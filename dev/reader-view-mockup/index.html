@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual Institucional: page reader view - UI mockup (spec 12.2)</title>
+
+<!--
+    Mockup CSS convention adopted from local_grades (see its AGENTS.md,
+    "UI Mockups", and dev/mockup-template/):
+
+    1. Link the live compiled theme stylesheet from learn.europaschule.eu.
+       Moodle bundles Bootstrap, the Space theme, and every DEPLOYED plugin's
+       styles.css into this one file. The two numbers in the path are
+       cache-busting revisions only - styles.php ignores their value and
+       always serves current CSS, so the URL will not go stale.
+    2. local_handbook is NOT deployed yet, so unlike the grades mockups there
+       is no repo styles.css to link. Every .local-handbook-* rule below is a
+       CANDIDATE, kept in the labelled "plugin-candidate styles" block. When
+       the plugin skeleton exists, that block moves verbatim into
+       local/handbook/styles.css and this file links it the grades way
+       (../../styles.css after the theme link).
+    3. Webfonts need harness fallbacks (verified in local_grades 2026-07-12):
+       the theme serves fonts without CORS headers, so on a localhost/file
+       mockup page Font Awesome renders as boxes without the CDN @font-face
+       below. Harness-only, never ships.
+    4. The body id "page-local-handbook-area" is the pagetype the plugin will
+       set on all its pages (mirroring LOCAL_GRADES_PAGE_TYPE); all candidate
+       CSS is scoped to it.
+
+    What this mocks: the published-page reader view from
+    docs/SPECIFICATION.md section 12.2 - title, summary, badges, dates, body,
+    on-page TOC, metadata card, typed related pages, connected quiz,
+    required-reading acknowledgement, print and report actions. The top tab
+    strip mirrors local_grades_render_area_actions(); the content header
+    mirrors local_grades_render_page_heading(). Theme chrome (navbar,
+    sidebar, breadcrumbs, page header) is intentionally not reproduced,
+    same as the grades mockups.
+
+    Heading levels: stored page content uses h2 headings (spec 10.2); the
+    reader renders them one level down (h3) beneath the in-content page
+    title, which follows the grades h2 content-header convention.
+-->
+<link rel="stylesheet" href="https://learn.europaschule.eu/theme/yui_combo.php?rollup/3.18.1/yui-moodlesimple-min.css">
+<link rel="stylesheet" href="https://learn.europaschule.eu/theme/styles.php/space/-1_-1/all">
+
+<style>
+    /* ------------------------------------------------------------------ */
+    /* Mockup harness only (never ships)                                   */
+    /* ------------------------------------------------------------------ */
+
+    @font-face {
+        font-family: 'Font Awesome 6 Free';
+        font-style: normal;
+        font-weight: 900;
+        font-display: block;
+        src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2') format('woff2');
+    }
+
+    .mockup-note {
+        max-width: 1300px;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+    }
+    /* 1300px approximates the real #region-main content width (page width
+       minus the Space theme's fixed sidebar), per the grades mockups. */
+    .mockup-page {
+        max-width: 1300px;
+        margin: 0 auto 3rem;
+        padding: 0 1rem;
+    }
+</style>
+
+<style>
+    /* ------------------------------------------------------------------ */
+    /* plugin-candidate styles                                             */
+    /* Future content of local/handbook/styles.css. Everything scoped to   */
+    /* the plugin pagetype id, classes prefixed local-handbook-*.          */
+    /* ------------------------------------------------------------------ */
+
+    /* Bootstrap 5 gap utilities polyfill: the site runs Bootstrap 4, which
+       never shipped .gap-*. Same approach as local_grades styles.css (its
+       polyfill is scoped to page-local-grades-area, so it does not reach
+       this pagetype). */
+    #page-local-handbook-area .gap-1 { gap: 0.25rem !important; }
+    #page-local-handbook-area .gap-2 { gap: 0.5rem !important; }
+    #page-local-handbook-area .gap-3 { gap: 1rem !important; }
+
+    /* Area tab strip, mirroring .local-grades-area-actions. */
+    #page-local-handbook-area .local-handbook-area-actions {
+        row-gap: 0.5rem;
+        border: 1px solid var(--primary, #0078c3);
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    /* Content header, mirroring .local-grades-content-header. */
+    #page-local-handbook-area .local-handbook-content-header {
+        margin-bottom: 0;
+    }
+    #page-local-handbook-area .local-handbook-content-actions {
+        gap: 0.5rem;
+        row-gap: 0.5rem;
+    }
+
+    /* Category trail above the page title (reader view only; the theme
+       breadcrumb carries the full site trail). */
+    #page-local-handbook-area .local-handbook-category-trail {
+        font-size: 0.8125rem;
+        color: var(--bs-secondary-color, #6c757d);
+        margin-bottom: 0.25rem;
+    }
+    #page-local-handbook-area .local-handbook-category-trail a {
+        color: inherit;
+    }
+    #page-local-handbook-area .local-handbook-category-trail .sep {
+        margin: 0 0.35rem;
+        opacity: 0.5;
+    }
+
+    /* Badge row + publication dates line under the title. */
+    #page-local-handbook-area .local-handbook-page-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0.75rem 0 0.5rem;
+    }
+    #page-local-handbook-area .local-handbook-page-dates {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1.5rem;
+        font-size: 0.8125rem;
+        color: var(--bs-secondary-color, #6c757d);
+        font-variant-numeric: tabular-nums;
+        padding-bottom: 1rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid var(--bs-border-color, var(--gray-300, #dee2e6));
+    }
+
+    /* Reader body: keep line length comfortable independently of column
+       width; headings need scroll room under the sticky theme navbar. */
+    #page-local-handbook-area .local-handbook-page-body p,
+    #page-local-handbook-area .local-handbook-page-body li {
+        max-width: 70ch;
+    }
+    #page-local-handbook-area .local-handbook-page-body h3 {
+        scroll-margin-top: 90px;
+        margin-top: 2rem;
+    }
+    #page-local-handbook-area .local-handbook-page-body h3:first-child {
+        margin-top: 0;
+    }
+    #page-local-handbook-area .local-handbook-page-body .table-responsive {
+        margin-bottom: 1.25rem;
+    }
+
+    /* Safety-rule callout inside procedure pages. */
+    #page-local-handbook-area .local-handbook-callout {
+        border-left: 3px solid var(--warning, #f0ad4e);
+        border-radius: 0 0.375rem 0.375rem 0;
+        padding: 0.75rem 1rem;
+        margin: 1rem 0 1.25rem;
+        max-width: 70ch;
+    }
+
+    /* On-page table of contents block. */
+    #page-local-handbook-area .local-handbook-toc {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.875rem;
+    }
+    #page-local-handbook-area .local-handbook-toc a {
+        display: block;
+        padding: 0.25rem 0.6rem;
+        border-left: 2px solid var(--bs-border-color, var(--gray-300, #dee2e6));
+        color: inherit;
+    }
+    #page-local-handbook-area .local-handbook-toc a:hover {
+        color: var(--primary, #0078c3);
+        text-decoration: none;
+        border-left-color: var(--primary, #0078c3);
+    }
+
+    /* Metadata card ("Ficha de la página"). */
+    #page-local-handbook-area .local-handbook-meta dt {
+        font-weight: 400;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+    #page-local-handbook-area .local-handbook-meta dd {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Typed related-pages list. */
+    #page-local-handbook-area .local-handbook-relations {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        font-size: 0.875rem;
+    }
+    #page-local-handbook-area .local-handbook-relations .relation-type {
+        display: block;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+
+    /* Required-reading acknowledgement box. */
+    #page-local-handbook-area .local-handbook-ack {
+        scroll-margin-top: 90px;
+    }
+    #page-local-handbook-area .local-handbook-ack .form-check-label {
+        max-width: 62ch;
+    }
+
+    /* Sticky rail on wide screens, static when the column stacks. */
+    @media (min-width: 992px) {
+        #page-local-handbook-area .local-handbook-rail {
+            position: sticky;
+            top: 90px;
+        }
+    }
+</style>
+</head>
+
+<body id="page-local-handbook-area" class="pagelayout-standard path-local path-local-handbook dir-ltr lang-es">
+
+<div class="mockup-note">
+    <div class="alert alert-info mb-0">
+        <strong>Mockup: Manual Institucional page reader view (view.php) &mdash; spec &sect;12.2.</strong>
+        Created 2026-07-14, before any plugin code exists. Conventions adopted from the local_grades
+        mockups: live theme CSS, region-main content only (no navbar/sidebar/breadcrumb chrome), body id
+        set to the plugin pagetype. <em>Every</em> <code>.local-handbook-*</code> class is a candidate
+        pattern &mdash; the plugin is not deployed, so nothing below ships in the theme stylesheet yet;
+        the candidate block is the seed for the future <code>local/handbook/styles.css</code>.
+        Sample article: <em>Supervisi&oacute;n durante los recreos</em> (Vida estudiantil &rsaquo;
+        Supervisi&oacute;n) &mdash; a safety-critical, required-reading procedure, chosen because it
+        exercises every reader element: badges, dates, table, callout, typed relations, connected quiz,
+        acknowledgement.
+    </div>
+</div>
+
+<div class="mockup-page">
+<div id="page" class="drawers">
+    <div id="topofscroll" class="main-inner">
+        <div id="page-content" class="pb-3">
+            <div id="region-main-box">
+                <section id="region-main">
+                    <div role="main">
+                        <span id="maincontent"></span>
+
+                        <!-- Area tab strip: mirrors local_grades_render_area_actions(). -->
+                        <nav class="mb-4 local-handbook-area-actions" aria-label="Navegación">
+                            <ul class="nav nav-tabs gap-2 mb-0">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" href="#">
+                                        <i class="fa-solid fa-book-open me-2" aria-hidden="true"></i>Manual Institucional
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="#">
+                                        <i class="fa-solid fa-magnifying-glass me-2" aria-hidden="true"></i>Buscar en el manual
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="#">
+                                        <i class="fa-solid fa-route me-2" aria-hidden="true"></i>Mi ruta de lectura
+                                        <span class="badge badge-primary ml-2">3</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link d-flex align-items-center" href="#" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Gestión
+                                        <i class="fa-solid fa-chevron-down ms-2" aria-hidden="true"></i>
+                                    </a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#">Categorías</a>
+                                        <a class="dropdown-item" href="#">Cola de revisión</a>
+                                        <a class="dropdown-item" href="#">Hallazgos de calidad</a>
+                                        <a class="dropdown-item" href="#">Informes</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <!-- Content header: mirrors local_grades_render_page_heading(). -->
+                        <div class="local-handbook-category-trail">
+                            <a href="#">Vida estudiantil</a><span class="sep">&rsaquo;</span><a href="#">Supervisión</a>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 local-handbook-content-header">
+                            <h2 class="mb-0">Supervisión durante los recreos</h2>
+                            <div class="d-flex flex-wrap gap-2 local-handbook-content-actions">
+                                <a class="btn btn-outline-secondary btn-sm" href="#">
+                                    <i class="fa-solid fa-print me-2" aria-hidden="true"></i>Imprimir
+                                </a>
+                                <a class="btn btn-outline-secondary btn-sm" href="#">
+                                    <i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i>Reportar un error
+                                </a>
+                            </div>
+                        </div>
+                        <hr class="local-handbook-content-divider">
+
+                        <!-- Pending required-reading notice. -->
+                        <div class="alert alert-info" role="status">
+                            <i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>
+                            Esta página es de <strong>lectura obligatoria</strong> y tienes pendiente confirmar la
+                            versión vigente (v4). <a href="#confirmar" class="alert-link">Ir a la confirmación de lectura</a>
+                        </div>
+
+                        <div class="row">
+
+                            <!-- ==================== Article column ==================== -->
+                            <div class="col-lg-8">
+
+                                <div class="local-handbook-page-badges">
+                                    <span class="badge badge-secondary">Procedimiento</span>
+                                    <span class="badge badge-warning">Crítico para la seguridad</span>
+                                    <span class="badge badge-primary">Lectura obligatoria</span>
+                                </div>
+
+                                <p class="lead">Cómo se organiza, ejecuta y registra la supervisión de estudiantes
+                                durante los recreos en la modalidad presencial: zonas, turnos, relevos y actuación
+                                ante incidentes.</p>
+
+                                <div class="local-handbook-page-dates">
+                                    <span><strong>Vigente desde:</strong> 01-03-2026</span>
+                                    <span><strong>Última actualización:</strong> 22-06-2026</span>
+                                    <span><strong>Versión publicada:</strong> v4</span>
+                                </div>
+
+                                <div class="local-handbook-page-body">
+
+                                    <h3 id="objetivo">Objetivo</h3>
+                                    <p>Garantizar que todos los estudiantes estén bajo supervisión visual activa de un
+                                    adulto responsable durante los recreos, y que cualquier incidente sea atendido y
+                                    registrado según el <a href="#">procedimiento de incidentes</a>.</p>
+
+                                    <h3 id="alcance">Alcance</h3>
+                                    <p>Aplica a todo el personal docente y auxiliar de la modalidad
+                                    <strong>presencial</strong>, en los recreos de media mañana y mediodía, en todas
+                                    las sedes. La supervisión durante los cambios de aula se rige por el procedimiento
+                                    <a href="#">Transiciones entre clases</a>.</p>
+
+                                    <h3 id="responsabilidades">Responsabilidades</h3>
+                                    <ul>
+                                        <li><strong>Coordinación de convivencia</strong> elabora y publica el rol de
+                                        turnos antes del inicio de cada bimestre.</li>
+                                        <li><strong>Docentes de turno</strong> supervisan la zona asignada durante todo
+                                        el recreo y registran novedades.</li>
+                                        <li><strong>Docente guía</strong> verifica que su grupo conozca las zonas
+                                        permitidas para su grado.</li>
+                                        <li><strong>Médico escolar</strong> atiende lesiones y define si corresponde
+                                        comunicación a la familia.</li>
+                                    </ul>
+
+                                    <h3 id="procedimiento">Procedimiento</h3>
+                                    <ol>
+                                        <li>Verifica tu turno en el rol publicado en la sala de profesores y en Moodle.</li>
+                                        <li>Llega a tu zona <strong>antes</strong> de que suene el timbre de salida al recreo.</li>
+                                        <li>Mantente en un punto con visión completa de la zona; evita conversaciones
+                                        prolongadas que interrumpan la supervisión visual.</li>
+                                        <li>Ante una lesión, aplica primeros auxilios básicos y deriva al
+                                        <a href="#">médico escolar</a>; nunca dejes la zona sin relevo.</li>
+                                        <li>Si necesitas ausentarte, solicita relevo al docente de la zona contigua e
+                                        informa a coordinación de convivencia.</li>
+                                        <li>Al finalizar, acompaña la transición de regreso a las aulas y registra
+                                        cualquier novedad en el <a href="#">formulario de novedades de patio</a>.</li>
+                                    </ol>
+
+                                    <div class="alert alert-warning local-handbook-callout">
+                                        <strong>Regla de seguridad:</strong> ninguna zona activa puede quedar sin
+                                        supervisión, ni siquiera durante un relevo breve. Si no hay relevo disponible,
+                                        la zona se cierra y los estudiantes se reubican en la zona contigua.
+                                    </div>
+
+                                    <h3 id="zonas">Zonas de supervisión</h3>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Zona</th>
+                                                    <th scope="col">Grados</th>
+                                                    <th scope="col">Docentes de turno</th>
+                                                    <th scope="col">Punto de observación</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td>Patio principal</td><td>1.º – 4.º primaria</td><td>2</td><td>Esquina noreste, junto al mástil</td></tr>
+                                                <tr><td>Cancha techada</td><td>5.º – 6.º primaria</td><td>1</td><td>Ingreso lateral de la cancha</td></tr>
+                                                <tr><td>Patio de secundaria</td><td>1.º – 5.º secundaria</td><td>2</td><td>Escalera del pabellón B</td></tr>
+                                                <tr><td>Kiosco y mesas</td><td>Todos</td><td>1</td><td>Frente a la caja del kiosco</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <h3 id="incidentes">Incidentes durante el recreo</h3>
+                                    <p>Todo incidente con lesión, conflicto físico o situación de riesgo se comunica el
+                                    mismo día a coordinación de convivencia mediante el
+                                    <a href="#">registro de incidentes</a>. Ante cualquier sospecha relacionada con la
+                                    protección del menor, aplica de inmediato el
+                                    <a href="#">protocolo de protección del menor</a>, que prevalece sobre este
+                                    procedimiento.</p>
+
+                                    <h3 id="registros">Registros</h3>
+                                    <ul>
+                                        <li>Rol de turnos del bimestre (coordinación de convivencia).</li>
+                                        <li>Formulario de novedades de patio, al cierre de cada recreo con novedades.</li>
+                                        <li>Registro de incidentes, cuando corresponda.</li>
+                                    </ul>
+
+                                    <h3 id="escalamiento">Escalamiento</h3>
+                                    <p>Dudas operativas: coordinación de convivencia. Ausencias imprevistas de docentes
+                                    de turno: coordinación académica. Situaciones de riesgo grave o emergencias:
+                                    dirección oficial, según el <a href="#">procedimiento de emergencias</a>.</p>
+                                </div>
+
+                                <!-- Required-reading acknowledgement (spec section 16). -->
+                                <div class="card mt-4 local-handbook-ack" id="confirmar">
+                                    <div class="card-body">
+                                        <h3 class="h5 mb-2">Confirmación de lectura</h3>
+                                        <p class="text-muted small">La confirmación queda registrada con tu usuario, la
+                                        versión publicada de la página (v4) y la fecha. No sustituye las evaluaciones de
+                                        conocimiento en Moodle.</p>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="ack-check">
+                                            <label class="form-check-label" for="ack-check">
+                                                He leído y comprendido la versión vigente de
+                                                <em>Supervisión durante los recreos</em> y sé a quién acudir ante dudas
+                                                o incidentes.
+                                            </label>
+                                        </div>
+                                        <button type="button" class="btn btn-primary">
+                                            <i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar lectura
+                                        </button>
+                                        <p class="text-muted small mb-0 mt-3">Forma parte de la ruta
+                                        <a href="#">Ser docente en EuropaSchule 2026-2027</a> · Sección 5: Rutinas
+                                        diarias y supervisión</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ==================== Rail column ==================== -->
+                            <div class="col-lg-4">
+                                <div class="local-handbook-rail">
+
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h3 class="h6 text-uppercase text-muted mb-3">En esta página</h3>
+                                            <ul class="local-handbook-toc">
+                                                <li><a href="#objetivo">Objetivo</a></li>
+                                                <li><a href="#alcance">Alcance</a></li>
+                                                <li><a href="#responsabilidades">Responsabilidades</a></li>
+                                                <li><a href="#procedimiento">Procedimiento</a></li>
+                                                <li><a href="#zonas">Zonas de supervisión</a></li>
+                                                <li><a href="#incidentes">Incidentes durante el recreo</a></li>
+                                                <li><a href="#registros">Registros</a></li>
+                                                <li><a href="#escalamiento">Escalamiento</a></li>
+                                                <li><a href="#confirmar">Confirmación de lectura</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h3 class="h6 text-uppercase text-muted mb-3">Ficha de la página</h3>
+                                            <dl class="row mb-0 small local-handbook-meta">
+                                                <dt class="col-5">Tipo</dt><dd class="col-7">Procedimiento</dd>
+                                                <dt class="col-5">Ámbito</dt><dd class="col-7">Presencial · Todas las sedes</dd>
+                                                <dt class="col-5">Audiencia</dt><dd class="col-7">Personal docente y auxiliar</dd>
+                                                <dt class="col-5">Área responsable</dt><dd class="col-7">Coordinación de convivencia</dd>
+                                                <dt class="col-5">Propietaria</dt><dd class="col-7">R. Delgado Quispe</dd>
+                                                <dt class="col-5">Aprobación</dt><dd class="col-7">Rectorado</dd>
+                                                <dt class="col-5">Vigente desde</dt><dd class="col-7">01-03-2026</dd>
+                                                <dt class="col-5">Próxima revisión</dt><dd class="col-7">01-03-2027</dd>
+                                                <dt class="col-5">Idioma</dt><dd class="col-7 mb-0">Español</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h3 class="h6 text-uppercase text-muted mb-3">Páginas relacionadas</h3>
+                                            <ul class="local-handbook-relations">
+                                                <li><span class="relation-type">Implementa</span>
+                                                    <a href="#">Política de convivencia escolar</a></li>
+                                                <li><span class="relation-type">Procedimiento conexo</span>
+                                                    <a href="#">Registro y seguimiento de incidentes</a></li>
+                                                <li><span class="relation-type">Excepción definida en</span>
+                                                    <a href="#">Protocolo de protección del menor</a></li>
+                                                <li><span class="relation-type">Guía rápida</span>
+                                                    <a href="#">Guía rápida: turno de patio en 1 página</a></li>
+                                                <li><span class="relation-type">Plantilla</span>
+                                                    <a href="#">Formulario de novedades de patio</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h3 class="h6 text-uppercase text-muted mb-3">Evaluación conectada</h3>
+                                            <p class="mb-1"><i class="fa-solid fa-clipboard-check me-2 text-muted" aria-hidden="true"></i>
+                                                <a href="#">Cuestionario: Supervisión y patio</a></p>
+                                            <p class="small text-success mb-0">Aprobado · 9/10 · 12-04-2026</p>
+                                        </div>
+                                    </div>
+
+                                    <p class="small text-muted">
+                                        Para editores: <a href="#">historial de revisiones</a> ·
+                                        borrador v5 en revisión desde el 30-06-2026 ·
+                                        <a href="#">crear nueva revisión</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+</body>
+</html>
