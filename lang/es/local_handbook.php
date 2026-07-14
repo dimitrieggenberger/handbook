@@ -294,6 +294,22 @@ $string['scale_low'] = 'Baja';
 $string['scale_medium'] = 'Media';
 $string['scale_high'] = 'Alta';
 
+// Reports (spec 12.5, 15.3).
+$string['reports'] = 'Informes';
+$string['reporthealth'] = 'Salud editorial';
+$string['reportpaths'] = 'Avance de rutas';
+$string['reportpageacks'] = 'Confirmaciones por página';
+$string['reportoverdue'] = 'Revisión vencida';
+$string['reportmissingowner'] = 'Sin responsable asignado';
+$string['reportneverpublished'] = 'Nunca publicadas';
+$string['reportagingdrafts'] = 'Borradores más antiguos en revisión';
+$string['openfindingscount'] = 'Hallazgos de calidad abiertos: {$a}';
+$string['reportpathintro'] = 'Páginas obligatorias confirmadas por persona ({$a} páginas obligatorias en esta ruta). Personal = usuarios con la capacidad de ver el manual.';
+$string['pathprogressshort'] = 'Confirmadas';
+$string['reportconfirmed'] = 'Confirmaron';
+$string['reportpending'] = 'Pendientes';
+$string['norequiredpages'] = 'Todavía no hay páginas de lectura obligatoria publicadas.';
+
 // External API.
 $string['errorexcludedpage'] = 'Esta página está excluida del acceso externo y de IA.';
 $string['errormetadataonly'] = 'Esta página es de solo metadatos para el acceso externo y de IA; su contenido no puede leerse ni editarse por la API.';

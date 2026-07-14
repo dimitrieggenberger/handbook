@@ -294,6 +294,22 @@ $string['scale_low'] = 'Niedrig';
 $string['scale_medium'] = 'Mittel';
 $string['scale_high'] = 'Hoch';
 
+// Reports (spec 12.5, 15.3).
+$string['reports'] = 'Berichte';
+$string['reporthealth'] = 'Redaktionelle Gesundheit';
+$string['reportpaths'] = 'Pfad-Fortschritt';
+$string['reportpageacks'] = 'Bestätigungen pro Seite';
+$string['reportoverdue'] = 'Überprüfung überfällig';
+$string['reportmissingowner'] = 'Ohne Verantwortliche/n';
+$string['reportneverpublished'] = 'Nie veröffentlicht';
+$string['reportagingdrafts'] = 'Älteste Entwürfe in Prüfung';
+$string['openfindingscount'] = 'Offene Qualitätsbefunde: {$a}';
+$string['reportpathintro'] = 'Bestätigte Pflichtseiten pro Person ({$a} Pflichtseiten in diesem Pfad). Personal = Nutzer mit der Anzeigeberechtigung für das Handbuch.';
+$string['pathprogressshort'] = 'Bestätigt';
+$string['reportconfirmed'] = 'Bestätigt';
+$string['reportpending'] = 'Ausstehend';
+$string['norequiredpages'] = 'Noch keine veröffentlichten Pflichtlektüre-Seiten.';
+
 // External API.
 $string['errorexcludedpage'] = 'Diese Seite ist vom externen und KI-Zugriff ausgeschlossen.';
 $string['errormetadataonly'] = 'Diese Seite ist für externen und KI-Zugriff auf Metadaten beschränkt; ihr Inhalt kann über die API weder gelesen noch bearbeitet werden.';

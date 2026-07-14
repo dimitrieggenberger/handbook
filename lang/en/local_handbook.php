@@ -294,6 +294,22 @@ $string['scale_low'] = 'Low';
 $string['scale_medium'] = 'Medium';
 $string['scale_high'] = 'High';
 
+// Reports (spec 12.5, 15.3).
+$string['reports'] = 'Reports';
+$string['reporthealth'] = 'Editorial health';
+$string['reportpaths'] = 'Path completion';
+$string['reportpageacks'] = 'Page acknowledgements';
+$string['reportoverdue'] = 'Review date exceeded';
+$string['reportmissingowner'] = 'No owner assigned';
+$string['reportneverpublished'] = 'Never published';
+$string['reportagingdrafts'] = 'Oldest drafts in review';
+$string['openfindingscount'] = 'Open quality findings: {$a}';
+$string['reportpathintro'] = 'Confirmed required pages per staff member ({$a} required pages in this path). Staff = users holding the handbook view capability.';
+$string['pathprogressshort'] = 'Confirmed';
+$string['reportconfirmed'] = 'Confirmed';
+$string['reportpending'] = 'Pending';
+$string['norequiredpages'] = 'No published required-reading pages yet.';
+
 // External API.
 $string['errorexcludedpage'] = 'This page is excluded from external and AI access.';
 $string['errormetadataonly'] = 'This page is metadata-only for external and AI access; its content cannot be read or drafted through the API.';

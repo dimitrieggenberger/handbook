@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.7.0 (2026-07-14)
+
+Reports (spec §12.5, §15.3).
+
+- manage/reports.php behind local/handbook:viewreports, in the Gestión
+  menu, with three views:
+  - Editorial health: review date exceeded, no owner, never published,
+    oldest drafts in review, open findings count.
+  - Path completion: per-staff confirmed/required progress for any path.
+  - Page acknowledgements: who confirmed which version and when, and who
+    is still pending, per required-reading page.
+- report_service with the set-wise acknowledgement-validity rule (the
+  re-acknowledgement boundary) shared with ack_service; staff = holders of
+  the view capability (path audiences remain a deferred decision).
+- EN/ES/DE strings; PHPUnit coverage including boundary invalidation.
+
 ## 0.6.1 (2026-07-14)
 
 - Fix upgrade failure "Key pageid collides with index page" on
