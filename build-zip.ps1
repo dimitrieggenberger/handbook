@@ -20,6 +20,7 @@ $excludedDirectories = @(
     'logs',
     'docs',
     'dev',
+    'mcp',
     'tmp',
     'temp',
     '.cache'
