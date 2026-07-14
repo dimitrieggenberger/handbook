@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.3.0 (2026-07-14)
+
+Phase 3: external API (spec §17).
+
+- Eight read functions: list_categories, list_pages, get_page, search_pages,
+  list_page_revisions, get_revision, list_changes (incremental sync cursor),
+  list_relations.
+- Four draft functions: create_page_draft, create_revision_draft (expected
+  base-revision check), update_draft (mandatory concurrency token),
+  submit_draft_for_review. No publish function by design.
+- AI-access enforcement on every function: excluded pages omitted/denied,
+  metadata_only pages never return or accept content.
+- Prebuilt restricted service "Institutional Handbook API"
+  (`local_handbook_api`); draft_updated audit event for UI and API writes.
+- docs/API.md with setup steps and curl examples; PHPUnit external tests.
+
+## 0.2.0 (2026-07-14)
+
+Initial-population tooling.
+
+- Bootstrap mode setting: while enabled, publishers get "Save and publish"
+  in the editor and imports may publish immediately, skipping review.
+  Revision history is recorded either way; switch off after seeding to
+  enforce the full workflow (spec §4.10).
+- JSON seed importer (`manage/import.php` + `import_service`): creates or
+  updates categories, pages and typed relations by slug through the normal
+  workflow service, so imports are ordinary revisions. Idempotent re-import.
+- Seed file `docs/seed/initial-handbook.json`: full §9.1 category tree,
+  three complete articles from the mockup scenario and five skeleton drafts.
+- Import link in the management dropdown; EN/ES/DE strings; PHPUnit tests
+  for the importer.
+
 ## 0.1.0 (2026-07-14)
 
 First development milestone (spec §33): plugin skeleton.

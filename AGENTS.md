@@ -27,9 +27,13 @@ and structural reference: page shell, area actions, CSS scoping, build script.
 - `edit.php`: create page / edit its working draft, submit for review
 - `review.php`: review queue (approve, request changes, publish)
 - `manage/categories.php`: category management
+- `manage/import.php` + `classes/local/service/import_service.php`: JSON seed import (by slug, idempotent)
+- `settings.php`: bootstrap mode (direct publish during initial population; off = full workflow)
+- `docs/seed/initial-handbook.json`: seed content (never shipped; uploaded via the import page)
 - `classes/local/service/page_service.php`: ALL workflow state transitions (spec §11.3)
 - `classes/form/`: moodleforms
 - `classes/event/`: page_created, draft_submitted, revision_published
+- `classes/external/` + `db/services.php`: external API (spec §17; see docs/API.md) — read + draft functions only, NO publish function, AI-access rules in `classes/external/helper.php`
 - `db/access.php`: capabilities (spec §7.3); `db/install.xml`: schema (spec §20)
 - `lang/{en,es,de}/local_handbook.php`: UI strings (all three, always)
 - `styles.css`: plugin CSS, scoped to `#page-local-handbook-area`
