@@ -30,18 +30,23 @@ require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
 use local_handbook\local\service\ack_service;
+use local_handbook\local\service\path_service;
 
 $pathid = optional_param('id', 0, PARAM_INT);
 
 $context = context_system::instance();
 local_handbook_require_view($context);
 
+$ismanager = has_capability('local/handbook:managepaths', $context);
+$visiblepaths = path_service::visible_paths((int)$USER->id, $ismanager);
+
 if ($pathid) {
     $path = $DB->get_record('local_handbook_path', ['id' => $pathid], '*', MUST_EXIST);
+    if (!$ismanager && (!(int)$path->active || !path_service::is_visible($path, (int)$USER->id))) {
+        throw new moodle_exception('errorpathnotvisible', 'local_handbook');
+    }
 } else {
-    $paths = $DB->get_records('local_handbook_path', ['active' => 1], 'schoolyear DESC, name ASC',
-        '*', 0, 1);
-    $path = $paths ? reset($paths) : null;
+    $path = $visiblepaths ? reset($visiblepaths) : null;
 }
 
 $url = new moodle_url('/local/handbook/path.php', $path ? ['id' => $path->id] : []);
@@ -75,6 +80,18 @@ echo html_writer::div(
     'local-handbook-category-trail'
 );
 echo local_handbook_render_page_heading(format_string($path->name), $actions);
+
+// Switcher when several paths are visible to this user.
+if (count($visiblepaths) > 1) {
+    $links = '';
+    foreach ($visiblepaths as $candidate) {
+        $classes = 'badge ' . ((int)$candidate->id === (int)$path->id
+            ? 'badge-primary' : 'badge-light border');
+        $links .= html_writer::link(new moodle_url('/local/handbook/path.php', ['id' => $candidate->id]),
+            s($candidate->name), ['class' => $classes]) . ' ';
+    }
+    echo html_writer::div($links, 'mb-3 d-flex flex-wrap gap-1');
+}
 
 if (trim((string)$path->description) !== '') {
     echo html_writer::div(

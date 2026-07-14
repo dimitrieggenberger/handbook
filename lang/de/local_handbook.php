@@ -226,6 +226,11 @@ $string['reconfirmitem'] = 'Erneut bestätigen: neue Version veröffentlicht';
 $string['pendingitem'] = 'Ausstehend';
 $string['readitem'] = 'Lektüre';
 $string['connectedquiz'] = 'Moodle-Test';
+$string['pathcohorts'] = 'Zielgruppen-Kohorten';
+$string['pathroles'] = 'Zielgruppen-Rollen (Systemebene)';
+$string['pathaudience'] = 'Zielgruppe des Pfads';
+$string['pathaudience_help'] = 'Beide leer lassen, um den Pfad allen Handbuch-Berechtigten zu zeigen. Andernfalls ist der Pfad sichtbar für Mitglieder EINER ausgewählten Kohorte oder Inhaber EINER ausgewählten Rolle auf Systemebene. Verwaltende sehen immer alle Pfade; der Fortschrittsbericht umfasst genau diese Zielgruppe.';
+$string['errorpathnotvisible'] = 'Dieser Lesepfad ist für deine Rolle oder Gruppen nicht verfügbar.';
 $string['importpathscreated'] = 'Lesepfade erstellt: {$a}';
 $string['importpathsupdated'] = 'Lesepfade aktualisiert: {$a}';
 

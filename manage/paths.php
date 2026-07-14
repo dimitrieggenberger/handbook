@@ -27,6 +27,7 @@ require_once(__DIR__ . '/../locallib.php');
 
 use local_handbook\form\path_form;
 use local_handbook\local\service\page_service;
+use local_handbook\local\service\path_service;
 
 $action = optional_param('action', '', PARAM_ALPHA);
 $pathid = optional_param('id', 0, PARAM_INT);
@@ -86,7 +87,10 @@ if ($action === 'edit') {
         : null;
 
     $formurl = new moodle_url($url, ['action' => 'edit'] + ($pathid ? ['id' => $pathid] : []));
-    $form = new path_form($formurl->out(false));
+    $form = new path_form($formurl->out(false), [
+        'cohorts' => $DB->get_records('cohort', ['visible' => 1], 'name ASC', 'id, name'),
+        'roles' => role_fix_names(get_all_roles(), $context, ROLENAME_ORIGINAL),
+    ]);
 
     if ($form->is_cancelled()) {
         redirect($url);
@@ -100,7 +104,8 @@ if ($action === 'edit') {
         $record->descriptionformat = FORMAT_HTML;
         $record->schoolyear = trim((string)$data->schoolyear);
         $record->active = (int)$data->active;
-        $record->audiencejson = '';
+        $record->audiencejson = path_service::encode_audience(
+            (array)($data->audiencecohorts ?? []), (array)($data->audienceroles ?? []));
         $record->quizcmid = 0;
         $record->timemodified = $now;
         $record->modifiedby = (int)$USER->id;
@@ -120,6 +125,9 @@ if ($action === 'edit') {
     }
 
     if ($path) {
+        $audience = path_service::get_audience($path);
+        $path->audiencecohorts = $audience->cohorts;
+        $path->audienceroles = $audience->roles;
         $form->set_data($path);
     }
 

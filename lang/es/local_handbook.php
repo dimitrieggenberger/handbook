@@ -226,6 +226,11 @@ $string['reconfirmitem'] = 'Reconfirmar: nueva versión publicada';
 $string['pendingitem'] = 'Pendiente';
 $string['readitem'] = 'Lectura';
 $string['connectedquiz'] = 'Cuestionario Moodle';
+$string['pathcohorts'] = 'Cohortes de la audiencia';
+$string['pathroles'] = 'Roles de la audiencia (nivel de sistema)';
+$string['pathaudience'] = 'Audiencia de la ruta';
+$string['pathaudience_help'] = 'Deja ambos vacíos para mostrar la ruta a todo el personal con acceso al manual. En caso contrario, la ruta es visible para quienes pertenezcan a CUALQUIER cohorte seleccionada o tengan CUALQUIER rol seleccionado a nivel de sistema. Los gestores siempre ven todas las rutas, y el informe de avance cubre exactamente esta audiencia.';
+$string['errorpathnotvisible'] = 'Esta ruta de lectura no está disponible para tu rol o tus grupos.';
 $string['importpathscreated'] = 'Rutas de lectura creadas: {$a}';
 $string['importpathsupdated'] = 'Rutas de lectura actualizadas: {$a}';
 

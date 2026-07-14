@@ -226,6 +226,11 @@ $string['reconfirmitem'] = 'Reconfirm: new version published';
 $string['pendingitem'] = 'Pending';
 $string['readitem'] = 'Reading';
 $string['connectedquiz'] = 'Moodle quiz';
+$string['pathcohorts'] = 'Audience cohorts';
+$string['pathroles'] = 'Audience roles (system level)';
+$string['pathaudience'] = 'Path audience';
+$string['pathaudience_help'] = 'Leave both empty to show the path to all handbook viewers. Otherwise the path is visible to members of ANY selected cohort or holders of ANY selected role at system level. Managers always see every path, and the completion report covers exactly this audience.';
+$string['errorpathnotvisible'] = 'This reading path is not available for your role or groups.';
 $string['importpathscreated'] = 'Reading paths created: {$a}';
 $string['importpathsupdated'] = 'Reading paths updated: {$a}';
 

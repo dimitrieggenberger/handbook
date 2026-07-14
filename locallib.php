@@ -29,6 +29,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use local_handbook\local\service\page_service;
+use local_handbook\local\service\path_service;
 
 /** @var string Pagetype for all handbook pages; scopes all plugin CSS. */
 const LOCAL_HANDBOOK_PAGE_TYPE = 'local-handbook-area';
@@ -163,7 +164,7 @@ function local_handbook_render_page_heading(string $title, string $actions = '')
  * @return string
  */
 function local_handbook_render_area_actions(string $currentpage, context_system $context): string {
-    global $DB;
+    global $DB, $USER;
 
     $tabitems = [
         'home' => [
@@ -182,7 +183,8 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'label' => get_string('myreadingpath', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/path.php'),
             'iconclass' => 'fa-route',
-            'visible' => $DB->record_exists('local_handbook_path', ['active' => 1]),
+            'visible' => !empty(path_service::visible_paths((int)$USER->id,
+                has_capability('local/handbook:managepaths', $context))),
         ],
     ];
 

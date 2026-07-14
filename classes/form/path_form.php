@@ -55,6 +55,24 @@ class path_form extends \moodleform {
         $mform->addElement('advcheckbox', 'active', get_string('active'));
         $mform->setDefault('active', 1);
 
+        // Audience (spec 15.3): cohorts and/or system roles; empty = all staff.
+        $cohortoptions = [];
+        foreach ($this->_customdata['cohorts'] ?? [] as $cohort) {
+            $cohortoptions[(int)$cohort->id] = format_string($cohort->name);
+        }
+        $cohortselect = $mform->addElement('select', 'audiencecohorts',
+            get_string('pathcohorts', 'local_handbook'), $cohortoptions, ['size' => 6]);
+        $cohortselect->setMultiple(true);
+        $mform->addHelpButton('audiencecohorts', 'pathaudience', 'local_handbook');
+
+        $roleoptions = [];
+        foreach ($this->_customdata['roles'] ?? [] as $role) {
+            $roleoptions[(int)$role->id] = $role->localname ?? $role->shortname;
+        }
+        $roleselect = $mform->addElement('select', 'audienceroles',
+            get_string('pathroles', 'local_handbook'), $roleoptions, ['size' => 6]);
+        $roleselect->setMultiple(true);
+
         $this->add_action_buttons();
     }
 }

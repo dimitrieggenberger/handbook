@@ -121,11 +121,31 @@ class import_service {
         $now = time();
         $existing = $DB->get_record('local_handbook_path', ['slug' => $slug]);
 
+        // Audience: cohort idnumbers and role shortnames, resolved to ids.
+        $cohortids = [];
+        foreach ((array)($data->cohorts ?? []) as $idnumber) {
+            $cohortid = (int)$DB->get_field('cohort', 'id', ['idnumber' => (string)$idnumber]);
+            if ($cohortid) {
+                $cohortids[] = $cohortid;
+            } else {
+                $report->errors[] = "paths[$index] ($slug): unknown cohort idnumber '$idnumber'";
+            }
+        }
+        $roleids = [];
+        foreach ((array)($data->roles ?? []) as $shortname) {
+            $roleid = (int)$DB->get_field('role', 'id', ['shortname' => (string)$shortname]);
+            if ($roleid) {
+                $roleids[] = $roleid;
+            } else {
+                $report->errors[] = "paths[$index] ($slug): unknown role shortname '$shortname'";
+            }
+        }
+
         $record = new stdClass();
         $record->name = $name;
         $record->description = (string)($data->description ?? '');
         $record->descriptionformat = FORMAT_HTML;
-        $record->audiencejson = '';
+        $record->audiencejson = path_service::encode_audience($cohortids, $roleids);
         $record->schoolyear = (string)($data->schoolyear ?? '');
         $record->active = (int)($data->active ?? 1);
         $record->quizcmid = (int)($data->quizcmid ?? 0);

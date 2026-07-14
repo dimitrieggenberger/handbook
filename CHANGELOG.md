@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.10.0 (2026-07-14)
+
+Path audiences and the MCP adapter.
+
+- Reading-path audiences (spec §15.3, resolves §32.1 for paths): cohorts
+  and/or system roles per path via path_service; empty = all staff.
+  Enforced in path.php, the "Mi ruta" tab and the path switcher; managers
+  see everything. The completion report now covers exactly the audience.
+  Importer accepts "cohorts" (idnumbers) and "roles" (shortnames).
+- MCP adapter in mcp/ (spec §18, separate deliverable, excluded from the
+  plugin ZIP): Node server exposing 14 tools (search/read/changes/
+  relations/revisions, draft create/update/submit, findings) over the REST
+  API; setup docs for Claude Code, Claude Desktop and remote options.
+- EN/ES/DE strings; PHPUnit coverage for audience visibility/encoding.
+
 ## 0.9.0 (2026-07-14)
 
 Privacy completion, archive and restore.

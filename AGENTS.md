@@ -26,7 +26,8 @@ and structural reference: page shell, area actions, CSS scoping, build script.
 - `view.php`: published-page reader (`?page=<slug-or-id>`)
 - `edit.php`: create page / edit its working draft, submit for review
 - `search.php`: dedicated handbook search with filters (spec §13.2)
-- `path.php` / `manage/paths.php`: reading paths (spec §15); `ack_service` + confirmation card in `view.php` (spec §16)
+- `path.php` / `manage/paths.php`: reading paths (spec §15); `ack_service` + confirmation card in `view.php` (spec §16); audiences via `path_service` (cohorts/system roles)
+- `mcp/`: standalone MCP adapter (spec §18) — Node, not shipped in the ZIP, token via env vars only
 - `history.php` / `compare.php`: revision history and word-diff comparison (spec §11.4, `diff_service`)
 - `review.php`: review queue (approve, request changes, publish)
 - `report.php` / `manage/findings.php`: quality findings (spec §19, `finding_service`)

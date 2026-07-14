@@ -108,7 +108,7 @@ class report_service {
         }
 
         $users = [];
-        foreach (self::get_staff_users() as $user) {
+        foreach (path_service::get_audience_users($path) as $user) {
             $confirmed = 0;
             foreach ($pageids as $pageid) {
                 if (isset($validbypage[$pageid][(int)$user->id])) {
