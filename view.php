@@ -61,6 +61,15 @@ if ((!$revision || (int)$page->archived === 1) && !$iseditorial) {
     throw new moodle_exception('errorpagenotfound', 'local_handbook');
 }
 
+// Archive / unarchive (publishers only; history is never deleted, 11.3).
+if ($action === 'archive' || $action === 'unarchive') {
+    require_sesskey();
+    require_capability('local/handbook:publish', $context);
+    page_service::set_archived($page, $action === 'archive');
+    redirect(local_handbook_page_url($page),
+        get_string($action === 'archive' ? 'pagearchived' : 'pageunarchived', 'local_handbook'));
+}
+
 // Record a required-reading acknowledgement (spec 16).
 if ($action === 'acknowledge') {
     require_sesskey();
@@ -97,6 +106,22 @@ $actions .= html_writer::link(
         . s(get_string('reportproblem', 'local_handbook')),
     ['class' => 'btn btn-outline-secondary btn-sm']
 );
+if (has_capability('local/handbook:publish', $context)) {
+    $archiveaction = (int)$page->archived === 1 ? 'unarchive' : 'archive';
+    $actions .= html_writer::link(
+        new moodle_url('/local/handbook/view.php', ['page' => $page->slug,
+            'action' => $archiveaction, 'sesskey' => sesskey()]),
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-box-archive me-2', 'aria-hidden' => 'true'])
+            . s(get_string($archiveaction . 'page', 'local_handbook')),
+        [
+            'class' => 'btn btn-outline-secondary btn-sm',
+            'data-confirmation' => 'modal',
+            'data-confirmation-content' => get_string('confirm' . $archiveaction, 'local_handbook',
+                format_string($page->title)),
+            'data-confirmation-yes-button-str' => get_string($archiveaction . 'page', 'local_handbook'),
+        ]
+    );
+}
 echo local_handbook_render_page_heading(format_string($page->title), $actions);
 
 if ((int)$page->archived === 1) {

@@ -420,6 +420,72 @@ class page_service {
     }
 
     /**
+     * Archive or unarchive a page (spec 11.3: archiving never deletes the
+     * revision history; readers stop seeing the page, editors still can).
+     *
+     * @param stdClass $page Page record.
+     * @param bool $archived Target state.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function set_archived(stdClass $page, bool $archived, int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+
+        $update = new stdClass();
+        $update->id = $page->id;
+        $update->archived = (int)$archived;
+        $update->timemodified = time();
+        $update->modifiedby = $userid;
+        $DB->update_record('local_handbook_page', $update);
+
+        $event = \local_handbook\event\page_archived::create([
+            'context' => context_system::instance(),
+            'objectid' => $page->id,
+            'other' => ['archived' => (int)$archived],
+        ]);
+        $event->trigger();
+    }
+
+    /**
+     * Restore an older revision as a new working draft (spec 11.3):
+     * creates a new revision based on the old content; it does not erase
+     * later history.
+     *
+     * @param stdClass $revision Superseded (or rejected) revision to restore.
+     * @param int $userid Acting user (0 = current user).
+     * @return stdClass The new draft revision.
+     */
+    public static function restore_revision(stdClass $revision, int $userid = 0): stdClass {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+
+        if (!in_array($revision->status, [self::STATUS_SUPERSEDED, self::STATUS_REJECTED], true)) {
+            throw new moodle_exception('errorworkflowstate', 'local_handbook');
+        }
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $revision->pageid], '*', MUST_EXIST);
+        if (self::get_working_revision((int)$page->id) !== null) {
+            throw new moodle_exception('errordraftexists', 'local_handbook');
+        }
+
+        $maxversion = (int)$DB->get_field_sql(
+            'SELECT MAX(versionnumber) FROM {local_handbook_revision} WHERE pageid = ?', [$page->id]);
+
+        $transaction = $DB->start_delegated_transaction();
+        $draft = self::insert_revision((int)$page->id, $maxversion + 1,
+            (int)$page->publishedrevisionid, (string)$revision->content,
+            (int)$revision->contentformat,
+            get_string('restoredsummary', 'local_handbook', (int)$revision->versionnumber),
+            $userid);
+        $transaction->allow_commit();
+
+        return $draft;
+    }
+
+    /**
      * Whether bootstrap mode is enabled (settings.php).
      *
      * While enabled, direct publishing bypasses the review queue for users

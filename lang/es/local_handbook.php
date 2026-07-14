@@ -343,6 +343,23 @@ $string['errornodraft'] = 'No existe un borrador editable de esta página.';
 $string['errorrevisionconflict'] = 'Otra persona modificó la revisión mientras editabas. Revisa la versión más reciente antes de guardar de nuevo.';
 $string['errorworkflowstate'] = 'Esta acción no está permitida en el estado actual de la revisión.';
 
+// Archive and restore (spec 11.3).
+$string['archivepage'] = 'Archivar';
+$string['unarchivepage'] = 'Desarchivar';
+$string['pagearchived'] = 'Página archivada. Su historial de revisiones se conserva.';
+$string['pageunarchived'] = 'Página restaurada del archivo.';
+$string['confirmarchive'] = '¿Archivar «{$a}»? Los lectores dejarán de verla; los editores conservan el acceso y todo el historial se mantiene.';
+$string['confirmunarchive'] = '¿Restaurar «{$a}» del archivo? Volverá a ser visible para los lectores.';
+$string['restoreasdraft'] = 'Restaurar como borrador';
+$string['confirmrestore'] = '¿Crear un nuevo borrador basado en la v{$a}? El historial posterior se conserva; el borrador sigue el flujo de revisión normal.';
+$string['restoredsummary'] = 'Restaurada desde la v{$a}.';
+$string['revisionrestored'] = 'La v{$a} se restauró como nuevo borrador de trabajo.';
+
+// Privacy export paths.
+$string['privacy:acknowledgementspath'] = 'Confirmaciones de lectura';
+$string['privacy:authoredpath'] = 'Revisiones creadas';
+$string['privacy:metadata:local_handbook_finding'] = 'Los hallazgos de calidad registran quién los reportó, a quién se asignaron y quién los resolvió.';
+
 // Privacy API.
 $string['privacy:metadata:local_handbook_revision'] = 'Las revisiones del manual registran qué usuario las creó, modificó, revisó, aprobó o publicó.';
 $string['privacy:metadata:local_handbook_revision:createdby'] = 'El usuario que creó la revisión.';

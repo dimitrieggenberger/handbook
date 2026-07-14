@@ -16,21 +16,34 @@
 
 namespace local_handbook\privacy;
 
+use context;
+use context_system;
 use core_privacy\local\metadata\collection;
+use core_privacy\local\request\approved_contextlist;
+use core_privacy\local\request\approved_userlist;
+use core_privacy\local\request\contextlist;
+use core_privacy\local\request\transform;
+use core_privacy\local\request\userlist;
+use core_privacy\local\request\writer;
 
 /**
  * Privacy provider for local_handbook.
  *
- * The plugin stores editorial attribution (who created, modified, reviewed,
- * approved or published institutional content). This attribution is part of
- * the institution's editorial audit record. Acknowledgement data arrives in
- * a later phase and will extend this provider with export/delete handling.
+ * Personal data handled:
+ * - Required-reading acknowledgements: exported and deleted on request.
+ * - Editorial attribution (who created/modified/reviewed/approved/published
+ *   institutional content): exported, but retained on deletion requests as
+ *   part of the institution's editorial audit record (legitimate-interest
+ *   retention; the content itself is institutional, not personal).
  *
  * @package   local_handbook
  * @copyright Educación Helvética SA / EuropaSchule
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\provider {
+class provider implements
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\plugin\provider,
+    \core_privacy\local\request\core_userlist_provider {
 
     /**
      * Describe the personal data stored by the plugin.
@@ -65,6 +78,176 @@ class provider implements \core_privacy\local\metadata\provider {
             'timeacknowledged' => 'privacy:metadata:local_handbook_ack:timeacknowledged',
         ], 'privacy:metadata:local_handbook_ack');
 
+        $collection->add_database_table('local_handbook_finding', [
+            'createdby' => 'privacy:metadata:local_handbook_finding',
+            'assigneduserid' => 'privacy:metadata:local_handbook_finding',
+            'resolvedby' => 'privacy:metadata:local_handbook_finding',
+        ], 'privacy:metadata:local_handbook_finding');
+
         return $collection;
+    }
+
+    /**
+     * Contexts holding personal data for a user (system only).
+     *
+     * @param int $userid User id.
+     * @return contextlist
+     */
+    public static function get_contexts_for_userid(int $userid): contextlist {
+        global $DB;
+
+        $contextlist = new contextlist();
+
+        $hasdata = $DB->record_exists('local_handbook_ack', ['userid' => $userid])
+            || $DB->record_exists('local_handbook_revision', ['createdby' => $userid])
+            || $DB->record_exists('local_handbook_page', ['owneruserid' => $userid])
+            || $DB->record_exists('local_handbook_finding', ['createdby' => $userid]);
+
+        if ($hasdata) {
+            $contextlist->add_system_context();
+        }
+        return $contextlist;
+    }
+
+    /**
+     * Users with personal data in a context.
+     *
+     * @param userlist $userlist Target userlist.
+     * @return void
+     */
+    public static function get_users_in_context(userlist $userlist) {
+        if (!$userlist->get_context() instanceof context_system) {
+            return;
+        }
+
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {local_handbook_ack}', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {local_handbook_revision}', []);
+        $userlist->add_from_sql('owneruserid',
+            'SELECT owneruserid FROM {local_handbook_page} WHERE owneruserid > 0', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {local_handbook_finding}', []);
+    }
+
+    /**
+     * Export a user's handbook data.
+     *
+     * @param approved_contextlist $contextlist Approved contexts.
+     * @return void
+     */
+    public static function export_user_data(approved_contextlist $contextlist) {
+        global $DB;
+
+        $userid = (int)$contextlist->get_user()->id;
+        $syscontext = context_system::instance();
+
+        $hassystem = false;
+        foreach ($contextlist->get_contexts() as $context) {
+            if ($context instanceof context_system) {
+                $hassystem = true;
+            }
+        }
+        if (!$hassystem) {
+            return;
+        }
+
+        $subcontext = [get_string('pluginname', 'local_handbook')];
+
+        // Acknowledgements.
+        $sql = "SELECT a.id, a.timeacknowledged, a.confirmationversion,
+                       p.title, p.slug, r.versionnumber
+                  FROM {local_handbook_ack} a
+                  JOIN {local_handbook_page} p ON p.id = a.pageid
+                  JOIN {local_handbook_revision} r ON r.id = a.revisionid
+                 WHERE a.userid = :userid
+              ORDER BY a.timeacknowledged ASC";
+        $acks = [];
+        foreach ($DB->get_records_sql($sql, ['userid' => $userid]) as $ack) {
+            $acks[] = (object)[
+                'page' => $ack->title,
+                'slug' => $ack->slug,
+                'acknowledgedversion' => (int)$ack->versionnumber,
+                'confirmationwordingversion' => (int)$ack->confirmationversion,
+                'timeacknowledged' => transform::datetime($ack->timeacknowledged),
+            ];
+        }
+        if ($acks) {
+            writer::with_context($syscontext)->export_data(
+                array_merge($subcontext, [get_string('privacy:acknowledgementspath', 'local_handbook')]),
+                (object)['acknowledgements' => $acks]);
+        }
+
+        // Editorial attribution (summary of authored revisions).
+        $sql = "SELECT r.id, r.versionnumber, r.status, r.timecreated, p.title
+                  FROM {local_handbook_revision} r
+                  JOIN {local_handbook_page} p ON p.id = r.pageid
+                 WHERE r.createdby = :userid
+              ORDER BY r.timecreated ASC";
+        $authored = [];
+        foreach ($DB->get_records_sql($sql, ['userid' => $userid]) as $revision) {
+            $authored[] = (object)[
+                'page' => $revision->title,
+                'version' => (int)$revision->versionnumber,
+                'status' => $revision->status,
+                'timecreated' => transform::datetime($revision->timecreated),
+            ];
+        }
+        if ($authored) {
+            writer::with_context($syscontext)->export_data(
+                array_merge($subcontext, [get_string('privacy:authoredpath', 'local_handbook')]),
+                (object)['revisions' => $authored]);
+        }
+    }
+
+    /**
+     * Delete all users' data in a context (acknowledgements only;
+     * editorial attribution is retained as institutional audit record).
+     *
+     * @param context $context Target context.
+     * @return void
+     */
+    public static function delete_data_for_all_users_in_context(context $context) {
+        global $DB;
+
+        if ($context instanceof context_system) {
+            $DB->delete_records('local_handbook_ack');
+        }
+    }
+
+    /**
+     * Delete one user's data (acknowledgements only).
+     *
+     * @param approved_contextlist $contextlist Approved contexts.
+     * @return void
+     */
+    public static function delete_data_for_user(approved_contextlist $contextlist) {
+        global $DB;
+
+        foreach ($contextlist->get_contexts() as $context) {
+            if ($context instanceof context_system) {
+                $DB->delete_records('local_handbook_ack',
+                    ['userid' => (int)$contextlist->get_user()->id]);
+            }
+        }
+    }
+
+    /**
+     * Delete data for multiple users in a context (acknowledgements only).
+     *
+     * @param approved_userlist $userlist Approved users.
+     * @return void
+     */
+    public static function delete_data_for_users(approved_userlist $userlist) {
+        global $DB;
+
+        if (!$userlist->get_context() instanceof context_system) {
+            return;
+        }
+
+        $userids = $userlist->get_userids();
+        if (!$userids) {
+            return;
+        }
+
+        [$insql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        $DB->delete_records_select('local_handbook_ack', "userid $insql", $params);
     }
 }

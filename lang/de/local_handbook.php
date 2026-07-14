@@ -343,6 +343,23 @@ $string['errornodraft'] = 'Für diese Seite existiert kein bearbeitbarer Entwurf
 $string['errorrevisionconflict'] = 'Die Überarbeitung wurde während der Bearbeitung von jemand anderem geändert. Prüfe die neuere Version, bevor du erneut speicherst.';
 $string['errorworkflowstate'] = 'Diese Aktion ist im aktuellen Workflow-Status der Überarbeitung nicht erlaubt.';
 
+// Archive and restore (spec 11.3).
+$string['archivepage'] = 'Archivieren';
+$string['unarchivepage'] = 'Aus dem Archiv holen';
+$string['pagearchived'] = 'Seite archiviert. Der Versionsverlauf bleibt erhalten.';
+$string['pageunarchived'] = 'Seite aus dem Archiv wiederhergestellt.';
+$string['confirmarchive'] = '„{$a}“ archivieren? Lesende sehen sie nicht mehr; Redakteure behalten Zugriff, der gesamte Verlauf bleibt erhalten.';
+$string['confirmunarchive'] = '„{$a}“ aus dem Archiv holen? Sie wird wieder für Lesende sichtbar.';
+$string['restoreasdraft'] = 'Als Entwurf wiederherstellen';
+$string['confirmrestore'] = 'Neuen Arbeitsentwurf auf Basis von v{$a} erstellen? Der spätere Verlauf bleibt erhalten; der Entwurf durchläuft den normalen Prüfworkflow.';
+$string['restoredsummary'] = 'Wiederhergestellt aus v{$a}.';
+$string['revisionrestored'] = 'v{$a} wurde als neuer Arbeitsentwurf wiederhergestellt.';
+
+// Privacy export paths.
+$string['privacy:acknowledgementspath'] = 'Lesebestätigungen';
+$string['privacy:authoredpath'] = 'Erstellte Überarbeitungen';
+$string['privacy:metadata:local_handbook_finding'] = 'Qualitätsbefunde erfassen, wer sie gemeldet hat, wem sie zugewiesen wurden und wer sie gelöst hat.';
+
 // Privacy API.
 $string['privacy:metadata:local_handbook_revision'] = 'Handbuch-Überarbeitungen erfassen, welche Nutzer sie erstellt, geändert, geprüft, freigegeben oder veröffentlicht haben.';
 $string['privacy:metadata:local_handbook_revision:createdby'] = 'Nutzer/in, die die Überarbeitung erstellt hat.';

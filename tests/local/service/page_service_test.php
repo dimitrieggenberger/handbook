@@ -191,6 +191,67 @@ final class page_service_test extends advanced_testcase {
         page_service::update_draft($stale, '<p>Conflicting edit.</p>', FORMAT_HTML, '');
     }
 
+    public function test_archive_and_unarchive_preserve_history(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $page = $this->create_page($this->create_category());
+
+        page_service::set_archived($page, true);
+        $record = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $this->assertEquals(1, $record->archived);
+        $this->assertSame(1, $DB->count_records('local_handbook_revision', ['pageid' => $page->id]));
+
+        page_service::set_archived($page, false);
+        $this->assertEquals(0, $DB->get_field('local_handbook_page', 'archived', ['id' => $page->id]));
+    }
+
+    public function test_restore_creates_new_draft_from_old_content(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Publish v1, then v2 (superseding v1).
+        $page = $this->create_page($this->create_category());
+        $v1 = $page->draftrevision;
+        page_service::submit_for_review($v1, 'v1');
+        $v1 = $DB->get_record('local_handbook_revision', ['id' => $v1->id], '*', MUST_EXIST);
+        page_service::approve($v1);
+        $v1 = $DB->get_record('local_handbook_revision', ['id' => $v1->id], '*', MUST_EXIST);
+        page_service::publish($v1);
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $v2 = page_service::create_revision_draft($page);
+        page_service::update_draft($v2, '<h2>Objetivo</h2><p>Contenido v2.</p>', FORMAT_HTML, 'v2');
+        $v2 = $DB->get_record('local_handbook_revision', ['id' => $v2->id], '*', MUST_EXIST);
+        page_service::submit_for_review($v2, 'v2');
+        $v2 = $DB->get_record('local_handbook_revision', ['id' => $v2->id], '*', MUST_EXIST);
+        page_service::approve($v2);
+        $v2 = $DB->get_record('local_handbook_revision', ['id' => $v2->id], '*', MUST_EXIST);
+        page_service::publish($v2);
+
+        // Restore v1: new draft v3 with v1's content, based on published v2.
+        $v1 = $DB->get_record('local_handbook_revision', ['id' => $v1->id], '*', MUST_EXIST);
+        $this->assertSame(page_service::STATUS_SUPERSEDED, $v1->status);
+
+        $draft = page_service::restore_revision($v1);
+        $this->assertEquals(3, $draft->versionnumber);
+        $this->assertSame(page_service::STATUS_DRAFT, $draft->status);
+        $this->assertSame($v1->content, $draft->content);
+        $this->assertEquals($v2->id, $draft->baserevisionid);
+
+        // v2 remains published; later history untouched.
+        $page = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $this->assertEquals($v2->id, $page->publishedrevisionid);
+
+        // A second restore is blocked while the draft exists.
+        $this->expectException(moodle_exception::class);
+        page_service::restore_revision($v1);
+    }
+
     public function test_request_changes_returns_draft_to_author(): void {
         global $DB;
 

@@ -343,6 +343,23 @@ $string['errornodraft'] = 'There is no editable draft revision for this page.';
 $string['errorrevisionconflict'] = 'The revision was modified by someone else while you were editing. Review the newer version before saving again.';
 $string['errorworkflowstate'] = 'This action is not allowed in the revision\'s current workflow state.';
 
+// Archive and restore (spec 11.3).
+$string['archivepage'] = 'Archive';
+$string['unarchivepage'] = 'Unarchive';
+$string['pagearchived'] = 'Page archived. Its revision history is preserved.';
+$string['pageunarchived'] = 'Page restored from the archive.';
+$string['confirmarchive'] = 'Archive "{$a}"? Readers will no longer see it; editors keep access and the full history is preserved.';
+$string['confirmunarchive'] = 'Restore "{$a}" from the archive? It becomes visible to readers again.';
+$string['restoreasdraft'] = 'Restore as draft';
+$string['confirmrestore'] = 'Create a new working draft based on v{$a}? Later history is kept; the draft goes through the normal review workflow.';
+$string['restoredsummary'] = 'Restored from v{$a}.';
+$string['revisionrestored'] = 'v{$a} was restored as a new working draft.';
+
+// Privacy export paths.
+$string['privacy:acknowledgementspath'] = 'Reading acknowledgements';
+$string['privacy:authoredpath'] = 'Authored revisions';
+$string['privacy:metadata:local_handbook_finding'] = 'Quality findings record who reported, was assigned to and resolved them.';
+
 // Privacy API.
 $string['privacy:metadata:local_handbook_revision'] = 'Handbook revisions record which user created, modified, reviewed, approved or published them.';
 $string['privacy:metadata:local_handbook_revision:createdby'] = 'The user who created the revision.';

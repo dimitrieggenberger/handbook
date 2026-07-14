@@ -28,6 +28,8 @@ require_once(__DIR__ . '/locallib.php');
 use local_handbook\local\service\page_service;
 
 $pageparam = required_param('page', PARAM_ALPHANUMEXT);
+$action = optional_param('action', '', PARAM_ALPHA);
+$revisionid = optional_param('rid', 0, PARAM_INT);
 
 $context = context_system::instance();
 local_handbook_require_view($context);
@@ -49,6 +51,17 @@ $url = new moodle_url('/local/handbook/history.php', ['page' => $page->slug]);
 local_handbook_apply_page_setup($url, $context, 'home',
     get_string('revisionhistory', 'local_handbook'),
     get_string('revisionhistory', 'local_handbook'));
+
+// Restore an older revision as a new working draft (spec 11.3).
+if ($action === 'restore' && $revisionid) {
+    require_sesskey();
+    require_capability('local/handbook:edit', $context);
+    $oldrevision = $DB->get_record('local_handbook_revision',
+        ['id' => $revisionid, 'pageid' => $page->id], '*', MUST_EXIST);
+    page_service::restore_revision($oldrevision);
+    redirect(new moodle_url('/local/handbook/edit.php', ['id' => $page->id]),
+        get_string('revisionrestored', 'local_handbook', (int)$oldrevision->versionnumber));
+}
 
 echo $OUTPUT->header();
 echo local_handbook_render_area_actions('home', $context);
@@ -126,6 +139,18 @@ foreach ($revisions as $revision) {
             'from' => (int)$revision->baserevisionid,
             'to' => $revision->id,
         ]), s(get_string('comparewithprevious', 'local_handbook')));
+    }
+    if ($revision->status === page_service::STATUS_SUPERSEDED
+            && has_capability('local/handbook:edit', $context)
+            && page_service::get_working_revision((int)$page->id) === null) {
+        $links[] = html_writer::link(new moodle_url($url, [
+            'action' => 'restore', 'rid' => $revision->id, 'sesskey' => sesskey(),
+        ]), s(get_string('restoreasdraft', 'local_handbook')), [
+            'data-confirmation' => 'modal',
+            'data-confirmation-content' => get_string('confirmrestore', 'local_handbook',
+                (int)$revision->versionnumber),
+            'data-confirmation-yes-button-str' => get_string('restoreasdraft', 'local_handbook'),
+        ]);
     }
     if ($links) {
         $body .= html_writer::div(implode(' · ', $links), 'small');

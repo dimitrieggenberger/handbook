@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.9.0 (2026-07-14)
+
+Privacy completion, archive and restore.
+
+- Privacy API: full export (acknowledgements + authored-revision summary)
+  and deletion of acknowledgements per user, context or userlist.
+  Editorial attribution is retained on deletion as the institution's audit
+  record (documented in the provider).
+- Archive/unarchive from the reader (publish capability, confirm modal):
+  readers stop seeing archived pages, editors keep access, history is
+  preserved; page_archived event.
+- Restore an older revision from the history page as a new working draft
+  (spec 11.3): content copied from the old revision, based on the current
+  published one, normal review workflow applies; blocked while a working
+  revision exists.
+- EN/ES/DE strings; PHPUnit coverage for archive and restore.
+
 ## 0.8.0 (2026-07-14)
 
 Notifications and scheduled tasks (spec §21).
