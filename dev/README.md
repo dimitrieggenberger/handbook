@@ -6,25 +6,26 @@ and `dev/mockup-template/`).
 
 ## Previewing
 
-Open the mockup's `index.html` directly in a browser on a machine with normal
-internet access. The page links the live compiled theme stylesheet from
-`learn.europaschule.eu` (Space theme + Bootstrap + all deployed plugins), so no
-local server is required yet — nothing in this repo is linked relatively.
-
-Alternatively, the `mockups` launch config (`.claude/launch.json`) serves the repo
-root on port 8137 (`python -m http.server`), mirroring the grades repo's config;
-browse to `/dev/<name>-mockup/index.html`. This is also what the Claude Code
-Browser pane uses, since it cannot open `file://` URLs. Once the plugin skeleton
-exists and mockups link the repo's `styles.css` relatively, this server becomes
-required rather than optional.
+Each mockup links the live compiled theme stylesheet from
+`learn.europaschule.eu` (Space theme + Bootstrap + all deployed plugins) and,
+after it, the repo's `styles.css` relatively (`../../styles.css`) — the plugin
+is not deployed yet, so its shipped rules only reach the page through that
+relative link. Mockups must therefore be served from the repo root: the
+`mockups` launch config (`.claude/launch.json`) serves it on port 8137
+(`python -m http.server`), mirroring the grades repo's config; browse to
+`/dev/<name>-mockup/index.html`. This is also what the Claude Code Browser
+pane uses, since it cannot open `file://` URLs. (Opening `index.html` via
+`file://` still renders, but without the repo's `styles.css`.)
 
 ## Conventions
 
 - Copy an existing mockup (or the grades repo's `dev/mockup-template/`) to start.
 - Body id is the plugin pagetype: `page-local-handbook-area`. All candidate CSS is
   scoped to it, classes prefixed `local-handbook-*`.
-- Candidate styles live in the labelled "plugin-candidate styles" block; that block
-  is the seed for the future `local/handbook/styles.css`. Harness-only styles
+- Shared, shipped rules live in the repo's `styles.css`, linked relatively after
+  the theme stylesheet. The labelled "plugin-candidate styles" block holds only
+  rules not yet shipped there; a rule that ships in `styles.css` leaves the
+  mockups' candidate blocks. Harness-only styles
   (Font Awesome CORS fallback, `.mockup-note`, `.mockup-page`) never ship.
 - Each mockup opens with a dated `.mockup-note` alert stating what it mocks and
   which patterns are candidates versus already shipped.

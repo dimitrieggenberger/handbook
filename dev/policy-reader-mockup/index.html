@@ -7,12 +7,13 @@
 
 <!--
     Mockup CSS convention adopted from local_grades, same as the other
-    handbook mockups (see dev/README.md): live theme stylesheet, candidate
-    styles scoped to the plugin pagetype id, Font Awesome @font-face as
-    harness-only CORS fallback. The candidate block below duplicates
-    reader-view-mockup's verbatim (it is the same view.php template) plus
-    one policy-specific addition, labelled at the end of the block; the
-    union of candidate blocks becomes local/handbook/styles.css.
+    handbook mockups (see dev/README.md): live theme stylesheet, then the
+    repo's styles.css linked relatively (../../styles.css, so previewing
+    requires serving the repo root), candidate styles scoped to the plugin
+    pagetype id, Font Awesome @font-face as harness-only CORS fallback.
+    The candidate block keeps only rules NOT yet shipped in styles.css,
+    the same ones reader-view-mockup keeps (it is the same view.php
+    template): the on-page TOC and the acknowledgement box.
 
     What this mocks: the same reader view as reader-view-mockup (view.php,
     spec 12.2) rendering a PAGE OF A DIFFERENT CONTENT TYPE - an
@@ -30,6 +31,7 @@
 -->
 <link rel="stylesheet" href="https://learn.europaschule.eu/theme/yui_combo.php?rollup/3.18.1/yui-moodlesimple-min.css">
 <link rel="stylesheet" href="https://learn.europaschule.eu/theme/styles.php/space/-1_-1/all">
+<link rel="stylesheet" href="../../styles.css">
 
 <style>
     /* ------------------------------------------------------------------ */
@@ -59,91 +61,10 @@
 <style>
     /* ------------------------------------------------------------------ */
     /* plugin-candidate styles                                             */
-    /* Future content of local/handbook/styles.css. Everything scoped to   */
-    /* the plugin pagetype id, classes prefixed local-handbook-*.          */
-    /* Duplicated verbatim from reader-view-mockup except where labelled.  */
+    /* Only rules NOT yet shipped in the repo's styles.css (linked above); */
+    /* scoped to the plugin pagetype id, classes prefixed local-handbook-*.*/
+    /* Same set as reader-view-mockup's (same view.php template).          */
     /* ------------------------------------------------------------------ */
-
-    /* Bootstrap 5 gap utilities polyfill (site runs Bootstrap 4). */
-    #page-local-handbook-area .gap-1 { gap: 0.25rem !important; }
-    #page-local-handbook-area .gap-2 { gap: 0.5rem !important; }
-    #page-local-handbook-area .gap-3 { gap: 1rem !important; }
-
-    /* Area tab strip, mirroring .local-grades-area-actions. */
-    #page-local-handbook-area .local-handbook-area-actions {
-        row-gap: 0.5rem;
-        border: 1px solid var(--primary, #0078c3);
-        border-radius: 0.375rem;
-        padding: 0.5rem;
-        margin-top: 1rem;
-    }
-
-    /* Content header, mirroring .local-grades-content-header. */
-    #page-local-handbook-area .local-handbook-content-header {
-        margin-bottom: 0;
-    }
-    #page-local-handbook-area .local-handbook-content-actions {
-        gap: 0.5rem;
-        row-gap: 0.5rem;
-    }
-
-    /* Category trail above the page title. */
-    #page-local-handbook-area .local-handbook-category-trail {
-        font-size: 0.8125rem;
-        color: var(--bs-secondary-color, #6c757d);
-        margin-bottom: 0.25rem;
-    }
-    #page-local-handbook-area .local-handbook-category-trail a {
-        color: inherit;
-    }
-    #page-local-handbook-area .local-handbook-category-trail .sep {
-        margin: 0 0.35rem;
-        opacity: 0.5;
-    }
-
-    /* Badge row + publication dates line under the title. */
-    #page-local-handbook-area .local-handbook-page-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem;
-        margin: 0.75rem 0 0.5rem;
-    }
-    #page-local-handbook-area .local-handbook-page-dates {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.25rem 1.5rem;
-        font-size: 0.8125rem;
-        color: var(--bs-secondary-color, #6c757d);
-        font-variant-numeric: tabular-nums;
-        padding-bottom: 1rem;
-        margin-bottom: 1.25rem;
-        border-bottom: 1px solid var(--bs-border-color, var(--gray-300, #dee2e6));
-    }
-
-    /* Reader body. */
-    #page-local-handbook-area .local-handbook-page-body p,
-    #page-local-handbook-area .local-handbook-page-body li {
-        max-width: 70ch;
-    }
-    #page-local-handbook-area .local-handbook-page-body h3 {
-        scroll-margin-top: 90px;
-        margin-top: 2rem;
-    }
-    #page-local-handbook-area .local-handbook-page-body h3:first-child {
-        margin-top: 0;
-    }
-    #page-local-handbook-area .local-handbook-page-body .table-responsive {
-        margin-bottom: 1.25rem;
-    }
-
-    /* Callout inside page bodies. */
-    #page-local-handbook-area .local-handbook-callout {
-        border-left: 3px solid var(--warning, #f0ad4e);
-        border-radius: 0 0.375rem 0.375rem 0;
-        padding: 0.75rem 1rem;
-        margin: 1rem 0 1.25rem;
-        max-width: 70ch;
-    }
 
     /* On-page table of contents block. */
     #page-local-handbook-area .local-handbook-toc {
@@ -164,54 +85,12 @@
         border-left-color: var(--primary, #0078c3);
     }
 
-    /* Metadata card ("Ficha de la página"). */
-    #page-local-handbook-area .local-handbook-meta dt {
-        font-weight: 400;
-        color: var(--bs-secondary-color, #6c757d);
-    }
-    #page-local-handbook-area .local-handbook-meta dd {
-        font-variant-numeric: tabular-nums;
-    }
-
-    /* Typed related-pages list. */
-    #page-local-handbook-area .local-handbook-relations {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.6rem;
-        font-size: 0.875rem;
-    }
-    #page-local-handbook-area .local-handbook-relations .relation-type {
-        display: block;
-        font-size: 0.6875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--bs-secondary-color, #6c757d);
-    }
-
     /* Required-reading acknowledgement box. */
     #page-local-handbook-area .local-handbook-ack {
         scroll-margin-top: 90px;
     }
     #page-local-handbook-area .local-handbook-ack .form-check-label {
         max-width: 62ch;
-    }
-
-    /* Sticky rail on wide screens. */
-    @media (min-width: 992px) {
-        #page-local-handbook-area .local-handbook-rail {
-            position: sticky;
-            top: 90px;
-        }
-    }
-
-    /* Policy-specific addition: authority badge uses the dark badge so
-       institution-wide policies stand out from operational content. */
-    #page-local-handbook-area .local-handbook-badge-authority {
-        background-color: var(--dark, #343a40);
-        color: #fff;
     }
 </style>
 </head>
