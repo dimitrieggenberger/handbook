@@ -1,5 +1,5 @@
 {
-  "$comment": "Initial seed for local_handbook (spec 9.1 category tree + first articles). Upload at /local/handbook/manage/import.php. Matching is by slug: re-importing updates instead of duplicating. Pages marked [BORRADOR PENDIENTE] are skeletons to be completed (e.g. with ChatGPT/Claude) before publishing.",
+  "$comment": "Initial seed for local_handbook (spec 9.1 category tree, scaffold pages for every subcategory, and the full Ser docente 2026-2027 induction path per spec 15.2). Upload at /local/handbook/manage/import.php. Matching is by slug: re-importing updates instead of duplicating, and identical published content is left untouched. Pages marked [BORRADOR] are writing scaffolds: replace each bullet with final prose (with ChatGPT/Claude or by hand), then re-import or edit in Moodle.",
 
   "categories": [
     {"slug": "identidad-institucional", "name": "Identidad institucional", "sortorder": 10},
@@ -104,6 +104,202 @@
       "summary": "Lo esencial de un turno de supervisión de patio, pensado para imprimirse y llevarse al recreo.",
       "content": "<p><em>Esta guía resume «Supervisión durante los recreos». Ante cualquier diferencia, prevalece el procedimiento completo.</em></p><h2>Antes del recreo</h2><ul><li>Verifica tu zona y horario en el rol de turnos (sala de profesores o Moodle).</li><li>Llega a tu punto de observación <strong>antes</strong> del timbre.</li><li>Ubica al docente de la zona contigua: es tu relevo ante una ausencia.</li></ul><h2>Durante el recreo</h2><ul><li>Mantente en tu punto de observación con visión completa de la zona.</li><li>Evita conversaciones prolongadas que interrumpan la supervisión visual.</li><li>Si necesitas ausentarte: primero relevo, después te retiras. Nunca al revés.</li><li>Zona sin relevo disponible = zona cerrada; reubica a los estudiantes en la zona contigua.</li></ul><h2>Si ocurre un incidente</h2><ol><li><strong>Lesión:</strong> primeros auxilios básicos y derivación al médico escolar; no dejes la zona sin relevo.</li><li><strong>Conflicto físico o situación de riesgo:</strong> intervén, separa y comunica a coordinación de convivencia el mismo día.</li><li><strong>Sospecha que afecte a un menor:</strong> aplica de inmediato el protocolo de protección del menor; prevalece sobre todo lo anterior.</li></ol><h2>Al finalizar</h2><ul><li>Acompaña la transición de regreso a las aulas.</li><li>¿Hubo novedades? Regístralas en el formulario de novedades de patio antes de fin de jornada.</li></ul>"
     },
+
+    {
+      "slug": "modelo-educativo",
+      "title": "Modelo educativo de EuropaSchule",
+      "category": "modelo-educativo",
+      "contenttype": "guideline",
+      "authoritylevel": 3,
+      "criticality": "reference",
+      "requiredreading": 1,
+      "responsiblearea": "Rectorado",
+      "summary": "Qué entendemos por educar en EuropaSchule: enfoque pedagógico, perfil del egresado y cómo el modelo se traduce en la práctica diaria.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Visión y misión</h2><ul><li>Enunciar la visión y la misión oficiales, con la fecha de su última aprobación.</li><li>Explicar en dos frases qué distingue a EuropaSchule de otras escuelas.</li></ul><h2>Enfoque pedagógico</h2><ul><li>Principios de aprendizaje que orientan la enseñanza (activo, personalizado, bilingüe…).</li><li>Cómo se refleja el enfoque en una clase típica: qué debería ver un observador.</li><li>Papel de la tecnología y de Moodle en el modelo.</li></ul><h2>Perfil del egresado</h2><ul><li>Competencias y actitudes que buscamos formar al terminar cada etapa.</li><li>Cómo se evalúa el avance hacia ese perfil.</li></ul><h2>Del modelo a la práctica</h2><ul><li>Enlazar las políticas y estándares que concretan el modelo (evaluación, planificación, convivencia).</li><li>Qué se espera de cada docente para encarnar el modelo.</li></ul>"
+    },
+    {
+      "slug": "fortalezas-institucionales",
+      "title": "Fortalezas institucionales",
+      "category": "fortalezas-institucionales",
+      "contenttype": "guideline",
+      "authoritylevel": 4,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Rectorado",
+      "summary": "Las fortalezas que definen a EuropaSchule y que todo el personal debe conocer, cuidar y comunicar.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Nuestras fortalezas</h2><ul><li>Listar 4–6 fortalezas (p. ej. bilingüismo, acompañamiento personal, modalidades flexibles, comunidad).</li><li>Para cada una: en qué se nota en el día a día y qué evidencia la respalda.</li></ul><h2>Cómo las cuidamos</h2><ul><li>Prácticas concretas del personal que sostienen cada fortaleza.</li><li>Riesgos que podrían debilitarlas y cómo evitarlos.</li></ul><h2>Cómo las comunicamos</h2><ul><li>Mensajes clave para familias nuevas y visitas.</li><li>Dónde encontrar material institucional actualizado (presentaciones, folletos).</li></ul>"
+    },
+    {
+      "slug": "prioridades-del-ano-2026-2027",
+      "title": "Prioridades del año 2026-2027",
+      "category": "prioridades-del-ano",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Rectorado",
+      "summary": "Las prioridades institucionales del año escolar 2026-2027 y lo que implican para cada área y cada docente.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Prioridades del año</h2><ul><li>Enumerar 3–5 prioridades del año con una frase de justificación cada una.</li><li>Indicar el indicador o la evidencia con que se medirá cada prioridad.</li></ul><h2>Qué significa para cada docente</h2><ul><li>Acciones concretas esperadas en el aula por cada prioridad.</li><li>Espacios de seguimiento (reuniones, observaciones, informes).</li></ul><h2>Calendario de hitos</h2><ul><li>Hitos del año por bimestre relacionados con las prioridades.</li><li>Responsable de reportar el avance de cada hito.</li></ul>"
+    },
+    {
+      "slug": "cultura-profesional-y-conducta-esperada",
+      "title": "Cultura profesional y conducta esperada",
+      "category": "cultura-profesional",
+      "contenttype": "policy",
+      "authoritylevel": 1,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Rectorado",
+      "summary": "Los acuerdos de cultura profesional de EuropaSchule: puntualidad, trato, colaboración, comunicación interna y ejemplo ante los estudiantes.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Principios de la cultura profesional</h2><ul><li>Valores que guían el trabajo entre colegas (confianza, franqueza respetuosa, mejora continua).</li><li>El personal como modelo de conducta ante los estudiantes.</li></ul><h2>Conducta esperada</h2><ul><li>Puntualidad y preparación en clases, turnos y reuniones.</li><li>Trato con estudiantes: cercanía profesional, límites claros (enlazar protocolo de protección del menor).</li><li>Uso de canales internos y tono en la comunicación escrita.</li><li>Manejo de desacuerdos: primero con la persona, luego por el escalamiento definido.</li></ul><h2>Lo que no aceptamos</h2><ul><li>Conductas incompatibles con el rol (detallar; enlazar conducta laboral).</li><li>Vías para reportar preocupaciones con seguridad.</li></ul>"
+    },
+
+    {
+      "slug": "estructura-institucional",
+      "title": "Estructura institucional",
+      "category": "estructura-institucional",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "reference",
+      "requiredreading": 1,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Cómo está organizada EuropaSchule: órganos de gobierno, direcciones, coordinaciones y líneas de dependencia.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Organigrama</h2><ul><li>Insertar el organigrama vigente (imagen) con fecha.</li><li>Describir en una frase el mandato de cada órgano: Promotoría, Rectorado, Dirección oficial, coordinaciones.</li></ul><h2>Direcciones y coordinaciones</h2><ul><li>Para cada área: nombre del cargo, titular actual y ámbito de decisión.</li><li>Qué decisiones requieren aprobación de qué nivel.</li></ul><h2>Órganos colegiados</h2><ul><li>Comités existentes (convivencia, académico…), integrantes y frecuencia de reunión.</li></ul>"
+    },
+    {
+      "slug": "responsabilidades-por-area",
+      "title": "Responsabilidades por área",
+      "category": "responsabilidades-por-area",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Qué área es responsable de qué: matrícula, académico, convivencia, administración, comunicación, tecnología.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Mapa de responsabilidades</h2><ul><li>Tabla área → responsabilidades principales → responsable → suplente.</li><li>Incluir: académico, convivencia, matrícula/secretaría, administración y finanzas, comunicación, tecnología/Moodle, infraestructura.</li></ul><h2>Zonas de frontera</h2><ul><li>Temas que suelen caer entre dos áreas y cómo se resuelven (p. ej. disciplina con componente académico).</li></ul><h2>Actualización</h2><ul><li>Quién mantiene esta página al cambiar cargos o áreas.</li></ul>"
+    },
+    {
+      "slug": "con-quien-hablar-sobre-que",
+      "title": "Con quién hablar sobre qué",
+      "category": "con-quien-hablar-sobre-que",
+      "contenttype": "quickguide",
+      "authoritylevel": 4,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Guía rápida para dirigir cada consulta o problema a la persona correcta a la primera.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Temas frecuentes</h2><ul><li>Tabla tema → primera persona de contacto → canal → cuándo escalar. Cubrir: horarios y aulas, notas y Moodle, conducta de estudiantes, familias molestas, permisos, salarios, materiales, TI.</li></ul><h2>Urgencias</h2><ul><li>A quién acudir de inmediato ante lesiones, riesgo a menores o emergencias (enlazar procedimientos).</li></ul><h2>Si no sabes a quién</h2><ul><li>Punto de entrada por defecto y compromiso de redirección.</li></ul>"
+    },
+    {
+      "slug": "escalamiento-y-autoridad",
+      "title": "Escalamiento y autoridad",
+      "category": "escalamiento-y-autoridad",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Cómo se escalan los asuntos en EuropaSchule, qué decisiones corresponden a cada nivel y qué documentos prevalecen sobre cuáles.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Cadena de escalamiento</h2><ul><li>Ruta general: docente → coordinación → dirección → rectorado, con plazos orientativos de respuesta.</li><li>Excepciones que saltan niveles (protección del menor, emergencias).</li></ul><h2>Autoridad de los documentos</h2><ul><li>Explicar la jerarquía del manual: política institucional &gt; procedimiento oficial &gt; estándar &gt; guía &gt; plantilla &gt; ejemplo.</li><li>Qué hacer al detectar una contradicción entre páginas (reportar un error).</li></ul><h2>Decisiones y registro</h2><ul><li>Qué decisiones deben quedar por escrito y dónde.</li></ul>"
+    },
+
+    {
+      "slug": "marco-curricular",
+      "title": "Marco curricular",
+      "category": "curriculo",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación académica",
+      "summary": "El marco curricular de EuropaSchule: planes oficiales, adaptaciones propias, áreas y cargas horarias por nivel.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Base normativa</h2><ul><li>Currículo oficial de referencia y normativa aplicable por modalidad.</li><li>Adaptaciones propias de EuropaSchule y quién las aprueba.</li></ul><h2>Áreas y cargas horarias</h2><ul><li>Tabla de áreas/asignaturas y horas por grado y modalidad.</li><li>Asignaturas propias (alemán, proyectos…) y su justificación.</li></ul><h2>Documentos derivados</h2><ul><li>Relación con planificación, sílabos y evaluación (enlazar).</li><li>Dónde viven los programas por asignatura.</li></ul>"
+    },
+    {
+      "slug": "planificacion-de-clases-y-unidades",
+      "title": "Planificación de clases y unidades",
+      "category": "planificacion",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Qué se planifica, con qué formato, con qué anticipación se entrega y cómo se revisa la planificación docente.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Niveles de planificación</h2><ul><li>Anual, por unidad y por sesión: propósito y nivel de detalle exigido en cada uno.</li></ul><h2>Formato y entrega</h2><ul><li>Plantilla oficial (enlazar en Formularios) y dónde se entrega/almacena.</li><li>Fechas límite por bimestre y qué pasa si no se entrega.</li></ul><h2>Revisión y retroalimentación</h2><ul><li>Quién revisa (líder de departamento, coordinación), con qué criterios y en qué plazos.</li></ul><h2>Ajustes durante el año</h2><ul><li>Cómo registrar desvíos del plan y replanificaciones.</li></ul>"
+    },
+    {
+      "slug": "silabos-y-temarios",
+      "title": "Sílabos y temarios: elaboración y entrega",
+      "category": "silabos-y-temarios",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Cómo se elaboran, aprueban y publican los sílabos y temarios de cada asignatura, y cómo se comunica su avance.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Contenido del sílabo</h2><ul><li>Elementos obligatorios: propósitos, temario por bimestre, evaluación, materiales.</li><li>Plantilla oficial (enlazar) y ejemplos bien logrados.</li></ul><h2>Elaboración y aprobación</h2><ul><li>Quién elabora, quién revisa y aprueba, y en qué fechas.</li></ul><h2>Publicación y seguimiento</h2><ul><li>Dónde se publican para familias y estudiantes (Moodle) y cuándo.</li><li>Cómo se registra el avance del temario durante el año.</li></ul>"
+    },
+    {
+      "slug": "evaluacion-del-aprendizaje",
+      "title": "Evaluación del aprendizaje",
+      "category": "evaluacion",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Los estándares de evaluación de EuropaSchule: tipos, cantidad mínima por bimestre, retroalimentación y evaluación diferenciada.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Principios de evaluación</h2><ul><li>Para qué evaluamos: evidencia de aprendizaje, retroalimentación, decisión pedagógica.</li><li>Coherencia entre lo enseñado, lo practicado y lo evaluado.</li></ul><h2>Tipos y cantidades</h2><ul><li>Instrumentos aceptados y cantidad mínima de notas por bimestre y asignatura.</li><li>Peso de cada tipo y reglas de redondeo (alinear con Calificación).</li></ul><h2>Retroalimentación</h2><ul><li>Plazos máximos para devolver resultados y forma de la retroalimentación.</li></ul><h2>Evaluación diferenciada</h2><ul><li>Cuándo procede, quién la aprueba y cómo se documenta.</li></ul>"
+    },
+    {
+      "slug": "calificacion-y-publicacion-de-notas",
+      "title": "Calificación y publicación de notas",
+      "category": "calificacion",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Cómo se registran las calificaciones en Moodle, escala y redondeo, fechas de publicación por bimestre y correcciones posteriores.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo. Alinear con el plugin local_grades.]</em></p><h2>Escala y redondeo</h2><ul><li>Escala vigente, mínimo aprobatorio y reglas de redondeo.</li><li>Bandas de estado usadas en los reportes (en riesgo, bueno, excelente…).</li></ul><h2>Registro en Moodle</h2><ul><li>Dónde y cómo registrar cada nota; estructura del libro de calificaciones.</li><li>Plazos de registro por bimestre.</li></ul><h2>Publicación</h2><ul><li>Fechas de publicación por bimestre y quién las gestiona.</li><li>Qué ven las familias y cuándo.</li></ul><h2>Correcciones y reclamos</h2><ul><li>Procedimiento y plazos para corregir una nota ya publicada.</li></ul>"
+    },
+    {
+      "slug": "estandares-de-uso-de-moodle",
+      "title": "Estándares de uso de Moodle",
+      "category": "moodle",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Cómo debe estar organizado cada curso Moodle: estructura mínima, nombres, materiales, tareas, asistencia y comunicación.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Estructura mínima del curso</h2><ul><li>Secciones obligatorias, nomenclatura de cursos y de actividades.</li><li>Qué debe estar publicado siempre: sílabo, criterios de evaluación, contacto.</li></ul><h2>Actividades y materiales</h2><ul><li>Estándares para tareas, cuestionarios y entrega de materiales.</li><li>Plazos de corrección en línea.</li></ul><h2>Asistencia y seguimiento</h2><ul><li>Registro de asistencia en Moodle (enlazar guía rápida).</li><li>Seguimiento de estudiantes homeschool e híbridos.</li></ul><h2>Soporte</h2><ul><li>A quién acudir por problemas técnicos y cómo pedir mejoras.</li></ul>"
+    },
+
+    {
+      "slug": "asistencia-y-puntualidad-de-estudiantes",
+      "title": "Asistencia y puntualidad de estudiantes",
+      "category": "asistencia-y-puntualidad",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Registro diario de asistencia, tratamiento de tardanzas y faltas, justificaciones y umbrales de alerta.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Registro diario</h2><ul><li>Quién registra, en qué sistema y en qué momento de la jornada.</li><li>Diferencias por modalidad (presencial, homeschool, híbrida).</li></ul><h2>Tardanzas y faltas</h2><ul><li>Definiciones y cómo se registran.</li><li>Justificaciones válidas, plazo y canal para presentarlas.</li></ul><h2>Umbrales y alertas</h2><ul><li>A partir de cuántas faltas/tardanzas se activa qué acción y quién la ejecuta.</li><li>Comunicación con la familia y registro de acuerdos.</li></ul>"
+    },
+    {
+      "slug": "consejeria-estudiantil-derivacion",
+      "title": "Consejería estudiantil: derivación y acompañamiento",
+      "category": "consejeria",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Consejería estudiantil",
+      "summary": "Cuándo y cómo derivar a un estudiante a consejería, qué información compartir y cómo funciona el acompañamiento.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Cuándo derivar</h2><ul><li>Señales académicas, emocionales y sociales que ameritan derivación.</li><li>Qué NO esperar para derivar (ante protección del menor, aplicar el protocolo de inmediato).</li></ul><h2>Cómo derivar</h2><ul><li>Canal y formulario de derivación; qué información incluir y cuál no.</li><li>Plazos de primera respuesta de consejería.</li></ul><h2>Acompañamiento y confidencialidad</h2><ul><li>Qué información vuelve al docente y cuál permanece reservada.</li><li>Rol del docente durante un plan de acompañamiento.</li></ul>"
+    },
     {
       "slug": "protocolo-de-proteccion-del-menor",
       "title": "Protocolo de protección del menor",
@@ -114,44 +310,46 @@
       "requiredreading": 1,
       "responsiblearea": "Dirección oficial",
       "summary": "Actuación obligatoria ante cualquier sospecha o evidencia que afecte la integridad de un menor. Prevalece sobre toda otra política o procedimiento del manual.",
-      "content": "<h2>Objetivo</h2><p><em>[BORRADOR PENDIENTE: definir el objetivo del protocolo y su carácter prevalente.]</em></p><h2>Alcance</h2><p><em>[BORRADOR PENDIENTE: comunidad educativa completa, tres modalidades, entornos digitales.]</em></p><h2>Señales de alerta</h2><p><em>[BORRADOR PENDIENTE: indicadores físicos, conductuales y digitales; deber de comunicar sin investigar por cuenta propia.]</em></p><h2>Actuación inmediata</h2><p><em>[BORRADOR PENDIENTE: pasos numerados, a quién se comunica, plazos, registro confidencial.]</em></p><h2>Confidencialidad</h2><p><em>[BORRADOR PENDIENTE: círculo mínimo de información, protección de datos, comunicación con familias y autoridades.]</em></p><h2>Escalamiento</h2><p><em>[BORRADOR PENDIENTE: dirección oficial, autoridades externas, seguimiento.]</em></p>"
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo. Este protocolo prevalece sobre todo el manual: redactarlo con revisión legal.]</em></p><h2>Objetivo y prevalencia</h2><ul><li>Enunciar el deber de protección y la prevalencia de este protocolo sobre cualquier otra página.</li><li>Base legal aplicable.</li></ul><h2>Señales de alerta</h2><ul><li>Indicadores físicos, conductuales y digitales, con ejemplos.</li><li>Regla de oro: comunicar, no investigar por cuenta propia ni confrontar.</li></ul><h2>Actuación inmediata</h2><ul><li>Pasos numerados: a quién se comunica (titular y suplente), en qué plazo, por qué canal.</li><li>Qué registrar por escrito y qué no poner por escrito.</li><li>Cómo actuar si la sospecha involucra a un miembro del personal.</li></ul><h2>Confidencialidad</h2><ul><li>Círculo mínimo de información; prohibición de comentar el caso.</li><li>Comunicación con la familia: quién decide y cuándo.</li></ul><h2>Autoridades externas y seguimiento</h2><ul><li>Cuándo y quién comunica a autoridades externas.</li><li>Acompañamiento posterior al estudiante y al equipo.</li></ul>"
     },
+
     {
-      "slug": "jornada-escolar-2026-2027",
-      "title": "Jornada escolar 2026-2027",
-      "category": "jornada-escolar",
+      "slug": "modalidad-presencial",
+      "title": "Modalidad presencial",
+      "category": "presencial",
       "contenttype": "standard",
       "authoritylevel": 3,
       "criticality": "operational",
       "requiredreading": 1,
       "responsiblearea": "Coordinación académica",
-      "summary": "Horarios de la jornada escolar del año 2026-2027 por nivel y modalidad: ingreso, bloques, recreos y salida.",
-      "content": "<h2>Horario general</h2><p><em>[BORRADOR PENDIENTE: tabla de horarios por nivel — ingreso, bloques, recreos, almuerzo, salida.]</em></p><h2>Diferencias por modalidad</h2><p><em>[BORRADOR PENDIENTE: presencial, homeschool e híbrida; sincronía y asincronía.]</em></p><h2>Puntualidad</h2><p><em>[BORRADOR PENDIENTE: referencias al procedimiento de asistencia y puntualidad.]</em></p>"
+      "summary": "Características, reglas y responsabilidades específicas de la modalidad presencial.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Qué define a la modalidad</h2><ul><li>Público, jornada y organización general.</li></ul><h2>Reglas específicas</h2><ul><li>Asistencia, supervisión, uso de espacios y dispositivos.</li><li>Qué páginas del manual aplican solo aquí.</li></ul><h2>Responsabilidades docentes</h2><ul><li>Diferencias respecto a las otras modalidades (turnos de patio, transiciones…).</li></ul>"
     },
     {
-      "slug": "registro-y-seguimiento-de-incidentes",
-      "title": "Registro y seguimiento de incidentes",
-      "category": "incidentes",
-      "contenttype": "procedure",
-      "authoritylevel": 2,
-      "criticality": "mandatory",
+      "slug": "modalidad-homeschool",
+      "title": "Modalidad homeschool",
+      "category": "homeschool",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "operational",
       "requiredreading": 1,
-      "responsiblearea": "Coordinación de convivencia",
-      "summary": "Qué se considera un incidente, cómo se registra el mismo día, quién le da seguimiento y cómo se comunica a las familias.",
-      "content": "<h2>Objetivo</h2><p><em>[BORRADOR PENDIENTE.]</em></p><h2>Qué es un incidente</h2><p><em>[BORRADOR PENDIENTE: tipificación y ejemplos.]</em></p><h2>Registro</h2><p><em>[BORRADOR PENDIENTE: formulario, plazo del mismo día, responsable.]</em></p><h2>Seguimiento</h2><p><em>[BORRADOR PENDIENTE: comité de convivencia, plazos, cierre.]</em></p><h2>Comunicación a familias</h2><p><em>[BORRADOR PENDIENTE.]</em></p>"
+      "responsiblearea": "Coordinación académica",
+      "summary": "Cómo funciona la modalidad homeschool: roles de familia y docentes, seguimiento, evaluación y comunicación.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Qué define a la modalidad</h2><ul><li>Rol de la familia como acompañante del aprendizaje y rol del docente EuropaSchule.</li><li>Plataformas y materiales utilizados.</li></ul><h2>Seguimiento del aprendizaje</h2><ul><li>Frecuencia y forma del contacto docente-estudiante-familia.</li><li>Cómo se registra el avance y qué alertas existen.</li></ul><h2>Evaluación y asistencia</h2><ul><li>Adaptaciones de evaluación y de registro de asistencia (enlazar las páginas generales y marcar las diferencias intencionales).</li></ul>"
     },
     {
-      "slug": "manual-del-docente",
-      "title": "Manual del docente",
-      "category": "docente",
-      "contenttype": "roledescription",
-      "authoritylevel": 4,
-      "criticality": "reference",
-      "requiredreading": 0,
+      "slug": "modalidad-hibrida",
+      "title": "Modalidad híbrida",
+      "category": "hibrida",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "operational",
+      "requiredreading": 1,
       "responsiblearea": "Coordinación académica",
-      "summary": "Panorama de las responsabilidades del rol docente en EuropaSchule, con enlaces a las políticas y procedimientos que las regulan.",
-      "content": "<h2>El rol docente en EuropaSchule</h2><p><em>[BORRADOR PENDIENTE: visión general del rol.]</em></p><h2>Responsabilidades académicas</h2><p><em>[BORRADOR PENDIENTE: planificación, sílabos, evaluación, calificación, Moodle.]</em></p><h2>Responsabilidades de convivencia</h2><p><em>[BORRADOR PENDIENTE: supervisión, incidentes, protección del menor.]</em></p><h2>Comunicación</h2><p><em>[BORRADOR PENDIENTE: familias, reuniones, escritura institucional.]</em></p><h2>Administración</h2><p><em>[BORRADOR PENDIENTE: asistencia laboral, permisos, rutinas anuales.]</em></p>"
+      "summary": "Cómo se combina lo presencial y lo remoto en la modalidad híbrida: horarios, presencialidad mínima y coordinación.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Qué define a la modalidad</h2><ul><li>Combinación de días/actividades presenciales y remotas; presencialidad mínima.</li></ul><h2>Organización y horarios</h2><ul><li>Cómo se planifican las sesiones sincrónicas y el trabajo autónomo.</li></ul><h2>Reglas específicas</h2><ul><li>Asistencia, evaluación y comunicación: qué difiere de presencial y homeschool y por qué (diferencias intencionales).</li></ul>"
     },
+
     {
       "slug": "comunicacion-con-familias",
       "title": "Comunicación con familias",
@@ -162,7 +360,324 @@
       "requiredreading": 1,
       "responsiblearea": "Dirección oficial",
       "summary": "Criterios y canales para la comunicación institucional con familias: qué se comunica, por qué canal, con qué tono y quién lo aprueba.",
-      "content": "<h2>Principios</h2><p><em>[BORRADOR PENDIENTE: transparencia, oportunidad, tono institucional.]</em></p><h2>Canales</h2><p><em>[BORRADOR PENDIENTE: Moodle, correo, reuniones; qué va por cada canal.]</em></p><h2>Quién comunica qué</h2><p><em>[BORRADOR PENDIENTE: docente, docente guía, coordinaciones, dirección.]</em></p><h2>Situaciones sensibles</h2><p><em>[BORRADOR PENDIENTE: incidentes, disciplina, confidencialidad.]</em></p>"
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Principios</h2><ul><li>Transparencia, oportunidad y tono institucional; una sola versión de los hechos.</li><li>Idiomas de comunicación y registro de lo comunicado.</li></ul><h2>Canales y usos</h2><ul><li>Tabla canal → para qué sirve → quién lo usa (Moodle, correo, reuniones, comunicados).</li><li>Tiempos máximos de respuesta a mensajes de familias.</li></ul><h2>Quién comunica qué</h2><ul><li>Docente vs. docente guía vs. coordinación vs. dirección: límites claros.</li><li>Qué comunicados requieren aprobación previa y de quién.</li></ul><h2>Situaciones sensibles</h2><ul><li>Incidentes, disciplina, protección del menor: qué canal y quién (enlazar procedimientos).</li></ul>"
+    },
+    {
+      "slug": "reuniones-con-familias",
+      "title": "Reuniones con familias",
+      "category": "reuniones",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "operational",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Cómo se convocan, preparan, conducen y registran las reuniones con familias, individuales y grupales.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Tipos de reunión</h2><ul><li>Grupales de inicio de año, individuales de seguimiento, extraordinarias por incidente.</li></ul><h2>Convocatoria y preparación</h2><ul><li>Canal y anticipación de la convocatoria; quién participa por parte de la escuela.</li><li>Qué información preparar (notas, asistencia, registros).</li></ul><h2>Conducción y registro</h2><ul><li>Estructura sugerida de la conversación y manejo de situaciones tensas.</li><li>Acta o registro de acuerdos: plantilla, dónde se guarda y a quién se copia.</li></ul>"
+    },
+    {
+      "slug": "gestion-de-quejas-de-familias",
+      "title": "Gestión de quejas de familias",
+      "category": "quejas",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "mandatory",
+      "requiredreading": 0,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Cómo se recibe, registra, investiga y responde una queja de familia, con plazos y responsables por nivel.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Recepción y registro</h2><ul><li>Canales válidos para presentar una queja y qué datos se registran.</li><li>Quién recibe según el tema (enlazar Con quién hablar sobre qué).</li></ul><h2>Tratamiento</h2><ul><li>Plazos de acuse y de respuesta por tipo de queja.</li><li>Cómo se investiga: a quién se escucha, qué se documenta.</li><li>Cuándo se escala y a quién.</li></ul><h2>Respuesta y cierre</h2><ul><li>Forma de la respuesta, registro del cierre y seguimiento de compromisos.</li><li>Protección del personal ante quejas infundadas.</li></ul>"
+    },
+    {
+      "slug": "confidencialidad-y-proteccion-de-datos",
+      "title": "Confidencialidad y protección de datos",
+      "category": "confidencialidad",
+      "contenttype": "policy",
+      "authoritylevel": 1,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Qué información de estudiantes y familias es confidencial, quién puede acceder a ella y cómo se maneja dentro y fuera de la escuela.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo. Revisar con la normativa de protección de datos aplicable.]</em></p><h2>Qué es confidencial</h2><ul><li>Categorías de datos: académicos, de salud, familiares, de consejería, disciplinarios.</li><li>Principio de mínimo necesario: acceder solo a lo que el rol requiere.</li></ul><h2>Reglas de manejo</h2><ul><li>Dónde puede almacenarse cada tipo de dato y dónde no (dispositivos personales, chats).</li><li>Qué puede comentarse con colegas y en qué espacios.</li><li>Fotos y trabajos de estudiantes: autorizaciones y publicación.</li></ul><h2>Incidentes de datos</h2><ul><li>Qué hacer ante una filtración o pérdida y a quién avisar de inmediato.</li></ul>"
+    },
+
+    {
+      "slug": "jornada-escolar-2026-2027",
+      "title": "Jornada escolar 2026-2027",
+      "category": "jornada-escolar",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Horarios de la jornada escolar del año 2026-2027 por nivel y modalidad: ingreso, bloques, recreos y salida.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Horario general</h2><ul><li>Tabla por nivel: ingreso, bloques de clase, recreos, almuerzo, salida.</li><li>Horario de los viernes u otros días especiales, si difiere.</li></ul><h2>Diferencias por modalidad</h2><ul><li>Presencial, homeschool e híbrida: sesiones sincrónicas y trabajo autónomo.</li></ul><h2>Puntualidad y permanencia</h2><ul><li>Ingreso tardío y salida anticipada de estudiantes: registro y autorizaciones (enlazar asistencia).</li><li>Presencia esperada del personal antes y después de la jornada.</li></ul>"
+    },
+    {
+      "slug": "transiciones-entre-clases",
+      "title": "Transiciones entre clases",
+      "category": "transiciones",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Cómo se realizan los cambios de aula y de actividad: tiempos, responsabilidades y supervisión de pasillos.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Reglas generales</h2><ul><li>Duración máxima de una transición y señal de inicio/fin.</li><li>Comportamiento esperado de los estudiantes en pasillos y escaleras.</li></ul><h2>Responsabilidades</h2><ul><li>Docente que termina la clase vs. docente que la recibe: quién acompaña a quién.</li><li>Supervisión de pasillos: puntos y responsables.</li></ul><h2>Casos especiales</h2><ul><li>Traslados a laboratorios, canchas o fuera del edificio.</li><li>Estudiantes que quedan rezagados o sin docente.</li></ul>"
+    },
+    {
+      "slug": "recreos-y-uso-del-patio",
+      "title": "Recreos y uso del patio",
+      "category": "recreos-y-patio",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "operational",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Normas de uso del patio durante los recreos: zonas por grado, juegos permitidos, materiales y clima.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo. La supervisión docente se regula en «Supervisión durante los recreos».]</em></p><h2>Zonas y grados</h2><ul><li>Qué zonas corresponden a qué grados y su señalización.</li></ul><h2>Juegos y materiales</h2><ul><li>Juegos permitidos y prohibidos; préstamo y devolución de materiales.</li></ul><h2>Reglas de convivencia en el patio</h2><ul><li>Normas específicas (balones, zonas tranquilas, kiosco) y consecuencias.</li></ul><h2>Clima y recreo interior</h2><ul><li>Criterio para recreo bajo techo y organización en ese caso.</li></ul>"
+    },
+    {
+      "slug": "uso-y-cuidado-de-aulas",
+      "title": "Uso y cuidado de aulas",
+      "category": "aulas",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Administración",
+      "summary": "Estándares de uso, orden y cuidado de las aulas y de su equipamiento, y responsabilidades del docente y del grupo.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Estado esperado del aula</h2><ul><li>Cómo debe quedar el aula al final de cada bloque y de la jornada.</li><li>Ambientación: qué se puede fijar en paredes y cómo.</li></ul><h2>Equipamiento</h2><ul><li>Uso del proyector/pantalla y dispositivos; reporte de fallas.</li><li>Inventario del aula y responsable.</li></ul><h2>Reservas y usos especiales</h2><ul><li>Cómo reservar aulas especiales (laboratorio, arte) y reglas propias.</li></ul>"
+    },
+    {
+      "slug": "kiosco-y-alimentacion",
+      "title": "Kiosco y alimentación",
+      "category": "kiosco-y-alimentacion",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Administración",
+      "summary": "Funcionamiento del kiosco, horarios de venta, criterios de alimentación saludable y manejo de alergias.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Funcionamiento</h2><ul><li>Horarios de venta por nivel y formas de pago.</li><li>Zona de consumo y normas en las mesas.</li></ul><h2>Alimentación saludable</h2><ul><li>Criterios de la oferta del kiosco y acuerdos con familias sobre loncheras.</li></ul><h2>Alergias y dietas</h2><ul><li>Registro de alergias alimentarias y cómo se comunica al personal pertinente.</li><li>Actuación ante una reacción alérgica (enlazar médico escolar).</li></ul>"
+    },
+    {
+      "slug": "medico-escolar-y-primeros-auxilios",
+      "title": "Médico escolar y primeros auxilios",
+      "category": "medico-escolar",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "safetycritical",
+      "requiredreading": 1,
+      "responsiblearea": "Médico escolar",
+      "summary": "Cuándo y cómo derivar a un estudiante al médico escolar, primeros auxilios básicos, medicación y comunicación con familias.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo. Revisar con el médico escolar.]</em></p><h2>Cuándo derivar</h2><ul><li>Situaciones que siempre se derivan y cuáles puede resolver el docente.</li><li>Cómo trasladar al estudiante (acompañado por quién) sin dejar al grupo solo.</li></ul><h2>Primeros auxilios básicos</h2><ul><li>Qué puede y qué no puede hacer un docente antes de la llegada del médico.</li><li>Ubicación de botiquines y quiénes tienen formación de primeros auxilios.</li></ul><h2>Medicación</h2><ul><li>Regla sobre administrar medicamentos: quién puede, con qué autorización.</li><li>Estudiantes con condiciones crónicas: fichas y planes individuales.</li></ul><h2>Comunicación y registro</h2><ul><li>Quién comunica a la familia y cuándo; registro de atenciones.</li><li>Cuándo se activa el procedimiento de emergencias.</li></ul>"
+    },
+    {
+      "slug": "procedimiento-de-emergencias-y-evacuacion",
+      "title": "Procedimiento de emergencias y evacuación",
+      "category": "emergencias",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "safetycritical",
+      "requiredreading": 1,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Actuación ante sismos, incendios y otras emergencias: alarmas, rutas, puntos de encuentro, roles y simulacros.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo. Validar con defensa civil / normativa local.]</em></p><h2>Tipos de emergencia y alarmas</h2><ul><li>Señales de alarma por tipo de emergencia y quién puede activarlas.</li></ul><h2>Evacuación</h2><ul><li>Rutas por pabellón y puntos de encuentro por grado (insertar plano).</li><li>Rol del docente: conteo del grupo, lista, estudiantes con movilidad reducida.</li></ul><h2>Roles de emergencia</h2><ul><li>Brigadas y responsables; cadena de mando durante la emergencia.</li><li>Comunicación con familias y autoridades: solo por los canales definidos.</li></ul><h2>Simulacros</h2><ul><li>Calendario, evaluación y registro de cada simulacro.</li></ul>"
+    },
+
+    {
+      "slug": "asistencia-y-puntualidad-del-personal",
+      "title": "Asistencia y puntualidad del personal",
+      "category": "asistencia-laboral",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Administración",
+      "summary": "Registro de asistencia del personal, horarios de presencia, tardanzas y su tratamiento.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Horarios y registro</h2><ul><li>Horario de presencia por tipo de contrato y cómo se registra la asistencia.</li></ul><h2>Tardanzas y salidas</h2><ul><li>Tratamiento de tardanzas; salidas dentro de la jornada y su autorización.</li></ul><h2>Ausencias imprevistas</h2><ul><li>A quién avisar, con qué anticipación mínima y cómo se cubre la clase (enlazar permisos y ausencias).</li></ul>"
+    },
+    {
+      "slug": "permisos-y-ausencias-del-personal",
+      "title": "Permisos y ausencias del personal",
+      "category": "permisos-y-ausencias",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Administración",
+      "summary": "Tipos de permiso, cómo solicitarlos, plazos de aprobación y cómo se organiza la cobertura de clases.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Tipos de permiso</h2><ul><li>Con y sin goce; salud, personales, formación, licencias legales.</li></ul><h2>Solicitud y aprobación</h2><ul><li>Formulario/canal, anticipación mínima por tipo y quién aprueba.</li></ul><h2>Cobertura de clases</h2><ul><li>Responsabilidad de dejar material listo; quién organiza el reemplazo.</li></ul><h2>Registro</h2><ul><li>Dónde queda registrado el permiso y su efecto administrativo.</li></ul>"
+    },
+    {
+      "slug": "salarios-y-seguros",
+      "title": "Salarios y seguros",
+      "category": "salarios-y-seguros",
+      "contenttype": "guideline",
+      "authoritylevel": 4,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Administración",
+      "summary": "Información de referencia sobre pago de salarios, boletas, seguros y beneficios, y a quién consultar cada tema.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Pagos y boletas</h2><ul><li>Fecha de pago, acceso a boletas y a quién consultar diferencias.</li></ul><h2>Seguros y beneficios</h2><ul><li>Seguros vigentes, coberturas principales y cómo usarlos.</li></ul><h2>Consultas</h2><ul><li>Canal y horario de atención de administración para estos temas; confidencialidad de la información salarial.</li></ul>"
+    },
+    {
+      "slug": "conducta-laboral",
+      "title": "Conducta laboral",
+      "category": "conducta-laboral",
+      "contenttype": "policy",
+      "authoritylevel": 1,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Normas de conducta laboral del personal: incompatibilidades, regalos, redes sociales, relación con familias y consecuencias.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo. Alinear con el reglamento interno de trabajo.]</em></p><h2>Normas de conducta</h2><ul><li>Relación profesional con estudiantes y familias fuera de la escuela (clases particulares, redes sociales, regalos).</li><li>Conflictos de interés y actividades incompatibles.</li><li>Uso de recursos e información institucional.</li></ul><h2>Procedimiento ante incumplimientos</h2><ul><li>Cómo se investiga, derecho a descargo y medidas posibles.</li></ul><h2>Canales de reporte</h2><ul><li>Cómo reportar conductas preocupantes con protección para quien reporta.</li></ul>"
+    },
+
+    {
+      "slug": "manual-del-docente",
+      "title": "Manual del docente",
+      "category": "docente",
+      "contenttype": "roledescription",
+      "authoritylevel": 4,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Panorama de las responsabilidades del rol docente en EuropaSchule, con enlaces a las políticas y procedimientos que las regulan.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción. Esta página es un mapa del rol: cada viñeta debe terminar enlazando a la página que regula el tema.]</em></p><h2>El rol docente en EuropaSchule</h2><ul><li>Resumen del rol en un párrafo: enseñar, acompañar, comunicar, participar.</li></ul><h2>Responsabilidades académicas</h2><ul><li>Planificación y sílabos; evaluación y calificación; estándares Moodle (enlazar cada una).</li></ul><h2>Responsabilidades de convivencia y cuidado</h2><ul><li>Supervisión y turnos; asistencia de estudiantes; incidentes; protección del menor.</li></ul><h2>Comunicación</h2><ul><li>Familias, reuniones, tono institucional.</li></ul><h2>Administración</h2><ul><li>Asistencia laboral, permisos, rutinas de inicio y fin de año.</li></ul>"
+    },
+    {
+      "slug": "manual-del-docente-guia",
+      "title": "Manual del docente guía",
+      "category": "docente-guia",
+      "contenttype": "roledescription",
+      "authoritylevel": 4,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Responsabilidades específicas del docente guía: acompañamiento del grupo, familias, asistencia, ambiente de aula y coordinación.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>El rol de docente guía</h2><ul><li>Qué añade este rol al de docente; asignación anual y grupo a cargo.</li></ul><h2>Acompañamiento del grupo</h2><ul><li>Seguimiento de asistencia, notas y clima del grupo; alertas tempranas.</li><li>Coordinación con consejería y docentes de asignatura.</li></ul><h2>Relación con familias</h2><ul><li>Primer punto de contacto de las familias del grupo; reuniones a su cargo.</li></ul><h2>Ambiente de aula</h2><ul><li>Rutinas del grupo, acuerdos de convivencia internos, aula asignada.</li></ul>"
+    },
+    {
+      "slug": "manual-del-lider-de-departamento",
+      "title": "Manual del líder de departamento",
+      "category": "lider-de-departamento",
+      "contenttype": "roledescription",
+      "authoritylevel": 4,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Responsabilidades del líder de departamento: calidad académica del área, acompañamiento a docentes y coordinación curricular.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>El rol</h2><ul><li>Alcance del departamento y tiempo asignado a la función.</li></ul><h2>Calidad académica</h2><ul><li>Revisión de planificaciones y sílabos del área; coherencia curricular vertical.</li><li>Análisis de resultados de evaluación del área.</li></ul><h2>Acompañamiento a docentes</h2><ul><li>Observaciones de clase, retroalimentación y apoyo a docentes nuevos.</li></ul><h2>Coordinación</h2><ul><li>Reuniones de departamento: frecuencia, actas y acuerdos.</li></ul>"
+    },
+    {
+      "slug": "manual-de-coordinacion-academica",
+      "title": "Manual de coordinación académica",
+      "category": "coordinacion-academica",
+      "contenttype": "roledescription",
+      "authoritylevel": 4,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Responsabilidades de la coordinación académica: currículo, horarios, seguimiento docente, calendario de evaluación y reportes.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>El rol</h2><ul><li>Ámbito de decisión y relación con dirección y departamentos.</li></ul><h2>Procesos a cargo</h2><ul><li>Horarios y asignación de cursos; calendario de evaluaciones; publicación de notas.</li><li>Seguimiento de la planificación docente y cobertura de ausencias.</li></ul><h2>Reportes</h2><ul><li>Qué reporta a dirección/rectorado y con qué frecuencia.</li></ul>"
+    },
+    {
+      "slug": "manual-de-consejeria-estudiantil",
+      "title": "Manual de consejería estudiantil",
+      "category": "consejeria-estudiantil",
+      "contenttype": "roledescription",
+      "authoritylevel": 4,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Consejería estudiantil",
+      "summary": "Responsabilidades de consejería estudiantil: atención de derivaciones, planes de acompañamiento, prevención y coordinación con docentes y familias.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>El rol</h2><ul><li>Alcance de la consejería y límites (qué casos se derivan fuera).</li></ul><h2>Atención de casos</h2><ul><li>Recepción de derivaciones, priorización y plazos de primera atención.</li><li>Planes de acompañamiento: contenido, seguimiento y cierre.</li></ul><h2>Prevención</h2><ul><li>Programas y talleres a su cargo durante el año.</li></ul><h2>Coordinación y confidencialidad</h2><ul><li>Qué comparte con docentes guía y familias, y qué permanece reservado.</li></ul>"
+    },
+
+    {
+      "slug": "registro-y-seguimiento-de-incidentes",
+      "title": "Registro y seguimiento de incidentes",
+      "category": "incidentes",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Qué se considera un incidente, cómo se registra el mismo día, quién le da seguimiento y cómo se comunica a las familias.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción; sustituye cada viñeta por texto definitivo.]</em></p><h2>Qué es un incidente</h2><ul><li>Tipificación con ejemplos: lesión, conflicto físico, acoso, daño material, riesgo.</li><li>Qué NO es un incidente y se maneja como novedad de aula.</li></ul><h2>Registro</h2><ul><li>Formulario oficial (enlazar), plazo del mismo día y quién registra.</li><li>Contenido mínimo del registro: hechos, no interpretaciones.</li></ul><h2>Seguimiento</h2><ul><li>Quién clasifica y asigna el caso; plazos por gravedad.</li><li>Medidas y su registro (enlazar política de convivencia).</li></ul><h2>Comunicación a familias</h2><ul><li>Quién comunica, cuándo y cómo se registra la comunicación.</li></ul>"
+    },
+    {
+      "slug": "guia-rapida-reportar-un-incidente",
+      "title": "Guía rápida: reportar un incidente",
+      "category": "procedimientos-y-guias-rapidas",
+      "contenttype": "quickguide",
+      "authoritylevel": 4,
+      "criticality": "operational",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Los pasos esenciales para registrar correctamente un incidente el mismo día.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción. Resume «Registro y seguimiento de incidentes»; ante diferencias prevalece el procedimiento completo.]</em></p><h2>En el momento</h2><ul><li>Atiende primero a las personas; pide apoyo si hace falta.</li><li>Ante lesión → médico escolar; ante riesgo a un menor → protocolo de protección.</li></ul><h2>El mismo día</h2><ul><li>Completa el formulario de incidentes: hechos, hora, lugar, involucrados, testigos.</li><li>Comunica a coordinación de convivencia por el canal definido.</li></ul><h2>Después</h2><ul><li>No comentes el caso fuera del círculo necesario.</li><li>Haz seguimiento de los acuerdos que te correspondan.</li></ul>"
+    },
+    {
+      "slug": "guia-rapida-registrar-asistencia",
+      "title": "Guía rápida: registrar asistencia en Moodle",
+      "category": "procedimientos-y-guias-rapidas",
+      "contenttype": "quickguide",
+      "authoritylevel": 4,
+      "criticality": "operational",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Cómo registrar la asistencia diaria en Moodle en menos de cinco minutos.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción. Completar con capturas de pantalla del curso real.]</em></p><h2>Registro diario</h2><ul><li>Dónde está la actividad de asistencia en el curso y cuándo registrarla.</li><li>Estados disponibles (presente, tardanza, falta, justificada) y su uso.</li></ul><h2>Correcciones</h2><ul><li>Cómo corregir un registro erróneo y hasta cuándo.</li></ul><h2>Problemas frecuentes</h2><ul><li>Estudiante que no aparece en la lista, dobles matrículas: a quién avisar.</li></ul>"
+    },
+    {
+      "slug": "guia-rapida-preparar-reunion-con-familias",
+      "title": "Guía rápida: preparar una reunión con familias",
+      "category": "procedimientos-y-guias-rapidas",
+      "contenttype": "quickguide",
+      "authoritylevel": 4,
+      "criticality": "operational",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Lista de verificación para preparar, conducir y cerrar bien una reunión individual con una familia.",
+      "content": "<p><em>[BORRADOR: esquema para ayudar a la redacción. Resume «Reuniones con familias».]</em></p><h2>Antes</h2><ul><li>Revisa notas, asistencia y registros del estudiante.</li><li>Define el objetivo de la reunión en una frase y anticipa preguntas difíciles.</li><li>Confirma lugar, hora y quién acompaña por parte de la escuela.</li></ul><h2>Durante</h2><ul><li>Abre con lo positivo; presenta hechos, no juicios.</li><li>Acuerda máximo 2–3 compromisos concretos con responsable y fecha.</li></ul><h2>Después</h2><ul><li>Registra los acuerdos en la plantilla oficial y compártelos.</li><li>Agenda el seguimiento.</li></ul>"
+    },
+
+    {
+      "slug": "formulario-de-novedades-de-patio",
+      "title": "Formulario de novedades de patio",
+      "category": "formularios-plantillas-y-ejemplos",
+      "contenttype": "template",
+      "authoritylevel": 5,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Plantilla para registrar las novedades de cada turno de patio.",
+      "content": "<p><em>[BORRADOR: adjuntar aquí el formulario oficial (archivo) y describir su uso.]</em></p><h2>Cuándo se usa</h2><ul><li>Al cierre de cada recreo con novedades (ver Supervisión durante los recreos).</li></ul><h2>Campos del formulario</h2><ul><li>Fecha, zona, docente de turno, novedad, estudiantes involucrados, acción tomada, derivación.</li></ul><h2>Entrega</h2><ul><li>Dónde se entrega/carga y quién lo revisa.</li></ul>"
+    },
+    {
+      "slug": "plantilla-de-silabo",
+      "title": "Plantilla de sílabo",
+      "category": "formularios-plantillas-y-ejemplos",
+      "contenttype": "template",
+      "authoritylevel": 5,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Plantilla oficial de sílabo por asignatura y bimestre.",
+      "content": "<p><em>[BORRADOR: adjuntar la plantilla oficial (archivo) y un ejemplo bien logrado.]</em></p><h2>Estructura de la plantilla</h2><ul><li>Secciones obligatorias y opcionales, con indicaciones de llenado.</li></ul><h2>Uso</h2><ul><li>Cuándo se completa y dónde se entrega (ver Sílabos y temarios).</li></ul>"
+    },
+    {
+      "slug": "plantilla-de-comunicacion-a-familias",
+      "title": "Plantilla de comunicación a familias",
+      "category": "formularios-plantillas-y-ejemplos",
+      "contenttype": "template",
+      "authoritylevel": 5,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Plantilla y tono oficial para comunicaciones escritas a familias, con ejemplos.",
+      "content": "<p><em>[BORRADOR: incluir la plantilla y 2–3 ejemplos reales anonimizados.]</em></p><h2>Estructura</h2><ul><li>Saludo, motivo, información esencial, próximos pasos, firma institucional.</li></ul><h2>Tono</h2><ul><li>Claro, respetuoso, sin tecnicismos; qué evitar.</li></ul><h2>Aprobación</h2><ul><li>Qué comunicaciones requieren visto bueno previo (ver Comunicación con familias).</li></ul>"
     }
   ],
 
@@ -171,17 +686,61 @@
       "slug": "ser-docente-en-europaschule-2026-2027",
       "name": "Ser docente en EuropaSchule 2026-2027",
       "schoolyear": "2026-2027",
-      "description": "Ruta de inducción docente (especificación §15.2). Se completará con más páginas a medida que se publiquen.",
+      "description": "Ruta de inducción docente según la especificación §15.2: doce secciones que recorren la identidad, las rutinas, la práctica académica y la comunicación de EuropaSchule.",
       "active": 1,
       "items": [
-        {"page": "politica-de-convivencia-escolar", "section": "2. Cultura profesional y conducta", "required": 1},
+        {"page": "modelo-educativo", "section": "1. Identidad institucional y prioridades del año", "required": 1},
+        {"page": "prioridades-del-ano-2026-2027", "section": "1. Identidad institucional y prioridades del año", "required": 1},
+        {"page": "fortalezas-institucionales", "section": "1. Identidad institucional y prioridades del año", "required": 0},
+
+        {"page": "cultura-profesional-y-conducta-esperada", "section": "2. Cultura profesional y conducta", "required": 1},
+        {"page": "conducta-laboral", "section": "2. Cultura profesional y conducta", "required": 1},
+
+        {"page": "estructura-institucional", "section": "3. Estructura institucional y escalamiento", "required": 1},
+        {"page": "con-quien-hablar-sobre-que", "section": "3. Estructura institucional y escalamiento", "required": 1},
+        {"page": "escalamiento-y-autoridad", "section": "3. Estructura institucional y escalamiento", "required": 1},
+
         {"page": "protocolo-de-proteccion-del-menor", "section": "4. Relación con estudiantes y protección del menor", "required": 1},
+        {"page": "consejeria-estudiantil-derivacion", "section": "4. Relación con estudiantes y protección del menor", "required": 1},
+        {"page": "confidencialidad-y-proteccion-de-datos", "section": "4. Relación con estudiantes y protección del menor", "required": 1},
+
         {"page": "jornada-escolar-2026-2027", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 1},
+        {"page": "transiciones-entre-clases", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 1},
         {"page": "supervision-durante-los-recreos", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 1},
+        {"page": "medico-escolar-y-primeros-auxilios", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 1},
+        {"page": "procedimiento-de-emergencias-y-evacuacion", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 1},
         {"page": "guia-rapida-turno-de-patio-en-1-pagina", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 0},
+
+        {"page": "manual-del-docente-guia", "section": "6. Responsabilidades de docente guía y ambiente de aula", "required": 1},
+        {"page": "uso-y-cuidado-de-aulas", "section": "6. Responsabilidades de docente guía y ambiente de aula", "required": 1},
+
+        {"page": "politica-de-convivencia-escolar", "section": "7. Disciplina, incidentes y quejas", "required": 1},
         {"page": "registro-y-seguimiento-de-incidentes", "section": "7. Disciplina, incidentes y quejas", "required": 1},
-        {"page": "manual-del-docente", "section": "6. Responsabilidades de docente guía y ambiente de aula", "required": 0},
-        {"page": "comunicacion-con-familias", "section": "11. Comunicación con familias y escritura institucional", "required": 1}
+        {"page": "asistencia-y-puntualidad-de-estudiantes", "section": "7. Disciplina, incidentes y quejas", "required": 1},
+        {"page": "gestion-de-quejas-de-familias", "section": "7. Disciplina, incidentes y quejas", "required": 0},
+        {"page": "guia-rapida-reportar-un-incidente", "section": "7. Disciplina, incidentes y quejas", "required": 0},
+
+        {"page": "marco-curricular", "section": "8. Currículo, planificación y evaluación", "required": 1},
+        {"page": "planificacion-de-clases-y-unidades", "section": "8. Currículo, planificación y evaluación", "required": 1},
+        {"page": "silabos-y-temarios", "section": "8. Currículo, planificación y evaluación", "required": 1},
+        {"page": "evaluacion-del-aprendizaje", "section": "8. Currículo, planificación y evaluación", "required": 1},
+        {"page": "calificacion-y-publicacion-de-notas", "section": "8. Currículo, planificación y evaluación", "required": 1},
+
+        {"page": "estandares-de-uso-de-moodle", "section": "9. Moodle y práctica digital", "required": 1},
+        {"page": "guia-rapida-registrar-asistencia", "section": "9. Moodle y práctica digital", "required": 0},
+
+        {"page": "modalidad-presencial", "section": "10. Modalidades: presencial, homeschool e híbrida", "required": 1},
+        {"page": "modalidad-homeschool", "section": "10. Modalidades: presencial, homeschool e híbrida", "required": 1},
+        {"page": "modalidad-hibrida", "section": "10. Modalidades: presencial, homeschool e híbrida", "required": 1},
+
+        {"page": "comunicacion-con-familias", "section": "11. Comunicación con familias y escritura institucional", "required": 1},
+        {"page": "reuniones-con-familias", "section": "11. Comunicación con familias y escritura institucional", "required": 1},
+        {"page": "guia-rapida-preparar-reunion-con-familias", "section": "11. Comunicación con familias y escritura institucional", "required": 0},
+
+        {"page": "asistencia-y-puntualidad-del-personal", "section": "12. Procedimientos administrativos y rutinas anuales", "required": 1},
+        {"page": "permisos-y-ausencias-del-personal", "section": "12. Procedimientos administrativos y rutinas anuales", "required": 1},
+        {"page": "salarios-y-seguros", "section": "12. Procedimientos administrativos y rutinas anuales", "required": 0},
+        {"page": "manual-del-docente", "section": "12. Procedimientos administrativos y rutinas anuales", "required": 0}
       ]
     }
   ],
@@ -189,9 +748,27 @@
   "relations": [
     {"source": "supervision-durante-los-recreos", "type": "implements", "target": "politica-de-convivencia-escolar"},
     {"source": "registro-y-seguimiento-de-incidentes", "type": "implements", "target": "politica-de-convivencia-escolar"},
+    {"source": "asistencia-y-puntualidad-de-estudiantes", "type": "implements", "target": "politica-de-convivencia-escolar"},
     {"source": "guia-rapida-turno-de-patio-en-1-pagina", "type": "quickguidefor", "target": "supervision-durante-los-recreos"},
+    {"source": "guia-rapida-reportar-un-incidente", "type": "quickguidefor", "target": "registro-y-seguimiento-de-incidentes"},
+    {"source": "guia-rapida-registrar-asistencia", "type": "quickguidefor", "target": "estandares-de-uso-de-moodle"},
+    {"source": "guia-rapida-preparar-reunion-con-familias", "type": "quickguidefor", "target": "reuniones-con-familias"},
     {"source": "protocolo-de-proteccion-del-menor", "type": "exceptionto", "target": "politica-de-convivencia-escolar"},
+    {"source": "formulario-de-novedades-de-patio", "type": "templatefor", "target": "supervision-durante-los-recreos"},
+    {"source": "plantilla-de-silabo", "type": "templatefor", "target": "silabos-y-temarios"},
+    {"source": "plantilla-de-comunicacion-a-familias", "type": "templatefor", "target": "comunicacion-con-familias"},
     {"source": "supervision-durante-los-recreos", "type": "relatedto", "target": "registro-y-seguimiento-de-incidentes"},
-    {"source": "supervision-durante-los-recreos", "type": "relatedto", "target": "jornada-escolar-2026-2027"}
+    {"source": "supervision-durante-los-recreos", "type": "relatedto", "target": "jornada-escolar-2026-2027"},
+    {"source": "supervision-durante-los-recreos", "type": "relatedto", "target": "medico-escolar-y-primeros-auxilios"},
+    {"source": "transiciones-entre-clases", "type": "relatedto", "target": "supervision-durante-los-recreos"},
+    {"source": "recreos-y-uso-del-patio", "type": "relatedto", "target": "supervision-durante-los-recreos"},
+    {"source": "calificacion-y-publicacion-de-notas", "type": "dependson", "target": "evaluacion-del-aprendizaje"},
+    {"source": "silabos-y-temarios", "type": "dependson", "target": "marco-curricular"},
+    {"source": "planificacion-de-clases-y-unidades", "type": "dependson", "target": "marco-curricular"},
+    {"source": "consejeria-estudiantil-derivacion", "type": "relatedto", "target": "protocolo-de-proteccion-del-menor"},
+    {"source": "kiosco-y-alimentacion", "type": "relatedto", "target": "medico-escolar-y-primeros-auxilios"},
+    {"source": "gestion-de-quejas-de-familias", "type": "relatedto", "target": "comunicacion-con-familias"},
+    {"source": "manual-del-docente-guia", "type": "relatedto", "target": "manual-del-docente"},
+    {"source": "cultura-profesional-y-conducta-esperada", "type": "relatedto", "target": "conducta-laboral"}
   ]
 }

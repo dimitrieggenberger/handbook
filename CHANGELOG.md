@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.10.1 (2026-07-14)
+
+Full handbook preseed.
+
+- docs/seed/initial-handbook.json now scaffolds the complete handbook:
+  50 pages covering every §9.1 subcategory — three finished articles plus
+  47 writing scaffolds ([BORRADOR] lead + topic-aware sections with bullet
+  prompts), realistic metadata (type, authority, criticality, required
+  reading, responsible area) per page.
+- The "Ser docente en EuropaSchule 2026-2027" path now has all twelve
+  §15.2 sections with 41 items (33 required, 8 optional) and 24 typed
+  relations including quick-guide and template links.
+- Importer: re-imports no longer create new revisions when the seed
+  content is identical to the published content (contenthash guard) —
+  metadata still updates, so iterating on the seed is churn-free.
+
 ## 0.10.0 (2026-07-14)
 
 Path audiences and the MCP adapter.

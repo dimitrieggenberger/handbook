@@ -340,6 +340,19 @@ class import_service {
                 $report->pagesupdated++;
                 return;
             }
+
+            // No version churn on repeated imports: when the seed content is
+            // identical to the published content and no draft exists, only
+            // the metadata update above applies.
+            if (!$revision && $page->publishedrevisionid) {
+                $publishedhash = (string)$DB->get_field('local_handbook_revision', 'contenthash',
+                    ['id' => $page->publishedrevisionid]);
+                if ($publishedhash === sha1($content)) {
+                    $report->pagesupdated++;
+                    return;
+                }
+            }
+
             if (!$revision) {
                 $revision = page_service::create_revision_draft($page, $userid);
             }
