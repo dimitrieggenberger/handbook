@@ -276,6 +276,13 @@ class page_service {
         $update->timemodified = time();
         $update->modifiedby = $userid;
         $DB->update_record('local_handbook_revision', $update);
+
+        $event = \local_handbook\event\draft_updated::create([
+            'context' => context_system::instance(),
+            'objectid' => $revision->id,
+            'other' => ['pageid' => (int)$revision->pageid],
+        ]);
+        $event->trigger();
     }
 
     /**
@@ -395,6 +402,47 @@ class page_service {
             'other' => ['pageid' => (int)$page->id, 'versionnumber' => (int)$revision->versionnumber],
         ]);
         $event->trigger();
+    }
+
+    /**
+     * Whether bootstrap mode is enabled (settings.php).
+     *
+     * While enabled, direct publishing bypasses the review queue for users
+     * holding local/handbook:publish. Intended only for the initial
+     * population phase (spec 4.10); revision history is recorded either way.
+     *
+     * @return bool
+     */
+    public static function bootstrap_mode_enabled(): bool {
+        return (bool)get_config('local_handbook', 'bootstrapmode');
+    }
+
+    /**
+     * Publish an editable draft directly, skipping review (bootstrap only).
+     *
+     * The revision passes through the same approved -> published transition
+     * and the same publish() method as the governed workflow, so audit
+     * fields, events and the supersede step are identical.
+     *
+     * @param stdClass $revision Draft or changes-requested revision.
+     * @param int $userid Acting user (0 = current user).
+     * @param int $effectivefrom Effective date (0 = now).
+     * @return void
+     */
+    public static function direct_publish(stdClass $revision, int $userid = 0, int $effectivefrom = 0): void {
+        global $DB, $USER;
+
+        if (!self::bootstrap_mode_enabled()) {
+            throw new moodle_exception('errorbootstrapoff', 'local_handbook');
+        }
+
+        $userid = $userid ?: (int)$USER->id;
+
+        self::transition($revision, array_merge(self::EDITABLE_STATUSES, [self::STATUS_IN_REVIEW]),
+            self::STATUS_APPROVED, $userid, ['approvedby' => $userid, 'timeapproved' => time()]);
+
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id], '*', MUST_EXIST);
+        self::publish($revision, $userid, $effectivefrom);
     }
 
     /**

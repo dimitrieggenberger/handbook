@@ -1,0 +1,177 @@
+{
+  "$comment": "Initial seed for local_handbook (spec 9.1 category tree + first articles). Upload at /local/handbook/manage/import.php. Matching is by slug: re-importing updates instead of duplicating. Pages marked [BORRADOR PENDIENTE] are skeletons to be completed (e.g. with ChatGPT/Claude) before publishing.",
+
+  "categories": [
+    {"slug": "identidad-institucional", "name": "Identidad institucional", "sortorder": 10},
+    {"slug": "modelo-educativo", "name": "Modelo educativo", "parent": "identidad-institucional", "sortorder": 10},
+    {"slug": "fortalezas-institucionales", "name": "Fortalezas institucionales", "parent": "identidad-institucional", "sortorder": 20},
+    {"slug": "prioridades-del-ano", "name": "Prioridades del año", "parent": "identidad-institucional", "sortorder": 30},
+    {"slug": "cultura-profesional", "name": "Cultura profesional", "parent": "identidad-institucional", "sortorder": 40},
+
+    {"slug": "organizacion-y-responsabilidades", "name": "Organización y responsabilidades", "sortorder": 20},
+    {"slug": "estructura-institucional", "name": "Estructura institucional", "parent": "organizacion-y-responsabilidades", "sortorder": 10},
+    {"slug": "responsabilidades-por-area", "name": "Responsabilidades por área", "parent": "organizacion-y-responsabilidades", "sortorder": 20},
+    {"slug": "con-quien-hablar-sobre-que", "name": "Con quién hablar sobre qué", "parent": "organizacion-y-responsabilidades", "sortorder": 30},
+    {"slug": "escalamiento-y-autoridad", "name": "Escalamiento y autoridad", "parent": "organizacion-y-responsabilidades", "sortorder": 40},
+
+    {"slug": "practica-academica", "name": "Práctica académica", "sortorder": 30},
+    {"slug": "curriculo", "name": "Currículo", "parent": "practica-academica", "sortorder": 10},
+    {"slug": "planificacion", "name": "Planificación", "parent": "practica-academica", "sortorder": 20},
+    {"slug": "silabos-y-temarios", "name": "Sílabos y temarios", "parent": "practica-academica", "sortorder": 30},
+    {"slug": "evaluacion", "name": "Evaluación", "parent": "practica-academica", "sortorder": 40},
+    {"slug": "calificacion", "name": "Calificación", "parent": "practica-academica", "sortorder": 50},
+    {"slug": "moodle", "name": "Moodle", "parent": "practica-academica", "sortorder": 60},
+
+    {"slug": "vida-estudiantil", "name": "Vida estudiantil", "sortorder": 40},
+    {"slug": "supervision", "name": "Supervisión", "parent": "vida-estudiantil", "sortorder": 10},
+    {"slug": "asistencia-y-puntualidad", "name": "Asistencia y puntualidad", "parent": "vida-estudiantil", "sortorder": 20},
+    {"slug": "convivencia-y-disciplina", "name": "Convivencia y disciplina", "parent": "vida-estudiantil", "sortorder": 30},
+    {"slug": "incidentes", "name": "Incidentes", "parent": "vida-estudiantil", "sortorder": 40},
+    {"slug": "consejeria", "name": "Consejería", "parent": "vida-estudiantil", "sortorder": 50},
+    {"slug": "proteccion-del-menor", "name": "Protección del menor", "parent": "vida-estudiantil", "sortorder": 60},
+
+    {"slug": "modalidades", "name": "Modalidades", "sortorder": 50},
+    {"slug": "presencial", "name": "Presencial", "parent": "modalidades", "sortorder": 10},
+    {"slug": "homeschool", "name": "Homeschool", "parent": "modalidades", "sortorder": 20},
+    {"slug": "hibrida", "name": "Híbrida", "parent": "modalidades", "sortorder": 30},
+
+    {"slug": "familias-y-comunicacion", "name": "Familias y comunicación", "sortorder": 60},
+    {"slug": "comunicacion-institucional", "name": "Comunicación institucional", "parent": "familias-y-comunicacion", "sortorder": 10},
+    {"slug": "reuniones", "name": "Reuniones", "parent": "familias-y-comunicacion", "sortorder": 20},
+    {"slug": "quejas", "name": "Quejas", "parent": "familias-y-comunicacion", "sortorder": 30},
+    {"slug": "confidencialidad", "name": "Confidencialidad", "parent": "familias-y-comunicacion", "sortorder": 40},
+
+    {"slug": "operaciones-diarias", "name": "Operaciones diarias", "sortorder": 70},
+    {"slug": "jornada-escolar", "name": "Jornada escolar", "parent": "operaciones-diarias", "sortorder": 10},
+    {"slug": "transiciones", "name": "Transiciones", "parent": "operaciones-diarias", "sortorder": 20},
+    {"slug": "recreos-y-patio", "name": "Recreos y patio", "parent": "operaciones-diarias", "sortorder": 30},
+    {"slug": "aulas", "name": "Aulas", "parent": "operaciones-diarias", "sortorder": 40},
+    {"slug": "kiosco-y-alimentacion", "name": "Kiosco y alimentación", "parent": "operaciones-diarias", "sortorder": 50},
+    {"slug": "medico-escolar", "name": "Médico escolar", "parent": "operaciones-diarias", "sortorder": 60},
+    {"slug": "emergencias", "name": "Emergencias", "parent": "operaciones-diarias", "sortorder": 70},
+
+    {"slug": "administracion-del-personal", "name": "Administración del personal", "sortorder": 80},
+    {"slug": "asistencia-laboral", "name": "Asistencia laboral", "parent": "administracion-del-personal", "sortorder": 10},
+    {"slug": "permisos-y-ausencias", "name": "Permisos y ausencias", "parent": "administracion-del-personal", "sortorder": 20},
+    {"slug": "salarios-y-seguros", "name": "Salarios y seguros", "parent": "administracion-del-personal", "sortorder": 30},
+    {"slug": "conducta-laboral", "name": "Conducta laboral", "parent": "administracion-del-personal", "sortorder": 40},
+
+    {"slug": "manuales-por-funcion", "name": "Manuales por función", "sortorder": 90},
+    {"slug": "docente", "name": "Docente", "parent": "manuales-por-funcion", "sortorder": 10},
+    {"slug": "docente-guia", "name": "Docente guía", "parent": "manuales-por-funcion", "sortorder": 20},
+    {"slug": "lider-de-departamento", "name": "Líder de departamento", "parent": "manuales-por-funcion", "sortorder": 30},
+    {"slug": "coordinacion-academica", "name": "Coordinación académica", "parent": "manuales-por-funcion", "sortorder": 40},
+    {"slug": "consejeria-estudiantil", "name": "Consejería estudiantil", "parent": "manuales-por-funcion", "sortorder": 50},
+
+    {"slug": "procedimientos-y-guias-rapidas", "name": "Procedimientos y guías rápidas", "sortorder": 100},
+    {"slug": "formularios-plantillas-y-ejemplos", "name": "Formularios, plantillas y ejemplos", "sortorder": 110}
+  ],
+
+  "pages": [
+    {
+      "slug": "politica-de-convivencia-escolar",
+      "title": "Política de convivencia escolar",
+      "category": "convivencia-y-disciplina",
+      "contenttype": "policy",
+      "authoritylevel": 1,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Los principios y normas que rigen la convivencia entre estudiantes, personal y familias en EuropaSchule, y el marco del que derivan los procedimientos de supervisión, disciplina e incidentes.",
+      "content": "<h2>Principios</h2><p>La convivencia en EuropaSchule se basa en el respeto mutuo, la responsabilidad personal y el acompañamiento formativo. Toda medida disciplinaria tiene una finalidad educativa: busca reparar, enseñar y restablecer la convivencia, no únicamente sancionar.</p><ul><li>Cada estudiante tiene derecho a un entorno seguro y libre de violencia.</li><li>El personal actúa como modelo de la conducta que espera de los estudiantes.</li><li>Las familias son parte del proceso formativo y se les informa con transparencia y oportunidad.</li><li>Las medidas se aplican con proporcionalidad, gradualidad y derecho a ser escuchado.</li></ul><h2>Alcance</h2><p>Esta política aplica a toda la comunidad educativa —estudiantes, personal docente y administrativo, y familias— en las tres modalidades (presencial, homeschool e híbrida), dentro y fuera del recinto cuando la actividad sea institucional, incluidos los entornos digitales de la escuela.</p><h2>Normas de convivencia</h2><p>Las normas específicas por nivel y modalidad se detallan en los procedimientos que implementan esta política. Con carácter general:</p><ol><li>Trato respetuoso en toda interacción, presencial o digital.</li><li>Cuidado de los espacios, materiales y recursos comunes.</li><li>Puntualidad y asistencia según la jornada escolar vigente.</li><li>Uso de dispositivos y plataformas conforme a las normas de práctica digital.</li><li>Rechazo activo de toda forma de acoso, discriminación o violencia.</li></ol><h2>Medidas formativas y disciplinarias</h2><p>Las medidas siguen una gradualidad: diálogo formativo, compromiso escrito, comunicación a la familia, plan de acompañamiento y, en casos graves, las medidas que determine el comité de convivencia. La tipificación de faltas y el debido proceso se regulan en el procedimiento de disciplina; los incidentes se registran según el registro y seguimiento de incidentes.</p><p><strong>Prevalencia:</strong> ante cualquier situación que afecte la integridad de un menor, el protocolo de protección del menor prevalece sobre esta política y sobre todo procedimiento derivado de ella.</p><h2>Roles y responsabilidades</h2><ul><li><strong>Rectorado</strong> aprueba esta política y sus modificaciones.</li><li><strong>Coordinación de convivencia</strong> mantiene la política, coordina el comité de convivencia y supervisa los procedimientos derivados.</li><li><strong>Docentes y docentes guía</strong> aplican las normas en el aula y derivan los casos según el escalamiento definido.</li><li><strong>Consejería estudiantil</strong> acompaña los planes formativos individuales.</li></ul><h2>Revisión de esta política</h2><p>La política se revisa cada año antes del inicio del año escolar, o antes si un cambio normativo o un hallazgo de calidad lo requiere. Toda modificación pasa por el flujo editorial del manual y la aprobación del Rectorado.</p>"
+    },
+    {
+      "slug": "supervision-durante-los-recreos",
+      "title": "Supervisión durante los recreos",
+      "category": "supervision",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "safetycritical",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Cómo se organiza, ejecuta y registra la supervisión de estudiantes durante los recreos en la modalidad presencial: zonas, turnos, relevos y actuación ante incidentes.",
+      "content": "<h2>Objetivo</h2><p>Garantizar que todos los estudiantes estén bajo supervisión visual activa de un adulto responsable durante los recreos, y que cualquier incidente sea atendido y registrado según el procedimiento de incidentes.</p><h2>Alcance</h2><p>Aplica a todo el personal docente y auxiliar de la modalidad <strong>presencial</strong>, en los recreos de media mañana y mediodía, en todas las sedes. La supervisión durante los cambios de aula se rige por el procedimiento Transiciones entre clases.</p><h2>Responsabilidades</h2><ul><li><strong>Coordinación de convivencia</strong> elabora y publica el rol de turnos antes del inicio de cada bimestre.</li><li><strong>Docentes de turno</strong> supervisan la zona asignada durante todo el recreo y registran novedades.</li><li><strong>Docente guía</strong> verifica que su grupo conozca las zonas permitidas para su grado.</li><li><strong>Médico escolar</strong> atiende lesiones y define si corresponde comunicación a la familia.</li></ul><h2>Procedimiento</h2><ol><li>Verifica tu turno en el rol publicado en la sala de profesores y en Moodle.</li><li>Llega a tu zona <strong>antes</strong> de que suene el timbre de salida al recreo.</li><li>Mantente en un punto con visión completa de la zona; evita conversaciones prolongadas que interrumpan la supervisión visual.</li><li>Ante una lesión, aplica primeros auxilios básicos y deriva al médico escolar; nunca dejes la zona sin relevo.</li><li>Si necesitas ausentarte, solicita relevo al docente de la zona contigua e informa a coordinación de convivencia.</li><li>Al finalizar, acompaña la transición de regreso a las aulas y registra cualquier novedad en el formulario de novedades de patio.</li></ol><p><strong>Regla de seguridad:</strong> ninguna zona activa puede quedar sin supervisión, ni siquiera durante un relevo breve. Si no hay relevo disponible, la zona se cierra y los estudiantes se reubican en la zona contigua.</p><h2>Zonas de supervisión</h2><table class=\"table\"><thead><tr><th>Zona</th><th>Grados</th><th>Docentes de turno</th><th>Punto de observación</th></tr></thead><tbody><tr><td>Patio principal</td><td>1.º – 4.º primaria</td><td>2</td><td>Esquina noreste, junto al mástil</td></tr><tr><td>Cancha techada</td><td>5.º – 6.º primaria</td><td>1</td><td>Ingreso lateral de la cancha</td></tr><tr><td>Patio de secundaria</td><td>1.º – 5.º secundaria</td><td>2</td><td>Escalera del pabellón B</td></tr><tr><td>Kiosco y mesas</td><td>Todos</td><td>1</td><td>Frente a la caja del kiosco</td></tr></tbody></table><h2>Incidentes durante el recreo</h2><p>Todo incidente con lesión, conflicto físico o situación de riesgo se comunica el mismo día a coordinación de convivencia mediante el registro de incidentes. Ante cualquier sospecha relacionada con la protección del menor, aplica de inmediato el protocolo de protección del menor, que prevalece sobre este procedimiento.</p><h2>Registros</h2><ul><li>Rol de turnos del bimestre (coordinación de convivencia).</li><li>Formulario de novedades de patio, al cierre de cada recreo con novedades.</li><li>Registro de incidentes, cuando corresponda.</li></ul><h2>Escalamiento</h2><p>Dudas operativas: coordinación de convivencia. Ausencias imprevistas de docentes de turno: coordinación académica. Situaciones de riesgo grave o emergencias: dirección oficial, según el procedimiento de emergencias.</p>"
+    },
+    {
+      "slug": "guia-rapida-turno-de-patio-en-1-pagina",
+      "title": "Guía rápida: turno de patio en 1 página",
+      "category": "procedimientos-y-guias-rapidas",
+      "contenttype": "quickguide",
+      "authoritylevel": 4,
+      "criticality": "safetycritical",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Lo esencial de un turno de supervisión de patio, pensado para imprimirse y llevarse al recreo.",
+      "content": "<p><em>Esta guía resume «Supervisión durante los recreos». Ante cualquier diferencia, prevalece el procedimiento completo.</em></p><h2>Antes del recreo</h2><ul><li>Verifica tu zona y horario en el rol de turnos (sala de profesores o Moodle).</li><li>Llega a tu punto de observación <strong>antes</strong> del timbre.</li><li>Ubica al docente de la zona contigua: es tu relevo ante una ausencia.</li></ul><h2>Durante el recreo</h2><ul><li>Mantente en tu punto de observación con visión completa de la zona.</li><li>Evita conversaciones prolongadas que interrumpan la supervisión visual.</li><li>Si necesitas ausentarte: primero relevo, después te retiras. Nunca al revés.</li><li>Zona sin relevo disponible = zona cerrada; reubica a los estudiantes en la zona contigua.</li></ul><h2>Si ocurre un incidente</h2><ol><li><strong>Lesión:</strong> primeros auxilios básicos y derivación al médico escolar; no dejes la zona sin relevo.</li><li><strong>Conflicto físico o situación de riesgo:</strong> intervén, separa y comunica a coordinación de convivencia el mismo día.</li><li><strong>Sospecha que afecte a un menor:</strong> aplica de inmediato el protocolo de protección del menor; prevalece sobre todo lo anterior.</li></ol><h2>Al finalizar</h2><ul><li>Acompaña la transición de regreso a las aulas.</li><li>¿Hubo novedades? Regístralas en el formulario de novedades de patio antes de fin de jornada.</li></ul>"
+    },
+    {
+      "slug": "protocolo-de-proteccion-del-menor",
+      "title": "Protocolo de protección del menor",
+      "category": "proteccion-del-menor",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "safetycritical",
+      "requiredreading": 1,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Actuación obligatoria ante cualquier sospecha o evidencia que afecte la integridad de un menor. Prevalece sobre toda otra política o procedimiento del manual.",
+      "content": "<h2>Objetivo</h2><p><em>[BORRADOR PENDIENTE: definir el objetivo del protocolo y su carácter prevalente.]</em></p><h2>Alcance</h2><p><em>[BORRADOR PENDIENTE: comunidad educativa completa, tres modalidades, entornos digitales.]</em></p><h2>Señales de alerta</h2><p><em>[BORRADOR PENDIENTE: indicadores físicos, conductuales y digitales; deber de comunicar sin investigar por cuenta propia.]</em></p><h2>Actuación inmediata</h2><p><em>[BORRADOR PENDIENTE: pasos numerados, a quién se comunica, plazos, registro confidencial.]</em></p><h2>Confidencialidad</h2><p><em>[BORRADOR PENDIENTE: círculo mínimo de información, protección de datos, comunicación con familias y autoridades.]</em></p><h2>Escalamiento</h2><p><em>[BORRADOR PENDIENTE: dirección oficial, autoridades externas, seguimiento.]</em></p>"
+    },
+    {
+      "slug": "jornada-escolar-2026-2027",
+      "title": "Jornada escolar 2026-2027",
+      "category": "jornada-escolar",
+      "contenttype": "standard",
+      "authoritylevel": 3,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Horarios de la jornada escolar del año 2026-2027 por nivel y modalidad: ingreso, bloques, recreos y salida.",
+      "content": "<h2>Horario general</h2><p><em>[BORRADOR PENDIENTE: tabla de horarios por nivel — ingreso, bloques, recreos, almuerzo, salida.]</em></p><h2>Diferencias por modalidad</h2><p><em>[BORRADOR PENDIENTE: presencial, homeschool e híbrida; sincronía y asincronía.]</em></p><h2>Puntualidad</h2><p><em>[BORRADOR PENDIENTE: referencias al procedimiento de asistencia y puntualidad.]</em></p>"
+    },
+    {
+      "slug": "registro-y-seguimiento-de-incidentes",
+      "title": "Registro y seguimiento de incidentes",
+      "category": "incidentes",
+      "contenttype": "procedure",
+      "authoritylevel": 2,
+      "criticality": "mandatory",
+      "requiredreading": 1,
+      "responsiblearea": "Coordinación de convivencia",
+      "summary": "Qué se considera un incidente, cómo se registra el mismo día, quién le da seguimiento y cómo se comunica a las familias.",
+      "content": "<h2>Objetivo</h2><p><em>[BORRADOR PENDIENTE.]</em></p><h2>Qué es un incidente</h2><p><em>[BORRADOR PENDIENTE: tipificación y ejemplos.]</em></p><h2>Registro</h2><p><em>[BORRADOR PENDIENTE: formulario, plazo del mismo día, responsable.]</em></p><h2>Seguimiento</h2><p><em>[BORRADOR PENDIENTE: comité de convivencia, plazos, cierre.]</em></p><h2>Comunicación a familias</h2><p><em>[BORRADOR PENDIENTE.]</em></p>"
+    },
+    {
+      "slug": "manual-del-docente",
+      "title": "Manual del docente",
+      "category": "docente",
+      "contenttype": "roledescription",
+      "authoritylevel": 4,
+      "criticality": "reference",
+      "requiredreading": 0,
+      "responsiblearea": "Coordinación académica",
+      "summary": "Panorama de las responsabilidades del rol docente en EuropaSchule, con enlaces a las políticas y procedimientos que las regulan.",
+      "content": "<h2>El rol docente en EuropaSchule</h2><p><em>[BORRADOR PENDIENTE: visión general del rol.]</em></p><h2>Responsabilidades académicas</h2><p><em>[BORRADOR PENDIENTE: planificación, sílabos, evaluación, calificación, Moodle.]</em></p><h2>Responsabilidades de convivencia</h2><p><em>[BORRADOR PENDIENTE: supervisión, incidentes, protección del menor.]</em></p><h2>Comunicación</h2><p><em>[BORRADOR PENDIENTE: familias, reuniones, escritura institucional.]</em></p><h2>Administración</h2><p><em>[BORRADOR PENDIENTE: asistencia laboral, permisos, rutinas anuales.]</em></p>"
+    },
+    {
+      "slug": "comunicacion-con-familias",
+      "title": "Comunicación con familias",
+      "category": "comunicacion-institucional",
+      "contenttype": "guideline",
+      "authoritylevel": 3,
+      "criticality": "operational",
+      "requiredreading": 1,
+      "responsiblearea": "Dirección oficial",
+      "summary": "Criterios y canales para la comunicación institucional con familias: qué se comunica, por qué canal, con qué tono y quién lo aprueba.",
+      "content": "<h2>Principios</h2><p><em>[BORRADOR PENDIENTE: transparencia, oportunidad, tono institucional.]</em></p><h2>Canales</h2><p><em>[BORRADOR PENDIENTE: Moodle, correo, reuniones; qué va por cada canal.]</em></p><h2>Quién comunica qué</h2><p><em>[BORRADOR PENDIENTE: docente, docente guía, coordinaciones, dirección.]</em></p><h2>Situaciones sensibles</h2><p><em>[BORRADOR PENDIENTE: incidentes, disciplina, confidencialidad.]</em></p>"
+    }
+  ],
+
+  "relations": [
+    {"source": "supervision-durante-los-recreos", "type": "implements", "target": "politica-de-convivencia-escolar"},
+    {"source": "registro-y-seguimiento-de-incidentes", "type": "implements", "target": "politica-de-convivencia-escolar"},
+    {"source": "guia-rapida-turno-de-patio-en-1-pagina", "type": "quickguidefor", "target": "supervision-durante-los-recreos"},
+    {"source": "protocolo-de-proteccion-del-menor", "type": "exceptionto", "target": "politica-de-convivencia-escolar"},
+    {"source": "supervision-durante-los-recreos", "type": "relatedto", "target": "registro-y-seguimiento-de-incidentes"},
+    {"source": "supervision-durante-los-recreos", "type": "relatedto", "target": "jornada-escolar-2026-2027"}
+  ]
+}

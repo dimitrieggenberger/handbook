@@ -167,7 +167,32 @@ $string['categorydeleted'] = 'Kategorie gelöscht.';
 $string['confirmdeletecategory'] = 'Kategorie „{$a}“ löschen? Das ist nur möglich, solange sie keine Seiten und keine Unterkategorien enthält.';
 $string['categorynotempty'] = 'Diese Kategorie enthält noch Seiten oder Unterkategorien und kann nicht gelöscht werden.';
 
+// Bootstrap mode and direct publish.
+$string['bootstrapmode'] = 'Aufbaumodus';
+$string['bootstrapmode_desc'] = 'Solange aktiviert, können Personen mit Veröffentlichungsrecht direkt aus dem Editor veröffentlichen, und Importe können sofort veröffentlichen — ohne Prüfwarteschlange. Der Versionsverlauf wird trotzdem erfasst. Nur für die anfängliche Befüllung gedacht: danach deaktivieren, damit der vollständige redaktionelle Workflow gilt.';
+$string['saveandpublish'] = 'Speichern und veröffentlichen';
+$string['bootstrapoffnotice'] = 'Der Aufbaumodus ist aus: Importierte Inhalte werden als Entwürfe angelegt und durchlaufen den normalen Prüfworkflow.';
+
+// Seed import.
+$string['importseed'] = 'Inhalte importieren';
+$string['importfile'] = 'Seed-Datei (JSON)';
+$string['publishonimport'] = 'Importierte Seiten sofort veröffentlichen';
+$string['importcategoriescreated'] = 'Kategorien erstellt: {$a}';
+$string['importcategoriesupdated'] = 'Kategorien aktualisiert: {$a}';
+$string['importpagescreated'] = 'Seiten erstellt: {$a}';
+$string['importpagesupdated'] = 'Seiten aktualisiert: {$a}';
+$string['importpagespublished'] = 'Seiten veröffentlicht: {$a}';
+$string['importrelationscreated'] = 'Beziehungen erstellt: {$a}';
+$string['importerrors'] = 'Importhinweise';
+$string['errorinvalidjson'] = 'Die hochgeladene Datei ist kein gültiges JSON.';
+
+// External API.
+$string['errorexcludedpage'] = 'Diese Seite ist vom externen und KI-Zugriff ausgeschlossen.';
+$string['errormetadataonly'] = 'Diese Seite ist für externen und KI-Zugriff auf Metadaten beschränkt; ihr Inhalt kann über die API weder gelesen noch bearbeitet werden.';
+$string['errorbasemismatch'] = 'Die veröffentlichte Version hat sich seit dem Lesen geändert. Hole die aktuelle Version, bevor du einen Entwurf erstellst.';
+
 // Errors.
+$string['errorbootstrapoff'] = 'Direktes Veröffentlichen erfordert den Aufbaumodus (siehe Plugin-Einstellungen).';
 $string['errorpagenotfound'] = 'Handbuchseite nicht gefunden.';
 $string['errorcategorynotfound'] = 'Handbuchkategorie nicht gefunden.';
 $string['errorslugexists'] = 'Dieser Slug wird bereits verwendet.';

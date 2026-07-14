@@ -167,7 +167,32 @@ $string['categorydeleted'] = 'Category deleted.';
 $string['confirmdeletecategory'] = 'Delete category "{$a}"? This is only possible while it has no pages and no subcategories.';
 $string['categorynotempty'] = 'This category still contains pages or subcategories and cannot be deleted.';
 
+// Bootstrap mode and direct publish.
+$string['bootstrapmode'] = 'Bootstrap mode';
+$string['bootstrapmode_desc'] = 'While enabled, users with the publish capability can publish directly from the editor and imports may publish immediately, skipping the review queue. Revision history is recorded either way. Intended only for the initial population phase — switch it off afterwards to enforce the full editorial workflow.';
+$string['saveandpublish'] = 'Save and publish';
+$string['bootstrapoffnotice'] = 'Bootstrap mode is off: imported content is created as drafts and goes through the normal review workflow.';
+
+// Seed import.
+$string['importseed'] = 'Import content';
+$string['importfile'] = 'Seed file (JSON)';
+$string['publishonimport'] = 'Publish imported pages immediately';
+$string['importcategoriescreated'] = 'Categories created: {$a}';
+$string['importcategoriesupdated'] = 'Categories updated: {$a}';
+$string['importpagescreated'] = 'Pages created: {$a}';
+$string['importpagesupdated'] = 'Pages updated: {$a}';
+$string['importpagespublished'] = 'Pages published: {$a}';
+$string['importrelationscreated'] = 'Relations created: {$a}';
+$string['importerrors'] = 'Import warnings';
+$string['errorinvalidjson'] = 'The uploaded file is not valid JSON.';
+
+// External API.
+$string['errorexcludedpage'] = 'This page is excluded from external and AI access.';
+$string['errormetadataonly'] = 'This page is metadata-only for external and AI access; its content cannot be read or drafted through the API.';
+$string['errorbasemismatch'] = 'The published revision has changed since it was read. Fetch the current version before drafting.';
+
 // Errors.
+$string['errorbootstrapoff'] = 'Direct publishing requires bootstrap mode (see plugin settings).';
 $string['errorpagenotfound'] = 'Handbook page not found.';
 $string['errorcategorynotfound'] = 'Handbook category not found.';
 $string['errorslugexists'] = 'This slug is already in use.';

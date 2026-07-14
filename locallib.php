@@ -184,6 +184,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/categories.php'),
             'visible' => has_capability('local/handbook:managecategories', $context),
         ],
+        'import' => [
+            'label' => get_string('importseed', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/import.php'),
+            'visible' => has_capability('local/handbook:manage', $context),
+        ],
     ];
 
     $tabs = '';
@@ -215,7 +220,7 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
     }
 
     if ($dropdownitems !== '') {
-        $isgroupactive = $currentpage === 'reviewqueue' || $currentpage === 'categories';
+        $isgroupactive = in_array($currentpage, ['reviewqueue', 'categories', 'import'], true);
         $toggleclasses = 'nav-link d-flex align-items-center';
         $toggleclasses .= $isgroupactive ? ' active' : '';
 

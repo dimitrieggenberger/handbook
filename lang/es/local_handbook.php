@@ -167,7 +167,32 @@ $string['categorydeleted'] = 'Categoría eliminada.';
 $string['confirmdeletecategory'] = '¿Eliminar la categoría «{$a}»? Solo es posible mientras no tenga páginas ni subcategorías.';
 $string['categorynotempty'] = 'Esta categoría todavía contiene páginas o subcategorías y no puede eliminarse.';
 
+// Bootstrap mode and direct publish.
+$string['bootstrapmode'] = 'Modo de arranque';
+$string['bootstrapmode_desc'] = 'Mientras está activo, quienes tienen la capacidad de publicar pueden hacerlo directamente desde el editor, y las importaciones pueden publicar de inmediato, sin pasar por la cola de revisión. El historial de revisiones se registra igualmente. Pensado solo para la fase de carga inicial: desactívalo después para aplicar el flujo editorial completo.';
+$string['saveandpublish'] = 'Guardar y publicar';
+$string['bootstrapoffnotice'] = 'El modo de arranque está desactivado: el contenido importado se crea como borradores y sigue el flujo de revisión normal.';
+
+// Seed import.
+$string['importseed'] = 'Importar contenido';
+$string['importfile'] = 'Archivo semilla (JSON)';
+$string['publishonimport'] = 'Publicar de inmediato las páginas importadas';
+$string['importcategoriescreated'] = 'Categorías creadas: {$a}';
+$string['importcategoriesupdated'] = 'Categorías actualizadas: {$a}';
+$string['importpagescreated'] = 'Páginas creadas: {$a}';
+$string['importpagesupdated'] = 'Páginas actualizadas: {$a}';
+$string['importpagespublished'] = 'Páginas publicadas: {$a}';
+$string['importrelationscreated'] = 'Relaciones creadas: {$a}';
+$string['importerrors'] = 'Avisos de la importación';
+$string['errorinvalidjson'] = 'El archivo subido no es JSON válido.';
+
+// External API.
+$string['errorexcludedpage'] = 'Esta página está excluida del acceso externo y de IA.';
+$string['errormetadataonly'] = 'Esta página es de solo metadatos para el acceso externo y de IA; su contenido no puede leerse ni editarse por la API.';
+$string['errorbasemismatch'] = 'La revisión publicada cambió desde que se leyó. Obtén la versión actual antes de crear el borrador.';
+
 // Errors.
+$string['errorbootstrapoff'] = 'La publicación directa requiere el modo de arranque (ver ajustes del plugin).';
 $string['errorpagenotfound'] = 'Página del manual no encontrada.';
 $string['errorcategorynotfound'] = 'Categoría del manual no encontrada.';
 $string['errorslugexists'] = 'Este slug ya está en uso.';

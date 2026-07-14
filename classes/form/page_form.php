@@ -120,8 +120,13 @@ class page_form extends \moodleform {
         $buttons = [
             $mform->createElement('submit', 'savedraft', get_string('savedraft', 'local_handbook')),
             $mform->createElement('submit', 'submitreview', get_string('submitforreview', 'local_handbook')),
-            $mform->createElement('cancel'),
         ];
+        // Bootstrap mode only (spec 4.10): direct publish for publishers.
+        if (!empty($this->_customdata['candirectpublish'])) {
+            $buttons[] = $mform->createElement('submit', 'saveandpublish',
+                get_string('saveandpublish', 'local_handbook'));
+        }
+        $buttons[] = $mform->createElement('cancel');
         $mform->addGroup($buttons, 'buttonar', '', ' ', false);
     }
 

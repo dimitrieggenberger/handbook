@@ -85,11 +85,15 @@ $editoroptions = [
     'subdirs' => 0,
 ];
 
+$candirectpublish = page_service::bootstrap_mode_enabled()
+    && has_capability('local/handbook:publish', $context);
+
 $form = new page_form($url->out(false), [
     'categories' => $categoryoptions,
     'page' => $page,
     'revision' => $revision,
     'editoroptions' => $editoroptions,
+    'candirectpublish' => $candirectpublish,
 ]);
 
 if ($form->is_cancelled()) {
@@ -156,6 +160,13 @@ if ($data = $form->get_data()) {
         $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id], '*', MUST_EXIST);
         page_service::submit_for_review($revision, trim((string)$data->changesummary));
         redirect(local_handbook_page_url($page), get_string('draftsubmitted', 'local_handbook'));
+    }
+
+    if (!empty($data->saveandpublish) && $candirectpublish) {
+        require_capability('local/handbook:publish', $context);
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id], '*', MUST_EXIST);
+        page_service::direct_publish($revision);
+        redirect(local_handbook_page_url($page), get_string('revisionpublished', 'local_handbook'));
     }
 
     redirect(new moodle_url('/local/handbook/edit.php', ['id' => $page->id]),
