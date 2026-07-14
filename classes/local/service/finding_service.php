@@ -163,6 +163,8 @@ class finding_service {
         ]);
         $event->trigger();
 
+        notification_service::finding_created($finding, $userid);
+
         return $finding;
     }
 

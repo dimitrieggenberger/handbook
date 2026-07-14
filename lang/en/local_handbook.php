@@ -310,6 +310,24 @@ $string['reportconfirmed'] = 'Confirmed';
 $string['reportpending'] = 'Pending';
 $string['norequiredpages'] = 'No published required-reading pages yet.';
 
+// Notifications and scheduled tasks (spec 21).
+$string['messageprovider:draftsubmitted'] = 'Handbook draft submitted for review';
+$string['messageprovider:changesrequested'] = 'Changes requested on your handbook draft';
+$string['messageprovider:findingcreated'] = 'New handbook quality finding';
+$string['messageprovider:reviewdue'] = 'Handbook page review due';
+$string['notifydraftsubmitted_subject'] = 'Draft for review: {$a->title} (v{$a->version})';
+$string['notifydraftsubmitted_body'] = 'A draft revision of "{$a->title}" (v{$a->version}) was submitted for review. Change summary: {$a->summary}';
+$string['notifychangesrequested_subject'] = 'Changes requested: {$a->title} (v{$a->version})';
+$string['notifychangesrequested_body'] = 'Your draft of "{$a->title}" (v{$a->version}) was returned with the note: {$a->note}';
+$string['notifyfindingcreated_subject'] = 'New quality finding #F-{$a->id}: {$a->type}';
+$string['notifyfindingcreated_body'] = 'A new quality finding was reported: {$a->summary}';
+$string['notifyreviewdue_subject'] = 'Review due: {$a->title}';
+$string['notifyreviewdue_body'] = 'The page "{$a->title}" you own reaches its review date on {$a->reviewdate}. Please review it and publish an updated revision or extend the review date.';
+$string['task_reviewreminder'] = 'Handbook review-date reminders';
+$string['task_linkchecker'] = 'Handbook link checker';
+$string['brokenlinksummary'] = 'Page "{$a->page}" links to "{$a->target}", which does not exist or is not published.';
+$string['brokenquizsummary'] = 'Reading-path item for page "{$a->page}" points to quiz course module {$a->cmid}, which no longer exists.';
+
 // External API.
 $string['errorexcludedpage'] = 'This page is excluded from external and AI access.';
 $string['errormetadataonly'] = 'This page is metadata-only for external and AI access; its content cannot be read or drafted through the API.';

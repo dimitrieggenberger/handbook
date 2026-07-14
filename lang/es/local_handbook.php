@@ -310,6 +310,24 @@ $string['reportconfirmed'] = 'Confirmaron';
 $string['reportpending'] = 'Pendientes';
 $string['norequiredpages'] = 'Todavía no hay páginas de lectura obligatoria publicadas.';
 
+// Notifications and scheduled tasks (spec 21).
+$string['messageprovider:draftsubmitted'] = 'Borrador del manual enviado a revisión';
+$string['messageprovider:changesrequested'] = 'Cambios solicitados en tu borrador del manual';
+$string['messageprovider:findingcreated'] = 'Nuevo hallazgo de calidad del manual';
+$string['messageprovider:reviewdue'] = 'Revisión de página del manual pendiente';
+$string['notifydraftsubmitted_subject'] = 'Borrador para revisar: {$a->title} (v{$a->version})';
+$string['notifydraftsubmitted_body'] = 'Se envió a revisión un borrador de «{$a->title}» (v{$a->version}). Resumen de cambios: {$a->summary}';
+$string['notifychangesrequested_subject'] = 'Cambios solicitados: {$a->title} (v{$a->version})';
+$string['notifychangesrequested_body'] = 'Tu borrador de «{$a->title}» (v{$a->version}) fue devuelto con la nota: {$a->note}';
+$string['notifyfindingcreated_subject'] = 'Nuevo hallazgo de calidad #F-{$a->id}: {$a->type}';
+$string['notifyfindingcreated_body'] = 'Se reportó un nuevo hallazgo de calidad: {$a->summary}';
+$string['notifyreviewdue_subject'] = 'Revisión pendiente: {$a->title}';
+$string['notifyreviewdue_body'] = 'La página «{$a->title}», de la que eres responsable, llega a su fecha de revisión el {$a->reviewdate}. Revísala y publica una versión actualizada o amplía la fecha de revisión.';
+$string['task_reviewreminder'] = 'Recordatorios de revisión del manual';
+$string['task_linkchecker'] = 'Verificador de enlaces del manual';
+$string['brokenlinksummary'] = 'La página «{$a->page}» enlaza a «{$a->target}», que no existe o no está publicada.';
+$string['brokenquizsummary'] = 'Un elemento de ruta de la página «{$a->page}» apunta al módulo de cuestionario {$a->cmid}, que ya no existe.';
+
 // External API.
 $string['errorexcludedpage'] = 'Esta página está excluida del acceso externo y de IA.';
 $string['errormetadataonly'] = 'Esta página es de solo metadatos para el acceso externo y de IA; su contenido no puede leerse ni editarse por la API.';

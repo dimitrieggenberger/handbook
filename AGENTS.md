@@ -39,6 +39,8 @@ and structural reference: page shell, area actions, CSS scoping, build script.
 - `classes/form/`: moodleforms
 - `classes/event/`: page_created, draft_submitted, revision_published
 - `classes/external/` + `db/services.php`: external API (spec §17; see docs/API.md) — read + draft functions only, NO publish function, AI-access rules in `classes/external/helper.php`
+- `db/messages.php` + `classes/local/service/notification_service.php`: workflow notifications (spec §21.3)
+- `db/tasks.php` + `classes/task/`: review reminders (weekly), link checker (daily, files broken_link findings)
 - `db/access.php`: capabilities (spec §7.3); `db/install.xml`: schema (spec §20)
 - `lang/{en,es,de}/local_handbook.php`: UI strings (all three, always)
 - `styles.css`: plugin CSS, scoped to `#page-local-handbook-area`

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for local_handbook.
+ * Scheduled tasks for local_handbook (specification 21.4).
  *
  * @package   local_handbook
  * @copyright Educación Helvética SA / EuropaSchule
@@ -24,8 +24,26 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_handbook';
-$plugin->version = 2026071408;
-$plugin->requires = 2026042001; // Moodle 5.2.1.
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.8.0';
+$tasks = [
+    // Weekly reminder to page owners whose review date is near or overdue.
+    [
+        'classname' => 'local_handbook\task\review_reminder',
+        'blocking' => 0,
+        'minute' => '30',
+        'hour' => '6',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '1',
+    ],
+
+    // Daily link checker: dead internal links and quiz cmids become findings.
+    [
+        'classname' => 'local_handbook\task\link_checker',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '5',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
+];

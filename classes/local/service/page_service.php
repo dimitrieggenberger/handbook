@@ -299,7 +299,7 @@ class page_service {
      * @return void
      */
     public static function submit_for_review(stdClass $revision, string $changesummary, int $userid = 0): void {
-        global $USER;
+        global $DB, $USER;
 
         $userid = $userid ?: (int)$USER->id;
 
@@ -316,6 +316,11 @@ class page_service {
             'other' => ['pageid' => (int)$revision->pageid, 'versionnumber' => (int)$revision->versionnumber],
         ]);
         $event->trigger();
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $revision->pageid]);
+        if ($page) {
+            notification_service::draft_submitted($revision, $page, $userid);
+        }
     }
 
     /**
@@ -327,11 +332,16 @@ class page_service {
      * @return void
      */
     public static function request_changes(stdClass $revision, string $note, int $userid = 0): void {
-        global $USER;
+        global $DB, $USER;
 
         $userid = $userid ?: (int)$USER->id;
         self::transition($revision, [self::STATUS_IN_REVIEW], self::STATUS_CHANGES_REQUESTED,
             $userid, ['reviewnote' => $note, 'reviewedby' => $userid]);
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $revision->pageid]);
+        if ($page) {
+            notification_service::changes_requested($revision, $page, $note);
+        }
     }
 
     /**

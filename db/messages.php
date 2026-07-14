@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for local_handbook.
+ * Message providers for local_handbook (specification 21.3).
  *
  * @package   local_handbook
  * @copyright Educación Helvética SA / EuropaSchule
@@ -24,8 +24,20 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_handbook';
-$plugin->version = 2026071408;
-$plugin->requires = 2026042001; // Moodle 5.2.1.
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.8.0';
+$messageproviders = [
+    // A draft was submitted for review (to reviewers).
+    'draftsubmitted' => [
+        'capability' => 'local/handbook:review',
+    ],
+
+    // Changes were requested on the user's draft (to the author).
+    'changesrequested' => [],
+
+    // A quality finding was created (to findings managers).
+    'findingcreated' => [
+        'capability' => 'local/handbook:managefindings',
+    ],
+
+    // A page's review date is due or overdue (to the page owner).
+    'reviewdue' => [],
+];

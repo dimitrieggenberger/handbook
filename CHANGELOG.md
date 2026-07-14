@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.8.0 (2026-07-14)
+
+Notifications and scheduled tasks (spec §21).
+
+- Message providers: draft submitted (to reviewers), changes requested
+  (to the author), finding created (to findings managers), review due
+  (to the page owner). Sent through the Message API, so each user controls
+  delivery channels; sending never blocks the workflow action.
+- Weekly review-reminder task: owners of published pages whose review
+  date is within 30 days or overdue.
+- Daily link-checker task: internal handbook links whose target is
+  missing/unpublished and path-item quiz cmids that no longer exist become
+  deduped advisory broken_link findings (source "audit", spec §15.4).
+- EN/ES/DE strings; PHPUnit coverage for the link checker.
+
 ## 0.7.0 (2026-07-14)
 
 Reports (spec §12.5, §15.3).

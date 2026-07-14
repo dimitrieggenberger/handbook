@@ -310,6 +310,24 @@ $string['reportconfirmed'] = 'Bestätigt';
 $string['reportpending'] = 'Ausstehend';
 $string['norequiredpages'] = 'Noch keine veröffentlichten Pflichtlektüre-Seiten.';
 
+// Notifications and scheduled tasks (spec 21).
+$string['messageprovider:draftsubmitted'] = 'Handbuch-Entwurf zur Prüfung eingereicht';
+$string['messageprovider:changesrequested'] = 'Änderungen an deinem Handbuch-Entwurf angefordert';
+$string['messageprovider:findingcreated'] = 'Neuer Qualitätsbefund im Handbuch';
+$string['messageprovider:reviewdue'] = 'Überprüfung einer Handbuchseite fällig';
+$string['notifydraftsubmitted_subject'] = 'Entwurf zur Prüfung: {$a->title} (v{$a->version})';
+$string['notifydraftsubmitted_body'] = 'Ein Entwurf von „{$a->title}“ (v{$a->version}) wurde zur Prüfung eingereicht. Änderungszusammenfassung: {$a->summary}';
+$string['notifychangesrequested_subject'] = 'Änderungen angefordert: {$a->title} (v{$a->version})';
+$string['notifychangesrequested_body'] = 'Dein Entwurf von „{$a->title}“ (v{$a->version}) kam mit folgender Notiz zurück: {$a->note}';
+$string['notifyfindingcreated_subject'] = 'Neuer Qualitätsbefund #F-{$a->id}: {$a->type}';
+$string['notifyfindingcreated_body'] = 'Ein neuer Qualitätsbefund wurde gemeldet: {$a->summary}';
+$string['notifyreviewdue_subject'] = 'Überprüfung fällig: {$a->title}';
+$string['notifyreviewdue_body'] = 'Die Seite „{$a->title}“, für die du verantwortlich bist, erreicht ihr Überprüfungsdatum am {$a->reviewdate}. Bitte überprüfe sie und veröffentliche eine aktualisierte Version oder verlängere das Datum.';
+$string['task_reviewreminder'] = 'Handbuch: Erinnerungen an Überprüfungstermine';
+$string['task_linkchecker'] = 'Handbuch: Link-Prüfung';
+$string['brokenlinksummary'] = 'Die Seite „{$a->page}“ verlinkt auf „{$a->target}“ — nicht vorhanden oder nicht veröffentlicht.';
+$string['brokenquizsummary'] = 'Ein Lesepfad-Element der Seite „{$a->page}“ verweist auf Test-Kursmodul {$a->cmid}, das nicht mehr existiert.';
+
 // External API.
 $string['errorexcludedpage'] = 'Diese Seite ist vom externen und KI-Zugriff ausgeschlossen.';
 $string['errormetadataonly'] = 'Diese Seite ist für externen und KI-Zugriff auf Metadaten beschränkt; ihr Inhalt kann über die API weder gelesen noch bearbeitet werden.';
