@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual Institucional: reading path view - UI mockup (spec 15)</title>
+
+<!--
+    Mockup CSS convention adopted from local_grades, same as the other
+    handbook mockups (see dev/README.md): live theme stylesheet, candidate
+    styles scoped to the plugin pagetype id, Font Awesome @font-face as
+    harness-only CORS fallback. Rules shared with the other mockups (gap
+    polyfill, area actions, content header) are duplicated verbatim; the
+    union of candidate blocks becomes local/handbook/styles.css.
+
+    What this mocks: "Mi ruta de lectura" (path.php) from
+    docs/SPECIFICATION.md section 15 - one assigned reading path with ordered
+    sections (the 12 of spec 15.2), required and optional items, per-version
+    acknowledgement states (confirmed / reconfirm after material change /
+    pending, spec 16), connected Moodle quizzes (spec 15.4), completion
+    progress, school-year versioning, and the manager-only completion-report
+    action. Sample data continues the shared scenario: path "Ser docente en
+    EuropaSchule 2026-2027", 18 of 31 pages confirmed, current section 5,
+    the three pending items shown on the home mockup. Confirmations are
+    page-level, so a few later-section pages already show as confirmed
+    (required reading acknowledged outside path order).
+-->
+<link rel="stylesheet" href="https://learn.europaschule.eu/theme/yui_combo.php?rollup/3.18.1/yui-moodlesimple-min.css">
+<link rel="stylesheet" href="https://learn.europaschule.eu/theme/styles.php/space/-1_-1/all">
+
+<style>
+    /* ------------------------------------------------------------------ */
+    /* Mockup harness only (never ships)                                   */
+    /* ------------------------------------------------------------------ */
+
+    @font-face {
+        font-family: 'Font Awesome 6 Free';
+        font-style: normal;
+        font-weight: 900;
+        font-display: block;
+        src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2') format('woff2');
+    }
+
+    .mockup-note {
+        max-width: 1300px;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+    }
+    .mockup-page {
+        max-width: 1300px;
+        margin: 0 auto 3rem;
+        padding: 0 1rem;
+    }
+</style>
+
+<style>
+    /* ------------------------------------------------------------------ */
+    /* plugin-candidate styles                                             */
+    /* Future content of local/handbook/styles.css. Everything scoped to   */
+    /* the plugin pagetype id, classes prefixed local-handbook-*.          */
+    /* ------------------------------------------------------------------ */
+
+    /* Bootstrap 5 gap utilities polyfill (site runs Bootstrap 4). */
+    #page-local-handbook-area .gap-1 { gap: 0.25rem !important; }
+    #page-local-handbook-area .gap-2 { gap: 0.5rem !important; }
+    #page-local-handbook-area .gap-3 { gap: 1rem !important; }
+
+    /* Area tab strip, mirroring .local-grades-area-actions. */
+    #page-local-handbook-area .local-handbook-area-actions {
+        row-gap: 0.5rem;
+        border: 1px solid var(--primary, #0078c3);
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    /* Content header, mirroring .local-grades-content-header. */
+    #page-local-handbook-area .local-handbook-content-header {
+        margin-bottom: 0;
+    }
+    #page-local-handbook-area .local-handbook-content-actions {
+        gap: 0.5rem;
+        row-gap: 0.5rem;
+    }
+
+    /* Trail-style label above the title (here: the path context line). */
+    #page-local-handbook-area .local-handbook-category-trail {
+        font-size: 0.8125rem;
+        color: var(--bs-secondary-color, #6c757d);
+        margin-bottom: 0.25rem;
+    }
+
+    /* Path progress summary. */
+    #page-local-handbook-area .local-handbook-path-summary .progress {
+        height: 0.5rem;
+    }
+    #page-local-handbook-area .local-handbook-path-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1.5rem;
+        font-size: 0.8125rem;
+        color: var(--bs-secondary-color, #6c757d);
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* One path section = one card; the header row carries number, title
+       and per-section progress. */
+    #page-local-handbook-area .local-handbook-path-section .section-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.25rem 1rem;
+    }
+    #page-local-handbook-area .local-handbook-path-section .section-number {
+        display: inline-block;
+        min-width: 1.5rem;
+        color: var(--bs-secondary-color, #6c757d);
+        font-variant-numeric: tabular-nums;
+    }
+    #page-local-handbook-area .local-handbook-path-section .section-progress {
+        font-size: 0.8125rem;
+        color: var(--bs-secondary-color, #6c757d);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    #page-local-handbook-area .local-handbook-path-section.is-current {
+        border-color: var(--primary, #0078c3);
+    }
+
+    /* Item rows inside an expanded section. */
+    #page-local-handbook-area .local-handbook-path-items {
+        list-style: none;
+        margin: 0.75rem 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    #page-local-handbook-area .local-handbook-path-items li {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        padding: 0.45rem 0;
+        border-top: 1px solid var(--bs-border-color, var(--gray-300, #dee2e6));
+        font-size: 0.875rem;
+    }
+    #page-local-handbook-area .local-handbook-path-items .item-status-icon {
+        flex: 0 0 1.1rem;
+        text-align: center;
+    }
+    #page-local-handbook-area .local-handbook-path-items .item-title {
+        flex: 1 1 14rem;
+    }
+    #page-local-handbook-area .local-handbook-path-items .item-state {
+        flex: 0 1 auto;
+        margin-left: auto;
+        font-size: 0.75rem;
+        color: var(--bs-secondary-color, #6c757d);
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        white-space: nowrap;
+    }
+    #page-local-handbook-area .local-handbook-path-items .is-confirmed .item-status-icon {
+        color: var(--success, #28a745);
+    }
+    #page-local-handbook-area .local-handbook-path-items .is-reconfirm .item-status-icon,
+    #page-local-handbook-area .local-handbook-path-items .is-reconfirm .item-state {
+        color: var(--warning-text-emphasis, #856404);
+    }
+    /* Pending uses the solid circle dimmed: the theme's Font Awesome free
+       set only guarantees the solid face, so no fa-regular outline icons. */
+    #page-local-handbook-area .local-handbook-path-items .is-pending .item-status-icon {
+        color: var(--bs-secondary-color, #6c757d);
+        opacity: 0.35;
+    }
+</style>
+</head>
+
+<body id="page-local-handbook-area" class="pagelayout-standard path-local path-local-handbook dir-ltr lang-es">
+
+<div class="mockup-note">
+    <div class="alert alert-info mb-0">
+        <strong>Mockup: Manual Institucional reading path view (path.php) &mdash; spec &sect;15.</strong>
+        Created 2026-07-14, before any plugin code exists. Same conventions as the other handbook
+        mockups; every <code>.local-handbook-*</code> class is a candidate pattern. Shows the assigned
+        path <em>Ser docente en EuropaSchule 2026-2027</em> with the 12 sections of &sect;15.2, ordered
+        required/optional items, per-version acknowledgement states (&sect;16), connected quizzes
+        (&sect;15.4), progress, and the manager-only completion report. Sections 4&ndash;6 are shown
+        expanded (4 and 5 hold the pending work, 6 is next); the rest render collapsed with per-section
+        progress &mdash; in the plugin every section header toggles its item list. Data is consistent
+        with the home mockup: 18/31 confirmed, current section 5, three pending confirmations.
+    </div>
+</div>
+
+<div class="mockup-page">
+<div id="page" class="drawers">
+    <div id="topofscroll" class="main-inner">
+        <div id="page-content" class="pb-3">
+            <div id="region-main-box">
+                <section id="region-main">
+                    <div role="main">
+                        <span id="maincontent"></span>
+
+                        <!-- Area tab strip: mirrors local_grades_render_area_actions(). -->
+                        <nav class="mb-4 local-handbook-area-actions" aria-label="Navegación">
+                            <ul class="nav nav-tabs gap-2 mb-0">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="#">
+                                        <i class="fa-solid fa-book-open me-2" aria-hidden="true"></i>Manual Institucional
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="#">
+                                        <i class="fa-solid fa-magnifying-glass me-2" aria-hidden="true"></i>Buscar en el manual
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" href="#">
+                                        <i class="fa-solid fa-route me-2" aria-hidden="true"></i>Mi ruta de lectura
+                                        <span class="badge badge-primary ml-2">3</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link d-flex align-items-center" href="#" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Gestión
+                                        <i class="fa-solid fa-chevron-down ms-2" aria-hidden="true"></i>
+                                    </a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#">Categorías</a>
+                                        <a class="dropdown-item" href="#">Cola de revisión</a>
+                                        <a class="dropdown-item" href="#">Hallazgos de calidad</a>
+                                        <a class="dropdown-item" href="#">Informes</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <!-- Content header: mirrors local_grades_render_page_heading(). -->
+                        <div class="local-handbook-category-trail">Mi ruta de lectura · Año escolar 2026-2027</div>
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 local-handbook-content-header">
+                            <h2 class="mb-0">Ser docente en EuropaSchule 2026-2027</h2>
+                            <div class="d-flex flex-wrap gap-2 local-handbook-content-actions">
+                                <!-- Manager-only action (path completion report, spec 15.3). -->
+                                <a class="btn btn-outline-secondary btn-sm" href="#">
+                                    <i class="fa-solid fa-chart-simple me-2" aria-hidden="true"></i>Informe de finalización
+                                </a>
+                            </div>
+                        </div>
+                        <hr class="local-handbook-content-divider">
+
+                        <div class="row">
+
+                            <!-- ==================== Sections column ==================== -->
+                            <div class="col-lg-8">
+
+                                <!-- Progress summary. -->
+                                <div class="card mb-3 local-handbook-path-summary">
+                                    <div class="card-body">
+                                        <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-2">
+                                            <strong>18 de 31 páginas confirmadas</strong>
+                                            <span class="small text-muted">Asignada al rol <strong>Docente</strong> · versión 2026-2027</span>
+                                        </div>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar" role="progressbar" style="width: 58%"
+                                                 aria-valuenow="18" aria-valuemin="0" aria-valuemax="31"></div>
+                                        </div>
+                                        <div class="local-handbook-path-stats">
+                                            <span><strong>Pendientes:</strong> 3 (2 reconfirmaciones)</span>
+                                            <span><strong>Próximo plazo:</strong> 31-07-2026</span>
+                                            <span><strong>Cuestionarios:</strong> 2 de 3 aprobados</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sections 1-3: collapsed, complete. -->
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">1.</span>
+                                                <a href="#">Identidad institucional y prioridades del año</a></h3>
+                                            <span class="section-progress"><i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i>3 de 3 confirmadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">2.</span>
+                                                <a href="#">Cultura profesional y conducta</a></h3>
+                                            <span class="section-progress"><i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i>3 de 3 confirmadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">3.</span>
+                                                <a href="#">Estructura institucional y escalamiento</a></h3>
+                                            <span class="section-progress"><i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i>3 de 3 confirmadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section 4: expanded, one reconfirmation pending. -->
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-3">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">4.</span>
+                                                Relación con estudiantes y protección del menor</h3>
+                                            <span class="section-progress">3 de 4 confirmadas</span>
+                                        </div>
+                                        <ul class="local-handbook-path-items">
+                                            <li class="is-confirmed">
+                                                <span class="item-status-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Relación profesional con estudiantes</a></span>
+                                                <span class="item-state">Confirmada v2 · 02-03-2026</span>
+                                            </li>
+                                            <li class="is-confirmed">
+                                                <span class="item-status-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Señales de alerta y deber de comunicar</a></span>
+                                                <span class="item-state">Confirmada v3 · 02-03-2026</span>
+                                            </li>
+                                            <li class="is-reconfirm">
+                                                <span class="item-status-icon"><i class="fa-solid fa-rotate" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Protocolo de protección del menor</a></span>
+                                                <span class="item-state">Reconfirmar · nueva versión v7 · antes del 31-07</span>
+                                            </li>
+                                            <li class="is-confirmed">
+                                                <span class="item-status-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Confidencialidad y datos de estudiantes</a></span>
+                                                <span class="item-state">Confirmada v1 · 05-03-2026</span>
+                                            </li>
+                                            <li class="is-confirmed">
+                                                <span class="item-status-icon"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Cuestionario: Protección del menor</a>
+                                                    <span class="badge badge-light border ml-2">Cuestionario Moodle</span></span>
+                                                <span class="item-state">Aprobado · 10/10 · 08-03-2026</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Section 5: current, expanded. -->
+                                <div class="card mb-2 local-handbook-path-section is-current">
+                                    <div class="card-body py-3">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">5.</span>
+                                                Rutinas diarias, transiciones y supervisión
+                                                <span class="badge badge-primary ml-2">Sección actual</span></h3>
+                                            <span class="section-progress">2 de 4 confirmadas</span>
+                                        </div>
+                                        <ul class="local-handbook-path-items">
+                                            <li class="is-confirmed">
+                                                <span class="item-status-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Jornada escolar 2026-2027</a></span>
+                                                <span class="item-state">Confirmada v2 · 20-06-2026</span>
+                                            </li>
+                                            <li class="is-confirmed">
+                                                <span class="item-status-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Transiciones entre clases</a></span>
+                                                <span class="item-state">Confirmada v3 · 20-06-2026</span>
+                                            </li>
+                                            <li class="is-reconfirm">
+                                                <span class="item-status-icon"><i class="fa-solid fa-rotate" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="../reader-view-mockup/index.html">Supervisión durante los recreos</a></span>
+                                                <span class="item-state">Reconfirmar · nueva versión v4 · antes del 31-07</span>
+                                            </li>
+                                            <li class="is-pending">
+                                                <span class="item-status-icon"><i class="fa-solid fa-circle" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Médico escolar y primeros auxilios</a></span>
+                                                <span class="item-state">Pendiente</span>
+                                            </li>
+                                            <li class="is-pending">
+                                                <span class="item-status-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="../quick-guide-reader-mockup/index.html">Guía rápida: turno de patio en 1 página</a>
+                                                    <span class="badge badge-light border ml-2">Opcional</span></span>
+                                                <span class="item-state">No cuenta para el avance</span>
+                                            </li>
+                                            <li class="is-confirmed">
+                                                <span class="item-status-icon"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Cuestionario: Supervisión y patio</a>
+                                                    <span class="badge badge-light border ml-2">Cuestionario Moodle</span></span>
+                                                <span class="item-state">Aprobado · 9/10 · 12-04-2026</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Section 6: next, expanded, untouched. -->
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-3">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">6.</span>
+                                                Responsabilidades de docente guía y ambiente de aula</h3>
+                                            <span class="section-progress">0 de 2 confirmadas</span>
+                                        </div>
+                                        <ul class="local-handbook-path-items">
+                                            <li class="is-pending">
+                                                <span class="item-status-icon"><i class="fa-solid fa-circle" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Manual del docente guía</a></span>
+                                                <span class="item-state">Pendiente</span>
+                                            </li>
+                                            <li class="is-pending">
+                                                <span class="item-status-icon"><i class="fa-solid fa-circle" aria-hidden="true"></i></span>
+                                                <span class="item-title"><a href="#">Ambiente de aula y uso de espacios</a></span>
+                                                <span class="item-state">Pendiente</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Sections 7-12: collapsed. Confirmations are page-level, so
+                                     pages already acknowledged as required reading count here
+                                     even before the reader reaches the section in order. -->
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">7.</span>
+                                                <a href="#">Disciplina, incidentes y quejas</a></h3>
+                                            <span class="section-progress">2 de 3 confirmadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">8.</span>
+                                                <a href="#">Currículo, planificación y evaluación</a></h3>
+                                            <span class="section-progress">2 de 3 confirmadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">9.</span>
+                                                <a href="#">Moodle y práctica digital</a></h3>
+                                            <span class="section-progress">0 de 2 confirmadas · 1 cuestionario</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">10.</span>
+                                                <a href="#">Modalidades: presencial, homeschool e híbrida</a></h3>
+                                            <span class="section-progress">0 de 2 confirmadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-2 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">11.</span>
+                                                <a href="#">Comunicación con familias y escritura institucional</a></h3>
+                                            <span class="section-progress">0 de 1 confirmadas · plazo 15-08</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-4 local-handbook-path-section">
+                                    <div class="card-body py-2">
+                                        <div class="section-header">
+                                            <h3 class="h6 mb-0"><span class="section-number">12.</span>
+                                                <a href="#">Procedimientos administrativos y rutinas anuales</a></h3>
+                                            <span class="section-progress">0 de 1 confirmadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ==================== Rail column ==================== -->
+                            <div class="col-lg-4">
+
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">
+                                            <i class="fa-solid fa-forward me-2 text-primary" aria-hidden="true"></i>Continuar
+                                        </h3>
+                                        <p class="mb-1"><a href="../reader-view-mockup/index.html"><strong>Supervisión durante los recreos</strong></a></p>
+                                        <p class="small text-muted mb-3">Sección 5 · reconfirmación de la versión v4,
+                                        publicada el 22-06-2026 con cambios sustanciales en zonas y relevos.</p>
+                                        <a class="btn btn-primary btn-sm" href="../reader-view-mockup/index.html">
+                                            <i class="fa-solid fa-arrow-right me-2" aria-hidden="true"></i>Leer y confirmar
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">Acerca de esta ruta</h3>
+                                        <dl class="row mb-0 small">
+                                            <dt class="col-5">Audiencia</dt><dd class="col-7">Rol Docente</dd>
+                                            <dt class="col-5">Año escolar</dt><dd class="col-7">2026-2027</dd>
+                                            <dt class="col-5">Secciones</dt><dd class="col-7">12</dd>
+                                            <dt class="col-5">Páginas</dt><dd class="col-7">31 obligatorias · 4 opcionales</dd>
+                                            <dt class="col-5">Cuestionarios</dt><dd class="col-7">3 conectados</dd>
+                                            <dt class="col-5">Plazo global</dt><dd class="col-7 mb-0">30-09-2026</dd>
+                                        </dl>
+                                        <p class="small text-muted mb-0 mt-3">Las confirmaciones se registran por versión
+                                        publicada de cada página (&sect;16). Si una página cambia sustancialmente,
+                                        reaparece aquí como pendiente de reconfirmación.</p>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">Rutas anteriores</h3>
+                                        <ul class="local-handbook-pagelist small list-unstyled mb-0">
+                                            <li class="mb-2"><a href="#">Ser docente en EuropaSchule 2025-2026</a>
+                                                <span class="d-block text-muted">Completada · 28-09-2025 · conservada como evidencia</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <p class="small text-muted">
+                                    Para gestores: <a href="#">informe de finalización por persona</a> ·
+                                    <a href="#">editar la ruta</a> · versión histórica protegida (&sect;15.3)
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+</body>
+</html>

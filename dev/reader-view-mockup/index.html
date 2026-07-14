@@ -225,6 +225,149 @@
             top: 90px;
         }
     }
+
+    /* ------------------------------------------------------------------ */
+    /* Dialogs: report a problem + revision history. Pattern adopted from  */
+    /* local_grades' medal detail dialog. In production each is a Moodle   */
+    /* core/modal; the shell below is the mockup stand-in and only the     */
+    /* panel-content styling ships. Opens from its trigger; closes on      */
+    /* backdrop click, the close button, or Escape.                        */
+    /* ------------------------------------------------------------------ */
+    #page-local-handbook-area .local-handbook-dialog {
+        position: fixed;
+        inset: 0;
+        z-index: 1060;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    #page-local-handbook-area .local-handbook-dialog[hidden] { display: none; }
+    #page-local-handbook-area .local-handbook-dialog__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(21, 30, 40, 0.55);
+        backdrop-filter: blur(2px);
+    }
+    #page-local-handbook-area .local-handbook-dialog__panel {
+        position: relative;
+        width: min(92vw, 540px);
+        max-height: 90vh;
+        overflow-y: auto;
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 18px 50px rgba(16, 24, 40, 0.35);
+        padding: 1.5rem;
+    }
+    #page-local-handbook-area .local-handbook-dialog__close {
+        position: absolute;
+        top: 0.6rem;
+        right: 0.75rem;
+        appearance: none;
+        border: 0;
+        background: none;
+        font-size: 1.4rem;
+        line-height: 1;
+        color: var(--bs-secondary-color, #6c757d);
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+    #page-local-handbook-area .local-handbook-dialog__close:focus-visible {
+        outline: 2px solid var(--primary, #0078c3);
+        outline-offset: 2px;
+    }
+    #page-local-handbook-area .local-handbook-dialog__title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        padding-right: 1.5rem;
+    }
+    #page-local-handbook-area .local-handbook-dialog__subtitle {
+        font-size: 0.8125rem;
+        color: var(--bs-secondary-color, #6c757d);
+        margin-bottom: 1rem;
+    }
+
+    /* Revision-history timeline inside the history dialog (spec 11). */
+    #page-local-handbook-area .local-handbook-revlist {
+        list-style: none;
+        margin: 0 0 0 0.4rem;
+        padding: 0;
+    }
+    #page-local-handbook-area .local-handbook-revlist li {
+        position: relative;
+        padding: 0 0 1.1rem 1.4rem;
+        border-left: 2px solid var(--bs-border-color, var(--gray-300, #dee2e6));
+    }
+    #page-local-handbook-area .local-handbook-revlist li:last-child {
+        padding-bottom: 0.2rem;
+    }
+    #page-local-handbook-area .local-handbook-revlist li::before {
+        content: "";
+        position: absolute;
+        left: -0.4rem;
+        top: 0.3rem;
+        width: 0.7rem;
+        height: 0.7rem;
+        border-radius: 50%;
+        background: var(--bs-border-color, var(--gray-300, #dee2e6));
+        border: 2px solid #fff;
+    }
+    #page-local-handbook-area .local-handbook-revlist li.is-current::before {
+        background: var(--success, #28a745);
+    }
+    #page-local-handbook-area .local-handbook-revlist li.is-draft::before {
+        background: #fff;
+        border-color: var(--primary, #0078c3);
+    }
+    #page-local-handbook-area .local-handbook-revlist .rev-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.25rem 0.5rem;
+    }
+    #page-local-handbook-area .local-handbook-revlist .rev-meta {
+        font-size: 0.75rem;
+        color: var(--bs-secondary-color, #6c757d);
+        font-variant-numeric: tabular-nums;
+    }
+    #page-local-handbook-area .local-handbook-revlist .rev-summary {
+        font-size: 0.875rem;
+        margin: 0.25rem 0;
+    }
+    #page-local-handbook-area .local-handbook-revlist .rev-actions {
+        font-size: 0.8125rem;
+    }
+
+    /* Motion: backdrop fades, panel rises; closing plays a short reverse;
+       everything is disabled under prefers-reduced-motion. */
+    #page-local-handbook-area .local-handbook-dialog__backdrop {
+        animation: local-handbook-dialog-fade 0.22s ease-out both;
+    }
+    #page-local-handbook-area .local-handbook-dialog__panel {
+        animation: local-handbook-dialog-rise 0.3s cubic-bezier(0.21, 0.86, 0.3, 1.08) both;
+    }
+    #page-local-handbook-area .local-handbook-dialog.is-closing .local-handbook-dialog__backdrop {
+        animation: local-handbook-dialog-fade-out 0.16s ease-in both;
+    }
+    #page-local-handbook-area .local-handbook-dialog.is-closing .local-handbook-dialog__panel {
+        animation: local-handbook-dialog-rise-out 0.16s ease-in both;
+    }
+    @keyframes local-handbook-dialog-fade { from { opacity: 0; } }
+    @keyframes local-handbook-dialog-fade-out { to { opacity: 0; } }
+    @keyframes local-handbook-dialog-rise {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    }
+    @keyframes local-handbook-dialog-rise-out {
+        to { opacity: 0; transform: translateY(10px) scale(0.97); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        #page-local-handbook-area .local-handbook-dialog *,
+        #page-local-handbook-area .local-handbook-dialog {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
 </style>
 </head>
 
@@ -241,7 +384,11 @@
         Sample article: <em>Supervisi&oacute;n durante los recreos</em> (Vida estudiantil &rsaquo;
         Supervisi&oacute;n) &mdash; a safety-critical, required-reading procedure, chosen because it
         exercises every reader element: badges, dates, table, callout, typed relations, connected quiz,
-        acknowledgement.
+        acknowledgement. <strong>Dialogs (added 2026-07-14):</strong> &ldquo;Reportar un error&rdquo;
+        (creates a quality finding, &sect;19) and the editors&rsquo; &ldquo;historial de
+        revisiones&rdquo; (&sect;11) open as centered dialogs, pattern adopted from local_grades&rsquo;
+        medal dialog &mdash; in production they ride Moodle core/modal; the shell + script here are the
+        mockup stand-in. Append <code>?dialog=report</code> or <code>?dialog=history</code> to auto-open.
     </div>
 </div>
 
@@ -298,9 +445,9 @@
                                 <a class="btn btn-outline-secondary btn-sm" href="#">
                                     <i class="fa-solid fa-print me-2" aria-hidden="true"></i>Imprimir
                                 </a>
-                                <a class="btn btn-outline-secondary btn-sm" href="#">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-handbook-dialog="report">
                                     <i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i>Reportar un error
-                                </a>
+                                </button>
                             </div>
                         </div>
                         <hr class="local-handbook-content-divider">
@@ -510,7 +657,7 @@
                                     </div>
 
                                     <p class="small text-muted">
-                                        Para editores: <a href="#">historial de revisiones</a> ·
+                                        Para editores: <a href="#" data-handbook-dialog="history">historial de revisiones</a> ·
                                         borrador v5 en revisión desde el 30-06-2026 ·
                                         <a href="#">crear nueva revisión</a>
                                     </p>
@@ -525,6 +672,212 @@
     </div>
 </div>
 </div>
+
+<!-- ==================== Dialogs ====================
+     CANDIDATE panel content; the shell + script are the mockup stand-in for
+     Moodle core/modal (pattern from local_grades' medal dialog). Triggers:
+     the "Reportar un error" button and the editors' "historial de
+     revisiones" link. Harness extra: ?dialog=report|history auto-opens. -->
+
+<!-- Report-a-problem dialog: submitting creates a quality finding (spec 19)
+     attributed to the reporting user and the published revision. -->
+<div class="local-handbook-dialog" id="handbook-dialog-report" hidden>
+    <div class="local-handbook-dialog__backdrop" data-handbook-dialog-close="1"></div>
+    <div class="local-handbook-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dialog-report-title">
+        <button type="button" class="local-handbook-dialog__close" data-handbook-dialog-close="1"
+                aria-label="Cerrar">&times;</button>
+        <h3 class="local-handbook-dialog__title" id="dialog-report-title">Reportar un error</h3>
+        <p class="local-handbook-dialog__subtitle">Supervisión durante los recreos · versión publicada v4</p>
+        <form id="handbook-report-form">
+            <div class="form-group">
+                <label for="report-type">Tipo de problema</label>
+                <select class="custom-select" id="report-type">
+                    <option>Instrucción desactualizada</option>
+                    <option>Información incorrecta</option>
+                    <option>Contradice otra página del manual</option>
+                    <option>Responsabilidad poco clara</option>
+                    <option>Enlace roto</option>
+                    <option>Dificultad de lectura o accesibilidad</option>
+                    <option>Otro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="report-section">Sección afectada</label>
+                <select class="custom-select" id="report-section">
+                    <option>Toda la página</option>
+                    <option>Objetivo</option>
+                    <option>Alcance</option>
+                    <option>Responsabilidades</option>
+                    <option>Procedimiento</option>
+                    <option>Zonas de supervisión</option>
+                    <option>Incidentes durante el recreo</option>
+                    <option>Registros</option>
+                    <option>Escalamiento</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="report-desc">Descripción</label>
+                <textarea class="form-control" id="report-desc" rows="4"
+                          placeholder="Qué encontraste y, si lo sabes, cómo debería ser…"></textarea>
+            </div>
+            <p class="small text-muted">Tu reporte crea un <strong>hallazgo de calidad</strong> (&sect;19) con tu
+            usuario, la fecha y la versión v4. El equipo editorial lo clasifica, lo atiende y registra la
+            resolución; puedes seguir su estado desde tu perfil.</p>
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="btn btn-outline-secondary" data-handbook-dialog-close="1">Cancelar</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-paper-plane me-2" aria-hidden="true"></i>Enviar reporte
+                </button>
+            </div>
+        </form>
+        <div class="alert alert-success mb-0" id="handbook-report-sent" hidden role="status">
+            <i class="fa-solid fa-circle-check me-2" aria-hidden="true"></i>
+            Gracias. Se creó el hallazgo <strong>#F-2107</strong> (abierto) sobre la versión v4 y el equipo
+            editorial fue notificado.
+        </div>
+    </div>
+</div>
+
+<!-- Revision-history dialog (spec 11): every revision keeps its version,
+     change summary, workflow state, publisher and dates. -->
+<div class="local-handbook-dialog" id="handbook-dialog-history" hidden>
+    <div class="local-handbook-dialog__backdrop" data-handbook-dialog-close="1"></div>
+    <div class="local-handbook-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="dialog-history-title">
+        <button type="button" class="local-handbook-dialog__close" data-handbook-dialog-close="1"
+                aria-label="Cerrar">&times;</button>
+        <h3 class="local-handbook-dialog__title" id="dialog-history-title">Historial de revisiones</h3>
+        <p class="local-handbook-dialog__subtitle">Supervisión durante los recreos</p>
+        <ul class="local-handbook-revlist">
+            <li class="is-draft">
+                <div class="rev-head">
+                    <strong>v5</strong>
+                    <span class="badge badge-info">En revisión</span>
+                    <span class="rev-meta">enviada el 30-06-2026 · R. Delgado Quispe · basada en v4</span>
+                </div>
+                <p class="rev-summary">Reorganiza las zonas por la obra del patio de secundaria y añade el
+                relevo del kiosco.</p>
+                <div class="rev-actions"><a href="#">Ver borrador</a> · <a href="#">Comparar con v4</a></div>
+            </li>
+            <li class="is-current">
+                <div class="rev-head">
+                    <strong>v4</strong>
+                    <span class="badge badge-success">Vigente</span>
+                    <span class="rev-meta">publicada el 22-06-2026 por M. Aliaga Torres · vigente desde el 01-03-2026</span>
+                </div>
+                <p class="rev-summary">Cambios sustanciales: nueva tabla de zonas, regla de relevos y registro
+                de novedades. Requiere nueva confirmación de lectura.</p>
+                <div class="rev-actions"><a href="#">Ver</a></div>
+            </li>
+            <li>
+                <div class="rev-head">
+                    <strong>v3</strong>
+                    <span class="badge badge-secondary">Sustituida</span>
+                    <span class="rev-meta">publicada el 28-02-2026 por M. Aliaga Torres</span>
+                </div>
+                <p class="rev-summary">Actualiza responsables tras el cambio de coordinación de convivencia.</p>
+                <div class="rev-actions"><a href="#">Ver</a> · <a href="#">Comparar con la vigente</a> ·
+                    <a href="#">Restaurar</a></div>
+            </li>
+            <li>
+                <div class="rev-head">
+                    <strong>v2</strong>
+                    <span class="badge badge-secondary">Sustituida</span>
+                    <span class="rev-meta">publicada el 15-08-2025 por M. Aliaga Torres</span>
+                </div>
+                <p class="rev-summary">Añade la zona del kiosco y mesas y el punto de observación por zona.</p>
+                <div class="rev-actions"><a href="#">Ver</a> · <a href="#">Comparar con la vigente</a> ·
+                    <a href="#">Restaurar</a></div>
+            </li>
+            <li>
+                <div class="rev-head">
+                    <strong>v1</strong>
+                    <span class="badge badge-secondary">Sustituida</span>
+                    <span class="rev-meta">publicada el 01-03-2025 por M. Aliaga Torres</span>
+                </div>
+                <p class="rev-summary">Versión inicial del procedimiento.</p>
+                <div class="rev-actions"><a href="#">Ver</a> · <a href="#">Comparar con la vigente</a> ·
+                    <a href="#">Restaurar</a></div>
+            </li>
+        </ul>
+        <p class="small text-muted mb-0 mt-3">Restaurar una versión anterior crea una nueva revisión basada en
+        ese contenido; no borra el historial posterior (&sect;11.3). &ldquo;Ver&rdquo;,
+        &ldquo;Comparar&rdquo; y &ldquo;Restaurar&rdquo; requieren capacidades de edición.</p>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+/* Mockup harness only (never ships): stands in for Moodle core/modal.
+   Behaviour mirrored from local_grades' medal dialog: open from trigger,
+   close on backdrop / close button / Escape, focus moves to the close
+   button on open and returns to the trigger on close, short reverse
+   animation on close unless prefers-reduced-motion. */
+
+let handbookDialogReturnFocus = null;
+
+function handbookOpenDialog(name, trigger) {
+    const el = document.getElementById('handbook-dialog-' + name);
+    if (!el) {
+        return;
+    }
+    el.hidden = false;
+    handbookDialogReturnFocus = trigger || null;
+    el.querySelector('.local-handbook-dialog__close').focus();
+}
+
+function handbookCloseDialog(el) {
+    if (!el || el.hidden || el.classList.contains('is-closing')) {
+        return;
+    }
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finish = () => {
+        el.classList.remove('is-closing');
+        el.hidden = true;
+        if (handbookDialogReturnFocus) {
+            handbookDialogReturnFocus.focus();
+            handbookDialogReturnFocus = null;
+        }
+    };
+    if (reduced) {
+        finish();
+    } else {
+        el.classList.add('is-closing');
+        setTimeout(finish, 170);
+    }
+}
+
+document.addEventListener('click', e => {
+    const trigger = e.target.closest('[data-handbook-dialog]');
+    if (trigger) {
+        e.preventDefault();
+        handbookOpenDialog(trigger.getAttribute('data-handbook-dialog'), trigger);
+        return;
+    }
+    if (e.target.closest('[data-handbook-dialog-close]')) {
+        handbookCloseDialog(e.target.closest('.local-handbook-dialog'));
+    }
+}, true);
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.local-handbook-dialog:not([hidden])').forEach(handbookCloseDialog);
+    }
+});
+
+/* Harness: the report form swaps to its success state instead of posting. */
+document.getElementById('handbook-report-form').addEventListener('submit', e => {
+    e.preventDefault();
+    e.target.hidden = true;
+    document.getElementById('handbook-report-sent').hidden = false;
+});
+
+/* Harness: ?dialog=report|history auto-opens a dialog for review. */
+const handbookAutoDialog = new URLSearchParams(location.search).get('dialog');
+if (handbookAutoDialog) {
+    handbookOpenDialog(handbookAutoDialog, null);
+}
+</script>
 
 </body>
 </html>

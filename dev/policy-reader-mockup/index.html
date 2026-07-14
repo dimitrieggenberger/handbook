@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual Institucional: policy reader view - UI mockup (spec 12.2)</title>
+
+<!--
+    Mockup CSS convention adopted from local_grades, same as the other
+    handbook mockups (see dev/README.md): live theme stylesheet, candidate
+    styles scoped to the plugin pagetype id, Font Awesome @font-face as
+    harness-only CORS fallback. The candidate block below duplicates
+    reader-view-mockup's verbatim (it is the same view.php template) plus
+    one policy-specific addition, labelled at the end of the block; the
+    union of candidate blocks becomes local/handbook/styles.css.
+
+    What this mocks: the same reader view as reader-view-mockup (view.php,
+    spec 12.2) rendering a PAGE OF A DIFFERENT CONTENT TYPE - an
+    institution-wide policy (authority level 1 of spec 10.3). Differences
+    exercised against the procedure example:
+    - authority badge and authority metadata row;
+    - required-reading acknowledgement in its CONFIRMED state (green
+      status alert, disabled re-confirmation, record of version and date);
+    - reverse typed relations ("Implementada por" - pages that implement
+      this policy, spec 9.2);
+    - principles-style prose instead of numbered operational steps.
+    Sample data continues the shared scenario: Supervision durante los
+    recreos (reader-view-mockup) declares "Implementa: Politica de
+    convivencia escolar"; this is that policy.
+-->
+<link rel="stylesheet" href="https://learn.europaschule.eu/theme/yui_combo.php?rollup/3.18.1/yui-moodlesimple-min.css">
+<link rel="stylesheet" href="https://learn.europaschule.eu/theme/styles.php/space/-1_-1/all">
+
+<style>
+    /* ------------------------------------------------------------------ */
+    /* Mockup harness only (never ships)                                   */
+    /* ------------------------------------------------------------------ */
+
+    @font-face {
+        font-family: 'Font Awesome 6 Free';
+        font-style: normal;
+        font-weight: 900;
+        font-display: block;
+        src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2') format('woff2');
+    }
+
+    .mockup-note {
+        max-width: 1300px;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+    }
+    .mockup-page {
+        max-width: 1300px;
+        margin: 0 auto 3rem;
+        padding: 0 1rem;
+    }
+</style>
+
+<style>
+    /* ------------------------------------------------------------------ */
+    /* plugin-candidate styles                                             */
+    /* Future content of local/handbook/styles.css. Everything scoped to   */
+    /* the plugin pagetype id, classes prefixed local-handbook-*.          */
+    /* Duplicated verbatim from reader-view-mockup except where labelled.  */
+    /* ------------------------------------------------------------------ */
+
+    /* Bootstrap 5 gap utilities polyfill (site runs Bootstrap 4). */
+    #page-local-handbook-area .gap-1 { gap: 0.25rem !important; }
+    #page-local-handbook-area .gap-2 { gap: 0.5rem !important; }
+    #page-local-handbook-area .gap-3 { gap: 1rem !important; }
+
+    /* Area tab strip, mirroring .local-grades-area-actions. */
+    #page-local-handbook-area .local-handbook-area-actions {
+        row-gap: 0.5rem;
+        border: 1px solid var(--primary, #0078c3);
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    /* Content header, mirroring .local-grades-content-header. */
+    #page-local-handbook-area .local-handbook-content-header {
+        margin-bottom: 0;
+    }
+    #page-local-handbook-area .local-handbook-content-actions {
+        gap: 0.5rem;
+        row-gap: 0.5rem;
+    }
+
+    /* Category trail above the page title. */
+    #page-local-handbook-area .local-handbook-category-trail {
+        font-size: 0.8125rem;
+        color: var(--bs-secondary-color, #6c757d);
+        margin-bottom: 0.25rem;
+    }
+    #page-local-handbook-area .local-handbook-category-trail a {
+        color: inherit;
+    }
+    #page-local-handbook-area .local-handbook-category-trail .sep {
+        margin: 0 0.35rem;
+        opacity: 0.5;
+    }
+
+    /* Badge row + publication dates line under the title. */
+    #page-local-handbook-area .local-handbook-page-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0.75rem 0 0.5rem;
+    }
+    #page-local-handbook-area .local-handbook-page-dates {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1.5rem;
+        font-size: 0.8125rem;
+        color: var(--bs-secondary-color, #6c757d);
+        font-variant-numeric: tabular-nums;
+        padding-bottom: 1rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid var(--bs-border-color, var(--gray-300, #dee2e6));
+    }
+
+    /* Reader body. */
+    #page-local-handbook-area .local-handbook-page-body p,
+    #page-local-handbook-area .local-handbook-page-body li {
+        max-width: 70ch;
+    }
+    #page-local-handbook-area .local-handbook-page-body h3 {
+        scroll-margin-top: 90px;
+        margin-top: 2rem;
+    }
+    #page-local-handbook-area .local-handbook-page-body h3:first-child {
+        margin-top: 0;
+    }
+    #page-local-handbook-area .local-handbook-page-body .table-responsive {
+        margin-bottom: 1.25rem;
+    }
+
+    /* Callout inside page bodies. */
+    #page-local-handbook-area .local-handbook-callout {
+        border-left: 3px solid var(--warning, #f0ad4e);
+        border-radius: 0 0.375rem 0.375rem 0;
+        padding: 0.75rem 1rem;
+        margin: 1rem 0 1.25rem;
+        max-width: 70ch;
+    }
+
+    /* On-page table of contents block. */
+    #page-local-handbook-area .local-handbook-toc {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.875rem;
+    }
+    #page-local-handbook-area .local-handbook-toc a {
+        display: block;
+        padding: 0.25rem 0.6rem;
+        border-left: 2px solid var(--bs-border-color, var(--gray-300, #dee2e6));
+        color: inherit;
+    }
+    #page-local-handbook-area .local-handbook-toc a:hover {
+        color: var(--primary, #0078c3);
+        text-decoration: none;
+        border-left-color: var(--primary, #0078c3);
+    }
+
+    /* Metadata card ("Ficha de la página"). */
+    #page-local-handbook-area .local-handbook-meta dt {
+        font-weight: 400;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+    #page-local-handbook-area .local-handbook-meta dd {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Typed related-pages list. */
+    #page-local-handbook-area .local-handbook-relations {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        font-size: 0.875rem;
+    }
+    #page-local-handbook-area .local-handbook-relations .relation-type {
+        display: block;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+
+    /* Required-reading acknowledgement box. */
+    #page-local-handbook-area .local-handbook-ack {
+        scroll-margin-top: 90px;
+    }
+    #page-local-handbook-area .local-handbook-ack .form-check-label {
+        max-width: 62ch;
+    }
+
+    /* Sticky rail on wide screens. */
+    @media (min-width: 992px) {
+        #page-local-handbook-area .local-handbook-rail {
+            position: sticky;
+            top: 90px;
+        }
+    }
+
+    /* Policy-specific addition: authority badge uses the dark badge so
+       institution-wide policies stand out from operational content. */
+    #page-local-handbook-area .local-handbook-badge-authority {
+        background-color: var(--dark, #343a40);
+        color: #fff;
+    }
+</style>
+</head>
+
+<body id="page-local-handbook-area" class="pagelayout-standard path-local path-local-handbook dir-ltr lang-es">
+
+<div class="mockup-note">
+    <div class="alert alert-info mb-0">
+        <strong>Mockup: Manual Institucional policy reader view (view.php) &mdash; spec &sect;12.2.</strong>
+        Created 2026-07-14. Same view.php template as <code>reader-view-mockup</code> rendering an
+        <strong>institution-wide policy</strong> (authority level 1, &sect;10.3): authority badge and
+        metadata, principles-style prose, reverse typed relations (&ldquo;Implementada por&rdquo;,
+        &sect;9.2), and the required-reading acknowledgement in its <strong>confirmed</strong> state
+        (&sect;16) &mdash; contrast with the pending state in <code>reader-view-mockup</code>.
+        Candidate CSS duplicates that mockup's block verbatim plus one labelled policy addition.
+        Sample article: <em>Pol&iacute;tica de convivencia escolar</em>, the policy that
+        <em>Supervisi&oacute;n durante los recreos</em> implements.
+    </div>
+</div>
+
+<div class="mockup-page">
+<div id="page" class="drawers">
+    <div id="topofscroll" class="main-inner">
+        <div id="page-content" class="pb-3">
+            <div id="region-main-box">
+                <section id="region-main">
+                    <div role="main">
+                        <span id="maincontent"></span>
+
+                        <!-- Area tab strip: mirrors local_grades_render_area_actions(). -->
+                        <nav class="mb-4 local-handbook-area-actions" aria-label="Navegación">
+                            <ul class="nav nav-tabs gap-2 mb-0">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" href="#">
+                                        <i class="fa-solid fa-book-open me-2" aria-hidden="true"></i>Manual Institucional
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="#">
+                                        <i class="fa-solid fa-magnifying-glass me-2" aria-hidden="true"></i>Buscar en el manual
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="#">
+                                        <i class="fa-solid fa-route me-2" aria-hidden="true"></i>Mi ruta de lectura
+                                        <span class="badge badge-primary ml-2">3</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link d-flex align-items-center" href="#" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Gestión
+                                        <i class="fa-solid fa-chevron-down ms-2" aria-hidden="true"></i>
+                                    </a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#">Categorías</a>
+                                        <a class="dropdown-item" href="#">Cola de revisión</a>
+                                        <a class="dropdown-item" href="#">Hallazgos de calidad</a>
+                                        <a class="dropdown-item" href="#">Informes</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <!-- Content header: mirrors local_grades_render_page_heading(). -->
+                        <div class="local-handbook-category-trail">
+                            <a href="#">Vida estudiantil</a><span class="sep">&rsaquo;</span><a href="#">Convivencia y disciplina</a>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 local-handbook-content-header">
+                            <h2 class="mb-0">Política de convivencia escolar</h2>
+                            <div class="d-flex flex-wrap gap-2 local-handbook-content-actions">
+                                <a class="btn btn-outline-secondary btn-sm" href="#">
+                                    <i class="fa-solid fa-print me-2" aria-hidden="true"></i>Imprimir
+                                </a>
+                                <a class="btn btn-outline-secondary btn-sm" href="#">
+                                    <i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i>Reportar un error
+                                </a>
+                            </div>
+                        </div>
+                        <hr class="local-handbook-content-divider">
+
+                        <!-- Required-reading status: CONFIRMED variant. -->
+                        <div class="alert alert-success" role="status">
+                            <i class="fa-solid fa-circle-check me-2" aria-hidden="true"></i>
+                            Confirmaste la lectura de la versión vigente (v3) el <strong>12-03-2026</strong>.
+                            Si se publica una nueva versión con cambios sustanciales, la página volverá a
+                            aparecer como pendiente en <a href="../reading-path-mockup/index.html" class="alert-link">tu ruta de lectura</a>.
+                        </div>
+
+                        <div class="row">
+
+                            <!-- ==================== Article column ==================== -->
+                            <div class="col-lg-8">
+
+                                <div class="local-handbook-page-badges">
+                                    <span class="badge badge-secondary">Política</span>
+                                    <span class="badge local-handbook-badge-authority">Autoridad institucional · Nivel 1</span>
+                                    <span class="badge badge-primary">Lectura obligatoria</span>
+                                </div>
+
+                                <p class="lead">Los principios y normas que rigen la convivencia entre estudiantes,
+                                personal y familias en EuropaSchule, y el marco del que derivan los procedimientos
+                                de supervisión, disciplina e incidentes.</p>
+
+                                <div class="local-handbook-page-dates">
+                                    <span><strong>Vigente desde:</strong> 01-03-2025</span>
+                                    <span><strong>Última actualización:</strong> 10-02-2026</span>
+                                    <span><strong>Versión publicada:</strong> v3</span>
+                                </div>
+
+                                <div class="local-handbook-page-body">
+
+                                    <h3 id="principios">Principios</h3>
+                                    <p>La convivencia en EuropaSchule se basa en el respeto mutuo, la responsabilidad
+                                    personal y el acompañamiento formativo. Toda medida disciplinaria tiene una
+                                    finalidad educativa: busca reparar, enseñar y restablecer la convivencia, no
+                                    únicamente sancionar.</p>
+                                    <ul>
+                                        <li>Cada estudiante tiene derecho a un entorno seguro y libre de violencia.</li>
+                                        <li>El personal actúa como modelo de la conducta que espera de los estudiantes.</li>
+                                        <li>Las familias son parte del proceso formativo y se les informa con
+                                        transparencia y oportunidad.</li>
+                                        <li>Las medidas se aplican con proporcionalidad, gradualidad y derecho a ser
+                                        escuchado.</li>
+                                    </ul>
+
+                                    <h3 id="alcance">Alcance</h3>
+                                    <p>Esta política aplica a toda la comunidad educativa —estudiantes, personal docente
+                                    y administrativo, y familias— en las tres modalidades (presencial, homeschool e
+                                    híbrida), dentro y fuera del recinto cuando la actividad sea institucional,
+                                    incluidos los entornos digitales de la escuela.</p>
+
+                                    <h3 id="normas">Normas de convivencia</h3>
+                                    <p>Las normas específicas por nivel y modalidad se detallan en los procedimientos
+                                    que implementan esta política. Con carácter general:</p>
+                                    <ol>
+                                        <li>Trato respetuoso en toda interacción, presencial o digital.</li>
+                                        <li>Cuidado de los espacios, materiales y recursos comunes.</li>
+                                        <li>Puntualidad y asistencia según la <a href="#">jornada escolar</a> vigente.</li>
+                                        <li>Uso de dispositivos y plataformas conforme a las
+                                        <a href="#">normas de práctica digital</a>.</li>
+                                        <li>Rechazo activo de toda forma de acoso, discriminación o violencia.</li>
+                                    </ol>
+
+                                    <h3 id="medidas">Medidas formativas y disciplinarias</h3>
+                                    <p>Las medidas siguen una gradualidad: diálogo formativo, compromiso escrito,
+                                    comunicación a la familia, plan de acompañamiento y, en casos graves, las medidas
+                                    que determine el comité de convivencia. La tipificación de faltas y el debido
+                                    proceso se regulan en el <a href="#">procedimiento de disciplina</a>; los
+                                    incidentes se registran según el
+                                    <a href="#">registro y seguimiento de incidentes</a>.</p>
+
+                                    <div class="alert alert-warning local-handbook-callout">
+                                        <strong>Prevalencia:</strong> ante cualquier situación que afecte la integridad
+                                        de un menor, el <a href="#">protocolo de protección del menor</a> prevalece
+                                        sobre esta política y sobre todo procedimiento derivado de ella.
+                                    </div>
+
+                                    <h3 id="responsabilidades">Roles y responsabilidades</h3>
+                                    <ul>
+                                        <li><strong>Rectorado</strong> aprueba esta política y sus modificaciones.</li>
+                                        <li><strong>Coordinación de convivencia</strong> mantiene la política, coordina
+                                        el comité de convivencia y supervisa los procedimientos derivados.</li>
+                                        <li><strong>Docentes y docentes guía</strong> aplican las normas en el aula y
+                                        derivan los casos según el escalamiento definido.</li>
+                                        <li><strong>Consejería estudiantil</strong> acompaña los planes formativos
+                                        individuales.</li>
+                                    </ul>
+
+                                    <h3 id="revision">Revisión de esta política</h3>
+                                    <p>La política se revisa cada año antes del inicio del año escolar, o antes si un
+                                    cambio normativo o un hallazgo de calidad lo requiere. Toda modificación pasa por
+                                    el flujo editorial del manual y la aprobación del Rectorado.</p>
+                                </div>
+
+                                <!-- Required-reading acknowledgement: CONFIRMED state (spec 16). -->
+                                <div class="card mt-4 local-handbook-ack" id="confirmar">
+                                    <div class="card-body">
+                                        <h3 class="h5 mb-2">Confirmación de lectura</h3>
+                                        <p class="mb-1"><i class="fa-solid fa-circle-check text-success me-2" aria-hidden="true"></i>
+                                        Confirmada por <strong>ti</strong> el 12-03-2026 · versión publicada v3 ·
+                                        dentro de la ruta <a href="../reading-path-mockup/index.html">Ser docente en EuropaSchule 2026-2027</a></p>
+                                        <p class="text-muted small mb-0">El registro conserva usuario, versión, fecha y
+                                        redacción de la confirmación (&sect;16). No es necesario volver a confirmar
+                                        salvo que se publique una nueva versión con cambios sustanciales.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ==================== Rail column ==================== -->
+                            <div class="col-lg-4">
+                                <div class="local-handbook-rail">
+
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h3 class="h6 text-uppercase text-muted mb-3">En esta página</h3>
+                                            <ul class="local-handbook-toc">
+                                                <li><a href="#principios">Principios</a></li>
+                                                <li><a href="#alcance">Alcance</a></li>
+                                                <li><a href="#normas">Normas de convivencia</a></li>
+                                                <li><a href="#medidas">Medidas formativas y disciplinarias</a></li>
+                                                <li><a href="#responsabilidades">Roles y responsabilidades</a></li>
+                                                <li><a href="#revision">Revisión de esta política</a></li>
+                                                <li><a href="#confirmar">Confirmación de lectura</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h3 class="h6 text-uppercase text-muted mb-3">Ficha de la página</h3>
+                                            <dl class="row mb-0 small local-handbook-meta">
+                                                <dt class="col-5">Tipo</dt><dd class="col-7">Política</dd>
+                                                <dt class="col-5">Autoridad</dt><dd class="col-7">Nivel 1 · Política institucional</dd>
+                                                <dt class="col-5">Ámbito</dt><dd class="col-7">Institucional · Todas las modalidades</dd>
+                                                <dt class="col-5">Audiencia</dt><dd class="col-7">Toda la comunidad educativa</dd>
+                                                <dt class="col-5">Área responsable</dt><dd class="col-7">Coordinación de convivencia</dd>
+                                                <dt class="col-5">Propietario</dt><dd class="col-7">M. Aliaga Torres</dd>
+                                                <dt class="col-5">Aprobación</dt><dd class="col-7">Rectorado</dd>
+                                                <dt class="col-5">Vigente desde</dt><dd class="col-7">01-03-2025</dd>
+                                                <dt class="col-5">Próxima revisión</dt><dd class="col-7">01-02-2027</dd>
+                                                <dt class="col-5">Idioma</dt><dd class="col-7 mb-0">Español</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h3 class="h6 text-uppercase text-muted mb-3">Páginas relacionadas</h3>
+                                            <ul class="local-handbook-relations">
+                                                <li><span class="relation-type">Implementada por</span>
+                                                    <a href="../reader-view-mockup/index.html">Supervisión durante los recreos</a></li>
+                                                <li><span class="relation-type">Implementada por</span>
+                                                    <a href="#">Registro y seguimiento de incidentes</a></li>
+                                                <li><span class="relation-type">Implementada por</span>
+                                                    <a href="#">Procedimiento de disciplina</a></li>
+                                                <li><span class="relation-type">Excepción definida en</span>
+                                                    <a href="#">Protocolo de protección del menor</a></li>
+                                                <li><span class="relation-type">Relacionada con</span>
+                                                    <a href="#">Normas de práctica digital</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <p class="small text-muted">
+                                        Para editores: <a href="#">historial de revisiones</a> ·
+                                        sin borradores en curso ·
+                                        <a href="#">crear nueva revisión</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+</body>
+</html>

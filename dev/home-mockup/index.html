@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual Institucional: handbook home - UI mockup (spec 12.1)</title>
+
+<!--
+    Mockup CSS convention adopted from local_grades (see its AGENTS.md,
+    "UI Mockups", and dev/mockup-template/), same as reader-view-mockup:
+
+    1. Link the live compiled theme stylesheet from learn.europaschule.eu.
+    2. local_handbook is NOT deployed yet, so every .local-handbook-* rule is
+       a CANDIDATE in the labelled "plugin-candidate styles" block. Rules
+       shared with reader-view-mockup (gap polyfill, area actions, content
+       header) are duplicated verbatim here; when the plugin skeleton exists
+       the union of the candidate blocks becomes local/handbook/styles.css.
+    3. Font Awesome @font-face is a harness-only CORS fallback, never ships.
+    4. Body id "page-local-handbook-area" is the pagetype the plugin will set
+       on all its pages; all candidate CSS is scoped to it.
+
+    What this mocks: the handbook home (index.php) from docs/SPECIFICATION.md
+    section 12.1 - prominent search, category navigation (the 11 top-level
+    categories of spec 9.1), pending required reading, assigned reading path
+    with progress (spec 15), quick guides, recently updated pages, safety-
+    critical pages, forms and templates, and the editorial queue summary that
+    only users with review capabilities would see. The top tab strip and
+    content header mirror the reader-view mockup. Theme chrome (navbar,
+    sidebar, breadcrumbs, page header) is intentionally not reproduced.
+-->
+<link rel="stylesheet" href="https://learn.europaschule.eu/theme/yui_combo.php?rollup/3.18.1/yui-moodlesimple-min.css">
+<link rel="stylesheet" href="https://learn.europaschule.eu/theme/styles.php/space/-1_-1/all">
+
+<style>
+    /* ------------------------------------------------------------------ */
+    /* Mockup harness only (never ships)                                   */
+    /* ------------------------------------------------------------------ */
+
+    @font-face {
+        font-family: 'Font Awesome 6 Free';
+        font-style: normal;
+        font-weight: 900;
+        font-display: block;
+        src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2') format('woff2');
+    }
+
+    .mockup-note {
+        max-width: 1300px;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+    }
+    /* 1300px approximates the real #region-main content width (page width
+       minus the Space theme's fixed sidebar), per the grades mockups. */
+    .mockup-page {
+        max-width: 1300px;
+        margin: 0 auto 3rem;
+        padding: 0 1rem;
+    }
+</style>
+
+<style>
+    /* ------------------------------------------------------------------ */
+    /* plugin-candidate styles                                             */
+    /* Future content of local/handbook/styles.css. Everything scoped to   */
+    /* the plugin pagetype id, classes prefixed local-handbook-*.          */
+    /* ------------------------------------------------------------------ */
+
+    /* Bootstrap 5 gap utilities polyfill: the site runs Bootstrap 4, which
+       never shipped .gap-*. Same approach as local_grades styles.css. */
+    #page-local-handbook-area .gap-1 { gap: 0.25rem !important; }
+    #page-local-handbook-area .gap-2 { gap: 0.5rem !important; }
+    #page-local-handbook-area .gap-3 { gap: 1rem !important; }
+
+    /* Area tab strip, mirroring .local-grades-area-actions. */
+    #page-local-handbook-area .local-handbook-area-actions {
+        row-gap: 0.5rem;
+        border: 1px solid var(--primary, #0078c3);
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    /* Content header, mirroring .local-grades-content-header. */
+    #page-local-handbook-area .local-handbook-content-header {
+        margin-bottom: 0;
+    }
+    #page-local-handbook-area .local-handbook-content-actions {
+        gap: 0.5rem;
+        row-gap: 0.5rem;
+    }
+
+    /* Prominent search hero (home only). */
+    #page-local-handbook-area .local-handbook-search {
+        border-radius: 0.375rem;
+        padding: 1.5rem 1.25rem;
+        margin-bottom: 1.5rem;
+        background: var(--gray-100, #f8f9fa);
+        border: 1px solid var(--bs-border-color, var(--gray-300, #dee2e6));
+    }
+    #page-local-handbook-area .local-handbook-search .form-control-lg {
+        max-width: 46rem;
+    }
+    #page-local-handbook-area .local-handbook-search-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    /* Category navigation grid. */
+    #page-local-handbook-area .local-handbook-category-card .card-body {
+        padding: 1rem 1.25rem;
+    }
+    #page-local-handbook-area .local-handbook-category-card .category-icon {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.375rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        background: rgba(0, 120, 195, 0.1);
+        color: var(--primary, #0078c3);
+    }
+    #page-local-handbook-area .local-handbook-category-card .category-sub {
+        font-size: 0.8125rem;
+        margin: 0.5rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    #page-local-handbook-area .local-handbook-category-card .category-sub li {
+        display: inline;
+    }
+    #page-local-handbook-area .local-handbook-category-card .category-sub li + li::before {
+        content: "\00b7";
+        margin: 0 0.4rem;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+    #page-local-handbook-area .local-handbook-category-card .category-count {
+        font-size: 0.75rem;
+        color: var(--bs-secondary-color, #6c757d);
+        white-space: nowrap;
+    }
+
+    /* Compact page lists in home cards (recent, safety, guides, forms). */
+    #page-local-handbook-area .local-handbook-pagelist {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.875rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+    #page-local-handbook-area .local-handbook-pagelist .page-meta {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--bs-secondary-color, #6c757d);
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Pending required-reading list keeps the deadline aligned right. */
+    #page-local-handbook-area .local-handbook-pending li {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.75rem;
+    }
+
+    /* Reading-path progress card. */
+    #page-local-handbook-area .local-handbook-path-progress .progress {
+        height: 0.5rem;
+    }
+</style>
+</head>
+
+<body id="page-local-handbook-area" class="pagelayout-standard path-local path-local-handbook dir-ltr lang-es">
+
+<div class="mockup-note">
+    <div class="alert alert-info mb-0">
+        <strong>Mockup: Manual Institucional handbook home (index.php) &mdash; spec &sect;12.1.</strong>
+        Created 2026-07-14, before any plugin code exists. Same conventions as
+        <code>reader-view-mockup</code>: live theme CSS, region-main content only, body id set to the
+        plugin pagetype, every <code>.local-handbook-*</code> class a candidate pattern. Shows all nine
+        &sect;12.1 elements: search, category navigation (&sect;9.1), pending required reading (&sect;16),
+        assigned reading path (&sect;15), quick guides, recent updates, safety-critical pages, forms and
+        templates, and the editorial queue card that renders only for users with review capabilities.
+        Sample data continues the reader-view scenario (<em>Supervisi&oacute;n durante los recreos</em>,
+        path <em>Ser docente en EuropaSchule 2026-2027</em>).
+    </div>
+</div>
+
+<div class="mockup-page">
+<div id="page" class="drawers">
+    <div id="topofscroll" class="main-inner">
+        <div id="page-content" class="pb-3">
+            <div id="region-main-box">
+                <section id="region-main">
+                    <div role="main">
+                        <span id="maincontent"></span>
+
+                        <!-- Area tab strip: mirrors local_grades_render_area_actions(). -->
+                        <nav class="mb-4 local-handbook-area-actions" aria-label="Navegación">
+                            <ul class="nav nav-tabs gap-2 mb-0">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" href="#">
+                                        <i class="fa-solid fa-book-open me-2" aria-hidden="true"></i>Manual Institucional
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="#">
+                                        <i class="fa-solid fa-magnifying-glass me-2" aria-hidden="true"></i>Buscar en el manual
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" href="#">
+                                        <i class="fa-solid fa-route me-2" aria-hidden="true"></i>Mi ruta de lectura
+                                        <span class="badge badge-primary ml-2">3</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link d-flex align-items-center" href="#" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Gestión
+                                        <i class="fa-solid fa-chevron-down ms-2" aria-hidden="true"></i>
+                                    </a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#">Categorías</a>
+                                        <a class="dropdown-item" href="#">Cola de revisión</a>
+                                        <a class="dropdown-item" href="#">Hallazgos de calidad</a>
+                                        <a class="dropdown-item" href="#">Informes</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <!-- Content header: mirrors local_grades_render_page_heading(). -->
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 local-handbook-content-header">
+                            <h2 class="mb-0">Manual Institucional</h2>
+                            <div class="d-flex flex-wrap gap-2 local-handbook-content-actions">
+                                <!-- Editor-only action (capability local/handbook:edit). -->
+                                <a class="btn btn-outline-secondary btn-sm" href="#">
+                                    <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Nueva página
+                                </a>
+                            </div>
+                        </div>
+                        <hr class="local-handbook-content-divider">
+
+                        <!-- Prominent search (spec 12.1 / 13). -->
+                        <div class="local-handbook-search">
+                            <form action="#" method="get" role="search">
+                                <label class="sr-only" for="handbook-search">Buscar en el manual</label>
+                                <div class="input-group input-group-lg">
+                                    <input type="text" class="form-control form-control-lg" id="handbook-search"
+                                           placeholder="Buscar procedimientos, políticas, guías y formularios…">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="fa-solid fa-magnifying-glass me-2" aria-hidden="true"></i>Buscar
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="local-handbook-search-filters">
+                                <span class="text-muted">Filtrar por tipo:</span>
+                                <a class="badge badge-light border" href="#">Política</a>
+                                <a class="badge badge-light border" href="#">Procedimiento</a>
+                                <a class="badge badge-light border" href="#">Guía rápida</a>
+                                <a class="badge badge-light border" href="#">Manual por función</a>
+                                <a class="badge badge-light border" href="#">Formulario / plantilla</a>
+                            </div>
+                        </div>
+
+                        <!-- Personal row: pending reading, path progress, editorial queue. -->
+                        <div class="row">
+                            <div class="col-lg-4 d-flex">
+                                <div class="card mb-3 flex-fill">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">
+                                            <i class="fa-solid fa-circle-exclamation me-2 text-warning" aria-hidden="true"></i>Lectura obligatoria pendiente
+                                        </h3>
+                                        <ul class="local-handbook-pagelist local-handbook-pending">
+                                            <li>
+                                                <a href="#">Supervisión durante los recreos <span class="text-muted">(v4)</span></a>
+                                                <span class="page-meta">antes del 31-07</span>
+                                            </li>
+                                            <li>
+                                                <a href="#">Protocolo de protección del menor <span class="text-muted">(v7)</span></a>
+                                                <span class="page-meta">antes del 31-07</span>
+                                            </li>
+                                            <li>
+                                                <a href="#">Comunicación con familias <span class="text-muted">(v2)</span></a>
+                                                <span class="page-meta">antes del 15-08</span>
+                                            </li>
+                                        </ul>
+                                        <p class="small text-muted mb-0 mt-3">La confirmación se registra por versión
+                                        publicada (&sect;16). Dos son reconfirmaciones tras cambios sustanciales.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 d-flex">
+                                <div class="card mb-3 flex-fill local-handbook-path-progress">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">
+                                            <i class="fa-solid fa-route me-2 text-primary" aria-hidden="true"></i>Mi ruta de lectura
+                                        </h3>
+                                        <p class="mb-2"><a href="#"><strong>Ser docente en EuropaSchule 2026-2027</strong></a></p>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar" role="progressbar" style="width: 58%"
+                                                 aria-valuenow="18" aria-valuemin="0" aria-valuemax="31"></div>
+                                        </div>
+                                        <p class="small text-muted mb-2">18 de 31 páginas confirmadas · Sección actual:
+                                        <strong>5. Rutinas diarias y supervisión</strong></p>
+                                        <a class="btn btn-outline-primary btn-sm" href="#">
+                                            <i class="fa-solid fa-arrow-right me-2" aria-hidden="true"></i>Continuar la ruta
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 d-flex">
+                                <!-- Rendered only with local/handbook:review (or edit) capability. -->
+                                <div class="card mb-3 flex-fill">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">
+                                            <i class="fa-solid fa-list-check me-2 text-secondary" aria-hidden="true"></i>Trabajo editorial
+                                        </h3>
+                                        <ul class="local-handbook-pagelist">
+                                            <li><a href="#">Borradores esperando revisión</a>
+                                                <span class="page-meta">4 borradores · el más antiguo desde el 30-06</span></li>
+                                            <li><a href="#">Cambios solicitados y reenviados</a>
+                                                <span class="page-meta">2 borradores</span></li>
+                                            <li><a href="#">Páginas con revisión vencida</a>
+                                                <span class="page-meta">3 páginas · próxima: Jornada escolar</span></li>
+                                            <li><a href="#">Hallazgos de calidad abiertos</a>
+                                                <span class="page-meta">2 hallazgos · 1 contradicción</span></li>
+                                        </ul>
+                                        <p class="small text-muted mb-0 mt-3">Visible solo para quienes tienen
+                                        capacidades de edición o revisión (&sect;7.3).</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+                            <!-- ==================== Category navigation ==================== -->
+                            <div class="col-lg-8">
+                                <h3 class="h5 mb-3">Categorías</h3>
+                                <div class="row">
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-landmark" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Identidad institucional</a></h4>
+                                                    </div>
+                                                    <span class="category-count">12 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Modelo educativo</a></li>
+                                                    <li><a href="#">Prioridades del año</a></li>
+                                                    <li><a href="#">Cultura profesional</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Organización y responsabilidades</a></h4>
+                                                    </div>
+                                                    <span class="category-count">15 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Estructura institucional</a></li>
+                                                    <li><a href="#">Con quién hablar sobre qué</a></li>
+                                                    <li><a href="#">Escalamiento</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Práctica académica</a></h4>
+                                                    </div>
+                                                    <span class="category-count">28 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Currículo</a></li>
+                                                    <li><a href="#">Planificación</a></li>
+                                                    <li><a href="#">Evaluación</a></li>
+                                                    <li><a href="#">Moodle</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-children" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Vida estudiantil</a></h4>
+                                                    </div>
+                                                    <span class="category-count">22 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Supervisión</a></li>
+                                                    <li><a href="#">Convivencia</a></li>
+                                                    <li><a href="#">Incidentes</a></li>
+                                                    <li><a href="#">Protección del menor</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-laptop-house" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Modalidades</a></h4>
+                                                    </div>
+                                                    <span class="category-count">9 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Presencial</a></li>
+                                                    <li><a href="#">Homeschool</a></li>
+                                                    <li><a href="#">Híbrida</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Familias y comunicación</a></h4>
+                                                    </div>
+                                                    <span class="category-count">11 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Comunicación institucional</a></li>
+                                                    <li><a href="#">Reuniones</a></li>
+                                                    <li><a href="#">Quejas</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-clock" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Operaciones diarias</a></h4>
+                                                    </div>
+                                                    <span class="category-count">19 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Jornada escolar</a></li>
+                                                    <li><a href="#">Recreos y patio</a></li>
+                                                    <li><a href="#">Médico escolar</a></li>
+                                                    <li><a href="#">Emergencias</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-id-card-clip" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Administración del personal</a></h4>
+                                                    </div>
+                                                    <span class="category-count">10 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Asistencia laboral</a></li>
+                                                    <li><a href="#">Permisos</a></li>
+                                                    <li><a href="#">Salarios y seguros</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-user-tie" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Manuales por función</a></h4>
+                                                    </div>
+                                                    <span class="category-count">5 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Docente</a></li>
+                                                    <li><a href="#">Docente guía</a></li>
+                                                    <li><a href="#">Líder de departamento</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Procedimientos y guías rápidas</a></h4>
+                                                    </div>
+                                                    <span class="category-count">14 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Todas las guías rápidas</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex">
+                                        <div class="card mb-3 flex-fill local-handbook-category-card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="category-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span>
+                                                        <h4 class="h6 mb-0"><a href="#">Formularios, plantillas y ejemplos</a></h4>
+                                                    </div>
+                                                    <span class="category-count">17 páginas</span>
+                                                </div>
+                                                <ul class="category-sub">
+                                                    <li><a href="#">Todos los formularios</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ==================== Rail column ==================== -->
+                            <div class="col-lg-4">
+
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">
+                                            <i class="fa-solid fa-triangle-exclamation me-2 text-warning" aria-hidden="true"></i>Páginas críticas para la seguridad
+                                        </h3>
+                                        <ul class="local-handbook-pagelist">
+                                            <li><a href="#">Protocolo de protección del menor</a></li>
+                                            <li><a href="#">Procedimiento de emergencias y evacuación</a></li>
+                                            <li><a href="#">Supervisión durante los recreos</a></li>
+                                            <li><a href="#">Médico escolar y primeros auxilios</a></li>
+                                            <li><a href="#">Registro y seguimiento de incidentes</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">
+                                            <i class="fa-solid fa-clock-rotate-left me-2 text-muted" aria-hidden="true"></i>Actualizado recientemente
+                                        </h3>
+                                        <ul class="local-handbook-pagelist">
+                                            <li><a href="#">Supervisión durante los recreos</a>
+                                                <span class="page-meta">v4 · 22-06-2026 · Vida estudiantil</span></li>
+                                            <li><a href="#">Calificación en Moodle: estándares</a>
+                                                <span class="page-meta">v6 · 18-06-2026 · Práctica académica</span></li>
+                                            <li><a href="#">Jornada escolar 2026-2027</a>
+                                                <span class="page-meta">v2 · 15-06-2026 · Operaciones diarias</span></li>
+                                            <li><a href="#">Comunicación con familias</a>
+                                                <span class="page-meta">v2 · 10-06-2026 · Familias y comunicación</span></li>
+                                            <li><a href="#">Permisos y ausencias del personal</a>
+                                                <span class="page-meta">v3 · 05-06-2026 · Administración del personal</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">
+                                            <i class="fa-solid fa-bolt me-2 text-muted" aria-hidden="true"></i>Guías rápidas
+                                        </h3>
+                                        <ul class="local-handbook-pagelist">
+                                            <li><a href="#">Turno de patio en 1 página</a></li>
+                                            <li><a href="#">Registrar asistencia en Moodle</a></li>
+                                            <li><a href="#">Reportar un incidente</a></li>
+                                            <li><a href="#">Preparar una reunión con familias</a></li>
+                                            <li><a href="#">Solicitar un permiso laboral</a></li>
+                                        </ul>
+                                        <p class="small mb-0 mt-2"><a href="#">Ver todas las guías rápidas &rsaquo;</a></p>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="h6 text-uppercase text-muted mb-3">
+                                            <i class="fa-solid fa-file-lines me-2 text-muted" aria-hidden="true"></i>Formularios y plantillas
+                                        </h3>
+                                        <ul class="local-handbook-pagelist">
+                                            <li><a href="#">Formulario de novedades de patio</a></li>
+                                            <li><a href="#">Registro de incidentes</a></li>
+                                            <li><a href="#">Plantilla de sílabo</a></li>
+                                            <li><a href="#">Plantilla de comunicación a familias</a></li>
+                                        </ul>
+                                        <p class="small mb-0 mt-2"><a href="#">Ver todos los formularios &rsaquo;</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+</body>
+</html>
