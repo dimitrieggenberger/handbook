@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 (2026-07-14)
+
+Reader search and revision comparison.
+
+- search.php: dedicated handbook search with content-type and category
+  filters, pagination, and a search tab in the area navigation (spec §13.2).
+- history.php: full revision history per page (viewhistory/editorial).
+- compare.php: metadata comparison plus a word-level text diff of any two
+  revisions (spec §11.4), linked from the history, the review queue
+  ("View changes") and the reader's editor footer.
+- diff_service: dependency-free longest-common-block word diff with
+  paragraph fallback for very large texts; PHPUnit coverage.
+
 ## 0.3.0 (2026-07-14)
 
 Phase 3: external API (spec §17).

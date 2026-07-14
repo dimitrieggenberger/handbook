@@ -186,6 +186,25 @@ $string['importrelationscreated'] = 'Beziehungen erstellt: {$a}';
 $string['importerrors'] = 'Importhinweise';
 $string['errorinvalidjson'] = 'Die hochgeladene Datei ist kein gültiges JSON.';
 
+// Search.
+$string['searchhandbook'] = 'Im Handbuch suchen';
+$string['searchplaceholder'] = 'Verfahren, Richtlinien, Leitfäden und Formulare suchen…';
+$string['alltypes'] = 'Alle Typen';
+$string['allcategories'] = 'Alle Kategorien';
+$string['searchresultcount'] = '{$a} Seiten gefunden';
+$string['noresults'] = 'Keine Seite entspricht deiner Suche.';
+
+// Revision history and comparison.
+$string['comparerevisions'] = 'Versionen vergleichen';
+$string['comparingversions'] = 'Vergleich v{$a->from} → v{$a->to}';
+$string['difflegend'] = 'Ergänzungen sind hervorgehoben, Entferntes ist durchgestrichen.';
+$string['comparewithpublished'] = 'Mit der veröffentlichten Version vergleichen';
+$string['comparewithprevious'] = 'Mit der Basisversion vergleichen';
+$string['viewchanges'] = 'Änderungen ansehen';
+$string['nocontentdiff'] = 'Keine Textänderungen zwischen diesen Versionen.';
+$string['createdby'] = 'Erstellt von';
+$string['backtopage'] = 'Zurück zur Seite';
+
 // External API.
 $string['errorexcludedpage'] = 'Diese Seite ist vom externen und KI-Zugriff ausgeschlossen.';
 $string['errormetadataonly'] = 'Diese Seite ist für externen und KI-Zugriff auf Metadaten beschränkt; ihr Inhalt kann über die API weder gelesen noch bearbeitet werden.';

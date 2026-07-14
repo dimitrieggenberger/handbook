@@ -25,6 +25,8 @@ and structural reference: page shell, area actions, CSS scoping, build script.
 - `category.php`: category listing
 - `view.php`: published-page reader (`?page=<slug-or-id>`)
 - `edit.php`: create page / edit its working draft, submit for review
+- `search.php`: dedicated handbook search with filters (spec §13.2)
+- `history.php` / `compare.php`: revision history and word-diff comparison (spec §11.4, `diff_service`)
 - `review.php`: review queue (approve, request changes, publish)
 - `manage/categories.php`: category management
 - `manage/import.php` + `classes/local/service/import_service.php`: JSON seed import (by slug, idempotent)

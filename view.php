@@ -203,6 +203,9 @@ if ($iseditorial) {
         . html_writer::link(new moodle_url('/local/handbook/edit.php', ['id' => $page->id]),
             s(get_string('editpage', 'local_handbook')))
         . ' · '
+        . html_writer::link(new moodle_url('/local/handbook/history.php', ['page' => $page->slug]),
+            s(get_string('revisionhistory', 'local_handbook')))
+        . ' · '
         . html_writer::link(new moodle_url('/local/handbook/review.php'),
             s(get_string('reviewqueue', 'local_handbook'))),
         ['class' => 'small text-muted']

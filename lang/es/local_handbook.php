@@ -186,6 +186,25 @@ $string['importrelationscreated'] = 'Relaciones creadas: {$a}';
 $string['importerrors'] = 'Avisos de la importación';
 $string['errorinvalidjson'] = 'El archivo subido no es JSON válido.';
 
+// Search.
+$string['searchhandbook'] = 'Buscar en el manual';
+$string['searchplaceholder'] = 'Buscar procedimientos, políticas, guías y formularios…';
+$string['alltypes'] = 'Todos los tipos';
+$string['allcategories'] = 'Todas las categorías';
+$string['searchresultcount'] = '{$a} páginas encontradas';
+$string['noresults'] = 'Ninguna página coincide con tu búsqueda.';
+
+// Revision history and comparison.
+$string['comparerevisions'] = 'Comparar revisiones';
+$string['comparingversions'] = 'Comparando v{$a->from} → v{$a->to}';
+$string['difflegend'] = 'Lo añadido aparece resaltado; lo eliminado, tachado.';
+$string['comparewithpublished'] = 'Comparar con la versión publicada';
+$string['comparewithprevious'] = 'Comparar con su versión base';
+$string['viewchanges'] = 'Ver cambios';
+$string['nocontentdiff'] = 'No hay cambios de texto entre estas versiones.';
+$string['createdby'] = 'Creada por';
+$string['backtopage'] = 'Volver a la página';
+
 // External API.
 $string['errorexcludedpage'] = 'Esta página está excluida del acceso externo y de IA.';
 $string['errormetadataonly'] = 'Esta página es de solo metadatos para el acceso externo y de IA; su contenido no puede leerse ni editarse por la API.';

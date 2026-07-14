@@ -186,6 +186,25 @@ $string['importrelationscreated'] = 'Relations created: {$a}';
 $string['importerrors'] = 'Import warnings';
 $string['errorinvalidjson'] = 'The uploaded file is not valid JSON.';
 
+// Search.
+$string['searchhandbook'] = 'Search the handbook';
+$string['searchplaceholder'] = 'Search procedures, policies, guides and forms…';
+$string['alltypes'] = 'All types';
+$string['allcategories'] = 'All categories';
+$string['searchresultcount'] = '{$a} pages found';
+$string['noresults'] = 'No pages match your search.';
+
+// Revision history and comparison.
+$string['comparerevisions'] = 'Compare revisions';
+$string['comparingversions'] = 'Comparing v{$a->from} → v{$a->to}';
+$string['difflegend'] = 'Additions are highlighted, removals struck through.';
+$string['comparewithpublished'] = 'Compare with the published version';
+$string['comparewithprevious'] = 'Compare with its base version';
+$string['viewchanges'] = 'View changes';
+$string['nocontentdiff'] = 'No text changes between these versions.';
+$string['createdby'] = 'Created by';
+$string['backtopage'] = 'Back to the page';
+
 // External API.
 $string['errorexcludedpage'] = 'This page is excluded from external and AI access.';
 $string['errormetadataonly'] = 'This page is metadata-only for external and AI access; its content cannot be read or drafted through the API.';

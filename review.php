@@ -122,6 +122,16 @@ foreach ($queue as $revision) {
             'small mb-2'
         );
     }
+    if ((int)$revision->baserevisionid) {
+        $body .= html_writer::div(
+            html_writer::link(new moodle_url('/local/handbook/compare.php', [
+                'page' => $revision->slug,
+                'from' => (int)$revision->baserevisionid,
+                'to' => $revision->id,
+            ]), s(get_string('viewchanges', 'local_handbook'))),
+            'small mb-2'
+        );
+    }
 
     // Action row.
     $actions = '';

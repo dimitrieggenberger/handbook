@@ -170,6 +170,12 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'iconclass' => 'fa-book-open',
             'visible' => true,
         ],
+        'search' => [
+            'label' => get_string('searchhandbook', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/search.php'),
+            'iconclass' => 'fa-magnifying-glass',
+            'visible' => true,
+        ],
     ];
 
     $managementitems = [
