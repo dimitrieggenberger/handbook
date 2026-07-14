@@ -154,7 +154,7 @@ if ($data = $form->get_data()) {
         'local_handbook', 'revision', (int)$revision->id);
 
     page_service::update_draft($revision, $data->content, (int)$data->contentformat,
-        trim((string)$data->changesummary));
+        trim((string)$data->changesummary), 0, (bool)($data->requiresreack ?? false));
 
     if ($submitforreview) {
         $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id], '*', MUST_EXIST);
@@ -193,6 +193,7 @@ if ($page) {
 $defaults->content = $revision->content ?? '';
 $defaults->contentformat = (int)($revision->contentformat ?? FORMAT_HTML);
 $defaults->changesummary = $revision->changesummary ?? '';
+$defaults->requiresreack = (int)($revision->requiresreacknowledgement ?? 0);
 $defaults->revisiontimemodified = (int)($revision->timemodified ?? 0);
 
 $defaults = file_prepare_standard_editor($defaults, 'content', $editoroptions, $context,

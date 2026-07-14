@@ -27,9 +27,11 @@
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
+use local_handbook\local\service\ack_service;
 use local_handbook\local\service\page_service;
 
 $pageparam = required_param('page', PARAM_ALPHANUMEXT);
+$action = optional_param('action', '', PARAM_ALPHA);
 
 $context = context_system::instance();
 local_handbook_require_view($context);
@@ -59,6 +61,22 @@ if ((!$revision || (int)$page->archived === 1) && !$iseditorial) {
     throw new moodle_exception('errorpagenotfound', 'local_handbook');
 }
 
+// Record a required-reading acknowledgement (spec 16).
+if ($action === 'acknowledge') {
+    require_sesskey();
+    require_capability('local/handbook:acknowledge', $context);
+    $pathid = optional_param('pathid', 0, PARAM_INT);
+    ack_service::acknowledge((int)$USER->id, $page, $pathid);
+    redirect(new moodle_url(local_handbook_page_url($page), [], 'confirmar'),
+        get_string('ackrecorded', 'local_handbook'));
+}
+
+$ackstatus = null;
+if ((int)$page->requiredreading && $revision
+        && has_capability('local/handbook:acknowledge', $context)) {
+    $ackstatus = ack_service::get_status((int)$USER->id, $page);
+}
+
 echo $OUTPUT->header();
 echo local_handbook_render_area_actions('home', $context);
 
@@ -77,6 +95,29 @@ echo local_handbook_render_page_heading(format_string($page->title), $actions);
 
 if ((int)$page->archived === 1) {
     echo html_writer::div(s(get_string('archivedpage', 'local_handbook')), 'alert alert-warning');
+}
+
+// Required-reading status notice (spec 16; mirrors the reader mockups).
+if ($ackstatus !== null) {
+    if ($ackstatus->status === ack_service::STATUS_CONFIRMED) {
+        echo html_writer::div(
+            html_writer::tag('i', '', ['class' => 'fa-solid fa-circle-check me-2', 'aria-hidden' => 'true'])
+            . s(get_string('ackconfirmednotice', 'local_handbook', (object)[
+                'version' => (int)$revision->versionnumber,
+                'date' => userdate((int)$ackstatus->ack->timeacknowledged,
+                    get_string('strftimedate', 'langconfig')),
+            ])),
+            'alert alert-success', ['role' => 'status']);
+    } else {
+        $stringkey = $ackstatus->status === ack_service::STATUS_RECONFIRM
+            ? 'ackreconfirmnotice' : 'ackpendingnotice';
+        echo html_writer::div(
+            html_writer::tag('i', '', ['class' => 'fa-solid fa-circle-info me-2', 'aria-hidden' => 'true'])
+            . s(get_string($stringkey, 'local_handbook', (int)$revision->versionnumber)) . ' '
+            . html_writer::link('#confirmar', s(get_string('gotoconfirmation', 'local_handbook')),
+                ['class' => 'alert-link']),
+            'alert alert-info', ['role' => 'status']);
+    }
 }
 
 // Notice for editors when a newer working revision exists.
@@ -116,6 +157,53 @@ if ($revision) {
     echo local_handbook_render_revision_content($revision, $context);
 } else {
     echo html_writer::div(s(get_string('notpublished', 'local_handbook')), 'alert alert-info');
+}
+
+// Confirmation card (spec 16; mirrors the reader mockups).
+if ($ackstatus !== null) {
+    $cardbody = html_writer::tag('h3', s(get_string('readingconfirmation', 'local_handbook')),
+        ['class' => 'h5 mb-2']);
+
+    if ($ackstatus->status === ack_service::STATUS_CONFIRMED) {
+        $cardbody .= html_writer::tag('p',
+            html_writer::tag('i', '', ['class' => 'fa-solid fa-circle-check text-success me-2',
+                'aria-hidden' => 'true'])
+            . s(get_string('ackconfirmedrecord', 'local_handbook', (object)[
+                'date' => userdate((int)$ackstatus->ack->timeacknowledged,
+                    get_string('strftimedate', 'langconfig')),
+                'version' => (int)$DB->get_field('local_handbook_revision', 'versionnumber',
+                    ['id' => $ackstatus->ack->revisionid]),
+            ])), ['class' => 'mb-1']);
+        $cardbody .= html_writer::tag('p', s(get_string('ackrecordinfo', 'local_handbook')),
+            ['class' => 'text-muted small mb-0']);
+    } else {
+        $cardbody .= html_writer::tag('p', s(get_string('ackrecordinfo', 'local_handbook')),
+            ['class' => 'text-muted small']);
+        $cardbody .= html_writer::start_tag('form', [
+            'method' => 'post',
+            'action' => local_handbook_page_url($page)->out(false),
+        ]);
+        $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action',
+            'value' => 'acknowledge']);
+        $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',
+            'value' => sesskey()]);
+        $cardbody .= html_writer::div(
+            html_writer::empty_tag('input', ['type' => 'checkbox', 'id' => 'ack-check',
+                'class' => 'form-check-input', 'required' => 'required'])
+            . html_writer::tag('label',
+                s(get_string('ackcheckboxlabel', 'local_handbook', format_string($page->title))),
+                ['for' => 'ack-check', 'class' => 'form-check-label']),
+            'form-check mb-3'
+        );
+        $cardbody .= html_writer::tag('button',
+            html_writer::tag('i', '', ['class' => 'fa-solid fa-check me-2', 'aria-hidden' => 'true'])
+            . s(get_string('confirmreading', 'local_handbook')),
+            ['type' => 'submit', 'class' => 'btn btn-primary']);
+        $cardbody .= html_writer::end_tag('form');
+    }
+
+    echo html_writer::div(html_writer::div($cardbody, 'card-body'),
+        'card mt-4 local-handbook-ack', ['id' => 'confirmar']);
 }
 
 echo html_writer::end_div(); // .col-lg-8.

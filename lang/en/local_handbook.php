@@ -186,6 +186,54 @@ $string['importrelationscreated'] = 'Relations created: {$a}';
 $string['importerrors'] = 'Import warnings';
 $string['errorinvalidjson'] = 'The uploaded file is not valid JSON.';
 
+// Required-reading acknowledgements (spec 16).
+$string['acknowledgereading'] = 'Acknowledge reading';
+$string['readingconfirmation'] = 'Reading confirmation';
+$string['ackpendingnotice'] = 'This page is required reading and you have not yet confirmed the current version (v{$a}).';
+$string['ackreconfirmnotice'] = 'This page is required reading and a materially changed version (v{$a}) needs your renewed confirmation.';
+$string['ackconfirmednotice'] = 'You confirmed reading the current version (v{$a->version}) on {$a->date}.';
+$string['gotoconfirmation'] = 'Go to the reading confirmation';
+$string['ackcheckboxlabel'] = 'I have read and understood the current version of "{$a}".';
+$string['confirmreading'] = 'Confirm reading';
+$string['ackrecorded'] = 'Your reading confirmation was recorded.';
+$string['ackconfirmedrecord'] = 'Confirmed on {$a->date} · published version v{$a->version}';
+$string['ackconfirmedshort'] = 'Confirmed · {$a}';
+$string['ackrecordinfo'] = 'The confirmation is recorded with your user, the published version of the page and the date. It does not replace knowledge assessments in Moodle.';
+$string['requiresreack'] = 'Requires renewed acknowledgement when published';
+$string['requiresreack_help'] = 'Tick for materially changed versions of required-reading pages: after publication, everyone must confirm reading again. Leave unticked for minor corrections.';
+$string['errornotrequiredreading'] = 'This page is not marked as required reading.';
+
+// Reading paths (spec 15).
+$string['myreadingpath'] = 'My reading path';
+$string['managepaths'] = 'Manage reading paths';
+$string['newpath'] = 'New reading path';
+$string['editpath'] = 'Edit reading path';
+$string['pathname'] = 'Path name';
+$string['schoolyear'] = 'School year';
+$string['pathitems'] = 'Path items';
+$string['sectionname'] = 'Section';
+$string['additem'] = 'Add item';
+$string['pathsaved'] = 'Reading path saved.';
+$string['pathdeleted'] = 'Reading path deleted.';
+$string['confirmdeletepath'] = 'Delete the reading path "{$a}" and all its items? Recorded acknowledgements are kept.';
+$string['pathitemcount'] = '{$a} items';
+$string['nopathsyet'] = 'No active reading paths yet.';
+$string['emptypath'] = 'This reading path has no items yet.';
+$string['pathprogress'] = '{$a->confirmed} of {$a->total} required pages confirmed';
+$string['sectionprogress'] = '{$a->confirmed} of {$a->total} confirmed';
+$string['optionalitem'] = 'Optional';
+$string['reconfirmitem'] = 'Reconfirm: new version published';
+$string['pendingitem'] = 'Pending';
+$string['readitem'] = 'Reading';
+$string['connectedquiz'] = 'Moodle quiz';
+$string['importpathscreated'] = 'Reading paths created: {$a}';
+$string['importpathsupdated'] = 'Reading paths updated: {$a}';
+
+// Privacy API (acknowledgements).
+$string['privacy:metadata:local_handbook_ack'] = 'Required-reading acknowledgements record which user confirmed which published revision and when.';
+$string['privacy:metadata:local_handbook_ack:userid'] = 'The user who confirmed reading.';
+$string['privacy:metadata:local_handbook_ack:timeacknowledged'] = 'When the confirmation was recorded.';
+
 // Search.
 $string['searchhandbook'] = 'Search the handbook';
 $string['searchplaceholder'] = 'Search procedures, policies, guides and forms…';

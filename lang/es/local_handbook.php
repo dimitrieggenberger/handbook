@@ -186,6 +186,54 @@ $string['importrelationscreated'] = 'Relaciones creadas: {$a}';
 $string['importerrors'] = 'Avisos de la importación';
 $string['errorinvalidjson'] = 'El archivo subido no es JSON válido.';
 
+// Required-reading acknowledgements (spec 16).
+$string['acknowledgereading'] = 'Confirmar lectura';
+$string['readingconfirmation'] = 'Confirmación de lectura';
+$string['ackpendingnotice'] = 'Esta página es de lectura obligatoria y todavía no has confirmado la versión vigente (v{$a}).';
+$string['ackreconfirmnotice'] = 'Esta página es de lectura obligatoria y una versión con cambios sustanciales (v{$a}) requiere tu nueva confirmación.';
+$string['ackconfirmednotice'] = 'Confirmaste la lectura de la versión vigente (v{$a->version}) el {$a->date}.';
+$string['gotoconfirmation'] = 'Ir a la confirmación de lectura';
+$string['ackcheckboxlabel'] = 'He leído y comprendido la versión vigente de «{$a}».';
+$string['confirmreading'] = 'Confirmar lectura';
+$string['ackrecorded'] = 'Tu confirmación de lectura quedó registrada.';
+$string['ackconfirmedrecord'] = 'Confirmada el {$a->date} · versión publicada v{$a->version}';
+$string['ackconfirmedshort'] = 'Confirmada · {$a}';
+$string['ackrecordinfo'] = 'La confirmación queda registrada con tu usuario, la versión publicada de la página y la fecha. No sustituye las evaluaciones de conocimiento en Moodle.';
+$string['requiresreack'] = 'Requiere nueva confirmación al publicarse';
+$string['requiresreack_help'] = 'Marca esta casilla en versiones con cambios sustanciales de páginas de lectura obligatoria: tras la publicación, todos deberán confirmar la lectura de nuevo. Déjala sin marcar para correcciones menores.';
+$string['errornotrequiredreading'] = 'Esta página no está marcada como lectura obligatoria.';
+
+// Reading paths (spec 15).
+$string['myreadingpath'] = 'Mi ruta de lectura';
+$string['managepaths'] = 'Gestionar rutas de lectura';
+$string['newpath'] = 'Nueva ruta de lectura';
+$string['editpath'] = 'Editar ruta de lectura';
+$string['pathname'] = 'Nombre de la ruta';
+$string['schoolyear'] = 'Año escolar';
+$string['pathitems'] = 'Elementos de la ruta';
+$string['sectionname'] = 'Sección';
+$string['additem'] = 'Añadir elemento';
+$string['pathsaved'] = 'Ruta de lectura guardada.';
+$string['pathdeleted'] = 'Ruta de lectura eliminada.';
+$string['confirmdeletepath'] = '¿Eliminar la ruta de lectura «{$a}» y todos sus elementos? Las confirmaciones registradas se conservan.';
+$string['pathitemcount'] = '{$a} elementos';
+$string['nopathsyet'] = 'Todavía no hay rutas de lectura activas.';
+$string['emptypath'] = 'Esta ruta de lectura todavía no tiene elementos.';
+$string['pathprogress'] = '{$a->confirmed} de {$a->total} páginas obligatorias confirmadas';
+$string['sectionprogress'] = '{$a->confirmed} de {$a->total} confirmadas';
+$string['optionalitem'] = 'Opcional';
+$string['reconfirmitem'] = 'Reconfirmar: nueva versión publicada';
+$string['pendingitem'] = 'Pendiente';
+$string['readitem'] = 'Lectura';
+$string['connectedquiz'] = 'Cuestionario Moodle';
+$string['importpathscreated'] = 'Rutas de lectura creadas: {$a}';
+$string['importpathsupdated'] = 'Rutas de lectura actualizadas: {$a}';
+
+// Privacy API (acknowledgements).
+$string['privacy:metadata:local_handbook_ack'] = 'Las confirmaciones de lectura obligatoria registran qué usuario confirmó qué revisión publicada y cuándo.';
+$string['privacy:metadata:local_handbook_ack:userid'] = 'El usuario que confirmó la lectura.';
+$string['privacy:metadata:local_handbook_ack:timeacknowledged'] = 'Cuándo se registró la confirmación.';
+
 // Search.
 $string['searchhandbook'] = 'Buscar en el manual';
 $string['searchplaceholder'] = 'Buscar procedimientos, políticas, guías y formularios…';

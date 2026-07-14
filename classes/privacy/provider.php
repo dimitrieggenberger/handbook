@@ -59,6 +59,12 @@ class provider implements \core_privacy\local\metadata\provider {
             'publishedby' => 'privacy:metadata:local_handbook_revision:publishedby',
         ], 'privacy:metadata:local_handbook_revision');
 
+        $collection->add_database_table('local_handbook_ack', [
+            'userid' => 'privacy:metadata:local_handbook_ack:userid',
+            'revisionid' => 'privacy:metadata:local_handbook_ack',
+            'timeacknowledged' => 'privacy:metadata:local_handbook_ack:timeacknowledged',
+        ], 'privacy:metadata:local_handbook_ack');
+
         return $collection;
     }
 }

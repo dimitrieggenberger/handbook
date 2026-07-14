@@ -186,6 +186,54 @@ $string['importrelationscreated'] = 'Beziehungen erstellt: {$a}';
 $string['importerrors'] = 'Importhinweise';
 $string['errorinvalidjson'] = 'Die hochgeladene Datei ist kein gültiges JSON.';
 
+// Required-reading acknowledgements (spec 16).
+$string['acknowledgereading'] = 'Lektüre bestätigen';
+$string['readingconfirmation'] = 'Lesebestätigung';
+$string['ackpendingnotice'] = 'Diese Seite ist Pflichtlektüre; die aktuelle Version (v{$a}) wurde noch nicht bestätigt.';
+$string['ackreconfirmnotice'] = 'Diese Seite ist Pflichtlektüre; eine wesentlich geänderte Version (v{$a}) erfordert eine erneute Bestätigung.';
+$string['ackconfirmednotice'] = 'Du hast die aktuelle Version (v{$a->version}) am {$a->date} bestätigt.';
+$string['gotoconfirmation'] = 'Zur Lesebestätigung';
+$string['ackcheckboxlabel'] = 'Ich habe die aktuelle Version von „{$a}“ gelesen und verstanden.';
+$string['confirmreading'] = 'Lektüre bestätigen';
+$string['ackrecorded'] = 'Deine Lesebestätigung wurde erfasst.';
+$string['ackconfirmedrecord'] = 'Bestätigt am {$a->date} · veröffentlichte Version v{$a->version}';
+$string['ackconfirmedshort'] = 'Bestätigt · {$a}';
+$string['ackrecordinfo'] = 'Die Bestätigung wird mit Nutzer, veröffentlichter Version und Datum erfasst. Sie ersetzt keine Wissensüberprüfungen in Moodle.';
+$string['requiresreack'] = 'Erfordert bei Veröffentlichung erneute Bestätigung';
+$string['requiresreack_help'] = 'Bei wesentlich geänderten Versionen von Pflichtlektüre-Seiten ankreuzen: Nach der Veröffentlichung müssen alle die Lektüre erneut bestätigen. Für kleinere Korrekturen nicht ankreuzen.';
+$string['errornotrequiredreading'] = 'Diese Seite ist nicht als Pflichtlektüre markiert.';
+
+// Reading paths (spec 15).
+$string['myreadingpath'] = 'Mein Lesepfad';
+$string['managepaths'] = 'Lesepfade verwalten';
+$string['newpath'] = 'Neuer Lesepfad';
+$string['editpath'] = 'Lesepfad bearbeiten';
+$string['pathname'] = 'Name des Pfads';
+$string['schoolyear'] = 'Schuljahr';
+$string['pathitems'] = 'Pfadelemente';
+$string['sectionname'] = 'Abschnitt';
+$string['additem'] = 'Element hinzufügen';
+$string['pathsaved'] = 'Lesepfad gespeichert.';
+$string['pathdeleted'] = 'Lesepfad gelöscht.';
+$string['confirmdeletepath'] = 'Lesepfad „{$a}“ mit allen Elementen löschen? Erfasste Bestätigungen bleiben erhalten.';
+$string['pathitemcount'] = '{$a} Elemente';
+$string['nopathsyet'] = 'Noch keine aktiven Lesepfade.';
+$string['emptypath'] = 'Dieser Lesepfad enthält noch keine Elemente.';
+$string['pathprogress'] = '{$a->confirmed} von {$a->total} Pflichtseiten bestätigt';
+$string['sectionprogress'] = '{$a->confirmed} von {$a->total} bestätigt';
+$string['optionalitem'] = 'Optional';
+$string['reconfirmitem'] = 'Erneut bestätigen: neue Version veröffentlicht';
+$string['pendingitem'] = 'Ausstehend';
+$string['readitem'] = 'Lektüre';
+$string['connectedquiz'] = 'Moodle-Test';
+$string['importpathscreated'] = 'Lesepfade erstellt: {$a}';
+$string['importpathsupdated'] = 'Lesepfade aktualisiert: {$a}';
+
+// Privacy API (acknowledgements).
+$string['privacy:metadata:local_handbook_ack'] = 'Pflichtlektüre-Bestätigungen erfassen, welche Person welche veröffentlichte Version wann bestätigt hat.';
+$string['privacy:metadata:local_handbook_ack:userid'] = 'Nutzer/in, die die Lektüre bestätigt hat.';
+$string['privacy:metadata:local_handbook_ack:timeacknowledged'] = 'Zeitpunkt der Bestätigung.';
+
 // Search.
 $string['searchhandbook'] = 'Im Handbuch suchen';
 $string['searchplaceholder'] = 'Verfahren, Richtlinien, Leitfäden und Formulare suchen…';

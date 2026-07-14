@@ -72,6 +72,8 @@ class import_service {
             'pagesupdated' => 0,
             'pagespublished' => 0,
             'relationscreated' => 0,
+            'pathscreated' => 0,
+            'pathsupdated' => 0,
             'errors' => [],
         ];
 
@@ -87,7 +89,85 @@ class import_service {
             self::import_relation((object)$relation, $userid, $report, $index);
         }
 
+        foreach ((array)($seed->paths ?? []) as $index => $path) {
+            self::import_path((object)$path, $userid, $report, $index);
+        }
+
         return $report;
+    }
+
+    /**
+     * Create or update a reading path and (declaratively) its items.
+     *
+     * Items are replaced from the seed on every import, so the seed file is
+     * the single description of the path's structure.
+     *
+     * @param stdClass $data Seed entry.
+     * @param int $userid Acting user.
+     * @param stdClass $report Report to update.
+     * @param int $index Entry position for error messages.
+     * @return void
+     */
+    private static function import_path(stdClass $data, int $userid, stdClass $report, int $index): void {
+        global $DB;
+
+        $slug = page_service::slugify((string)($data->slug ?? ($data->name ?? '')));
+        $name = trim((string)($data->name ?? ''));
+        if ($slug === '' || $name === '') {
+            $report->errors[] = "paths[$index]: missing slug or name";
+            return;
+        }
+
+        $now = time();
+        $existing = $DB->get_record('local_handbook_path', ['slug' => $slug]);
+
+        $record = new stdClass();
+        $record->name = $name;
+        $record->description = (string)($data->description ?? '');
+        $record->descriptionformat = FORMAT_HTML;
+        $record->audiencejson = '';
+        $record->schoolyear = (string)($data->schoolyear ?? '');
+        $record->active = (int)($data->active ?? 1);
+        $record->quizcmid = (int)($data->quizcmid ?? 0);
+        $record->timemodified = $now;
+        $record->modifiedby = $userid;
+
+        if ($existing) {
+            $record->id = $existing->id;
+            $DB->update_record('local_handbook_path', $record);
+            $pathid = (int)$existing->id;
+            $report->pathsupdated++;
+        } else {
+            $record->slug = $slug;
+            $record->timecreated = $now;
+            $record->createdby = $userid;
+            $pathid = (int)$DB->insert_record('local_handbook_path', $record);
+            $report->pathscreated++;
+        }
+
+        // Declarative items: replace with the seed's list.
+        $DB->delete_records('local_handbook_pathitem', ['pathid' => $pathid]);
+        $sortorder = 10;
+        foreach ((array)($data->items ?? []) as $itemindex => $item) {
+            $item = (object)$item;
+            $pageslug = trim((string)($item->page ?? ''));
+            $pageid = $pageslug !== ''
+                ? (int)$DB->get_field('local_handbook_page', 'id', ['slug' => $pageslug])
+                : 0;
+            if (!$pageid) {
+                $report->errors[] = "paths[$index] ($slug) items[$itemindex]: unknown page '$pageslug'";
+                continue;
+            }
+            $DB->insert_record('local_handbook_pathitem', (object)[
+                'pathid' => $pathid,
+                'pageid' => $pageid,
+                'sectionname' => (string)($item->section ?? ''),
+                'sortorder' => (int)($item->sortorder ?? $sortorder),
+                'required' => (int)($item->required ?? 1),
+                'quizcmid' => (int)($item->quizcmid ?? 0),
+            ]);
+            $sortorder += 10;
+        }
     }
 
     /**

@@ -163,6 +163,8 @@ function local_handbook_render_page_heading(string $title, string $actions = '')
  * @return string
  */
 function local_handbook_render_area_actions(string $currentpage, context_system $context): string {
+    global $DB;
+
     $tabitems = [
         'home' => [
             'label' => get_string('pluginname', 'local_handbook'),
@@ -175,6 +177,12 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/search.php'),
             'iconclass' => 'fa-magnifying-glass',
             'visible' => true,
+        ],
+        'path' => [
+            'label' => get_string('myreadingpath', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/path.php'),
+            'iconclass' => 'fa-route',
+            'visible' => $DB->record_exists('local_handbook_path', ['active' => 1]),
         ],
     ];
 
@@ -189,6 +197,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'label' => get_string('managecategories', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/manage/categories.php'),
             'visible' => has_capability('local/handbook:managecategories', $context),
+        ],
+        'paths' => [
+            'label' => get_string('managepaths', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/paths.php'),
+            'visible' => has_capability('local/handbook:managepaths', $context),
         ],
         'import' => [
             'label' => get_string('importseed', 'local_handbook'),
@@ -226,7 +239,7 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
     }
 
     if ($dropdownitems !== '') {
-        $isgroupactive = in_array($currentpage, ['reviewqueue', 'categories', 'import'], true);
+        $isgroupactive = in_array($currentpage, ['reviewqueue', 'categories', 'paths', 'import'], true);
         $toggleclasses = 'nav-link d-flex align-items-center';
         $toggleclasses .= $isgroupactive ? ' active' : '';
 

@@ -166,6 +166,26 @@
     }
   ],
 
+  "paths": [
+    {
+      "slug": "ser-docente-en-europaschule-2026-2027",
+      "name": "Ser docente en EuropaSchule 2026-2027",
+      "schoolyear": "2026-2027",
+      "description": "Ruta de inducción docente (especificación §15.2). Se completará con más páginas a medida que se publiquen.",
+      "active": 1,
+      "items": [
+        {"page": "politica-de-convivencia-escolar", "section": "2. Cultura profesional y conducta", "required": 1},
+        {"page": "protocolo-de-proteccion-del-menor", "section": "4. Relación con estudiantes y protección del menor", "required": 1},
+        {"page": "jornada-escolar-2026-2027", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 1},
+        {"page": "supervision-durante-los-recreos", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 1},
+        {"page": "guia-rapida-turno-de-patio-en-1-pagina", "section": "5. Rutinas diarias, transiciones y supervisión", "required": 0},
+        {"page": "registro-y-seguimiento-de-incidentes", "section": "7. Disciplina, incidentes y quejas", "required": 1},
+        {"page": "manual-del-docente", "section": "6. Responsabilidades de docente guía y ambiente de aula", "required": 0},
+        {"page": "comunicacion-con-familias", "section": "11. Comunicación con familias y escritura institucional", "required": 1}
+      ]
+    }
+  ],
+
   "relations": [
     {"source": "supervision-durante-los-recreos", "type": "implements", "target": "politica-de-convivencia-escolar"},
     {"source": "registro-y-seguimiento-de-incidentes", "type": "implements", "target": "politica-de-convivencia-escolar"},

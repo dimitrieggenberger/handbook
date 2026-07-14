@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.5.0 (2026-07-14)
+
+Phase 4: reading paths and required-reading acknowledgements.
+
+- Schema + upgrade step for path, pathitem and ack tables (§20.5–20.7).
+- Acknowledgements (§16): confirmation card and status notices in the
+  reader, recorded per user and published revision; older confirmations
+  stay valid until a version published with "requires renewed
+  acknowledgement" (editable flag on drafts) demands reconfirmation.
+- Reading paths (§15): path.php with sections, per-item status, progress
+  bar and quiz links; manage/paths.php CRUD with item management; "Mi ruta
+  de lectura" tab appears once an active path exists.
+- Seed importer supports declarative paths; the initial seed now includes
+  the "Ser docente en EuropaSchule 2026-2027" induction path.
+- page_acknowledged event, ack privacy metadata, EN/ES/DE strings,
+  PHPUnit coverage for the acknowledgement lifecycle; path and ack styles
+  ship in styles.css (mockup candidate blocks trimmed).
+- Deferred (recorded, spec §32): audience assignment of paths (all active
+  paths visible to all staff for now) and the completion report.
+
 ## 0.4.0 (2026-07-14)
 
 Reader search and revision comparison.

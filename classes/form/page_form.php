@@ -89,6 +89,11 @@ class page_form extends \moodleform {
 
         $mform->addElement('advcheckbox', 'requiredreading', get_string('requiredreading', 'local_handbook'));
 
+        $mform->addElement('advcheckbox', 'requiresreack',
+            get_string('requiresreack', 'local_handbook'));
+        $mform->addHelpButton('requiresreack', 'requiresreack', 'local_handbook');
+        $mform->hideIf('requiresreack', 'requiredreading', 'notchecked');
+
         $aiaccesslevels = [];
         foreach (page_service::ai_access_levels() as $level) {
             $aiaccesslevels[$level] = get_string('aiaccess_' . $level, 'local_handbook');

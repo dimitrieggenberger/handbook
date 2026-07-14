@@ -51,7 +51,8 @@ if ($form->is_cancelled()) {
     if (!is_object($seed)) {
         $report = (object)['errors' => [get_string('errorinvalidjson', 'local_handbook')],
             'categoriescreated' => 0, 'categoriesupdated' => 0, 'pagescreated' => 0,
-            'pagesupdated' => 0, 'pagespublished' => 0, 'relationscreated' => 0];
+            'pagesupdated' => 0, 'pagespublished' => 0, 'relationscreated' => 0,
+            'pathscreated' => 0, 'pathsupdated' => 0];
     } else {
         $report = import_service::import($seed, !empty($data->publishonimport));
     }
@@ -74,6 +75,8 @@ if ($report !== null) {
         'importpagesupdated' => $report->pagesupdated,
         'importpagespublished' => $report->pagespublished,
         'importrelationscreated' => $report->relationscreated,
+        'importpathscreated' => $report->pathscreated,
+        'importpathsupdated' => $report->pathsupdated,
     ];
     foreach ($counters as $stringkey => $count) {
         $lines .= html_writer::tag('li', s(get_string($stringkey, 'local_handbook', $count)));

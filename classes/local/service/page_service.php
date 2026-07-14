@@ -248,10 +248,12 @@ class page_service {
      * @param int $contentformat Content format.
      * @param string $changesummary Change summary (may be empty until submit).
      * @param int $userid Acting user (0 = current user).
+     * @param bool|null $requiresreack Whether publishing this revision demands
+     *        renewed acknowledgements (null = leave unchanged, spec 16).
      * @return void
      */
     public static function update_draft(stdClass $revision, string $content, int $contentformat,
-            string $changesummary, int $userid = 0): void {
+            string $changesummary, int $userid = 0, ?bool $requiresreack = null): void {
         global $DB, $USER;
 
         $userid = $userid ?: (int)$USER->id;
@@ -273,6 +275,9 @@ class page_service {
         $update->plaintext = html_to_text($content, 0, false);
         $update->contenthash = sha1($content);
         $update->changesummary = $changesummary;
+        if ($requiresreack !== null) {
+            $update->requiresreacknowledgement = (int)$requiresreack;
+        }
         $update->timemodified = time();
         $update->modifiedby = $userid;
         $DB->update_record('local_handbook_revision', $update);
