@@ -203,5 +203,55 @@
         <INDEX NAME="pagetime" UNIQUE="false" FIELDS="pageid, timeacknowledged"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_handbook_finding" COMMENT="Quality findings from humans, AI tools and scheduled audits (specification 19)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="findingtype" TYPE="char" LENGTH="40" NOTNULL="true"/>
+        <FIELD NAME="severity" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="medium"/>
+        <FIELD NAME="confidence" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="medium"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="open"/>
+        <FIELD NAME="summary" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="explanation" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="recommendation" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="source" TYPE="char" LENGTH="40" NOTNULL="true" DEFAULT="human"/>
+        <FIELD NAME="externalreference" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT=""/>
+        <FIELD NAME="assigneduserid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="resolutionnote" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="resolvedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timeresolved" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
+        <INDEX NAME="typestatus" UNIQUE="false" FIELDS="findingtype, status"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_findpage" COMMENT="Pages affected by a finding, with optional anchor and excerpt (specification 19.2)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="findingid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="anchor" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT=""/>
+        <FIELD NAME="excerpt" TYPE="text" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="findingid" TYPE="foreign" FIELDS="findingid" REFTABLE="local_handbook_finding" REFFIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="findingpage" UNIQUE="false" FIELDS="findingid, pageid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

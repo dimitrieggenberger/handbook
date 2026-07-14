@@ -29,6 +29,7 @@ and structural reference: page shell, area actions, CSS scoping, build script.
 - `path.php` / `manage/paths.php`: reading paths (spec §15); `ack_service` + confirmation card in `view.php` (spec §16)
 - `history.php` / `compare.php`: revision history and word-diff comparison (spec §11.4, `diff_service`)
 - `review.php`: review queue (approve, request changes, publish)
+- `report.php` / `manage/findings.php`: quality findings (spec §19, `finding_service`)
 - `manage/categories.php`: category management
 - `manage/import.php` + `classes/local/service/import_service.php`: JSON seed import (by slug, idempotent)
 - `settings.php`: bootstrap mode (direct publish during initial population; off = full workflow)

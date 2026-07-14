@@ -253,6 +253,47 @@ $string['nocontentdiff'] = 'No hay cambios de texto entre estas versiones.';
 $string['createdby'] = 'Creada por';
 $string['backtopage'] = 'Volver a la página';
 
+// Quality findings (spec 19).
+$string['reportproblem'] = 'Reportar un error';
+$string['reportintro'] = 'Describe lo que encontraste. Tu reporte crea un hallazgo de calidad, registrado con tu usuario y la versión publicada; el equipo editorial lo clasifica y registra la resolución.';
+$string['problemtype'] = 'Tipo de problema';
+$string['affectedsection'] = 'Sección afectada (opcional)';
+$string['problemdescription'] = 'Descripción';
+$string['reportplaceholder'] = 'Qué encontraste y, si lo sabes, cómo debería ser…';
+$string['sendreport'] = 'Enviar reporte';
+$string['reportthanks'] = 'Gracias. Se creó el hallazgo #F-{$a} y el equipo editorial fue notificado.';
+$string['managefindings'] = 'Hallazgos de calidad';
+$string['nofindings'] = 'Ningún hallazgo coincide con este filtro.';
+$string['findingupdated'] = 'Hallazgo actualizado.';
+$string['resolutionnote'] = 'Nota de resolución';
+$string['filteropenish'] = 'Abiertos + en revisión';
+$string['findingtype_contradiction'] = 'Posible contradicción';
+$string['findingtype_duplicate'] = 'Contenido duplicado o solapado';
+$string['findingtype_ambiguous_responsibility'] = 'Responsabilidad poco clara';
+$string['findingtype_missing_escalation'] = 'Falta la vía de escalamiento';
+$string['findingtype_missing_record'] = 'Falta un registro o formulario obligatorio';
+$string['findingtype_outdated_reference'] = 'Referencia desactualizada (rol, fecha o sistema)';
+$string['findingtype_incorrect_content'] = 'Información incorrecta';
+$string['findingtype_inconsistent_terminology'] = 'Terminología inconsistente';
+$string['findingtype_broken_link'] = 'Enlace interno roto';
+$string['findingtype_missing_owner'] = 'Falta responsable o aprobador';
+$string['findingtype_review_overdue'] = 'Fecha de revisión vencida';
+$string['findingtype_procedure_without_policy'] = 'Procedimiento sin política asociada';
+$string['findingtype_policy_without_procedure'] = 'Política sin procedimiento aplicable';
+$string['findingtype_modality_difference'] = 'Diferencia entre modalidades sin explicación';
+$string['findingtype_assessment_outdated'] = 'La evaluación conectada puede estar desactualizada';
+$string['findingtype_accessibility'] = 'Problema de accesibilidad o legibilidad';
+$string['findingtype_other'] = 'Otro';
+$string['findingstatus_open'] = 'Abierto';
+$string['findingstatus_under_review'] = 'En revisión';
+$string['findingstatus_accepted'] = 'Aceptado';
+$string['findingstatus_dismissed'] = 'Descartado';
+$string['findingstatus_resolved'] = 'Resuelto';
+$string['findingstatus_intentional_difference'] = 'Diferencia intencional';
+$string['scale_low'] = 'Baja';
+$string['scale_medium'] = 'Media';
+$string['scale_high'] = 'Alta';
+
 // External API.
 $string['errorexcludedpage'] = 'Esta página está excluida del acceso externo y de IA.';
 $string['errormetadataonly'] = 'Esta página es de solo metadatos para el acceso externo y de IA; su contenido no puede leerse ni editarse por la API.';

@@ -253,6 +253,47 @@ $string['nocontentdiff'] = 'No text changes between these versions.';
 $string['createdby'] = 'Created by';
 $string['backtopage'] = 'Back to the page';
 
+// Quality findings (spec 19).
+$string['reportproblem'] = 'Report a problem';
+$string['reportintro'] = 'Describe what you found. Your report creates a quality finding, recorded with your user and the published version; the editorial team triages it and records the resolution.';
+$string['problemtype'] = 'Problem type';
+$string['affectedsection'] = 'Affected section (optional)';
+$string['problemdescription'] = 'Description';
+$string['reportplaceholder'] = 'What did you find and, if you know, how should it be?';
+$string['sendreport'] = 'Send report';
+$string['reportthanks'] = 'Thank you. Finding #F-{$a} was created and the editorial team was notified.';
+$string['managefindings'] = 'Quality findings';
+$string['nofindings'] = 'No findings match this filter.';
+$string['findingupdated'] = 'Finding updated.';
+$string['resolutionnote'] = 'Resolution note';
+$string['filteropenish'] = 'Open + under review';
+$string['findingtype_contradiction'] = 'Possible contradiction';
+$string['findingtype_duplicate'] = 'Duplicate or overlapping content';
+$string['findingtype_ambiguous_responsibility'] = 'Ambiguous responsibility';
+$string['findingtype_missing_escalation'] = 'Missing escalation route';
+$string['findingtype_missing_record'] = 'Missing required record or form';
+$string['findingtype_outdated_reference'] = 'Outdated role, date or system reference';
+$string['findingtype_incorrect_content'] = 'Incorrect information';
+$string['findingtype_inconsistent_terminology'] = 'Inconsistent terminology';
+$string['findingtype_broken_link'] = 'Broken internal link';
+$string['findingtype_missing_owner'] = 'Missing owner or approver';
+$string['findingtype_review_overdue'] = 'Review date exceeded';
+$string['findingtype_procedure_without_policy'] = 'Procedure without a connected policy';
+$string['findingtype_policy_without_procedure'] = 'Policy without an implementable procedure';
+$string['findingtype_modality_difference'] = 'Unexplained difference across modalities';
+$string['findingtype_assessment_outdated'] = 'Connected assessment may be outdated';
+$string['findingtype_accessibility'] = 'Accessibility or readability concern';
+$string['findingtype_other'] = 'Other';
+$string['findingstatus_open'] = 'Open';
+$string['findingstatus_under_review'] = 'Under review';
+$string['findingstatus_accepted'] = 'Accepted';
+$string['findingstatus_dismissed'] = 'Dismissed';
+$string['findingstatus_resolved'] = 'Resolved';
+$string['findingstatus_intentional_difference'] = 'Intentional difference';
+$string['scale_low'] = 'Low';
+$string['scale_medium'] = 'Medium';
+$string['scale_high'] = 'High';
+
 // External API.
 $string['errorexcludedpage'] = 'This page is excluded from external and AI access.';
 $string['errormetadataonly'] = 'This page is metadata-only for external and AI access; its content cannot be read or drafted through the API.';

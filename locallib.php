@@ -203,6 +203,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/paths.php'),
             'visible' => has_capability('local/handbook:managepaths', $context),
         ],
+        'findings' => [
+            'label' => get_string('managefindings', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/findings.php'),
+            'visible' => has_capability('local/handbook:managefindings', $context),
+        ],
         'import' => [
             'label' => get_string('importseed', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/manage/import.php'),
@@ -239,7 +244,8 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
     }
 
     if ($dropdownitems !== '') {
-        $isgroupactive = in_array($currentpage, ['reviewqueue', 'categories', 'paths', 'import'], true);
+        $isgroupactive = in_array($currentpage,
+            ['reviewqueue', 'categories', 'paths', 'findings', 'import'], true);
         $toggleclasses = 'nav-link d-flex align-items-center';
         $toggleclasses .= $isgroupactive ? ' active' : '';
 

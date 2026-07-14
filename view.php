@@ -91,6 +91,12 @@ if (has_capability('local/handbook:edit', $context)) {
         ['class' => 'btn btn-outline-secondary btn-sm']
     );
 }
+$actions .= html_writer::link(
+    new moodle_url('/local/handbook/report.php', ['page' => $page->slug]),
+    html_writer::tag('i', '', ['class' => 'fa-solid fa-triangle-exclamation me-2', 'aria-hidden' => 'true'])
+        . s(get_string('reportproblem', 'local_handbook')),
+    ['class' => 'btn btn-outline-secondary btn-sm']
+);
 echo local_handbook_render_page_heading(format_string($page->title), $actions);
 
 if ((int)$page->archived === 1) {

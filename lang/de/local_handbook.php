@@ -253,6 +253,47 @@ $string['nocontentdiff'] = 'Keine Textänderungen zwischen diesen Versionen.';
 $string['createdby'] = 'Erstellt von';
 $string['backtopage'] = 'Zurück zur Seite';
 
+// Quality findings (spec 19).
+$string['reportproblem'] = 'Fehler melden';
+$string['reportintro'] = 'Beschreibe, was dir aufgefallen ist. Deine Meldung erzeugt einen Qualitätsbefund, erfasst mit deinem Nutzer und der veröffentlichten Version; die Redaktion sichtet ihn und dokumentiert die Lösung.';
+$string['problemtype'] = 'Art des Problems';
+$string['affectedsection'] = 'Betroffener Abschnitt (optional)';
+$string['problemdescription'] = 'Beschreibung';
+$string['reportplaceholder'] = 'Was ist dir aufgefallen und, falls bekannt, wie sollte es sein?';
+$string['sendreport'] = 'Meldung senden';
+$string['reportthanks'] = 'Danke. Befund #F-{$a} wurde erstellt und die Redaktion benachrichtigt.';
+$string['managefindings'] = 'Qualitätsbefunde';
+$string['nofindings'] = 'Keine Befunde entsprechen diesem Filter.';
+$string['findingupdated'] = 'Befund aktualisiert.';
+$string['resolutionnote'] = 'Lösungsnotiz';
+$string['filteropenish'] = 'Offen + in Prüfung';
+$string['findingtype_contradiction'] = 'Möglicher Widerspruch';
+$string['findingtype_duplicate'] = 'Doppelter oder überlappender Inhalt';
+$string['findingtype_ambiguous_responsibility'] = 'Unklare Zuständigkeit';
+$string['findingtype_missing_escalation'] = 'Fehlender Eskalationsweg';
+$string['findingtype_missing_record'] = 'Fehlendes Pflichtdokument oder Formular';
+$string['findingtype_outdated_reference'] = 'Veraltete Angabe (Rolle, Datum oder System)';
+$string['findingtype_incorrect_content'] = 'Falsche Information';
+$string['findingtype_inconsistent_terminology'] = 'Uneinheitliche Terminologie';
+$string['findingtype_broken_link'] = 'Defekter interner Link';
+$string['findingtype_missing_owner'] = 'Fehlende/r Verantwortliche/r oder Freigebende/r';
+$string['findingtype_review_overdue'] = 'Überprüfungsdatum überschritten';
+$string['findingtype_procedure_without_policy'] = 'Verfahren ohne zugehörige Richtlinie';
+$string['findingtype_policy_without_procedure'] = 'Richtlinie ohne umsetzbares Verfahren';
+$string['findingtype_modality_difference'] = 'Unerklärter Unterschied zwischen Modalitäten';
+$string['findingtype_assessment_outdated'] = 'Verbundener Test möglicherweise veraltet';
+$string['findingtype_accessibility'] = 'Barrierefreiheits- oder Lesbarkeitsproblem';
+$string['findingtype_other'] = 'Sonstiges';
+$string['findingstatus_open'] = 'Offen';
+$string['findingstatus_under_review'] = 'In Prüfung';
+$string['findingstatus_accepted'] = 'Akzeptiert';
+$string['findingstatus_dismissed'] = 'Verworfen';
+$string['findingstatus_resolved'] = 'Gelöst';
+$string['findingstatus_intentional_difference'] = 'Beabsichtigter Unterschied';
+$string['scale_low'] = 'Niedrig';
+$string['scale_medium'] = 'Mittel';
+$string['scale_high'] = 'Hoch';
+
 // External API.
 $string['errorexcludedpage'] = 'Diese Seite ist vom externen und KI-Zugriff ausgeschlossen.';
 $string['errormetadataonly'] = 'Diese Seite ist für externen und KI-Zugriff auf Metadaten beschränkt; ihr Inhalt kann über die API weder gelesen noch bearbeitet werden.';

@@ -79,6 +79,20 @@ $functions = [
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
     ],
 
+    // Findings (17.2, 17.3, 19). Advisory only, never change content.
+    'local_handbook_list_findings' => [
+        'classname' => 'local_handbook\external\list_findings',
+        'description' => 'List quality findings (default: open and under review).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_create_finding' => [
+        'classname' => 'local_handbook\external\create_finding',
+        'description' => 'Create an advisory quality finding linked to one or more pages.',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+
     // Draft functions (17.3). No publish function by design.
     'local_handbook_create_page_draft' => [
         'classname' => 'local_handbook\external\create_page_draft',

@@ -73,6 +73,7 @@ Read (§17.2) — require `apiaccess` + `view`:
 | `local_handbook_get_revision` | One revision with content when permitted (superseded needs `viewhistory`; working revisions need `edit`/`review`). |
 | `local_handbook_list_changes` | Pages modified since a timestamp; returns `servertime` as the next cursor. |
 | `local_handbook_list_relations` | Typed relations of a page, both directions. |
+| `local_handbook_list_findings` | Quality findings (default: open + under review), with affected pages. |
 
 Draft writes (§17.3) — additionally require `edit`:
 
@@ -82,6 +83,7 @@ Draft writes (§17.3) — additionally require `edit`:
 | `local_handbook_create_revision_draft` | New draft based on the published revision; `expectedpublishedrevisionid` guards against a stale base. |
 | `local_handbook_update_draft` | Update draft content; `expectedtimemodified` is mandatory (conflict = clear error, never overwrite). |
 | `local_handbook_submit_draft_for_review` | Move the draft into the human review queue. Change summary required. |
+| `local_handbook_create_finding` | Advisory quality finding (contradiction, outdated reference, …) citing one or more pages with anchors/excerpts. Never changes content (§19.3). |
 
 There is **no publish function**. Review, approval and publication are human
 UI actions.

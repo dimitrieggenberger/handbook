@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.6.1 (2026-07-14)
+
+- Fix upgrade failure "Key pageid collides with index page" on
+  local_handbook_findpage: removed the redundant single-column index that
+  duplicated the foreign key. The upgrade step is re-runnable; installs
+  interrupted by the error resume cleanly.
+
+## 0.6.0 (2026-07-14)
+
+Phase 5 (first slice): quality findings.
+
+- finding/findpage tables with upgrade step (§20.8–20.9).
+- finding_service: create + status transitions (open, under_review,
+  accepted, dismissed, resolved, intentional_difference, §19.3); findings
+  are advisory and never change page content.
+- report.php: "Reportar un error" from every reader page creates a
+  human-source finding linked to the page and published revision (§12.2).
+- manage/findings.php: dashboard with status filters, affected-page links,
+  inline status transitions with resolution notes.
+- API: local_handbook_list_findings and local_handbook_create_finding
+  (agents cite pages/anchors; AI-excluded pages filtered).
+- finding_created event, EN/ES/DE strings, PHPUnit coverage.
+
 ## 0.5.0 (2026-07-14)
 
 Phase 4: reading paths and required-reading acknowledgements.
