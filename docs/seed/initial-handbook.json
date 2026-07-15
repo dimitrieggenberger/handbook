@@ -1,4 +1,4 @@
-﻿{
+{
   "$comment": "Initial seed for local_handbook (spec 9.1 category tree, scaffold pages for every subcategory, and the full Ser docente 2026-2027 induction path per spec 15.2). Upload at /local/handbook/manage/import.php. Matching is by slug: re-importing updates instead of duplicating, and identical published content is left untouched. Pages marked [BORRADOR] are writing scaffolds: replace each bullet with final prose (with ChatGPT/Claude or by hand), then re-import or edit in Moodle.",
 
   "categories": [

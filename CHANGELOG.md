@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.2 (2026-07-14)
+
+- Fix "El archivo subido no es JSON válido" on seed import: the 0.11.1
+  seed file carried a UTF-8 BOM, which json_decode rejects. The seed is
+  BOM-free again and the importer now strips a leading BOM from any
+  uploaded file.
+
 ## 0.11.1 (2026-07-14)
 
 - Fix reader crash "Call to undefined function file_rewrite_pluginfile_urls":

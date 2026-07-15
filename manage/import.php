@@ -46,8 +46,10 @@ $report = null;
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/local/handbook/index.php'));
 } else if ($data = $form->get_data()) {
-    $json = $form->get_file_content('seedfile');
-    $seed = json_decode((string)$json);
+    $json = (string)$form->get_file_content('seedfile');
+    // Tolerate a UTF-8 BOM (editors and PowerShell often add one).
+    $json = preg_replace('/^\xEF\xBB\xBF/', '', $json);
+    $seed = json_decode($json);
     if (!is_object($seed)) {
         $report = (object)['errors' => [get_string('errorinvalidjson', 'local_handbook')],
             'categoriescreated' => 0, 'categoriesupdated' => 0, 'pagescreated' => 0,
