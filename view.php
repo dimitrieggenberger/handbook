@@ -41,6 +41,17 @@ if (ctype_digit($pageparam)) {
     $page = $DB->get_record('local_handbook_page', ['id' => (int)$pageparam]);
 } else {
     $page = $DB->get_record('local_handbook_page', ['slug' => $pageparam]);
+    // A retired slug still resolves: redirect to the page's current address
+    // so old links and bookmarks keep working (spec 7.3).
+    if (!$page) {
+        $alias = $DB->get_record('local_handbook_pagealias', ['oldslug' => $pageparam]);
+        if ($alias) {
+            $target = $DB->get_record('local_handbook_page', ['id' => $alias->pageid]);
+            if ($target) {
+                redirect(new moodle_url('/local/handbook/view.php', ['page' => $target->slug]));
+            }
+        }
+    }
 }
 if (!$page) {
     throw new moodle_exception('errorpagenotfound', 'local_handbook');

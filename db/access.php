@@ -170,6 +170,15 @@ $capabilities = [
         'archetypes' => [],
     ],
 
+    // Propose page relation edits through the API as change-set drafts
+    // (spec 5, 10). Propose-only; granted only to approved service accounts.
+    'local/handbook:apiproposerelations' => [
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+
     'local/handbook:manage' => [
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',

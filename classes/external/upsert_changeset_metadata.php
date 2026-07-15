@@ -48,6 +48,8 @@ class upsert_changeset_metadata extends external_api {
             'identifier' => new external_value(PARAM_ALPHANUMEXT, 'Page id or slug'),
             'metadata' => new external_single_structure([
                 'title' => new external_value(PARAM_TEXT, 'Proposed title', VALUE_OPTIONAL),
+                'slug' => new external_value(PARAM_TEXT,
+                    'Proposed slug; the old slug keeps resolving', VALUE_OPTIONAL),
                 'summary' => new external_value(PARAM_RAW, 'Proposed summary', VALUE_OPTIONAL),
                 'contenttype' => new external_value(PARAM_ALPHANUMEXT, 'Proposed content type', VALUE_OPTIONAL),
                 'authoritylevel' => new external_value(PARAM_INT, 'Proposed authority level (1-5)', VALUE_OPTIONAL),

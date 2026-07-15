@@ -43,6 +43,7 @@ $string['handbook:viewreports'] = 'Handbuchberichte ansehen';
 $string['handbook:manageapi'] = 'Externen Zugriff auf das Handbuch konfigurieren';
 $string['handbook:apiaccess'] = 'Externe Servicefunktionen des Handbuchs verwenden';
 $string['handbook:apiproposemetadata'] = 'Metadaten-Änderungen (Steckbrief) des Handbuchs über die API vorschlagen';
+$string['handbook:apiproposerelations'] = 'Beziehungsänderungen zwischen Handbuchseiten über die API vorschlagen';
 $string['handbook:manage'] = 'Das Handbuch-Plugin administrieren';
 
 // Navigation and page titles.
@@ -502,6 +503,7 @@ $string['changeitemapproved'] = 'Änderung freigegeben.';
 $string['changeitemapplied'] = 'Änderung angewendet und veröffentlicht.';
 $string['changeitemrejected'] = 'Änderung abgelehnt.';
 $string['metafield_title'] = 'Titel';
+$string['metafield_slug'] = 'Slug';
 $string['metafield_summary'] = 'Zusammenfassung';
 $string['metafield_contenttype'] = 'Inhaltstyp';
 $string['metafield_authoritylevel'] = 'Autoritätsstufe';
@@ -515,3 +517,22 @@ $string['errormetadatavalue'] = 'Der vorgeschlagene Wert für „{$a}" ist ungü
 $string['errormetadatapatchempty'] = 'Ein Metadaten-Vorschlag muss mindestens ein Feld ändern.';
 $string['errorunsupportedkind'] = 'Diese Änderungsart („{$a}") kann nicht automatisch angewendet werden.';
 $string['errorwrongitemkind'] = 'Diese Aktion gilt nicht für eine Seiteninhalts-Überarbeitung.';
+
+// Neue Seiten, Slug-Aliasse, Beziehungen und Bereiche (Phase 1).
+$string['newpagechangesummary'] = 'Neue Seite: {$a}';
+$string['newpagesubmitsummary'] = 'Neue Seite über ein Change-Set vorgeschlagen.';
+$string['relationchangesummary'] = 'Beziehungen: {$a} Änderung(en)';
+$string['itemkindnewpage'] = 'Neue Seite';
+$string['relationopcreate'] = 'Hinzufügen';
+$string['relationopremove'] = 'Entfernen';
+$string['errornewpagecategory'] = 'Eine neue Seite muss auf eine vorhandene Kategorie verweisen.';
+$string['errornewpagecontent'] = 'Eine neue Seite muss Inhalt enthalten.';
+$string['errorslugtaken'] = 'Der Slug „{$a}" wird bereits verwendet.';
+$string['errorrelationop'] = 'Ein Beziehungsvorgang muss „create" oder „remove" sein.';
+$string['errorrelationtype'] = 'Unbekannter Beziehungstyp „{$a}".';
+$string['errorrelationself'] = 'Eine Seite kann nicht auf sich selbst verweisen.';
+$string['errorrelationtarget'] = 'Ein Beziehungsvorgang benötigt eine gültige Zielseite.';
+$string['errorrelationempty'] = 'Ein Beziehungsvorschlag muss mindestens einen Vorgang enthalten.';
+$string['errorrelationunresolved'] = 'Das Beziehungsziel „{$a}" konnte nicht aufgelöst werden; wenden Sie zuerst die neue Seite an, auf die es verweist.';
+$string['errortempkeyrequired'] = 'Ein Vorschlag für eine neue Seite benötigt einen stabilen Tempkey.';
+$string['errorunknownarea'] = 'Der verantwortliche Bereich „{$a}" ist nicht im kontrollierten Vokabular enthalten.';

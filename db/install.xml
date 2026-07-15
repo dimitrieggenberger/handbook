@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/handbook/db" VERSION="2026071502" COMMENT="XMLDB file for local_handbook (specification section 20)"
+<XMLDB PATH="local/handbook/db" VERSION="2026071505" COMMENT="XMLDB file for local_handbook (specification section 20)"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -311,6 +311,44 @@
         <INDEX NAME="changesetkind" UNIQUE="false" FIELDS="changesetid, kind"/>
         <INDEX NAME="revisionid" UNIQUE="false" FIELDS="revisionid"/>
         <INDEX NAME="itemstatus" UNIQUE="false" FIELDS="itemstatus"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_pagealias" COMMENT="Retired page slugs that still resolve to their page (spec 7.3)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="oldslug" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="oldslug" UNIQUE="true" FIELDS="oldslug"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_area" COMMENT="Controlled vocabulary of responsible areas (spec 9)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="areakey" TYPE="char" LENGTH="100" NOTNULL="true" COMMENT="Stable machine key"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Display name stored on pages"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="areakey" UNIQUE="true" FIELDS="areakey"/>
+        <INDEX NAME="activesort" UNIQUE="false" FIELDS="active, sortorder"/>
       </INDEXES>
     </TABLE>
   </TABLES>

@@ -204,6 +204,13 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       }))
   );
 
+  server.tool(
+    "handbook_list_areas",
+    "List the controlled vocabulary of responsible areas (key + display name). Use a returned key or name for the responsiblearea field of a metadata or new-page proposal so it references the governed vocabulary.",
+    {},
+    handler(() => ws("local_handbook_list_areas", {}))
+  );
+
   if (!writable) {
     return; // Read-only mode: no draft or change-set write tools.
   }
@@ -335,6 +342,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       changesetid: z.number().int(),
       identifier: z.string().describe("Page slug or numeric id"),
       title: z.string().optional(),
+      slug: z.string().optional().describe("New slug; the old slug keeps resolving"),
       summary: z.string().optional(),
       contenttype: z.string().optional()
         .describe("policy, procedure, standard, guideline, quickguide, template, example, roledescription"),
@@ -348,7 +356,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     },
     handler((args) => {
       const metadata = {};
-      for (const key of ["title", "summary", "contenttype", "authoritylevel",
+      for (const key of ["title", "slug", "summary", "contenttype", "authoritylevel",
         "criticality", "responsiblearea", "reviewdate", "requiredreading"]) {
         if (args[key] !== undefined) {
           metadata[key] = args[key];
@@ -361,6 +369,64 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
         expectedtimemodified: args.expectedtimemodified ?? 0,
       });
     })
+  );
+
+  server.tool(
+    "handbook_upsert_change_set_new_page",
+    "Propose a BRAND-NEW page inside THIS change set. Identify it by a stable tempkey (e.g. \"newpage:direccion-oficial\") so later relation proposals can point at it before it exists. Staged as a draft — a human reviews, approves and publishes it in Moodle. Never publishes. A category is required.",
+    {
+      changesetid: z.number().int(),
+      tempkey: z.string().describe("Stable id within this change set, e.g. newpage:slug"),
+      title: z.string(),
+      categoryid: z.number().int().describe("Existing category id"),
+      content: z.string().describe("Clean HTML, headings starting at h2"),
+      slug: z.string().optional(),
+      summary: z.string().optional(),
+      contenttype: z.string().optional()
+        .describe("policy, procedure, standard, guideline, quickguide, template, example, roledescription"),
+      authoritylevel: z.number().int().min(1).max(5).optional(),
+      criticality: z.string().optional().describe("reference, operational, mandatory, safetycritical"),
+      responsiblearea: z.string().optional(),
+      reviewdate: z.number().int().optional(),
+      requiredreading: z.boolean().optional(),
+      language: z.string().optional(),
+    },
+    handler((args) => {
+      const page = { title: args.title, categoryid: args.categoryid, content: args.content };
+      for (const key of ["slug", "summary", "contenttype", "authoritylevel", "criticality",
+        "responsiblearea", "reviewdate", "requiredreading", "language"]) {
+        if (args[key] !== undefined) {
+          page[key] = args[key];
+        }
+      }
+      return ws("local_handbook_upsert_changeset_new_page", {
+        changesetid: args.changesetid,
+        tempkey: args.tempkey,
+        page,
+      });
+    })
+  );
+
+  server.tool(
+    "handbook_upsert_change_set_relations",
+    "Propose edits to a page's outgoing typed relations inside THIS change set. Each operation is create or remove, with a relationtype and a target — an existing page (target = slug/id) or a new page proposed in this same change set (targettempkey). Replaces this page's relation proposal in the set. Staged as a draft; a human applies it in Moodle.",
+    {
+      changesetid: z.number().int(),
+      identifier: z.string().describe("Source page slug or id"),
+      operations: z.array(z.object({
+        op: z.enum(["create", "remove"]),
+        relationtype: z.string()
+          .describe("relatedto, dependson, implements, replaces, supersedes, exceptionto, procedurefor, quickguidefor, templatefor, assessmentfor, translationof"),
+        target: z.string().optional().describe("Existing target page slug or id"),
+        targettempkey: z.string().optional().describe("Tempkey of a new page in this change set"),
+      })).min(1),
+    },
+    handler((args) =>
+      ws("local_handbook_upsert_changeset_relations", {
+        changesetid: args.changesetid,
+        identifier: args.identifier,
+        operations: args.operations,
+      }))
   );
 
   server.tool(

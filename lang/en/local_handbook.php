@@ -43,6 +43,7 @@ $string['handbook:viewreports'] = 'View handbook reports';
 $string['handbook:manageapi'] = 'Configure handbook external access';
 $string['handbook:apiaccess'] = 'Use handbook external-service functions';
 $string['handbook:apiproposemetadata'] = 'Propose handbook metadata (fiche) patches through the API';
+$string['handbook:apiproposerelations'] = 'Propose handbook page relation edits through the API';
 $string['handbook:manage'] = 'Administer the handbook plugin';
 
 // Navigation and page titles.
@@ -502,6 +503,7 @@ $string['changeitemapproved'] = 'Change approved.';
 $string['changeitemapplied'] = 'Change applied and published.';
 $string['changeitemrejected'] = 'Change rejected.';
 $string['metafield_title'] = 'Title';
+$string['metafield_slug'] = 'Slug';
 $string['metafield_summary'] = 'Summary';
 $string['metafield_contenttype'] = 'Content type';
 $string['metafield_authoritylevel'] = 'Authority level';
@@ -515,3 +517,22 @@ $string['errormetadatavalue'] = 'The proposed value for "{$a}" is not valid.';
 $string['errormetadatapatchempty'] = 'A metadata proposal must change at least one field.';
 $string['errorunsupportedkind'] = 'This change kind ("{$a}") cannot be applied automatically.';
 $string['errorwrongitemkind'] = 'This action does not apply to a page content revision.';
+
+// New pages, slug aliases, relations and areas (Phase 1).
+$string['newpagechangesummary'] = 'New page: {$a}';
+$string['newpagesubmitsummary'] = 'New page proposed via a change set.';
+$string['relationchangesummary'] = 'Relations: {$a} change(s)';
+$string['itemkindnewpage'] = 'New page';
+$string['relationopcreate'] = 'Add';
+$string['relationopremove'] = 'Remove';
+$string['errornewpagecategory'] = 'A new page must reference an existing category.';
+$string['errornewpagecontent'] = 'A new page must include content.';
+$string['errorslugtaken'] = 'The slug "{$a}" is already in use.';
+$string['errorrelationop'] = 'A relation operation must be "create" or "remove".';
+$string['errorrelationtype'] = 'Unknown relation type "{$a}".';
+$string['errorrelationself'] = 'A page cannot relate to itself.';
+$string['errorrelationtarget'] = 'A relation operation needs a valid target page.';
+$string['errorrelationempty'] = 'A relation proposal must contain at least one operation.';
+$string['errorrelationunresolved'] = 'The relation target "{$a}" could not be resolved; apply the new page it points to first.';
+$string['errortempkeyrequired'] = 'A new-page proposal needs a stable tempkey.';
+$string['errorunknownarea'] = 'The responsible area "{$a}" is not in the controlled vocabulary.';

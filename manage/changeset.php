@@ -270,6 +270,30 @@ $itembadges = [
 ];
 
 foreach ($changeset->items as $item) {
+    // New-page proposal: rendered from its payload (no bound page until applied).
+    if ($item->kind === changeset_service::KIND_PAGE_CREATE) {
+        $data = json_decode((string)$item->payloadjson, true) ?: [];
+        $title = (string)($data['title'] ?? get_string('changesetnewpage', 'local_handbook'));
+        $applied = (int)$item->pageid
+            ? $DB->get_record('local_handbook_page', ['id' => $item->pageid]) : null;
+        $titlehtml = $applied
+            ? html_writer::link(local_handbook_page_url($applied), s($title)) : s($title);
+        $head = $titlehtml . ' '
+            . html_writer::span(s(get_string('itemkindnewpage', 'local_handbook')), 'badge badge-light border')
+            . ' ' . html_writer::span(s(get_string('itemstatus_' . $item->itemstatus, 'local_handbook')),
+                $itembadges[$item->itemstatus] ?? 'badge badge-secondary');
+        $body = html_writer::tag('h4', $head, ['class' => 'h6 mb-2']);
+        if ($item->itemstatus === changeset_service::ITEM_CONFLICT
+                && trim((string)$item->conflictnote) !== '') {
+            $body .= html_writer::div(s($item->conflictnote), 'alert alert-warning py-2 px-3 small mb-2');
+        }
+        $body .= local_handbook_render_new_page_preview($data);
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
     $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid]);
     if (!$page) {
         continue;
@@ -297,36 +321,24 @@ foreach ($changeset->items as $item) {
                 'small text-muted mb-2');
         }
 
-        $metaactions = [];
-        if ($item->itemstatus === changeset_service::ITEM_IN_REVIEW && $canapprove) {
-            $metaactions[] = local_handbook_changeset_item_button($url, 'approveitem', (int)$item->id,
-                get_string('approve', 'local_handbook'), 'btn-primary');
-        }
-        if ($item->itemstatus === changeset_service::ITEM_APPROVED && $canpublish) {
-            $metaactions[] = local_handbook_changeset_item_button($url, 'applyitem', (int)$item->id,
-                get_string('applychange', 'local_handbook'), 'btn-primary');
-        }
-        if ($item->itemstatus === changeset_service::ITEM_IN_REVIEW && $canreview) {
-            $metaactions[] = local_handbook_changeset_item_button($url, 'rejectitem', (int)$item->id,
-                get_string('reject', 'local_handbook'), 'btn-outline-danger');
-        }
-        if (!in_array($item->itemstatus, [changeset_service::ITEM_IN_REVIEW,
-                changeset_service::ITEM_APPROVED, changeset_service::ITEM_PUBLISHED], true)) {
-            $rmform = html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false),
-                'class' => 'd-inline',
-                'onsubmit' => 'return confirm(' . json_encode(get_string('confirmremoveitem', 'local_handbook')) . ');']);
-            $rmform .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'removeitem']);
-            $rmform .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'itemid', 'value' => (int)$item->id]);
-            $rmform .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-            $rmform .= html_writer::tag('button', s(get_string('removeitem', 'local_handbook')),
-                ['type' => 'submit', 'class' => 'btn btn-link btn-sm text-danger']);
-            $rmform .= html_writer::end_tag('form');
-            $metaactions[] = $rmform;
-        }
-        if ($metaactions) {
-            $body .= html_writer::div(implode(' ', $metaactions), 'd-flex flex-wrap gap-2 align-items-center');
-        }
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
 
+    // Relation-edit proposal: list the operations + its workflow.
+    if ($item->kind === changeset_service::KIND_RELATION_CHANGE) {
+        $payload = json_decode((string)$item->payloadjson, true);
+        $ops = is_array($payload) ? ($payload['ops'] ?? []) : [];
+        if ($ops) {
+            $body .= local_handbook_render_relation_ops($ops);
+        } else {
+            $body .= html_writer::div(s(get_string('metadatanochanges', 'local_handbook')),
+                'small text-muted mb-2');
+        }
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
         echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
         continue;
     }
