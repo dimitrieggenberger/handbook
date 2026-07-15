@@ -23,16 +23,41 @@
 
 import { createServer } from "node:http";
 import { randomUUID, timingSafeEqual } from "node:crypto";
+import { readFileSync, existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { buildHandbookServer } from "./lib/handbook.mjs";
 
+// Load a local .env file (next to this script) if present, without adding a
+// dependency. Real environment variables always win over the file.
+const scriptdir = dirname(fileURLToPath(import.meta.url));
+const envfile = join(scriptdir, ".env");
+if (existsSync(envfile)) {
+  for (const line of readFileSync(envfile, "utf8").split(/\r?\n/)) {
+    const match = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)\s*$/);
+    if (!match || line.trimStart().startsWith("#")) {
+      continue;
+    }
+    let value = match[2].trim();
+    if ((value.startsWith('"') && value.endsWith('"'))
+        || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (process.env[match[1]] === undefined) {
+      process.env[match[1]] = value;
+    }
+  }
+}
+
 const baseUrl = (process.env.HANDBOOK_BASE_URL || "").replace(/\/+$/, "");
 const wstoken = process.env.HANDBOOK_WSTOKEN || "";
 const authToken = process.env.HANDBOOK_MCP_AUTH_TOKEN || "";
 const mode = process.env.HANDBOOK_MCP_MODE === "readonly" ? "readonly" : "readwrite-drafts";
-const port = Number(process.env.HANDBOOK_MCP_PORT || 3000);
+// Infomaniak (and most managed Node hosts) inject the port via PORT.
+const port = Number(process.env.PORT || process.env.HANDBOOK_MCP_PORT || 3000);
 const mcpPath = process.env.HANDBOOK_MCP_PATH || "/mcp";
 
 if (!baseUrl || !wstoken) {

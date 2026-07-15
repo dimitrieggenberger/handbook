@@ -11,3 +11,5 @@ desktop.ini
 .vscode/
 node_modules/
 vendor/
+.env
+mcp/.env
