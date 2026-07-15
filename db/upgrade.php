@@ -161,5 +161,67 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071413, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071419) {
+        // Handbook AI change sets (spec 36): public authorship + grouped
+        // multi-page draft proposals.
+
+        // Staff-facing published author on the revision (0 = fall back to
+        // owner/responsible area; set at approval, never from createdby).
+        $table = new xmldb_table('local_handbook_revision');
+        $field = new xmldb_field('authoruserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL,
+            null, '0', 'publishedby');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $table = new xmldb_table('local_handbook_changeset');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('title', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('instructionsummary', XMLDB_TYPE_TEXT);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, 'draft');
+        $table->add_field('source', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'human');
+        $table->add_field('externalreference', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, '');
+        $table->add_field('sponsoruserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timesubmitted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecompleted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('modifiedby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('submittedby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('createdby', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
+        $table->add_key('modifiedby', XMLDB_KEY_FOREIGN, ['modifiedby'], 'user', ['id']);
+        $table->add_index('status', XMLDB_INDEX_NOTUNIQUE, ['status']);
+        $table->add_index('sourcestatus', XMLDB_INDEX_NOTUNIQUE, ['source', 'status']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_handbook_changeitem');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('changesetid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('revisionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('itemstatus', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, 'draft');
+        $table->add_field('changesummary', XMLDB_TYPE_TEXT);
+        $table->add_field('conflictnote', XMLDB_TYPE_TEXT);
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('changesetid', XMLDB_KEY_FOREIGN, ['changesetid'], 'local_handbook_changeset', ['id']);
+        $table->add_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'], 'local_handbook_page', ['id']);
+        $table->add_index('changesetorder', XMLDB_INDEX_NOTUNIQUE, ['changesetid', 'sortorder']);
+        $table->add_index('changesetpage', XMLDB_INDEX_UNIQUE, ['changesetid', 'pageid']);
+        $table->add_index('revisionid', XMLDB_INDEX_NOTUNIQUE, ['revisionid']);
+        $table->add_index('itemstatus', XMLDB_INDEX_NOTUNIQUE, ['itemstatus']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071419, 'local', 'handbook');
+    }
+
     return true;
 }

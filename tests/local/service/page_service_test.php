@@ -314,4 +314,67 @@ final class page_service_test extends advanced_testcase {
         $this->assertSame(page_service::STATUS_CHANGES_REQUESTED, $revision->status);
         $this->assertSame('Falta la sección de escalamiento.', $revision->reviewnote);
     }
+
+    public function test_approve_sets_published_author_to_approver(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        // Draft authored by one user.
+        $author = $this->getDataGenerator()->create_user();
+        $page = page_service::create_page((object)[
+            'title' => 'Autoría en aprobación',
+            'categoryid' => $this->create_category(),
+            'contenttype' => 'procedure',
+            'summary' => 's',
+            'content' => '<h2>x</h2>',
+            'contentformat' => FORMAT_HTML,
+        ], (int)$author->id);
+        page_service::submit_for_review($page->draftrevision, 'v1', (int)$author->id);
+
+        // Approved and published by an admin: the public author is the approver.
+        $this->setAdminUser();
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $page->draftrevision->id]);
+        page_service::approve($revision);
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id]);
+        $this->assertEquals((int)get_admin()->id, (int)$revision->authoruserid);
+
+        page_service::publish($revision);
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id]);
+        $this->assertEquals((int)get_admin()->id, (int)$revision->authoruserid);
+        $this->assertEquals((int)$author->id, (int)$revision->createdby);
+    }
+
+    public function test_approve_accepts_explicit_author(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $institutional = $this->getDataGenerator()->create_user();
+        $page = $this->create_page($this->create_category());
+        page_service::submit_for_review($page->draftrevision, 'v1');
+
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $page->draftrevision->id]);
+        page_service::approve($revision, 0, (int)$institutional->id);
+
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id]);
+        $this->assertEquals((int)$institutional->id, (int)$revision->authoruserid);
+    }
+
+    public function test_bootstrap_direct_publish_sets_author(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        set_config('bootstrapmode', 1, 'local_handbook');
+
+        $page = $this->create_page($this->create_category());
+        $revision = $page->draftrevision;
+        page_service::direct_publish($revision);
+
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id]);
+        $this->assertSame(page_service::STATUS_PUBLISHED, $revision->status);
+        $this->assertEquals((int)get_admin()->id, (int)$revision->authoruserid);
+    }
 }

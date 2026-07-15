@@ -344,6 +344,13 @@ class page_service {
         self::transition($revision, [self::STATUS_IN_REVIEW], self::STATUS_CHANGES_REQUESTED,
             $userid, ['reviewnote' => $note, 'reviewedby' => $userid]);
 
+        $event = \local_handbook\event\changes_requested::create([
+            'context' => context_system::instance(),
+            'objectid' => $revision->id,
+            'other' => ['pageid' => (int)$revision->pageid, 'versionnumber' => (int)$revision->versionnumber],
+        ]);
+        $event->trigger();
+
         $page = $DB->get_record('local_handbook_page', ['id' => $revision->pageid]);
         if ($page) {
             notification_service::changes_requested($revision, $page, $note);
@@ -353,16 +360,55 @@ class page_service {
     /**
      * Approve a revision for publication.
      *
+     * The staff-facing published author defaults to the approving human
+     * (spec 36.5); an authorized editor may pass an explicit human or
+     * institutional author. It is never derived from createdby, so an
+     * AI-created draft never presents Handbook AI as its published author.
+     *
      * @param stdClass $revision Revision in review.
      * @param int $userid Acting user (0 = current user).
+     * @param int $authoruserid Explicit published author (0 = the approver).
      * @return void
      */
-    public static function approve(stdClass $revision, int $userid = 0): void {
+    public static function approve(stdClass $revision, int $userid = 0, int $authoruserid = 0): void {
         global $USER;
 
         $userid = $userid ?: (int)$USER->id;
+        $author = $authoruserid ?: $userid;
         self::transition($revision, [self::STATUS_IN_REVIEW], self::STATUS_APPROVED,
-            $userid, ['approvedby' => $userid, 'timeapproved' => time()]);
+            $userid, ['approvedby' => $userid, 'timeapproved' => time(), 'authoruserid' => $author]);
+
+        $event = \local_handbook\event\revision_approved::create([
+            'context' => context_system::instance(),
+            'objectid' => $revision->id,
+            'other' => ['pageid' => (int)$revision->pageid, 'versionnumber' => (int)$revision->versionnumber],
+        ]);
+        $event->trigger();
+    }
+
+    /**
+     * Reject a revision in review (spec 36.4): it leaves the workflow without
+     * publishing. History is preserved; the page keeps its current published
+     * revision. Used chiefly from the change-set review interface.
+     *
+     * @param stdClass $revision Revision in review.
+     * @param string $note Reason for rejection.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function reject(stdClass $revision, string $note = '', int $userid = 0): void {
+        global $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        self::transition($revision, [self::STATUS_IN_REVIEW], self::STATUS_REJECTED,
+            $userid, ['reviewnote' => $note, 'reviewedby' => $userid]);
+
+        $event = \local_handbook\event\revision_rejected::create([
+            'context' => context_system::instance(),
+            'objectid' => $revision->id,
+            'other' => ['pageid' => (int)$revision->pageid, 'versionnumber' => (int)$revision->versionnumber],
+        ]);
+        $event->trigger();
     }
 
     /**
@@ -403,6 +449,10 @@ class page_service {
         $update->publishedby = $userid;
         $update->timepublished = $now;
         $update->effectivefrom = $effectivefrom;
+        // Safety net: governed publishing sets the author at approval, but any
+        // path that reaches publish with no author yet falls back to the
+        // publisher (never createdby; spec 36.5).
+        $update->authoruserid = (int)$revision->authoruserid ?: $userid;
         $update->timemodified = $now;
         $update->modifiedby = $userid;
         $DB->update_record('local_handbook_revision', $update);
@@ -530,7 +580,8 @@ class page_service {
         $userid = $userid ?: (int)$USER->id;
 
         self::transition($revision, array_merge(self::EDITABLE_STATUSES, [self::STATUS_IN_REVIEW]),
-            self::STATUS_APPROVED, $userid, ['approvedby' => $userid, 'timeapproved' => time()]);
+            self::STATUS_APPROVED, $userid,
+            ['approvedby' => $userid, 'timeapproved' => time(), 'authoruserid' => $userid]);
 
         $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id], '*', MUST_EXIST);
         self::publish($revision, $userid, $effectivefrom);

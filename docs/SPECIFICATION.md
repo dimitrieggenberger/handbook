@@ -1506,7 +1506,55 @@ The project succeeds when EuropaSchule personnel have one reliable place to find
 
 ---
 
-## 36. Document revision history
+## 36. Handbook AI change sets and public authorship
 
+This chapter extends the external API (17) and MCP adapter (18) so approved AI clients (ChatGPT, Claude) can use the live handbook as context, analyse it for contradictions and duplication, and create **coordinated draft proposals** across multiple pages. Humans retain exclusive authority to review, approve, and publish. It refines rather than replaces sections 11, 14, 17 and 18.
+
+### 36.1 Authority boundary (non-negotiable)
+
+Handbook AI **may**: list/search/read AI-eligible content and relations; read permitted working drafts; create new page drafts; create a revision draft based on the current published revision; update its own editable draft; create advisory findings; create and manage draft change sets; and submit drafts or a change set for human review **after an explicit user instruction**.
+
+Handbook AI **may never**: approve or publish a revision; use bootstrap direct publication; archive or delete published content; change permissions, categories, audiences or paths; silently overwrite a human draft or a draft belonging to another change set; or bypass the service layer with direct database writes. There is deliberately no external function and no MCP tool for approval or publication, and none may be added.
+
+### 36.2 Operating model
+
+1. **Analysis phase (no writes):** load the compact context index (36.6), search terms/synonyms/role names/dates, read potentially affected pages and their typed relations in both directions, identify the canonical article for each rule, report affected pages and possible conflicts, ask clarifying questions, and produce a dry-run plan. No Moodle write occurs.
+2. **Explicit write boundary:** writing begins only after an explicit instruction ("create the drafts", "create the change set"). Agreement with the analysis or answered questions is not permission to write.
+3. **Drafting phase:** for each affected page, read the published revision and content hash, check for a working revision, and then create one (using the published revision as the expected base) or reuse the same editable draft when it belongs to this change set. A working revision belonging to another change set or a human, or already in review/approved, is a conflict: report it, do not overwrite. Every update carries `expectedtimemodified`. Repeated instructions update the same editable revision — never a second draft for the same page.
+4. **Review phase:** creating/updating change-set drafts keeps items editable; submitting the change set for review is a separate explicit operation. Once submitted, further AI editing of an item is blocked until a human returns it to an editable state.
+
+### 36.3 Change sets
+
+A change set groups coordinated proposals across multiple pages, conceptually like a pull request.
+
+`local_handbook_changeset`: `id`, `title`, `instructionsummary` (a concise approved instruction summary, never a full transcript), `status` (`draft`, `in_review`, `partially_completed`, `completed`, `cancelled`), `source` (`human` default, `ai`), `externalreference` (optional conversation/task id, never a secret), `sponsoruserid` (accountable human requester), the `time*` fields, and `createdby`/`modifiedby`/`submittedby` (technical creator preserved truthfully).
+
+`local_handbook_changeitem`: `id`, `changesetid`, `pageid`, `revisionid` (the working revision this item drafts; 0 until created), `itemstatus` (`draft`, `conflict`, `in_review`, `approved`, `published`, `rejected`, `skipped`), `changesummary`, `conflictnote`, `sortorder`, `time*`. A page occurs at most once per change set (unique `changesetid, pageid`).
+
+### 36.4 Change-set services and conflict rules
+
+Change-set operations run through a dedicated service (`changeset_service`) that orchestrates `page_service` inside transactions and fires events; it never writes revisions directly. Operations: create; get with items; list with filters; upsert a page draft; remove an item only when safe and unpublished; submit eligible items; cancel without deleting audit records; and — via an event observer on the existing workflow events — synchronise item status when a revision is approved, rejected, published, superseded or returned for changes.
+
+The **conservative upsert** decides per page: no working revision → create a revision draft (requires the expected published revision id); a working revision owned by *this* change set and editable → update it (requires `expectedtimemodified`); otherwise → a structured **conflict** result that never overwrites. Because the model guarantees at most one working revision per page, a working revision with no change-item is treated as a human/manual draft, and one linked to a different change set is treated as foreign — both are conflicts. Batch operations return a per-page result: one page's conflict never hides the status of the others.
+
+### 36.5 Authorship and attribution
+
+Technical attribution and published authorship are separate. Internal audit values (`createdby`, `modifiedby`, events, change-set technical creator) always record the real acting account, including the service account; these are never falsified. Managers and authorized editors may see that Handbook AI prepared a draft.
+
+Staff-facing published authorship comes from an explicit `authoruserid` on the revision (default 0), **not** from `createdby`. When a human approves a proposal, `authoruserid` is set to the approving user unless an authorized editor selects another human or an institutional author (e.g. EuropaSchule); `approvedby` and `publishedby` are preserved separately. Staff reader pages may show author, responsible area, approver, effective date and published version; they must never display "generated by AI", Handbook AI as author, or AI badges.
+
+### 36.6 Context and working-draft endpoints
+
+`local_handbook_get_context_index` / `handbook_get_context_index` returns a compact record per AI-permitted page — id, slug, title, summary, category path, content type, authority, criticality, responsible area, language, review/effective dates, published revision id, content hash and modification time, typed relations in both directions, whether an editable working revision exists, and archive state where permitted — but **no full content**. The agent retrieves full content only for relevant pages. `list_changes` (17.2) remains the incremental cursor; the Moodle database stays authoritative.
+
+`local_handbook_get_working_page` / `handbook_get_working_page` returns the current working revision and page metadata when the service account has `edit` or `review`, respecting `aiaccess` and central authorization, without ever changing workflow state.
+
+### 36.7 Service account and remote transport
+
+The `handbook-ai` service account holds only `apiaccess`, `view`, `viewhistory` and `edit`; it is never granted `review`, `approve`, `publish`, `manage`, `managechangesets`, `manageapi`, `viewrestricted`, or administrator access. The MCP adapter keeps its local stdio entry point and adds a Streamable HTTP transport (HTTPS `/mcp` plus a secret-free `/health`) sharing one tool implementation; the Moodle token remains a server-side secret, never returned to the client, committed, or embedded in tool schemas.
+
+## 37. Document revision history
+
+- **v1.2** — Added chapter 36 (Handbook AI change sets and public authorship): grouped multi-page draft proposals with a per-page conservative upsert and conflict model, an event-driven change-set/item status synchronisation, explicit published authorship (`authoruserid`) kept separate from truthful technical attribution, compact context-index and working-draft endpoints, and a shared stdio/Streamable-HTTP MCP transport. Confirmed the service account excludes `viewrestricted`.
 - **v1.1** — Incorporated pre-implementation review: mandated a single central authorization service for capability and audience checks across all surfaces (4.2, 13.2, 14, 22.1); made the page's published-revision pointer the single source of truth and added version-number concurrency protection (11.3, 20.10); specified per-revision file areas with copy-on-draft semantics (14); excluded restricted-audience pages from Moodle global search indexing (13.2); noted quiz course-module-ID fragility and link-checker coverage (15.4); added Moodle routing API evaluation for slug URLs (8.1, 27); named `moodle-plugin-ci` for automated quality checks (27, 34); split section 32 into schema-blocking and deferrable decisions; corrected the Model Context Protocol reference (34).
 - **v1.0** — Initial project specification.

@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.12.0 (2026-07-14)
+
+Handbook AI change sets — Phases 0-1: specification, schema and the
+server-side domain core (no UI or API surface yet; those follow in later
+phases).
+
+- Specification chapter 36 (Handbook AI change sets and public authorship):
+  authority boundary, four-phase operating model, change-set data model,
+  conservative per-page upsert and conflict rules, event-driven status
+  synchronisation, `authoruserid` published authorship kept separate from
+  truthful technical attribution, context-index and working-draft endpoints,
+  and a shared stdio/Streamable-HTTP MCP transport. Revision history renumbered
+  to §37; spec at v1.2.
+- Schema: `authoruserid` on the revision (default 0 = fall back to owner);
+  new `local_handbook_changeset` and `local_handbook_changeitem` tables
+  (install.xml + guarded upgrade step, re-runnable). One page per change set
+  (unique changesetid, pageid).
+- New capability `local/handbook:managechangesets` (editorial only; the API
+  service account never receives it). EN/ES/DE strings.
+- Public authorship: `page_service::approve()` sets the revision's
+  `authoruserid` to the approving human (with an explicit-author override) and
+  `publish()` guarantees it; bootstrap `direct_publish()` sets it too. Never
+  derived from `createdby`, so an AI-created draft never presents Handbook AI
+  as its published author. New `page_service::reject()` (in_review → rejected).
+- `changeset_service` (spec 36.4): create / get-with-items / list / conservative
+  `upsert_draft` / `remove_item` / `submit` / `cancel`, orchestrating
+  page_service inside transactions — never writing revisions directly, and with
+  no approve or publish operation. The upsert reuses this change set's editable
+  draft (no version churn) and returns a structured conflict — never an
+  overwrite — for a human draft, another change set's draft, an in-review draft,
+  a stale published base, or a concurrency mismatch. Batch `submit` returns a
+  per-page result.
+- Event-driven status sync: new events (revision_approved, revision_rejected,
+  changes_requested, changeset_created, changeset_submitted) and a `db/events.php`
+  observer that keeps each change item in step with its revision's workflow —
+  keeping page_service unaware of change sets. Touches only change-set tables
+  and fires no events, so there is no recursion.
+- PHPUnit: full change-set battery (create, multi-page upsert, reuse-the-same-
+  draft, refuse-to-overwrite human/foreign drafts, base mismatch, concurrency
+  conflict, partial submit, status sync through approve/publish/request-changes/
+  reject, and published-author-is-approver-not-AI-creator) plus page_service
+  authorship coverage.
+
 ## 0.11.6 (2026-07-14)
 
 - Embedded files now follow drafts created outside the web editor:

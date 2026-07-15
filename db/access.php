@@ -126,6 +126,16 @@ $capabilities = [
         ],
     ],
 
+    // Review and act on grouped change-set proposals (spec 36). Editorial
+    // only; the API service account never receives this.
+    'local/handbook:managechangesets' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
     'local/handbook:viewreports' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,

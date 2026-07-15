@@ -97,6 +97,7 @@
         <FIELD NAME="reviewedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="approvedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="publishedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="authoruserid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Staff-facing published author (0 = fall back to owner/responsible area); set at approval, never from createdby"/>
         <FIELD NAME="timeapproved" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timepublished" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
@@ -252,6 +253,60 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="findingpage" UNIQUE="false" FIELDS="findingid, pageid"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_changeset" COMMENT="Coordinated multi-page draft proposals, PR-like (specification 36.3)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="instructionsummary" TYPE="text" NOTNULL="false" COMMENT="Concise approved instruction summary; never a full chat transcript"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="draft" COMMENT="draft, in_review, partially_completed, completed, cancelled"/>
+        <FIELD NAME="source" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="human" COMMENT="human or ai"/>
+        <FIELD NAME="externalreference" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Optional conversation/task id; never a secret"/>
+        <FIELD NAME="sponsoruserid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Accountable human requester when known"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timesubmitted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Technical creator (service account for AI proposals); truthful audit"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="submittedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
+        <INDEX NAME="sourcestatus" UNIQUE="false" FIELDS="source, status"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_changeitem" COMMENT="One affected page per change set: its working revision and per-item status (specification 36.3)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="changesetid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Working revision this item drafts (0 = not yet created)"/>
+        <FIELD NAME="itemstatus" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="draft" COMMENT="draft, conflict, in_review, approved, published, rejected, skipped"/>
+        <FIELD NAME="changesummary" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="conflictnote" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="changesetid" TYPE="foreign" FIELDS="changesetid" REFTABLE="local_handbook_changeset" REFFIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="changesetorder" UNIQUE="false" FIELDS="changesetid, sortorder"/>
+        <INDEX NAME="changesetpage" UNIQUE="true" FIELDS="changesetid, pageid"/>
+        <INDEX NAME="revisionid" UNIQUE="false" FIELDS="revisionid"/>
+        <INDEX NAME="itemstatus" UNIQUE="false" FIELDS="itemstatus"/>
       </INDEXES>
     </TABLE>
   </TABLES>
