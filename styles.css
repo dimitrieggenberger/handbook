@@ -227,6 +227,21 @@
 #page-local-handbook-area .local-handbook-ack {
     scroll-margin-top: 90px;
 }
+/* Lay the checkbox row out with flexbox so the box stays pinned to the top
+   next to the first line of the label instead of dropping to the baseline of
+   the last wrapped line. */
+#page-local-handbook-area .local-handbook-ack .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-left: 0;
+}
+#page-local-handbook-area .local-handbook-ack .form-check .form-check-input {
+    float: none;
+    flex: 0 0 auto;
+    margin-left: 0;
+    margin-top: 0.3rem;
+}
 #page-local-handbook-area .local-handbook-ack .form-check-label {
     max-width: 62ch;
 }

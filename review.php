@@ -43,6 +43,29 @@ local_handbook_apply_page_setup($url, $context, 'reviewqueue',
 
 // ---- Actions -----------------------------------------------------------.
 
+if ($action === 'approveall') {
+    // Bulk approve: for a queue of already-reviewed drafts, approve every
+    // revision currently in review in one step (no per-item confirmation).
+    require_sesskey();
+    require_capability('local/handbook:approve', $context);
+
+    $inreview = $DB->get_records('local_handbook_revision',
+        ['status' => page_service::STATUS_IN_REVIEW], 'timemodified ASC');
+    $approved = 0;
+    foreach ($inreview as $revision) {
+        // approve() re-reads and guards each revision's state inside its own
+        // transaction, so a draft that changed state meanwhile is skipped
+        // rather than forced through.
+        try {
+            page_service::approve($revision);
+            $approved++;
+        } catch (moodle_exception $e) {
+            continue;
+        }
+    }
+    redirect($url, get_string('allrevisionsapproved', 'local_handbook', $approved));
+}
+
 if ($action !== '' && $revisionid) {
     require_sesskey();
 
@@ -93,6 +116,23 @@ if (!$queue) {
 $canapprove = has_capability('local/handbook:approve', $context);
 $canpublish = has_capability('local/handbook:publish', $context);
 $canreview = has_capability('local/handbook:review', $context);
+
+// When several drafts are waiting in review, offer a single "approve all"
+// action so a batch reviewed beforehand need not be authorised one by one.
+$inreviewcount = 0;
+foreach ($queue as $revision) {
+    if ($revision->status === page_service::STATUS_IN_REVIEW) {
+        $inreviewcount++;
+    }
+}
+if ($canapprove && $inreviewcount > 1) {
+    $approveallbutton = new single_button(
+        new moodle_url($url, ['action' => 'approveall', 'sesskey' => sesskey()]),
+        get_string('approveall', 'local_handbook', $inreviewcount), 'post', ['type' => 'primary']);
+    $approveallbutton->add_confirm_action(
+        get_string('confirmapproveall', 'local_handbook', $inreviewcount));
+    echo html_writer::div($OUTPUT->render($approveallbutton), 'mb-3');
+}
 
 foreach ($queue as $revision) {
     $pagerecord = new stdClass();
