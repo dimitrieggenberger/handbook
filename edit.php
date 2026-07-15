@@ -28,6 +28,10 @@
 
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
+// EDITOR_UNLIMITED_FILES is defined in formslib (verified against Moodle
+// 5.2 source: public/lib/formslib.php); this page uses it before the form
+// class would load formslib.
+require_once($CFG->libdir . '/formslib.php');
 
 use local_handbook\form\page_form;
 use local_handbook\local\service\page_service;

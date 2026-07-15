@@ -28,11 +28,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// file_rewrite_pluginfile_urls() and EDITOR_UNLIMITED_FILES live in these
-// libs; plugin pages use them before formslib would load them indirectly,
-// so they must be required explicitly.
+// file_rewrite_pluginfile_urls() lives here; reader pages do not load
+// formslib, so filelib must be required explicitly.
 require_once($CFG->libdir . '/filelib.php');
-require_once($CFG->libdir . '/editorlib.php');
 
 use local_handbook\local\service\ack_service;
 use local_handbook\local\service\page_service;

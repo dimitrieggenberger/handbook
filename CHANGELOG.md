@@ -1,10 +1,19 @@
 # Changelog
 
+## 0.11.4 (2026-07-14)
+
+- Actually fix "Undefined constant EDITOR_UNLIMITED_FILES": in Moodle 5.2
+  the constant is defined in lib/formslib.php (verified against core
+  source), not lib/editorlib.php as 0.11.3 assumed. edit.php now requires
+  formslib before building the editor options; the editorlib require is
+  removed.
+
 ## 0.11.3 (2026-07-14)
 
 - Fix "Undefined constant EDITOR_UNLIMITED_FILES" on edit.php: locallib
   now also requires lib/editorlib.php (same load-order class of bug as the
   0.11.1 filelib fix — edit.php uses the constant before formslib loads).
+  Superseded by 0.11.4: the constant is not in editorlib on Moodle 5.2.
 
 ## 0.11.2 (2026-07-14)
 
