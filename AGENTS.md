@@ -85,6 +85,18 @@ local_grades-approved patterns (`/local/grades/dev/uireference.php`) → new
 `#page-local-handbook-area`. Keep strings in EN, ES and DE. Design new screens
 as `dev/<name>-mockup/index.html` mockups first (see `dev/README.md`).
 
+## Core Source Reference
+
+A sparse checkout of Moodle MOODLE_502_STABLE lives at
+`E:\Codex Moodle Plugins\moodle-ref` (only `public/lib` checked out —
+Moodle 5.x puts the app root under `public/`). Before using a core
+constant or function that setup.php might not load, grep it there
+(example that bit us twice: `EDITOR_UNLIMITED_FILES` is defined in
+`public/lib/formslib.php`, and `file_rewrite_pluginfile_urls` in
+`public/lib/filelib.php` — neither is loaded on plain plugin pages).
+`php -l` cannot catch undefined constants/functions; only a real Moodle
+run (or moodle-plugin-ci) can.
+
 ## Encoding Rules
 
 Repo text files are UTF-8 without BOM. Windows PowerShell 5.1 corrupts them
