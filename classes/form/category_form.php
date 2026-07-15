@@ -60,6 +60,11 @@ class category_form extends \moodleform {
         $mform->addElement('advcheckbox', 'visible', get_string('categoryvisible', 'local_handbook'));
         $mform->setDefault('visible', 1);
 
+        $mform->addElement('text', 'icon', get_string('categoryicon', 'local_handbook'),
+            ['size' => 30, 'placeholder' => 'fa-folder-open']);
+        $mform->setType('icon', PARAM_ALPHANUMEXT);
+        $mform->addHelpButton('icon', 'categoryicon', 'local_handbook');
+
         $mform->addElement('text', 'sortorder', get_string('order', 'core'), ['size' => 6]);
         $mform->setType('sortorder', PARAM_INT);
         $mform->setDefault('sortorder', 0);

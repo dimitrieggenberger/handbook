@@ -91,6 +91,8 @@ if ($action === 'edit') {
         $record->descriptionformat = FORMAT_HTML;
         $record->sortorder = (int)$data->sortorder;
         $record->visible = (int)$data->visible;
+        $record->icon = preg_match('/^fa-[a-z0-9-]+$/', trim((string)$data->icon))
+            ? trim((string)$data->icon) : '';
         $record->audiencekey = '';
         $record->timemodified = $now;
         $record->modifiedby = (int)$USER->id;

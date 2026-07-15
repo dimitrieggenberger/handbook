@@ -216,7 +216,8 @@ if (!$categories) {
         $header = html_writer::div(
             html_writer::div(
                 html_writer::span(
-                    html_writer::tag('i', '', ['class' => 'fa-solid fa-folder-open', 'aria-hidden' => 'true']),
+                    html_writer::tag('i', '', ['class' => 'fa-solid '
+                        . local_handbook_category_icon($category), 'aria-hidden' => 'true']),
                     'category-icon'
                 )
                 . html_writer::tag('h4', html_writer::link($caturl, s($category->name)), ['class' => 'h6 mb-0']),

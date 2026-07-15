@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.1 (2026-07-14)
+
+- Fix reader crash "Call to undefined function file_rewrite_pluginfile_urls":
+  locallib.php now requires lib/filelib.php explicitly (editor pages loaded
+  it indirectly through formslib; view.php/print.php did not).
+- Category icons: new icon field (Font Awesome solid class) with upgrade
+  step, input in the category form and the importer, validated rendering on
+  the home grid with folder fallback; the seed assigns icons to all eleven
+  top-level categories.
+
 ## 0.11.0 (2026-07-14)
 
 Mockup parity: home personalization, reader polish, path navigation.

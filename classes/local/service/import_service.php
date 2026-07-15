@@ -229,6 +229,8 @@ class import_service {
         $record->descriptionformat = FORMAT_HTML;
         $record->sortorder = (int)($data->sortorder ?? 0);
         $record->visible = (int)($data->visible ?? 1);
+        $icon = trim((string)($data->icon ?? ''));
+        $record->icon = preg_match('/^fa-[a-z0-9-]+$/', $icon) ? $icon : '';
         $record->audiencekey = '';
         $record->timemodified = $now;
         $record->modifiedby = $userid;

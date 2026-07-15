@@ -28,6 +28,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// file_rewrite_pluginfile_urls() and friends live here; reader pages do not
+// load formslib, so filelib must be required explicitly.
+require_once($CFG->libdir . '/filelib.php');
+
 use local_handbook\local\service\ack_service;
 use local_handbook\local\service\page_service;
 use local_handbook\local\service\path_service;
@@ -463,6 +467,20 @@ function local_handbook_get_recently_published(int $limit = 5): array {
           ORDER BY r.timepublished DESC";
 
     return $DB->get_records_sql($sql, [], 0, $limit);
+}
+
+/**
+ * Validated Font Awesome icon class for a category (default: folder).
+ *
+ * @param stdClass $category Category record.
+ * @return string A safe fa-* class name.
+ */
+function local_handbook_category_icon(stdClass $category): string {
+    $icon = trim((string)($category->icon ?? ''));
+    if (preg_match('/^fa-[a-z0-9-]+$/', $icon)) {
+        return $icon;
+    }
+    return 'fa-folder-open';
 }
 
 /**

@@ -149,5 +149,17 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071405, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071413) {
+        // Category icons (Font Awesome solid class, empty = default folder).
+        $table = new xmldb_table('local_handbook_category');
+        $field = new xmldb_field('icon', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, '',
+            'visible');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071413, 'local', 'handbook');
+    }
+
     return true;
 }
