@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/handbook/db" VERSION="2026071505" COMMENT="XMLDB file for local_handbook (specification section 20)"
+<XMLDB PATH="local/handbook/db" VERSION="2026071506" COMMENT="XMLDB file for local_handbook (specification section 20)"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -289,7 +289,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="changesetid" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="kind" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="page_revision" COMMENT="Item kind. page_revision (default); future proposal kinds (page_create, page_metadata, page_move, page_archive, page_restore, relation_change, category_change, glossary_*) are applied only by a human-gated dispatcher, never by the API"/>
-        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Bound page (0 = no bound page yet; new-page/category/glossary items identify their target via tempkey)"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Bound page (0 = no bound page yet; new-page/category/glossary items identify their target via tempkey)"/>
         <FIELD NAME="tempkey" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="" COMMENT="Stable id within the change set for an entity with no real id yet (e.g. newpage:slug); resolved to a real id at publish"/>
         <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Working revision this item drafts (0 = none, or not a page-revision item)"/>
         <FIELD NAME="itemstatus" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="draft" COMMENT="draft, conflict, in_review, approved, published, rejected, skipped"/>

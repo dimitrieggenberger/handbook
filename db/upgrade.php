@@ -247,9 +247,9 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
             $dbman->add_field($table, $payloadjson);
         }
 
-        // pageid may now be 0 (items with no bound page yet).
-        $pageid = new xmldb_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-        $dbman->change_field_default($table, $pageid);
+        // pageid may now be 0 for page-less items (new entities keyed by
+        // tempkey); it is always written explicitly, so it needs no default —
+        // and Moodle refuses to modify a field that is part of an index.
 
         // Relax the one-item-per-page rule: several items may touch one page.
         $oldunique = new xmldb_index('changesetpage', XMLDB_INDEX_UNIQUE, ['changesetid', 'pageid']);
