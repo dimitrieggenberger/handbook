@@ -42,6 +42,8 @@ $string['handbook:managechangesets'] = 'Revisar y gestionar los conjuntos de cam
 $string['handbook:viewreports'] = 'Ver los informes del manual';
 $string['handbook:manageapi'] = 'Configurar el acceso externo al manual';
 $string['handbook:apiaccess'] = 'Usar las funciones de servicio externo del manual';
+$string['handbook:apiproposemetadata'] = 'Proponer cambios de ficha (metadatos) del manual mediante la API';
+$string['handbook:apiproposerelations'] = 'Proponer cambios de relaciones entre páginas del manual mediante la API';
 $string['handbook:manage'] = 'Administrar el plugin del manual';
 
 // Navigation and page titles.
@@ -489,3 +491,48 @@ $string['backtochangesets'] = 'Volver a los conjuntos de cambios';
 $string['draftmatchespublished'] = 'Este borrador coincide con la versión publicada: todavía no hay cambios.';
 $string['changesetnewpage'] = 'Página nueva (aún sin publicar)';
 $string['externalreference'] = 'Referencia externa';
+
+// Propuestas de ficha (metadatos) en los change sets (Fase 1).
+$string['metadatachangesummary'] = 'Metadatos: {$a}';
+$string['metadatafield'] = 'Campo';
+$string['metadatacurrentvalue'] = 'Actual';
+$string['metadataproposedvalue'] = 'Propuesto';
+$string['metadatanochanges'] = 'Esta propuesta no contiene cambios de campos.';
+$string['applychange'] = 'Aplicar cambio';
+$string['changeitemapproved'] = 'Cambio aprobado.';
+$string['changeitemapplied'] = 'Cambio aplicado y publicado.';
+$string['changeitemrejected'] = 'Cambio rechazado.';
+$string['metafield_title'] = 'Título';
+$string['metafield_slug'] = 'Slug';
+$string['metafield_summary'] = 'Resumen';
+$string['metafield_contenttype'] = 'Tipo de contenido';
+$string['metafield_authoritylevel'] = 'Nivel de autoridad';
+$string['metafield_criticality'] = 'Criticidad';
+$string['metafield_responsiblearea'] = 'Área responsable';
+$string['metafield_reviewdate'] = 'Fecha de revisión';
+$string['metafield_requiredreading'] = 'Lectura obligatoria';
+$string['conflict_metadataconcurrency'] = 'La ficha de la página cambió después de preparar esta propuesta; recárguela y propóngala de nuevo.';
+$string['errormetadatafieldunsupported'] = 'El campo de metadatos «{$a}» no puede cambiarse mediante una propuesta de metadatos.';
+$string['errormetadatavalue'] = 'El valor propuesto para «{$a}» no es válido.';
+$string['errormetadatapatchempty'] = 'Una propuesta de metadatos debe cambiar al menos un campo.';
+$string['errorunsupportedkind'] = 'Este tipo de cambio («{$a}») no puede aplicarse automáticamente.';
+$string['errorwrongitemkind'] = 'Esta acción no se aplica a una revisión de contenido de la página.';
+
+// Páginas nuevas, alias de slug, relaciones y áreas (Fase 1).
+$string['newpagechangesummary'] = 'Página nueva: {$a}';
+$string['newpagesubmitsummary'] = 'Página nueva propuesta mediante un change set.';
+$string['relationchangesummary'] = 'Relaciones: {$a} cambio(s)';
+$string['itemkindnewpage'] = 'Página nueva';
+$string['relationopcreate'] = 'Añadir';
+$string['relationopremove'] = 'Quitar';
+$string['errornewpagecategory'] = 'Una página nueva debe referirse a una categoría existente.';
+$string['errornewpagecontent'] = 'Una página nueva debe incluir contenido.';
+$string['errorslugtaken'] = 'El slug «{$a}» ya está en uso.';
+$string['errorrelationop'] = 'Una operación de relación debe ser «create» o «remove».';
+$string['errorrelationtype'] = 'Tipo de relación desconocido «{$a}».';
+$string['errorrelationself'] = 'Una página no puede relacionarse consigo misma.';
+$string['errorrelationtarget'] = 'Una operación de relación necesita una página de destino válida.';
+$string['errorrelationempty'] = 'Una propuesta de relaciones debe contener al menos una operación.';
+$string['errorrelationunresolved'] = 'No se pudo resolver el destino de la relación «{$a}»; aplique primero la página nueva a la que apunta.';
+$string['errortempkeyrequired'] = 'Una propuesta de página nueva necesita un tempkey estable.';
+$string['errorunknownarea'] = 'El área responsable «{$a}» no está en el vocabulario controlado.';

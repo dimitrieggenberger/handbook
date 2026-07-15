@@ -223,5 +223,125 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071419, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071502) {
+        // Phase 0: make change items polymorphic so a change set can carry more
+        // than a page content revision (metadata/taxonomy/lifecycle/glossary
+        // proposals arrive in later phases). Existing rows become page_revision.
+        $table = new xmldb_table('local_handbook_changeitem');
+
+        $kind = new xmldb_field('kind', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL,
+            null, 'page_revision', 'changesetid');
+        if (!$dbman->field_exists($table, $kind)) {
+            $dbman->add_field($table, $kind);
+        }
+
+        $tempkey = new xmldb_field('tempkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL,
+            null, '', 'pageid');
+        if (!$dbman->field_exists($table, $tempkey)) {
+            $dbman->add_field($table, $tempkey);
+        }
+
+        $payloadjson = new xmldb_field('payloadjson', XMLDB_TYPE_TEXT, null, null, null,
+            null, null, 'itemstatus');
+        if (!$dbman->field_exists($table, $payloadjson)) {
+            $dbman->add_field($table, $payloadjson);
+        }
+
+        // pageid may now be 0 for page-less items (new entities keyed by
+        // tempkey); it is always written explicitly, so it needs no default —
+        // and Moodle refuses to modify a field that is part of an index.
+
+        // Relax the one-item-per-page rule: several items may touch one page.
+        $oldunique = new xmldb_index('changesetpage', XMLDB_INDEX_UNIQUE, ['changesetid', 'pageid']);
+        if ($dbman->index_exists($table, $oldunique)) {
+            $dbman->drop_index($table, $oldunique);
+        }
+        $newindex = new xmldb_index('changesetpage', XMLDB_INDEX_NOTUNIQUE, ['changesetid', 'pageid']);
+        if (!$dbman->index_exists($table, $newindex)) {
+            $dbman->add_index($table, $newindex);
+        }
+        $kindindex = new xmldb_index('changesetkind', XMLDB_INDEX_NOTUNIQUE, ['changesetid', 'kind']);
+        if (!$dbman->index_exists($table, $kindindex)) {
+            $dbman->add_index($table, $kindindex);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071502, 'local', 'handbook');
+    }
+
+    if ($oldversion < 2026071504) {
+        // Phase 1: retired page slugs that still resolve (spec 7.3).
+        $table = new xmldb_table('local_handbook_pagealias');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('oldslug', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'], 'local_handbook_page', ['id']);
+        $table->add_index('oldslug', XMLDB_INDEX_UNIQUE, ['oldslug']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071504, 'local', 'handbook');
+    }
+
+    if ($oldversion < 2026071505) {
+        // Phase 1: controlled vocabulary of responsible areas (spec 9).
+        $table = new xmldb_table('local_handbook_area');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('areakey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('active', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('modifiedby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('areakey', XMLDB_INDEX_UNIQUE, ['areakey']);
+        $table->add_index('activesort', XMLDB_INDEX_NOTUNIQUE, ['active', 'sortorder']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Seed the catalogue from the responsible-area values already in use so
+        // the vocabulary starts populated rather than empty.
+        if (!$DB->count_records('local_handbook_area')) {
+            $now = time();
+            $sort = 0;
+            $seen = [];
+            $rs = $DB->get_recordset_sql(
+                "SELECT DISTINCT responsiblearea FROM {local_handbook_page}
+                  WHERE responsiblearea IS NOT NULL AND responsiblearea <> ''");
+            foreach ($rs as $row) {
+                $name = trim($row->responsiblearea);
+                if ($name === '') {
+                    continue;
+                }
+                $key = \local_handbook\local\service\page_service::slugify($name);
+                $candidate = $key;
+                $n = 2;
+                while (isset($seen[$candidate])) {
+                    $candidate = $key . '-' . $n++;
+                }
+                $seen[$candidate] = true;
+                $DB->insert_record('local_handbook_area', (object)[
+                    'areakey' => $candidate,
+                    'name' => \core_text::substr($name, 0, 255),
+                    'active' => 1,
+                    'sortorder' => $sort++,
+                    'timecreated' => $now,
+                    'timemodified' => $now,
+                    'createdby' => 0,
+                    'modifiedby' => 0,
+                ]);
+            }
+            $rs->close();
+        }
+
+        upgrade_plugin_savepoint(true, 2026071505, 'local', 'handbook');
+    }
+
     return true;
 }

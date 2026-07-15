@@ -61,6 +61,31 @@ class helper {
     }
 
     /**
+     * Capability check for metadata (fiche) proposal functions (spec 5).
+     *
+     * A propose capability only — it authorises staging a draft patch, never
+     * reviewing, approving, applying or publishing it.
+     *
+     * @param context_system $context System context.
+     * @return void
+     */
+    public static function require_propose_metadata(context_system $context): void {
+        self::require_read($context);
+        require_capability('local/handbook:apiproposemetadata', $context);
+    }
+
+    /**
+     * Capability check for relation proposal functions (spec 5, 10).
+     *
+     * @param context_system $context System context.
+     * @return void
+     */
+    public static function require_propose_relations(context_system $context): void {
+        self::require_read($context);
+        require_capability('local/handbook:apiproposerelations', $context);
+    }
+
+    /**
      * Resolve a page by numeric id or slug.
      *
      * @param string $identifier Page id or slug.

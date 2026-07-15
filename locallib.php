@@ -185,6 +185,210 @@ function local_handbook_changeset_action_button(moodle_url $url, string $action,
 }
 
 /**
+ * Render a change-set item workflow button that posts an item id (used by
+ * non-revision proposal items, e.g. metadata patches).
+ *
+ * @param moodle_url $url Change-set detail URL.
+ * @param string $action Action name.
+ * @param int $itemid Change-item id.
+ * @param string $label Button label.
+ * @param string $btnclass Bootstrap button class suffix.
+ * @return string
+ */
+function local_handbook_changeset_item_button(moodle_url $url, string $action, int $itemid,
+        string $label, string $btnclass): string {
+    $form = html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false),
+        'class' => 'd-inline']);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => $action]);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'itemid', 'value' => $itemid]);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    $form .= html_writer::tag('button', s($label),
+        ['type' => 'submit', 'class' => 'btn btn-sm ' . $btnclass]);
+    $form .= html_writer::end_tag('form');
+    return $form;
+}
+
+/**
+ * Format a single page metadata value for display in a review diff.
+ *
+ * @param string $field Field name.
+ * @param mixed $value Field value (published or proposed).
+ * @return string HTML-safe display string.
+ */
+function local_handbook_format_metadata_value(string $field, $value): string {
+    if ($value === null || $value === '') {
+        return html_writer::span('—', 'text-muted');
+    }
+    switch ($field) {
+        case 'contenttype':
+            return s(get_string('contenttype_' . $value, 'local_handbook'));
+        case 'criticality':
+            return s(get_string('criticality_' . $value, 'local_handbook'));
+        case 'requiredreading':
+            return s(get_string((int)$value ? 'yes' : 'no'));
+        case 'reviewdate':
+            return (int)$value
+                ? s(userdate((int)$value, get_string('strftimedate', 'langconfig')))
+                : html_writer::span('—', 'text-muted');
+        default:
+            return s((string)$value);
+    }
+}
+
+/**
+ * Render a before/after table for a proposed page metadata (fiche) patch.
+ *
+ * @param stdClass $page The page (published values).
+ * @param array $patch Field => proposed value map.
+ * @return string HTML.
+ */
+function local_handbook_render_metadata_diff(stdClass $page, array $patch): string {
+    $head = html_writer::tag('tr',
+        html_writer::tag('th', s(get_string('metadatafield', 'local_handbook')), ['scope' => 'col'])
+        . html_writer::tag('th', s(get_string('metadatacurrentvalue', 'local_handbook')), ['scope' => 'col'])
+        . html_writer::tag('th', s(get_string('metadataproposedvalue', 'local_handbook')), ['scope' => 'col']));
+
+    $rows = '';
+    foreach ($patch as $field => $proposed) {
+        $label = get_string('metafield_' . $field, 'local_handbook');
+        $current = $page->$field ?? null;
+        $rows .= html_writer::tag('tr',
+            html_writer::tag('th', s($label), ['scope' => 'row', 'class' => 'text-nowrap'])
+            . html_writer::tag('td', local_handbook_format_metadata_value($field, $current),
+                ['class' => 'text-muted'])
+            . html_writer::tag('td', local_handbook_format_metadata_value($field, $proposed)));
+    }
+
+    return html_writer::tag('table',
+        html_writer::tag('thead', $head) . html_writer::tag('tbody', $rows),
+        ['class' => 'table table-sm table-bordered small mb-2']);
+}
+
+/**
+ * A remove-item form for a non-revision change item.
+ *
+ * @param moodle_url $url Change-set detail URL.
+ * @param int $itemid Change-item id.
+ * @return string
+ */
+function local_handbook_changeset_item_remove_form(moodle_url $url, int $itemid): string {
+    $form = html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false),
+        'class' => 'd-inline',
+        'onsubmit' => 'return confirm(' . json_encode(get_string('confirmremoveitem', 'local_handbook')) . ');']);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'removeitem']);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'itemid', 'value' => $itemid]);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    $form .= html_writer::tag('button', s(get_string('removeitem', 'local_handbook')),
+        ['type' => 'submit', 'class' => 'btn btn-link btn-sm text-danger']);
+    $form .= html_writer::end_tag('form');
+    return $form;
+}
+
+/**
+ * Workflow action row for a non-revision change item (metadata, new page,
+ * relations): approve / apply / reject / remove, gated by the reviewer's caps.
+ *
+ * @param moodle_url $url Change-set detail URL.
+ * @param stdClass $item Change-item record.
+ * @param bool $canapprove Reviewer holds approve.
+ * @param bool $canpublish Reviewer holds publish.
+ * @param bool $canreview Reviewer holds review.
+ * @return string HTML (empty when no action is available).
+ */
+function local_handbook_changeset_nonrevision_actions(moodle_url $url, stdClass $item,
+        bool $canapprove, bool $canpublish, bool $canreview): string {
+    $service = \local_handbook\local\service\changeset_service::class;
+    $actions = [];
+    if ($item->itemstatus === $service::ITEM_IN_REVIEW && $canapprove) {
+        $actions[] = local_handbook_changeset_item_button($url, 'approveitem', (int)$item->id,
+            get_string('approve', 'local_handbook'), 'btn-primary');
+    }
+    if ($item->itemstatus === $service::ITEM_APPROVED && $canpublish) {
+        $actions[] = local_handbook_changeset_item_button($url, 'applyitem', (int)$item->id,
+            get_string('applychange', 'local_handbook'), 'btn-primary');
+    }
+    if ($item->itemstatus === $service::ITEM_IN_REVIEW && $canreview) {
+        $actions[] = local_handbook_changeset_item_button($url, 'rejectitem', (int)$item->id,
+            get_string('reject', 'local_handbook'), 'btn-outline-danger');
+    }
+    if (!in_array($item->itemstatus, [$service::ITEM_IN_REVIEW, $service::ITEM_APPROVED,
+            $service::ITEM_PUBLISHED], true)) {
+        $actions[] = local_handbook_changeset_item_remove_form($url, (int)$item->id);
+    }
+    return $actions
+        ? html_writer::div(implode(' ', $actions), 'd-flex flex-wrap gap-2 align-items-center')
+        : '';
+}
+
+/**
+ * Render a preview of a proposed new page (fiche summary + content preview).
+ *
+ * @param array $data New-page payload.
+ * @return string HTML.
+ */
+function local_handbook_render_new_page_preview(array $data): string {
+    global $DB;
+
+    $rows = '';
+    $catid = (int)($data['categoryid'] ?? 0);
+    $catname = $catid
+        ? (string)$DB->get_field('local_handbook_category', 'name', ['id' => $catid])
+        : '';
+    $fields = [
+        'metafield_title' => (string)($data['title'] ?? ''),
+        'category' => $catname,
+        'metafield_contenttype' => isset($data['contenttype'])
+            ? get_string('contenttype_' . $data['contenttype'], 'local_handbook') : '',
+        'metafield_responsiblearea' => (string)($data['responsiblearea'] ?? ''),
+    ];
+    foreach ($fields as $labelkey => $value) {
+        if (trim((string)$value) === '') {
+            continue;
+        }
+        $rows .= html_writer::tag('tr',
+            html_writer::tag('th', s(get_string($labelkey, 'local_handbook')),
+                ['scope' => 'row', 'class' => 'text-nowrap'])
+            . html_writer::tag('td', s($value)));
+    }
+    $out = html_writer::tag('table', html_writer::tag('tbody', $rows),
+        ['class' => 'table table-sm table-bordered small mb-2']);
+
+    $summary = trim((string)($data['summary'] ?? ''));
+    if ($summary !== '') {
+        $out .= html_writer::div(s($summary), 'small text-muted mb-2');
+    }
+    return $out;
+}
+
+/**
+ * Render a list of proposed relation operations for review.
+ *
+ * @param array $ops Operation list (op, relationtype, targetpageid, targettempkey).
+ * @return string HTML.
+ */
+function local_handbook_render_relation_ops(array $ops): string {
+    global $DB;
+
+    $items = '';
+    foreach ($ops as $op) {
+        $verb = ($op['op'] ?? '') === 'remove'
+            ? get_string('relationopremove', 'local_handbook')
+            : get_string('relationopcreate', 'local_handbook');
+        $type = local_handbook_relation_label((string)($op['relationtype'] ?? ''));
+        $targetid = (int)($op['targetpageid'] ?? 0);
+        if ($targetid) {
+            $target = (string)$DB->get_field('local_handbook_page', 'title', ['id' => $targetid]);
+        } else {
+            $target = (string)($op['targettempkey'] ?? '');
+        }
+        $items .= html_writer::tag('li',
+            html_writer::span(s($verb), 'font-weight-bold') . ' '
+            . s($type) . ' → ' . s($target));
+    }
+    return html_writer::tag('ul', $items, ['class' => 'small mb-2']);
+}
+
+/**
  * Render the shared area navigation row (tab strip).
  *
  * @param string $currentpage Key of the current page.

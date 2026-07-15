@@ -158,6 +158,30 @@ $functions = [
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
     ],
+    'local_handbook_upsert_changeset_metadata' => [
+        'classname' => 'local_handbook\external\upsert_changeset_metadata',
+        'description' => 'Propose a page metadata (fiche) patch inside a change set (draft only; never applies).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposemetadata',
+    ],
+    'local_handbook_upsert_changeset_new_page' => [
+        'classname' => 'local_handbook\external\upsert_changeset_new_page',
+        'description' => 'Propose a brand-new page inside a change set (draft only; never publishes).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
+    ],
+    'local_handbook_upsert_changeset_relations' => [
+        'classname' => 'local_handbook\external\upsert_changeset_relations',
+        'description' => 'Propose edits to a page\'s outgoing relations inside a change set (draft only).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposerelations',
+    ],
+    'local_handbook_list_areas' => [
+        'classname' => 'local_handbook\external\list_areas',
+        'description' => 'List the controlled vocabulary of responsible areas.',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
     'local_handbook_submit_changeset_for_review' => [
         'classname' => 'local_handbook\external\submit_changeset_for_review',
         'description' => 'Submit a change set\'s eligible drafts for human review.',

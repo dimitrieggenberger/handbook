@@ -107,6 +107,29 @@ if ($action !== '') {
             redirect($url, get_string('revisionrejected', 'local_handbook'));
         }
     }
+
+    // Non-revision proposal items (e.g. metadata patches) are approved, applied
+    // and rejected by item id. The apply (applyitem) is the only human-gated
+    // write to published state; no external/MCP function reaches it.
+    if (in_array($action, ['approveitem', 'applyitem', 'rejectitem'], true)) {
+        $itemid = required_param('itemid', PARAM_INT);
+
+        if ($action === 'approveitem') {
+            require_capability('local/handbook:approve', $context);
+            changeset_service::approve_item($itemid);
+            redirect($url, get_string('changeitemapproved', 'local_handbook'));
+        }
+        if ($action === 'applyitem') {
+            require_capability('local/handbook:publish', $context);
+            changeset_service::publish_item($itemid);
+            redirect($url, get_string('changeitemapplied', 'local_handbook'));
+        }
+        if ($action === 'rejectitem') {
+            require_capability('local/handbook:review', $context);
+            changeset_service::reject_item($itemid, optional_param('note', '', PARAM_TEXT));
+            redirect($url, get_string('changeitemrejected', 'local_handbook'));
+        }
+    }
 }
 
 // Re-read after any redirect-less fallthrough.
@@ -247,6 +270,30 @@ $itembadges = [
 ];
 
 foreach ($changeset->items as $item) {
+    // New-page proposal: rendered from its payload (no bound page until applied).
+    if ($item->kind === changeset_service::KIND_PAGE_CREATE) {
+        $data = json_decode((string)$item->payloadjson, true) ?: [];
+        $title = (string)($data['title'] ?? get_string('changesetnewpage', 'local_handbook'));
+        $applied = (int)$item->pageid
+            ? $DB->get_record('local_handbook_page', ['id' => $item->pageid]) : null;
+        $titlehtml = $applied
+            ? html_writer::link(local_handbook_page_url($applied), s($title)) : s($title);
+        $head = $titlehtml . ' '
+            . html_writer::span(s(get_string('itemkindnewpage', 'local_handbook')), 'badge badge-light border')
+            . ' ' . html_writer::span(s(get_string('itemstatus_' . $item->itemstatus, 'local_handbook')),
+                $itembadges[$item->itemstatus] ?? 'badge badge-secondary');
+        $body = html_writer::tag('h4', $head, ['class' => 'h6 mb-2']);
+        if ($item->itemstatus === changeset_service::ITEM_CONFLICT
+                && trim((string)$item->conflictnote) !== '') {
+            $body .= html_writer::div(s($item->conflictnote), 'alert alert-warning py-2 px-3 small mb-2');
+        }
+        $body .= local_handbook_render_new_page_preview($data);
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
     $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid]);
     if (!$page) {
         continue;
@@ -262,6 +309,38 @@ foreach ($changeset->items as $item) {
     if ($item->itemstatus === changeset_service::ITEM_CONFLICT
             && trim((string)$item->conflictnote) !== '') {
         $body .= html_writer::div(s($item->conflictnote), 'alert alert-warning py-2 px-3 small mb-2');
+    }
+
+    // Metadata (fiche) proposal: before/after field table + its own workflow.
+    if ($item->kind === changeset_service::KIND_PAGE_METADATA) {
+        $patch = json_decode((string)$item->payloadjson, true);
+        if (is_array($patch) && $patch) {
+            $body .= local_handbook_render_metadata_diff($page, $patch);
+        } else {
+            $body .= html_writer::div(s(get_string('metadatanochanges', 'local_handbook')),
+                'small text-muted mb-2');
+        }
+
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
+    // Relation-edit proposal: list the operations + its workflow.
+    if ($item->kind === changeset_service::KIND_RELATION_CHANGE) {
+        $payload = json_decode((string)$item->payloadjson, true);
+        $ops = is_array($payload) ? ($payload['ops'] ?? []) : [];
+        if ($ops) {
+            $body .= local_handbook_render_relation_ops($ops);
+        } else {
+            $body .= html_writer::div(s(get_string('metadatanochanges', 'local_handbook')),
+                'small text-muted mb-2');
+        }
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
     }
 
     // Before/after diff (published vs the item's draft).

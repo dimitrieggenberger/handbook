@@ -363,6 +363,296 @@ final class changeset_service_test extends advanced_testcase {
         $this->assertNotEquals((int)$revision->createdby, (int)$revision->authoruserid);
     }
 
+    public function test_page_revision_item_uses_default_kind_and_empty_payload(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Política de evaluación');
+        $changeset = changeset_service::create((object)['title' => 'Update', 'source' => 'ai']);
+
+        changeset_service::upsert_draft($changeset->id, (int)$page->id,
+            '<h2>Nuevo</h2><p>Texto.</p>', FORMAT_HTML, 'Cambio');
+
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id], '*', MUST_EXIST);
+        $this->assertSame(changeset_service::KIND_PAGE_REVISION, $item->kind);
+        $this->assertSame('', $item->tempkey);
+        $this->assertNull($item->payloadjson);
+    }
+
+    public function test_change_set_allows_several_item_kinds_for_one_page(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Estructura institucional');
+        $changeset = changeset_service::create((object)['title' => 'Coordinated', 'source' => 'ai']);
+
+        // A page_revision item for this page.
+        changeset_service::upsert_draft($changeset->id, (int)$page->id,
+            '<h2>Nuevo</h2><p>Texto.</p>', FORMAT_HTML, 'Contenido');
+
+        // A second item of a different kind for the SAME page — impossible under
+        // the old unique (changesetid, pageid) index; allowed after Phase 0.
+        $now = time();
+        $DB->insert_record('local_handbook_changeitem', (object)[
+            'changesetid' => (int)$changeset->id,
+            'kind' => 'page_metadata',
+            'pageid' => (int)$page->id,
+            'tempkey' => '',
+            'revisionid' => 0,
+            'itemstatus' => changeset_service::ITEM_DRAFT,
+            'payloadjson' => json_encode(['title' => 'Nuevo título']),
+            'changesummary' => 'Metadatos',
+            'conflictnote' => '',
+            'sortorder' => 5,
+            'timecreated' => $now,
+            'timemodified' => $now,
+        ]);
+
+        $this->assertSame(2, $DB->count_records('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id]));
+    }
+
+    public function test_upsert_metadata_stages_a_page_metadata_item(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Política de evaluación');
+        $changeset = changeset_service::create((object)['title' => 'Fiche', 'source' => 'ai']);
+
+        $result = changeset_service::upsert_metadata($changeset->id, (int)$page->id,
+            ['title' => 'Evaluación del aprendizaje', 'requiredreading' => true]);
+
+        $this->assertSame(changeset_service::ITEM_DRAFT, $result['status']);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_METADATA], '*', MUST_EXIST);
+        $this->assertSame(0, (int)$item->revisionid);
+        $patch = json_decode((string)$item->payloadjson, true);
+        $this->assertSame('Evaluación del aprendizaje', $patch['title']);
+        $this->assertSame(1, $patch['requiredreading']);
+    }
+
+    public function test_upsert_metadata_rejects_unsupported_field(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Estructura institucional');
+        $changeset = changeset_service::create((object)['title' => 'Bad', 'source' => 'ai']);
+
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id, ['aiaccess' => 'excluded']);
+    }
+
+    public function test_metadata_apply_writes_the_page_row_only_after_human_publish(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Convivencia escolar');
+        $changeset = changeset_service::create((object)['title' => 'Fiche', 'source' => 'ai']);
+
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id,
+            ['title' => 'Política de convivencia', 'responsiblearea' => 'Coordinación de Bienestar',
+                'requiredreading' => true]);
+
+        // Staged only: the published page row is untouched.
+        $this->assertSame('Convivencia escolar',
+            (string)$DB->get_field('local_handbook_page', 'title', ['id' => $page->id]));
+
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_METADATA], '*', MUST_EXIST);
+        $this->assertSame(changeset_service::ITEM_IN_REVIEW, $item->itemstatus);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $updated = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $this->assertSame('Política de convivencia', $updated->title);
+        $this->assertSame('Coordinación de Bienestar', $updated->responsiblearea);
+        $this->assertSame(1, (int)$updated->requiredreading);
+        $this->assertSame(changeset_service::ITEM_PUBLISHED,
+            (string)$DB->get_field('local_handbook_changeitem', 'itemstatus', ['id' => $item->id]));
+    }
+
+    public function test_publish_item_requires_an_approved_item(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Modalidad híbrida');
+        $changeset = changeset_service::create((object)['title' => 'Fiche', 'source' => 'ai']);
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id, ['title' => 'Nuevo']);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_METADATA], '*', MUST_EXIST);
+
+        // Still a draft (never approved): applying must be refused.
+        $this->expectException(\moodle_exception::class);
+        changeset_service::publish_item((int)$item->id);
+    }
+
+    public function test_metadata_upsert_flags_a_stale_fiche(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Calendario académico');
+        $changeset = changeset_service::create((object)['title' => 'Fiche', 'source' => 'ai']);
+
+        $result = changeset_service::upsert_metadata($changeset->id, (int)$page->id,
+            ['title' => 'Nuevo'], (int)$page->timemodified + 1000);
+
+        $this->assertSame(changeset_service::ITEM_CONFLICT, $result['status']);
+    }
+
+    public function test_new_page_proposal_creates_and_publishes_on_apply(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $changeset = changeset_service::create((object)['title' => 'New pages', 'source' => 'ai']);
+
+        changeset_service::upsert_new_page($changeset->id, 'newpage:direccion', [
+            'title' => 'Dirección oficial',
+            'categoryid' => $cat,
+            'content' => '<h2>Introducción</h2><p>Texto.</p>',
+            'summary' => 'Resumen.',
+            'contenttype' => 'policy',
+        ]);
+
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newpage:direccion',
+                'kind' => changeset_service::KIND_PAGE_CREATE], '*', MUST_EXIST);
+        $this->assertSame(changeset_service::ITEM_IN_REVIEW, $item->itemstatus);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $item = $DB->get_record('local_handbook_changeitem', ['id' => $item->id], '*', MUST_EXIST);
+        $this->assertSame(changeset_service::ITEM_PUBLISHED, $item->itemstatus);
+        $this->assertGreaterThan(0, (int)$item->pageid);
+        $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid], '*', MUST_EXIST);
+        $this->assertSame('Dirección oficial', $page->title);
+        $this->assertGreaterThan(0, (int)$page->publishedrevisionid);
+    }
+
+    public function test_new_page_requires_a_category(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $changeset = changeset_service::create((object)['title' => 'New', 'source' => 'ai']);
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_new_page($changeset->id, 'newpage:x',
+            ['title' => 'X', 'content' => '<p>y</p>']);
+    }
+
+    public function test_relation_proposal_creates_a_relation_on_apply(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $a = $this->publish_page($cat, 'Política');
+        $b = $this->publish_page($cat, 'Procedimiento');
+        $changeset = changeset_service::create((object)['title' => 'Relations', 'source' => 'ai']);
+
+        changeset_service::upsert_relations($changeset->id, (int)$a->id, [
+            ['op' => 'create', 'relationtype' => 'relatedto', 'targetpageid' => (int)$b->id],
+        ]);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $a->id,
+                'kind' => changeset_service::KIND_RELATION_CHANGE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertTrue($DB->record_exists('local_handbook_relation',
+            ['sourcepageid' => $a->id, 'relationtype' => 'relatedto', 'targetpageid' => $b->id]));
+    }
+
+    public function test_relation_to_new_page_resolves_tempkey_on_apply(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $a = $this->publish_page($cat, 'Política');
+        $changeset = changeset_service::create((object)['title' => 'Coordinated', 'source' => 'ai']);
+
+        changeset_service::upsert_new_page($changeset->id, 'newpage:b', [
+            'title' => 'Guía nueva', 'categoryid' => $cat, 'content' => '<h2>x</h2><p>y</p>']);
+        changeset_service::upsert_relations($changeset->id, (int)$a->id, [
+            ['op' => 'create', 'relationtype' => 'quickguidefor',
+                'targetpageid' => 0, 'targettempkey' => 'newpage:b'],
+        ]);
+        changeset_service::submit($changeset->id);
+
+        // The new page must be applied before the relation can resolve.
+        $np = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newpage:b',
+                'kind' => changeset_service::KIND_PAGE_CREATE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$np->id);
+        changeset_service::publish_item((int)$np->id);
+        $np = $DB->get_record('local_handbook_changeitem', ['id' => $np->id], '*', MUST_EXIST);
+
+        $rel = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $a->id,
+                'kind' => changeset_service::KIND_RELATION_CHANGE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$rel->id);
+        changeset_service::publish_item((int)$rel->id);
+
+        $this->assertTrue($DB->record_exists('local_handbook_relation',
+            ['sourcepageid' => $a->id, 'relationtype' => 'quickguidefor',
+                'targetpageid' => (int)$np->pageid]));
+    }
+
+    public function test_slug_rename_registers_an_alias_on_apply(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Reglamento interno');
+        $oldslug = $page->slug;
+        $changeset = changeset_service::create((object)['title' => 'Rename', 'source' => 'ai']);
+
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id, ['slug' => 'reglamento-2027']);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_METADATA], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $updated = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $this->assertSame('reglamento-2027', $updated->slug);
+        $this->assertTrue($DB->record_exists('local_handbook_pagealias',
+            ['oldslug' => $oldslug, 'pageid' => $page->id]));
+    }
+
     /**
      * Read one item's status.
      *

@@ -29,10 +29,14 @@ use stdClass;
  * ends at submitting drafts for human review: there is no approve or publish
  * operation here, by design (36.1).
  *
- * The model already guarantees at most one working revision per page, so a
- * change item maps a page to its single working revision. The conservative
- * upsert (36.4) reuses that draft when this change set owns it and refuses to
- * overwrite a human draft or a draft owned by another change set.
+ * Each change item carries a kind (see KIND_* ). Today every item is a
+ * page_revision: the model guarantees at most one working revision per page,
+ * so such an item maps a page to its single working revision, and the
+ * conservative upsert (36.4) reuses that draft when this change set owns it and
+ * refuses to overwrite a human draft or a draft owned by another change set.
+ * The schema also holds non-revision kinds (metadata, taxonomy, lifecycle,
+ * glossary) that later phases add; those are never approved or published here —
+ * they are applied only by the human-gated publish path.
  *
  * @package   local_handbook
  * @copyright Educación Helvética SA / EuropaSchule
@@ -65,6 +69,69 @@ class changeset_service {
     public const ITEM_REJECTED = 'rejected';
     /** @var string */
     public const ITEM_SKIPPED = 'skipped';
+
+    /**
+     * @var string A change item that proposes a new working content revision
+     * for a page — the only kind today. Later phases add metadata, taxonomy,
+     * lifecycle and glossary kinds; each is applied only by the human-gated
+     * publish path, never by the API (spec 36.1).
+     */
+    public const KIND_PAGE_REVISION = 'page_revision';
+
+    /**
+     * @var string A change item that proposes a partial patch to a page's
+     * fiche (metadata) — versioned and reviewed like content, applied to the
+     * page row only by the human-gated publish path (Phase 1).
+     */
+    public const KIND_PAGE_METADATA = 'page_metadata';
+
+    /**
+     * Page fiche fields a metadata proposal may patch. Deliberately excludes
+     * structural and sensitive fields (slug, categoryid, audience, aiaccess,
+     * owner/approver, archived) — those arrive with the taxonomy, lifecycle
+     * and sensitive-field work in later increments.
+     *
+     * @return string[]
+     */
+    public static function metadata_fields(): array {
+        return ['title', 'slug', 'summary', 'contenttype', 'authoritylevel', 'criticality',
+            'responsiblearea', 'reviewdate', 'requiredreading'];
+    }
+
+    /**
+     * @var string A change item that proposes a brand-new page. It has no page
+     * id yet; it is identified within the change set by a tempkey and applied
+     * (page created + first revision published) only by the human publish path.
+     */
+    public const KIND_PAGE_CREATE = 'page_create';
+
+    /**
+     * @var string A change item that proposes edits to a page's outgoing
+     * typed relations (create/remove/retype), applied only by the human path.
+     */
+    public const KIND_RELATION_CHANGE = 'relation_change';
+
+    /**
+     * Fields a new-page proposal may carry (spec 13).
+     *
+     * @return string[]
+     */
+    public static function new_page_fields(): array {
+        return ['title', 'slug', 'summary', 'categoryid', 'content', 'contenttype',
+            'authoritylevel', 'criticality', 'responsiblearea', 'reviewdate',
+            'requiredreading', 'language'];
+    }
+
+    /**
+     * Typed relation kinds a proposal may use (spec 9.2, 10).
+     *
+     * @return string[]
+     */
+    public static function relation_types(): array {
+        return ['relatedto', 'dependson', 'implements', 'replaces', 'supersedes',
+            'exceptionto', 'procedurefor', 'quickguidefor', 'templatefor',
+            'assessmentfor', 'translationof'];
+    }
 
     /** @var string[] Change-set states that reject further drafting. */
     private const LOCKED_STATUSES = [self::STATUS_COMPLETED, self::STATUS_CANCELLED];
@@ -245,6 +312,306 @@ class changeset_service {
     }
 
     /**
+     * Create or update this change set's proposed metadata (fiche) patch for
+     * one page. Draft authority only — the patch is applied to the page row
+     * exclusively by the human-gated publish path (publish_item()).
+     *
+     * Partial-patch semantics (spec 6): only the fields present in $patch are
+     * proposed; omitted fields keep their published value.
+     *
+     * @param int $changesetid Change-set id.
+     * @param int $pageid Page id.
+     * @param array $patch Field => value map (subset of metadata_fields()).
+     * @param int $expectedtimemodified Page timemodified the caller based the
+     *        patch on (0 = skip the concurrency check).
+     * @param int $userid Acting user (0 = current user).
+     * @return array Per-item result.
+     */
+    public static function upsert_metadata(int $changesetid, int $pageid, array $patch,
+            int $expectedtimemodified = 0, int $userid = 0): array {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+        $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
+
+        if ($expectedtimemodified && (int)$page->timemodified !== $expectedtimemodified) {
+            return self::record_conflict($changeset, $pageid, 0, 'conflict_metadataconcurrency',
+                0, '', $userid, self::KIND_PAGE_METADATA);
+        }
+
+        // Validate now so a bad proposal never reaches the review queue; it is
+        // re-validated at apply time in case the page changed meanwhile.
+        $normalized = self::validate_metadata_patch($page, $patch);
+        $summary = self::summarise_metadata_patch($normalized);
+
+        $item = self::write_item($changeset, $pageid, 0, self::ITEM_DRAFT, '',
+            $summary, $userid, self::KIND_PAGE_METADATA, json_encode($normalized));
+        return self::item_result($item, null);
+    }
+
+    /**
+     * Validate and normalise a metadata patch (throws on any invalid field).
+     *
+     * @param stdClass $page The page the patch targets (for context).
+     * @param array $patch Raw field => value map.
+     * @return array Normalised, typed patch (only supported fields).
+     */
+    public static function validate_metadata_patch(stdClass $page, array $patch): array {
+        $allowed = self::metadata_fields();
+        $normalised = [];
+
+        foreach ($patch as $field => $value) {
+            if (!in_array($field, $allowed, true)) {
+                throw new moodle_exception('errormetadatafieldunsupported', 'local_handbook', '', $field);
+            }
+            switch ($field) {
+                case 'title':
+                    $title = trim((string)$value);
+                    if ($title === '' || \core_text::strlen($title) > 255) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['title'] = $title;
+                    break;
+                case 'slug':
+                    // Normalise to a URL-safe slug now; uniqueness is enforced
+                    // at apply time (it may change between proposal and apply).
+                    $slug = page_service::slugify((string)$value);
+                    if ($slug === '') {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['slug'] = $slug;
+                    break;
+                case 'summary':
+                    $normalised['summary'] = (string)$value;
+                    break;
+                case 'responsiblearea':
+                    // Route through the controlled vocabulary (throws if unknown
+                    // once the catalogue is governed).
+                    $normalised['responsiblearea'] = area_service::resolve_name((string)$value);
+                    break;
+                case 'contenttype':
+                    if (!in_array($value, page_service::content_types(), true)) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['contenttype'] = (string)$value;
+                    break;
+                case 'criticality':
+                    if (!in_array($value, page_service::criticalities(), true)) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['criticality'] = (string)$value;
+                    break;
+                case 'authoritylevel':
+                    $level = (int)$value;
+                    if ($level < 1 || $level > 5) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['authoritylevel'] = $level;
+                    break;
+                case 'reviewdate':
+                    $date = (int)$value;
+                    if ($date < 0) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['reviewdate'] = $date;
+                    break;
+                case 'requiredreading':
+                    $normalised['requiredreading'] = (int)((bool)$value);
+                    break;
+            }
+        }
+
+        if (!$normalised) {
+            throw new moodle_exception('errormetadatapatchempty', 'local_handbook');
+        }
+        return $normalised;
+    }
+
+    /**
+     * A short, human summary of which fiche fields a patch changes.
+     *
+     * @param array $normalised Normalised patch.
+     * @return string
+     */
+    private static function summarise_metadata_patch(array $normalised): string {
+        $labels = [];
+        foreach (array_keys($normalised) as $field) {
+            $labels[] = get_string('metafield_' . $field, 'local_handbook');
+        }
+        return get_string('metadatachangesummary', 'local_handbook', implode(', ', $labels));
+    }
+
+    /**
+     * Create or update this change set's proposal for a brand-new page.
+     *
+     * The page is identified within the set by a stable tempkey; it is created
+     * and its first revision published only by the human publish path.
+     *
+     * @param int $changesetid Change-set id.
+     * @param string $tempkey Stable id within the set (e.g. newpage:slug).
+     * @param array $data New-page fields (see new_page_fields()).
+     * @param int $userid Acting user (0 = current user).
+     * @return array Per-item result.
+     */
+    public static function upsert_new_page(int $changesetid, string $tempkey, array $data,
+            int $userid = 0): array {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+
+        $tempkey = self::normalise_tempkey($tempkey);
+        $normalised = self::validate_new_page($data);
+        $summary = get_string('newpagechangesummary', 'local_handbook', $normalised['title']);
+
+        $item = self::write_item($changeset, 0, 0, self::ITEM_DRAFT, '', $summary,
+            $userid, self::KIND_PAGE_CREATE, json_encode($normalised), $tempkey);
+        return self::item_result($item, null);
+    }
+
+    /**
+     * Validate and normalise a new-page proposal (throws on any problem).
+     *
+     * @param array $data Raw new-page fields.
+     * @return array Normalised fields for page_service::create_page().
+     */
+    public static function validate_new_page(array $data): array {
+        global $DB;
+
+        $title = trim((string)($data['title'] ?? ''));
+        if ($title === '' || \core_text::strlen($title) > 255) {
+            throw new moodle_exception('errormetadatavalue', 'local_handbook', '', 'title');
+        }
+        $categoryid = (int)($data['categoryid'] ?? 0);
+        if (!$categoryid || !$DB->record_exists('local_handbook_category', ['id' => $categoryid])) {
+            throw new moodle_exception('errornewpagecategory', 'local_handbook');
+        }
+        $content = (string)($data['content'] ?? '');
+        if (trim($content) === '') {
+            throw new moodle_exception('errornewpagecontent', 'local_handbook');
+        }
+
+        $out = [
+            'title' => $title,
+            'categoryid' => $categoryid,
+            'content' => $content,
+            'summary' => (string)($data['summary'] ?? ''),
+        ];
+        if (!empty($data['slug'])) {
+            $out['slug'] = page_service::slugify((string)$data['slug']);
+        }
+        $out['contenttype'] = in_array($data['contenttype'] ?? null, page_service::content_types(), true)
+            ? (string)$data['contenttype'] : 'procedure';
+        $out['criticality'] = in_array($data['criticality'] ?? null, page_service::criticalities(), true)
+            ? (string)$data['criticality'] : 'operational';
+        $level = (int)($data['authoritylevel'] ?? 4);
+        $out['authoritylevel'] = ($level >= 1 && $level <= 5) ? $level : 4;
+        $out['reviewdate'] = max(0, (int)($data['reviewdate'] ?? 0));
+        $out['requiredreading'] = (int)((bool)($data['requiredreading'] ?? false));
+        $out['language'] = \core_text::substr(trim((string)($data['language'] ?? 'es')), 0, 10) ?: 'es';
+        if (isset($data['responsiblearea']) && trim((string)$data['responsiblearea']) !== '') {
+            $out['responsiblearea'] = area_service::resolve_name((string)$data['responsiblearea']);
+        }
+        return $out;
+    }
+
+    /**
+     * Create or update this change set's proposed relation edits for one page.
+     *
+     * @param int $changesetid Change-set id.
+     * @param int $sourcepageid The page whose outgoing relations change.
+     * @param array $ops Operation list; each: op (create|remove), relationtype,
+     *        and a target (targetpageid or targettempkey for a new page).
+     * @param int $userid Acting user (0 = current user).
+     * @return array Per-item result.
+     */
+    public static function upsert_relations(int $changesetid, int $sourcepageid, array $ops,
+            int $userid = 0): array {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+        $DB->get_record('local_handbook_page', ['id' => $sourcepageid], '*', MUST_EXIST);
+
+        $normalised = self::validate_relations($sourcepageid, $ops);
+        $summary = get_string('relationchangesummary', 'local_handbook', count($normalised));
+
+        $item = self::write_item($changeset, $sourcepageid, 0, self::ITEM_DRAFT, '', $summary,
+            $userid, self::KIND_RELATION_CHANGE, json_encode(['ops' => $normalised]));
+        return self::item_result($item, null);
+    }
+
+    /**
+     * Validate and normalise a relation operation list (throws on any problem).
+     *
+     * @param int $sourcepageid Source page id.
+     * @param array $ops Raw operations.
+     * @return array Normalised operations.
+     */
+    public static function validate_relations(int $sourcepageid, array $ops): array {
+        global $DB;
+
+        $out = [];
+        foreach ($ops as $op) {
+            $action = $op['op'] ?? '';
+            if (!in_array($action, ['create', 'remove'], true)) {
+                throw new moodle_exception('errorrelationop', 'local_handbook');
+            }
+            $type = $op['relationtype'] ?? '';
+            if (!in_array($type, self::relation_types(), true)) {
+                throw new moodle_exception('errorrelationtype', 'local_handbook', '', (string)$type);
+            }
+            $targetpageid = (int)($op['targetpageid'] ?? 0);
+            $targettempkey = trim((string)($op['targettempkey'] ?? ''));
+            if ($targetpageid) {
+                if ($targetpageid === $sourcepageid) {
+                    throw new moodle_exception('errorrelationself', 'local_handbook');
+                }
+                if (!$DB->record_exists('local_handbook_page', ['id' => $targetpageid])) {
+                    throw new moodle_exception('errorrelationtarget', 'local_handbook');
+                }
+            } else if ($targettempkey === '') {
+                throw new moodle_exception('errorrelationtarget', 'local_handbook');
+            }
+            $out[] = [
+                'op' => $action,
+                'relationtype' => $type,
+                'targetpageid' => $targetpageid,
+                'targettempkey' => $targettempkey,
+            ];
+        }
+        if (!$out) {
+            throw new moodle_exception('errorrelationempty', 'local_handbook');
+        }
+        return $out;
+    }
+
+    /**
+     * Normalise a tempkey (non-empty, capped).
+     *
+     * @param string $tempkey Raw tempkey.
+     * @return string
+     */
+    private static function normalise_tempkey(string $tempkey): string {
+        $tempkey = trim($tempkey);
+        if ($tempkey === '') {
+            throw new moodle_exception('errortempkeyrequired', 'local_handbook');
+        }
+        return \core_text::substr($tempkey, 0, 100);
+    }
+
+    /**
      * Submit every eligible item of a change set for human review (36.4).
      *
      * Eligible items (editable drafts owned by this change set) are submitted;
@@ -270,8 +637,22 @@ class changeset_service {
 
         $results = [];
         foreach ($items as $item) {
-            if ($item->itemstatus !== self::ITEM_DRAFT || !$item->revisionid) {
+            if ($item->itemstatus !== self::ITEM_DRAFT) {
                 // Conflicts / already-submitted / skipped items pass through untouched.
+                $results[] = self::item_result($item, null);
+                continue;
+            }
+            if ($item->kind !== self::KIND_PAGE_REVISION) {
+                // A non-revision proposal (metadata, taxonomy, lifecycle,
+                // glossary) has no draft revision to submit; move it straight
+                // into review for a human to approve and apply.
+                $item->itemstatus = self::ITEM_IN_REVIEW;
+                $item->timemodified = time();
+                $DB->update_record('local_handbook_changeitem', $item);
+                $results[] = self::item_result($item, null);
+                continue;
+            }
+            if (!$item->revisionid) {
                 $results[] = self::item_result($item, null);
                 continue;
             }
@@ -367,6 +748,298 @@ class changeset_service {
     }
 
     /**
+     * Approve a non-revision proposal item (in_review -> approved).
+     *
+     * The caller MUST have checked local/handbook:approve first. Page-revision
+     * items are approved through the revision workflow (page_service::approve),
+     * never here.
+     *
+     * @param int $itemid Change-item id.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function approve_item(int $itemid, int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $item = $DB->get_record('local_handbook_changeitem', ['id' => $itemid], '*', MUST_EXIST);
+        self::assert_non_revision_item($item);
+        if ($item->itemstatus !== self::ITEM_IN_REVIEW) {
+            throw new moodle_exception('errorworkflowstate', 'local_handbook');
+        }
+
+        $DB->update_record('local_handbook_changeitem', (object)[
+            'id' => (int)$item->id, 'itemstatus' => self::ITEM_APPROVED, 'timemodified' => time(),
+        ]);
+        self::recompute_status((int)$item->changesetid, $userid);
+    }
+
+    /**
+     * Reject a non-revision proposal item (in_review -> rejected, terminal).
+     *
+     * The caller MUST have checked local/handbook:review first.
+     *
+     * @param int $itemid Change-item id.
+     * @param string $note Reason for rejection.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function reject_item(int $itemid, string $note = '', int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $item = $DB->get_record('local_handbook_changeitem', ['id' => $itemid], '*', MUST_EXIST);
+        self::assert_non_revision_item($item);
+        if ($item->itemstatus !== self::ITEM_IN_REVIEW) {
+            throw new moodle_exception('errorworkflowstate', 'local_handbook');
+        }
+
+        $DB->update_record('local_handbook_changeitem', (object)[
+            'id' => (int)$item->id, 'itemstatus' => self::ITEM_REJECTED,
+            'conflictnote' => $note, 'timemodified' => time(),
+        ]);
+        self::recompute_status((int)$item->changesetid, $userid);
+    }
+
+    /**
+     * Apply an approved non-revision proposal to the published state and mark
+     * the item published (approved -> published). This is the single, human-
+     * gated apply path: the caller MUST have checked local/handbook:publish.
+     *
+     * The apply and the status change happen in one transaction so the
+     * published state and the audit record can never diverge. There is no
+     * external/MCP function that reaches this method (spec 17.3, 36.1).
+     *
+     * @param int $itemid Change-item id.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function publish_item(int $itemid, int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $item = $DB->get_record('local_handbook_changeitem', ['id' => $itemid], '*', MUST_EXIST);
+        self::assert_non_revision_item($item);
+        if ($item->itemstatus !== self::ITEM_APPROVED) {
+            throw new moodle_exception('errorworkflowstate', 'local_handbook');
+        }
+
+        $transaction = $DB->start_delegated_transaction();
+        self::apply_item($item, $userid);
+        $DB->update_record('local_handbook_changeitem', (object)[
+            'id' => (int)$item->id, 'itemstatus' => self::ITEM_PUBLISHED, 'timemodified' => time(),
+        ]);
+        $transaction->allow_commit();
+
+        self::recompute_status((int)$item->changesetid, $userid);
+    }
+
+    /**
+     * Guard: the workflow/apply methods act only on non-revision items.
+     *
+     * @param stdClass $item Change-item record.
+     * @return void
+     */
+    private static function assert_non_revision_item(stdClass $item): void {
+        if ($item->kind === self::KIND_PAGE_REVISION) {
+            throw new moodle_exception('errorwrongitemkind', 'local_handbook');
+        }
+    }
+
+    /**
+     * Apply a non-revision proposal to the published state by kind.
+     *
+     * @param stdClass $item Change-item record (approved).
+     * @param int $userid Acting user (the human publisher).
+     * @return void
+     */
+    private static function apply_item(stdClass $item, int $userid): void {
+        switch ($item->kind) {
+            case self::KIND_PAGE_METADATA:
+                self::apply_metadata_patch($item, $userid);
+                break;
+            case self::KIND_PAGE_CREATE:
+                self::apply_page_create($item, $userid);
+                break;
+            case self::KIND_RELATION_CHANGE:
+                self::apply_relations($item, $userid);
+                break;
+            default:
+                throw new moodle_exception('errorunsupportedkind', 'local_handbook', '', $item->kind);
+        }
+    }
+
+    /**
+     * Apply a metadata patch to its page row (re-validated at apply time).
+     *
+     * @param stdClass $item Change-item record (kind page_metadata).
+     * @param int $userid Human publisher (recorded as modifiedby).
+     * @return void
+     */
+    private static function apply_metadata_patch(stdClass $item, int $userid): void {
+        global $DB;
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid], '*', MUST_EXIST);
+        $patch = json_decode((string)$item->payloadjson, true);
+        if (!is_array($patch)) {
+            throw new moodle_exception('errormetadatapatchempty', 'local_handbook');
+        }
+        $normalised = self::validate_metadata_patch($page, $patch);
+
+        // A slug rename keeps the old slug resolvable and must stay unique.
+        if (isset($normalised['slug']) && $normalised['slug'] !== $page->slug) {
+            self::apply_slug_change($page, $normalised['slug'], $userid);
+        } else {
+            unset($normalised['slug']);
+        }
+
+        $update = (object)['id' => (int)$page->id];
+        foreach ($normalised as $field => $value) {
+            $update->$field = $value;
+        }
+        $update->timemodified = time();
+        $update->modifiedby = $userid;
+        $DB->update_record('local_handbook_page', $update);
+    }
+
+    /**
+     * Apply a slug rename: verify uniqueness and register the old slug as an
+     * alias so existing addresses keep resolving (spec 7.3).
+     *
+     * @param stdClass $page Page being renamed.
+     * @param string $newslug New canonical slug.
+     * @param int $userid Acting user.
+     * @return void
+     */
+    private static function apply_slug_change(stdClass $page, string $newslug, int $userid): void {
+        global $DB;
+
+        if ($DB->record_exists_select('local_handbook_page', 'slug = :slug AND id <> :id',
+                ['slug' => $newslug, 'id' => $page->id])) {
+            throw new moodle_exception('errorslugtaken', 'local_handbook', '', $newslug);
+        }
+        if ($DB->record_exists_select('local_handbook_pagealias', 'oldslug = :slug AND pageid <> :id',
+                ['slug' => $newslug, 'id' => $page->id])) {
+            throw new moodle_exception('errorslugtaken', 'local_handbook', '', $newslug);
+        }
+
+        // Keep the current slug resolvable.
+        if (!$DB->record_exists('local_handbook_pagealias', ['oldslug' => $page->slug])) {
+            $DB->insert_record('local_handbook_pagealias', (object)[
+                'pageid' => (int)$page->id,
+                'oldslug' => $page->slug,
+                'timecreated' => time(),
+                'createdby' => $userid,
+            ]);
+        }
+        // If the new slug was previously an alias for this page, it is canonical now.
+        $DB->delete_records('local_handbook_pagealias',
+            ['oldslug' => $newslug, 'pageid' => (int)$page->id]);
+    }
+
+    /**
+     * Apply a new-page proposal: create the page and publish its first
+     * revision through the governed workflow, then bind the item to the new id.
+     *
+     * @param stdClass $item Change-item record (kind page_create).
+     * @param int $userid Human publisher.
+     * @return void
+     */
+    private static function apply_page_create(stdClass $item, int $userid): void {
+        global $DB;
+
+        $data = json_decode((string)$item->payloadjson, true);
+        if (!is_array($data)) {
+            throw new moodle_exception('errornewpagecontent', 'local_handbook');
+        }
+        // Re-validate defensively (category may have changed since proposal).
+        $data = self::validate_new_page($data);
+
+        $record = (object)$data;
+        $record->contentformat = FORMAT_HTML;
+        $page = page_service::create_page($record, $userid);
+
+        // Publish the first revision through the governed transitions.
+        $revision = $page->draftrevision;
+        page_service::submit_for_review($revision,
+            get_string('newpagesubmitsummary', 'local_handbook'), $userid);
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id], '*', MUST_EXIST);
+        page_service::approve($revision, $userid);
+        $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id], '*', MUST_EXIST);
+        page_service::publish($revision, $userid);
+
+        // Bind the item to the created page so later items and the UI resolve it.
+        $DB->update_record('local_handbook_changeitem', (object)[
+            'id' => (int)$item->id, 'pageid' => (int)$page->id,
+        ]);
+        $item->pageid = (int)$page->id;
+    }
+
+    /**
+     * Apply proposed relation edits to a page's outgoing relations.
+     *
+     * @param stdClass $item Change-item record (kind relation_change).
+     * @param int $userid Human publisher.
+     * @return void
+     */
+    private static function apply_relations(stdClass $item, int $userid): void {
+        global $DB;
+
+        $payload = json_decode((string)$item->payloadjson, true);
+        $ops = is_array($payload) ? ($payload['ops'] ?? []) : [];
+        $source = (int)$item->pageid;
+
+        foreach ($ops as $op) {
+            $targetid = (int)($op['targetpageid'] ?? 0);
+            if (!$targetid && !empty($op['targettempkey'])) {
+                $targetid = self::resolve_tempkey_page((int)$item->changesetid, (string)$op['targettempkey']);
+            }
+            if (!$targetid || !$DB->record_exists('local_handbook_page', ['id' => $targetid])) {
+                throw new moodle_exception('errorrelationunresolved', 'local_handbook');
+            }
+            $type = (string)$op['relationtype'];
+            $key = ['sourcepageid' => $source, 'relationtype' => $type, 'targetpageid' => $targetid];
+
+            if ($op['op'] === 'create') {
+                if (!$DB->record_exists('local_handbook_relation', $key)) {
+                    $sortorder = (int)$DB->get_field_sql(
+                        'SELECT COALESCE(MAX(sortorder), -1) + 1 FROM {local_handbook_relation} '
+                        . 'WHERE sourcepageid = ?', [$source]);
+                    $DB->insert_record('local_handbook_relation', (object)[
+                        'sourcepageid' => $source,
+                        'targetpageid' => $targetid,
+                        'relationtype' => $type,
+                        'sortorder' => $sortorder,
+                        'timecreated' => time(),
+                        'createdby' => $userid,
+                    ]);
+                }
+            } else {
+                $DB->delete_records('local_handbook_relation', $key);
+            }
+        }
+    }
+
+    /**
+     * Resolve a new-page tempkey to its created page id (0 = not applied yet).
+     *
+     * @param int $changesetid Change-set id.
+     * @param string $tempkey New-page tempkey.
+     * @return int Created page id.
+     */
+    private static function resolve_tempkey_page(int $changesetid, string $tempkey): int {
+        global $DB;
+
+        $item = $DB->get_record('local_handbook_changeitem', [
+            'changesetid' => $changesetid, 'tempkey' => $tempkey, 'kind' => self::KIND_PAGE_CREATE,
+        ]);
+        if ($item && (int)$item->pageid > 0) {
+            return (int)$item->pageid;
+        }
+        throw new moodle_exception('errorrelationunresolved', 'local_handbook', '', $tempkey);
+    }
+
+    /**
      * Synchronise change-item status from a revision's workflow state (36.4).
      *
      * Called by the event observer when a revision is submitted, approved,
@@ -382,7 +1055,8 @@ class changeset_service {
 
         $userid = $userid ?: (int)$USER->id;
 
-        $items = $DB->get_records('local_handbook_changeitem', ['revisionid' => $revisionid]);
+        $items = $DB->get_records('local_handbook_changeitem',
+            ['revisionid' => $revisionid, 'kind' => self::KIND_PAGE_REVISION]);
         if (!$items) {
             return;
         }
@@ -498,35 +1172,52 @@ class changeset_service {
      * @param int $version Version number for the note placeholder.
      * @param string $changesummary Proposed change summary.
      * @param int $userid Acting user.
+     * @param string $kind Item kind (default page_revision).
      * @return array Per-item result.
      */
     private static function record_conflict(stdClass $changeset, int $pageid, int $revisionid,
-            string $notekey, int $version, string $changesummary, int $userid): array {
+            string $notekey, int $version, string $changesummary, int $userid,
+            string $kind = self::KIND_PAGE_REVISION): array {
         $note = get_string($notekey, 'local_handbook', $version);
         $item = self::write_item($changeset, $pageid, $revisionid, self::ITEM_CONFLICT,
-            $note, $changesummary, $userid);
+            $note, $changesummary, $userid, $kind);
         return self::item_result($item, null);
     }
 
     /**
-     * Insert or update the change item for one page (unique changesetid,pageid).
+     * Insert or update a change item.
+     *
+     * A change set holds at most one item of a given kind per page, so the item
+     * is keyed by (changesetid, pageid, kind). With the unique DB index relaxed
+     * for polymorphism, that one-per-(page,kind) guarantee is enforced here.
      *
      * @param stdClass $changeset Change-set record.
-     * @param int $pageid Page id.
+     * @param int $pageid Page id (0 for an item with no bound page yet).
      * @param int $revisionid Working revision id (0 = none/unowned).
      * @param string $itemstatus Item status.
      * @param string $conflictnote Conflict note ('' when clear).
      * @param string $changesummary Change summary (kept if non-empty).
      * @param int $userid Acting user.
+     * @param string $kind Item kind (default page_revision).
+     * @param string|null $payloadjson Proposed change for non-revision kinds
+     *        (null leaves any stored payload unchanged).
+     * @param string $tempkey Stable id within the set for a page-less item
+     *        (new entities); items with a page id are keyed by page instead.
      * @return stdClass The change-item record.
      */
     private static function write_item(stdClass $changeset, int $pageid, int $revisionid,
-            string $itemstatus, string $conflictnote, string $changesummary, int $userid): stdClass {
+            string $itemstatus, string $conflictnote, string $changesummary, int $userid,
+            string $kind = self::KIND_PAGE_REVISION, ?string $payloadjson = null,
+            string $tempkey = ''): stdClass {
         global $DB;
 
         $now = time();
-        $item = $DB->get_record('local_handbook_changeitem',
-            ['changesetid' => $changeset->id, 'pageid' => $pageid]);
+        // Items bound to a page are keyed by (set, page, kind); page-less items
+        // (new entities) are keyed by (set, tempkey, kind).
+        $lookup = $pageid > 0
+            ? ['changesetid' => $changeset->id, 'pageid' => $pageid, 'kind' => $kind]
+            : ['changesetid' => $changeset->id, 'tempkey' => $tempkey, 'kind' => $kind];
+        $item = $DB->get_record('local_handbook_changeitem', $lookup);
 
         if ($item) {
             $item->revisionid = $revisionid;
@@ -534,6 +1225,9 @@ class changeset_service {
             $item->conflictnote = $conflictnote;
             if (trim($changesummary) !== '') {
                 $item->changesummary = $changesummary;
+            }
+            if ($payloadjson !== null) {
+                $item->payloadjson = $payloadjson;
             }
             $item->timemodified = $now;
             $DB->update_record('local_handbook_changeitem', $item);
@@ -543,9 +1237,12 @@ class changeset_service {
                 . 'WHERE changesetid = ?', [$changeset->id]);
             $item = new stdClass();
             $item->changesetid = (int)$changeset->id;
+            $item->kind = $kind;
             $item->pageid = $pageid;
+            $item->tempkey = $tempkey;
             $item->revisionid = $revisionid;
             $item->itemstatus = $itemstatus;
+            $item->payloadjson = $payloadjson;
             $item->changesummary = $changesummary;
             $item->conflictnote = $conflictnote;
             $item->sortorder = $sortorder;

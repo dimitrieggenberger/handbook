@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/handbook/db" VERSION="2026071400" COMMENT="XMLDB file for local_handbook (specification section 20)"
+<XMLDB PATH="local/handbook/db" VERSION="2026071506" COMMENT="XMLDB file for local_handbook (specification section 20)"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -284,13 +284,16 @@
       </INDEXES>
     </TABLE>
 
-    <TABLE NAME="local_handbook_changeitem" COMMENT="One affected page per change set: its working revision and per-item status (specification 36.3)">
+    <TABLE NAME="local_handbook_changeitem" COMMENT="One proposed change per change set: a page working revision (default) or, in later phases, a metadata/taxonomy/lifecycle/glossary proposal (specification 36.3)">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="changesetid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-        <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Working revision this item drafts (0 = not yet created)"/>
+        <FIELD NAME="kind" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="page_revision" COMMENT="Item kind. page_revision (default); future proposal kinds (page_create, page_metadata, page_move, page_archive, page_restore, relation_change, category_change, glossary_*) are applied only by a human-gated dispatcher, never by the API"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Bound page (0 = no bound page yet; new-page/category/glossary items identify their target via tempkey)"/>
+        <FIELD NAME="tempkey" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="" COMMENT="Stable id within the change set for an entity with no real id yet (e.g. newpage:slug); resolved to a real id at publish"/>
+        <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Working revision this item drafts (0 = none, or not a page-revision item)"/>
         <FIELD NAME="itemstatus" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="draft" COMMENT="draft, conflict, in_review, approved, published, rejected, skipped"/>
+        <FIELD NAME="payloadjson" TYPE="text" NOTNULL="false" COMMENT="Proposed change for non-revision kinds (metadata patch, move, archive, relation, category, glossary); null for page_revision items"/>
         <FIELD NAME="changesummary" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="conflictnote" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
@@ -304,9 +307,48 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="changesetorder" UNIQUE="false" FIELDS="changesetid, sortorder"/>
-        <INDEX NAME="changesetpage" UNIQUE="true" FIELDS="changesetid, pageid"/>
+        <INDEX NAME="changesetpage" UNIQUE="false" FIELDS="changesetid, pageid"/>
+        <INDEX NAME="changesetkind" UNIQUE="false" FIELDS="changesetid, kind"/>
         <INDEX NAME="revisionid" UNIQUE="false" FIELDS="revisionid"/>
         <INDEX NAME="itemstatus" UNIQUE="false" FIELDS="itemstatus"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_pagealias" COMMENT="Retired page slugs that still resolve to their page (spec 7.3)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="oldslug" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="oldslug" UNIQUE="true" FIELDS="oldslug"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_area" COMMENT="Controlled vocabulary of responsible areas (spec 9)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="areakey" TYPE="char" LENGTH="100" NOTNULL="true" COMMENT="Stable machine key"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Display name stored on pages"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="areakey" UNIQUE="true" FIELDS="areakey"/>
+        <INDEX NAME="activesort" UNIQUE="false" FIELDS="active, sortorder"/>
       </INDEXES>
     </TABLE>
   </TABLES>
