@@ -107,6 +107,29 @@ if ($action !== '') {
             redirect($url, get_string('revisionrejected', 'local_handbook'));
         }
     }
+
+    // Non-revision proposal items (e.g. metadata patches) are approved, applied
+    // and rejected by item id. The apply (applyitem) is the only human-gated
+    // write to published state; no external/MCP function reaches it.
+    if (in_array($action, ['approveitem', 'applyitem', 'rejectitem'], true)) {
+        $itemid = required_param('itemid', PARAM_INT);
+
+        if ($action === 'approveitem') {
+            require_capability('local/handbook:approve', $context);
+            changeset_service::approve_item($itemid);
+            redirect($url, get_string('changeitemapproved', 'local_handbook'));
+        }
+        if ($action === 'applyitem') {
+            require_capability('local/handbook:publish', $context);
+            changeset_service::publish_item($itemid);
+            redirect($url, get_string('changeitemapplied', 'local_handbook'));
+        }
+        if ($action === 'rejectitem') {
+            require_capability('local/handbook:review', $context);
+            changeset_service::reject_item($itemid, optional_param('note', '', PARAM_TEXT));
+            redirect($url, get_string('changeitemrejected', 'local_handbook'));
+        }
+    }
 }
 
 // Re-read after any redirect-less fallthrough.
@@ -262,6 +285,50 @@ foreach ($changeset->items as $item) {
     if ($item->itemstatus === changeset_service::ITEM_CONFLICT
             && trim((string)$item->conflictnote) !== '') {
         $body .= html_writer::div(s($item->conflictnote), 'alert alert-warning py-2 px-3 small mb-2');
+    }
+
+    // Metadata (fiche) proposal: before/after field table + its own workflow.
+    if ($item->kind === changeset_service::KIND_PAGE_METADATA) {
+        $patch = json_decode((string)$item->payloadjson, true);
+        if (is_array($patch) && $patch) {
+            $body .= local_handbook_render_metadata_diff($page, $patch);
+        } else {
+            $body .= html_writer::div(s(get_string('metadatanochanges', 'local_handbook')),
+                'small text-muted mb-2');
+        }
+
+        $metaactions = [];
+        if ($item->itemstatus === changeset_service::ITEM_IN_REVIEW && $canapprove) {
+            $metaactions[] = local_handbook_changeset_item_button($url, 'approveitem', (int)$item->id,
+                get_string('approve', 'local_handbook'), 'btn-primary');
+        }
+        if ($item->itemstatus === changeset_service::ITEM_APPROVED && $canpublish) {
+            $metaactions[] = local_handbook_changeset_item_button($url, 'applyitem', (int)$item->id,
+                get_string('applychange', 'local_handbook'), 'btn-primary');
+        }
+        if ($item->itemstatus === changeset_service::ITEM_IN_REVIEW && $canreview) {
+            $metaactions[] = local_handbook_changeset_item_button($url, 'rejectitem', (int)$item->id,
+                get_string('reject', 'local_handbook'), 'btn-outline-danger');
+        }
+        if (!in_array($item->itemstatus, [changeset_service::ITEM_IN_REVIEW,
+                changeset_service::ITEM_APPROVED, changeset_service::ITEM_PUBLISHED], true)) {
+            $rmform = html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false),
+                'class' => 'd-inline',
+                'onsubmit' => 'return confirm(' . json_encode(get_string('confirmremoveitem', 'local_handbook')) . ');']);
+            $rmform .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'removeitem']);
+            $rmform .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'itemid', 'value' => (int)$item->id]);
+            $rmform .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+            $rmform .= html_writer::tag('button', s(get_string('removeitem', 'local_handbook')),
+                ['type' => 'submit', 'class' => 'btn btn-link btn-sm text-danger']);
+            $rmform .= html_writer::end_tag('form');
+            $metaactions[] = $rmform;
+        }
+        if ($metaactions) {
+            $body .= html_writer::div(implode(' ', $metaactions), 'd-flex flex-wrap gap-2 align-items-center');
+        }
+
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
     }
 
     // Before/after diff (published vs the item's draft).

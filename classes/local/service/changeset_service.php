@@ -78,6 +78,26 @@ class changeset_service {
      */
     public const KIND_PAGE_REVISION = 'page_revision';
 
+    /**
+     * @var string A change item that proposes a partial patch to a page's
+     * fiche (metadata) — versioned and reviewed like content, applied to the
+     * page row only by the human-gated publish path (Phase 1).
+     */
+    public const KIND_PAGE_METADATA = 'page_metadata';
+
+    /**
+     * Page fiche fields a metadata proposal may patch. Deliberately excludes
+     * structural and sensitive fields (slug, categoryid, audience, aiaccess,
+     * owner/approver, archived) — those arrive with the taxonomy, lifecycle
+     * and sensitive-field work in later increments.
+     *
+     * @return string[]
+     */
+    public static function metadata_fields(): array {
+        return ['title', 'summary', 'contenttype', 'authoritylevel', 'criticality',
+            'responsiblearea', 'reviewdate', 'requiredreading'];
+    }
+
     /** @var string[] Change-set states that reject further drafting. */
     private const LOCKED_STATUSES = [self::STATUS_COMPLETED, self::STATUS_CANCELLED];
 
@@ -257,6 +277,134 @@ class changeset_service {
     }
 
     /**
+     * Create or update this change set's proposed metadata (fiche) patch for
+     * one page. Draft authority only — the patch is applied to the page row
+     * exclusively by the human-gated publish path (publish_item()).
+     *
+     * Partial-patch semantics (spec 6): only the fields present in $patch are
+     * proposed; omitted fields keep their published value.
+     *
+     * @param int $changesetid Change-set id.
+     * @param int $pageid Page id.
+     * @param array $patch Field => value map (subset of metadata_fields()).
+     * @param int $expectedtimemodified Page timemodified the caller based the
+     *        patch on (0 = skip the concurrency check).
+     * @param int $userid Acting user (0 = current user).
+     * @return array Per-item result.
+     */
+    public static function upsert_metadata(int $changesetid, int $pageid, array $patch,
+            int $expectedtimemodified = 0, int $userid = 0): array {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+        $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
+
+        if ($expectedtimemodified && (int)$page->timemodified !== $expectedtimemodified) {
+            return self::record_conflict($changeset, $pageid, 0, 'conflict_metadataconcurrency',
+                0, '', $userid, self::KIND_PAGE_METADATA);
+        }
+
+        // Validate now so a bad proposal never reaches the review queue; it is
+        // re-validated at apply time in case the page changed meanwhile.
+        $normalized = self::validate_metadata_patch($page, $patch);
+        $summary = self::summarise_metadata_patch($normalized);
+
+        $item = self::write_item($changeset, $pageid, 0, self::ITEM_DRAFT, '',
+            $summary, $userid, self::KIND_PAGE_METADATA, json_encode($normalized));
+        return self::item_result($item, null);
+    }
+
+    /**
+     * Validate and normalise a metadata patch (throws on any invalid field).
+     *
+     * @param stdClass $page The page the patch targets (for context).
+     * @param array $patch Raw field => value map.
+     * @return array Normalised, typed patch (only supported fields).
+     */
+    public static function validate_metadata_patch(stdClass $page, array $patch): array {
+        $allowed = self::metadata_fields();
+        $normalised = [];
+
+        foreach ($patch as $field => $value) {
+            if (!in_array($field, $allowed, true)) {
+                throw new moodle_exception('errormetadatafieldunsupported', 'local_handbook', '', $field);
+            }
+            switch ($field) {
+                case 'title':
+                    $title = trim((string)$value);
+                    if ($title === '' || \core_text::strlen($title) > 255) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['title'] = $title;
+                    break;
+                case 'summary':
+                    $normalised['summary'] = (string)$value;
+                    break;
+                case 'responsiblearea':
+                    $area = trim((string)$value);
+                    if ($area === '' || \core_text::strlen($area) > 255) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['responsiblearea'] = $area;
+                    break;
+                case 'contenttype':
+                    if (!in_array($value, page_service::content_types(), true)) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['contenttype'] = (string)$value;
+                    break;
+                case 'criticality':
+                    if (!in_array($value, page_service::criticalities(), true)) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['criticality'] = (string)$value;
+                    break;
+                case 'authoritylevel':
+                    $level = (int)$value;
+                    if ($level < 1 || $level > 5) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['authoritylevel'] = $level;
+                    break;
+                case 'reviewdate':
+                    $date = (int)$value;
+                    if ($date < 0) {
+                        throw new moodle_exception('errormetadatavalue', 'local_handbook', '', $field);
+                    }
+                    $normalised['reviewdate'] = $date;
+                    break;
+                case 'requiredreading':
+                    $normalised['requiredreading'] = (int)((bool)$value);
+                    break;
+            }
+        }
+
+        if (!$normalised) {
+            throw new moodle_exception('errormetadatapatchempty', 'local_handbook');
+        }
+        return $normalised;
+    }
+
+    /**
+     * A short, human summary of which fiche fields a patch changes.
+     *
+     * @param array $normalised Normalised patch.
+     * @return string
+     */
+    private static function summarise_metadata_patch(array $normalised): string {
+        $labels = [];
+        foreach (array_keys($normalised) as $field) {
+            $labels[] = get_string('metafield_' . $field, 'local_handbook');
+        }
+        return get_string('metadatachangesummary', 'local_handbook', implode(', ', $labels));
+    }
+
+    /**
      * Submit every eligible item of a change set for human review (36.4).
      *
      * Eligible items (editable drafts owned by this change set) are submitted;
@@ -282,8 +430,22 @@ class changeset_service {
 
         $results = [];
         foreach ($items as $item) {
-            if ($item->itemstatus !== self::ITEM_DRAFT || !$item->revisionid) {
+            if ($item->itemstatus !== self::ITEM_DRAFT) {
                 // Conflicts / already-submitted / skipped items pass through untouched.
+                $results[] = self::item_result($item, null);
+                continue;
+            }
+            if ($item->kind !== self::KIND_PAGE_REVISION) {
+                // A non-revision proposal (metadata, taxonomy, lifecycle,
+                // glossary) has no draft revision to submit; move it straight
+                // into review for a human to approve and apply.
+                $item->itemstatus = self::ITEM_IN_REVIEW;
+                $item->timemodified = time();
+                $DB->update_record('local_handbook_changeitem', $item);
+                $results[] = self::item_result($item, null);
+                continue;
+            }
+            if (!$item->revisionid) {
                 $results[] = self::item_result($item, null);
                 continue;
             }
@@ -376,6 +538,148 @@ class changeset_service {
             'timemodified' => time(),
             'modifiedby' => $userid,
         ]);
+    }
+
+    /**
+     * Approve a non-revision proposal item (in_review -> approved).
+     *
+     * The caller MUST have checked local/handbook:approve first. Page-revision
+     * items are approved through the revision workflow (page_service::approve),
+     * never here.
+     *
+     * @param int $itemid Change-item id.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function approve_item(int $itemid, int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $item = $DB->get_record('local_handbook_changeitem', ['id' => $itemid], '*', MUST_EXIST);
+        self::assert_non_revision_item($item);
+        if ($item->itemstatus !== self::ITEM_IN_REVIEW) {
+            throw new moodle_exception('errorworkflowstate', 'local_handbook');
+        }
+
+        $DB->update_record('local_handbook_changeitem', (object)[
+            'id' => (int)$item->id, 'itemstatus' => self::ITEM_APPROVED, 'timemodified' => time(),
+        ]);
+        self::recompute_status((int)$item->changesetid, $userid);
+    }
+
+    /**
+     * Reject a non-revision proposal item (in_review -> rejected, terminal).
+     *
+     * The caller MUST have checked local/handbook:review first.
+     *
+     * @param int $itemid Change-item id.
+     * @param string $note Reason for rejection.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function reject_item(int $itemid, string $note = '', int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $item = $DB->get_record('local_handbook_changeitem', ['id' => $itemid], '*', MUST_EXIST);
+        self::assert_non_revision_item($item);
+        if ($item->itemstatus !== self::ITEM_IN_REVIEW) {
+            throw new moodle_exception('errorworkflowstate', 'local_handbook');
+        }
+
+        $DB->update_record('local_handbook_changeitem', (object)[
+            'id' => (int)$item->id, 'itemstatus' => self::ITEM_REJECTED,
+            'conflictnote' => $note, 'timemodified' => time(),
+        ]);
+        self::recompute_status((int)$item->changesetid, $userid);
+    }
+
+    /**
+     * Apply an approved non-revision proposal to the published state and mark
+     * the item published (approved -> published). This is the single, human-
+     * gated apply path: the caller MUST have checked local/handbook:publish.
+     *
+     * The apply and the status change happen in one transaction so the
+     * published state and the audit record can never diverge. There is no
+     * external/MCP function that reaches this method (spec 17.3, 36.1).
+     *
+     * @param int $itemid Change-item id.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function publish_item(int $itemid, int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $item = $DB->get_record('local_handbook_changeitem', ['id' => $itemid], '*', MUST_EXIST);
+        self::assert_non_revision_item($item);
+        if ($item->itemstatus !== self::ITEM_APPROVED) {
+            throw new moodle_exception('errorworkflowstate', 'local_handbook');
+        }
+
+        $transaction = $DB->start_delegated_transaction();
+        self::apply_item($item, $userid);
+        $DB->update_record('local_handbook_changeitem', (object)[
+            'id' => (int)$item->id, 'itemstatus' => self::ITEM_PUBLISHED, 'timemodified' => time(),
+        ]);
+        $transaction->allow_commit();
+
+        self::recompute_status((int)$item->changesetid, $userid);
+    }
+
+    /**
+     * Guard: the workflow/apply methods act only on non-revision items.
+     *
+     * @param stdClass $item Change-item record.
+     * @return void
+     */
+    private static function assert_non_revision_item(stdClass $item): void {
+        if ($item->kind === self::KIND_PAGE_REVISION) {
+            throw new moodle_exception('errorwrongitemkind', 'local_handbook');
+        }
+    }
+
+    /**
+     * Apply a non-revision proposal to the published state by kind.
+     *
+     * @param stdClass $item Change-item record (approved).
+     * @param int $userid Acting user (the human publisher).
+     * @return void
+     */
+    private static function apply_item(stdClass $item, int $userid): void {
+        switch ($item->kind) {
+            case self::KIND_PAGE_METADATA:
+                self::apply_metadata_patch($item, $userid);
+                break;
+            default:
+                throw new moodle_exception('errorunsupportedkind', 'local_handbook', '', $item->kind);
+        }
+    }
+
+    /**
+     * Apply a metadata patch to its page row (re-validated at apply time).
+     *
+     * @param stdClass $item Change-item record (kind page_metadata).
+     * @param int $userid Human publisher (recorded as modifiedby).
+     * @return void
+     */
+    private static function apply_metadata_patch(stdClass $item, int $userid): void {
+        global $DB;
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid], '*', MUST_EXIST);
+        $patch = json_decode((string)$item->payloadjson, true);
+        if (!is_array($patch)) {
+            throw new moodle_exception('errormetadatapatchempty', 'local_handbook');
+        }
+        $normalised = self::validate_metadata_patch($page, $patch);
+
+        $update = (object)['id' => (int)$page->id];
+        foreach ($normalised as $field => $value) {
+            $update->$field = $value;
+        }
+        $update->timemodified = time();
+        $update->modifiedby = $userid;
+        $DB->update_record('local_handbook_page', $update);
     }
 
     /**
@@ -511,13 +815,15 @@ class changeset_service {
      * @param int $version Version number for the note placeholder.
      * @param string $changesummary Proposed change summary.
      * @param int $userid Acting user.
+     * @param string $kind Item kind (default page_revision).
      * @return array Per-item result.
      */
     private static function record_conflict(stdClass $changeset, int $pageid, int $revisionid,
-            string $notekey, int $version, string $changesummary, int $userid): array {
+            string $notekey, int $version, string $changesummary, int $userid,
+            string $kind = self::KIND_PAGE_REVISION): array {
         $note = get_string($notekey, 'local_handbook', $version);
         $item = self::write_item($changeset, $pageid, $revisionid, self::ITEM_CONFLICT,
-            $note, $changesummary, $userid);
+            $note, $changesummary, $userid, $kind);
         return self::item_result($item, null);
     }
 
@@ -536,11 +842,13 @@ class changeset_service {
      * @param string $changesummary Change summary (kept if non-empty).
      * @param int $userid Acting user.
      * @param string $kind Item kind (default page_revision).
+     * @param string|null $payloadjson Proposed change for non-revision kinds
+     *        (null leaves any stored payload unchanged).
      * @return stdClass The change-item record.
      */
     private static function write_item(stdClass $changeset, int $pageid, int $revisionid,
             string $itemstatus, string $conflictnote, string $changesummary, int $userid,
-            string $kind = self::KIND_PAGE_REVISION): stdClass {
+            string $kind = self::KIND_PAGE_REVISION, ?string $payloadjson = null): stdClass {
         global $DB;
 
         $now = time();
@@ -554,6 +862,9 @@ class changeset_service {
             if (trim($changesummary) !== '') {
                 $item->changesummary = $changesummary;
             }
+            if ($payloadjson !== null) {
+                $item->payloadjson = $payloadjson;
+            }
             $item->timemodified = $now;
             $DB->update_record('local_handbook_changeitem', $item);
         } else {
@@ -566,6 +877,7 @@ class changeset_service {
             $item->pageid = $pageid;
             $item->revisionid = $revisionid;
             $item->itemstatus = $itemstatus;
+            $item->payloadjson = $payloadjson;
             $item->changesummary = $changesummary;
             $item->conflictnote = $conflictnote;
             $item->sortorder = $sortorder;

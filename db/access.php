@@ -160,6 +160,16 @@ $capabilities = [
         'archetypes' => [],
     ],
 
+    // Propose metadata (fiche) patches through the API as change-set drafts
+    // (spec 5). A propose capability only: it never grants review, approval,
+    // application or publication. Granted only to approved service accounts.
+    'local/handbook:apiproposemetadata' => [
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+
     'local/handbook:manage' => [
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',

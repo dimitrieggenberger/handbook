@@ -158,6 +158,12 @@ $functions = [
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
     ],
+    'local_handbook_upsert_changeset_metadata' => [
+        'classname' => 'local_handbook\external\upsert_changeset_metadata',
+        'description' => 'Propose a page metadata (fiche) patch inside a change set (draft only; never applies).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposemetadata',
+    ],
     'local_handbook_submit_changeset_for_review' => [
         'classname' => 'local_handbook\external\submit_changeset_for_review',
         'description' => 'Submit a change set\'s eligible drafts for human review.',

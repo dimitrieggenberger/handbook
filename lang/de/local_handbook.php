@@ -42,6 +42,7 @@ $string['handbook:managechangesets'] = 'Änderungssätze des Handbuchs prüfen u
 $string['handbook:viewreports'] = 'Handbuchberichte ansehen';
 $string['handbook:manageapi'] = 'Externen Zugriff auf das Handbuch konfigurieren';
 $string['handbook:apiaccess'] = 'Externe Servicefunktionen des Handbuchs verwenden';
+$string['handbook:apiproposemetadata'] = 'Metadaten-Änderungen (Steckbrief) des Handbuchs über die API vorschlagen';
 $string['handbook:manage'] = 'Das Handbuch-Plugin administrieren';
 
 // Navigation and page titles.
@@ -489,3 +490,28 @@ $string['backtochangesets'] = 'Zurück zu den Änderungssätzen';
 $string['draftmatchespublished'] = 'Dieser Entwurf entspricht der veröffentlichten Version — noch keine Änderungen.';
 $string['changesetnewpage'] = 'Neue Seite (noch nicht veröffentlicht)';
 $string['externalreference'] = 'Externe Referenz';
+
+// Metadaten-Vorschläge (Steckbrief) in Change-Sets (Phase 1).
+$string['metadatachangesummary'] = 'Metadaten: {$a}';
+$string['metadatafield'] = 'Feld';
+$string['metadatacurrentvalue'] = 'Aktuell';
+$string['metadataproposedvalue'] = 'Vorgeschlagen';
+$string['metadatanochanges'] = 'Dieser Vorschlag enthält keine Feldänderungen.';
+$string['applychange'] = 'Änderung anwenden';
+$string['changeitemapproved'] = 'Änderung freigegeben.';
+$string['changeitemapplied'] = 'Änderung angewendet und veröffentlicht.';
+$string['changeitemrejected'] = 'Änderung abgelehnt.';
+$string['metafield_title'] = 'Titel';
+$string['metafield_summary'] = 'Zusammenfassung';
+$string['metafield_contenttype'] = 'Inhaltstyp';
+$string['metafield_authoritylevel'] = 'Autoritätsstufe';
+$string['metafield_criticality'] = 'Kritikalität';
+$string['metafield_responsiblearea'] = 'Verantwortlicher Bereich';
+$string['metafield_reviewdate'] = 'Prüfdatum';
+$string['metafield_requiredreading'] = 'Pflichtlektüre';
+$string['conflict_metadataconcurrency'] = 'Der Seiten-Steckbrief hat sich nach der Erstellung dieses Vorschlags geändert; bitte neu laden und erneut vorschlagen.';
+$string['errormetadatafieldunsupported'] = 'Das Metadatenfeld „{$a}" kann nicht über einen Metadaten-Vorschlag geändert werden.';
+$string['errormetadatavalue'] = 'Der vorgeschlagene Wert für „{$a}" ist ungültig.';
+$string['errormetadatapatchempty'] = 'Ein Metadaten-Vorschlag muss mindestens ein Feld ändern.';
+$string['errorunsupportedkind'] = 'Diese Änderungsart („{$a}") kann nicht automatisch angewendet werden.';
+$string['errorwrongitemkind'] = 'Diese Aktion gilt nicht für eine Seiteninhalts-Überarbeitung.';

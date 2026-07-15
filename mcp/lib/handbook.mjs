@@ -329,6 +329,41 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
   );
 
   server.tool(
+    "handbook_upsert_change_set_metadata",
+    "Propose a partial metadata (fiche) patch for ONE page inside THIS change set: include only the fields to change; omitted fields keep their published value. Staged as a draft — a human reviews, approves and applies it in Moodle. Never applies. Pass expectedtimemodified from the page you read to guard against a concurrent fiche edit.",
+    {
+      changesetid: z.number().int(),
+      identifier: z.string().describe("Page slug or numeric id"),
+      title: z.string().optional(),
+      summary: z.string().optional(),
+      contenttype: z.string().optional()
+        .describe("policy, procedure, standard, guideline, quickguide, template, example, roledescription"),
+      authoritylevel: z.number().int().min(1).max(5).optional(),
+      criticality: z.string().optional()
+        .describe("reference, operational, mandatory, safetycritical"),
+      responsiblearea: z.string().optional(),
+      reviewdate: z.number().int().optional().describe("Unix time"),
+      requiredreading: z.boolean().optional(),
+      expectedtimemodified: z.number().int().optional(),
+    },
+    handler((args) => {
+      const metadata = {};
+      for (const key of ["title", "summary", "contenttype", "authoritylevel",
+        "criticality", "responsiblearea", "reviewdate", "requiredreading"]) {
+        if (args[key] !== undefined) {
+          metadata[key] = args[key];
+        }
+      }
+      return ws("local_handbook_upsert_changeset_metadata", {
+        changesetid: args.changesetid,
+        identifier: args.identifier,
+        metadata,
+        expectedtimemodified: args.expectedtimemodified ?? 0,
+      });
+    })
+  );
+
+  server.tool(
     "handbook_submit_change_set_for_review",
     "Submit a change set's eligible drafts for human review. Do this ONLY after the user explicitly asks. Returns a per-page result; conflicts are skipped, not forced. Review, approval and publication remain human actions in Moodle.",
     { changesetid: z.number().int() },

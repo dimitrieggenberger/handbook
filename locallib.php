@@ -185,6 +185,86 @@ function local_handbook_changeset_action_button(moodle_url $url, string $action,
 }
 
 /**
+ * Render a change-set item workflow button that posts an item id (used by
+ * non-revision proposal items, e.g. metadata patches).
+ *
+ * @param moodle_url $url Change-set detail URL.
+ * @param string $action Action name.
+ * @param int $itemid Change-item id.
+ * @param string $label Button label.
+ * @param string $btnclass Bootstrap button class suffix.
+ * @return string
+ */
+function local_handbook_changeset_item_button(moodle_url $url, string $action, int $itemid,
+        string $label, string $btnclass): string {
+    $form = html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false),
+        'class' => 'd-inline']);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => $action]);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'itemid', 'value' => $itemid]);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    $form .= html_writer::tag('button', s($label),
+        ['type' => 'submit', 'class' => 'btn btn-sm ' . $btnclass]);
+    $form .= html_writer::end_tag('form');
+    return $form;
+}
+
+/**
+ * Format a single page metadata value for display in a review diff.
+ *
+ * @param string $field Field name.
+ * @param mixed $value Field value (published or proposed).
+ * @return string HTML-safe display string.
+ */
+function local_handbook_format_metadata_value(string $field, $value): string {
+    if ($value === null || $value === '') {
+        return html_writer::span('—', 'text-muted');
+    }
+    switch ($field) {
+        case 'contenttype':
+            return s(get_string('contenttype_' . $value, 'local_handbook'));
+        case 'criticality':
+            return s(get_string('criticality_' . $value, 'local_handbook'));
+        case 'requiredreading':
+            return s(get_string((int)$value ? 'yes' : 'no'));
+        case 'reviewdate':
+            return (int)$value
+                ? s(userdate((int)$value, get_string('strftimedate', 'langconfig')))
+                : html_writer::span('—', 'text-muted');
+        default:
+            return s((string)$value);
+    }
+}
+
+/**
+ * Render a before/after table for a proposed page metadata (fiche) patch.
+ *
+ * @param stdClass $page The page (published values).
+ * @param array $patch Field => proposed value map.
+ * @return string HTML.
+ */
+function local_handbook_render_metadata_diff(stdClass $page, array $patch): string {
+    $head = html_writer::tag('tr',
+        html_writer::tag('th', s(get_string('metadatafield', 'local_handbook')), ['scope' => 'col'])
+        . html_writer::tag('th', s(get_string('metadatacurrentvalue', 'local_handbook')), ['scope' => 'col'])
+        . html_writer::tag('th', s(get_string('metadataproposedvalue', 'local_handbook')), ['scope' => 'col']));
+
+    $rows = '';
+    foreach ($patch as $field => $proposed) {
+        $label = get_string('metafield_' . $field, 'local_handbook');
+        $current = $page->$field ?? null;
+        $rows .= html_writer::tag('tr',
+            html_writer::tag('th', s($label), ['scope' => 'row', 'class' => 'text-nowrap'])
+            . html_writer::tag('td', local_handbook_format_metadata_value($field, $current),
+                ['class' => 'text-muted'])
+            . html_writer::tag('td', local_handbook_format_metadata_value($field, $proposed)));
+    }
+
+    return html_writer::tag('table',
+        html_writer::tag('thead', $head) . html_writer::tag('tbody', $rows),
+        ['class' => 'table table-sm table-bordered small mb-2']);
+}
+
+/**
  * Render the shared area navigation row (tab strip).
  *
  * @param string $currentpage Key of the current page.

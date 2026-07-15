@@ -42,6 +42,7 @@ $string['handbook:managechangesets'] = 'Revisar y gestionar los conjuntos de cam
 $string['handbook:viewreports'] = 'Ver los informes del manual';
 $string['handbook:manageapi'] = 'Configurar el acceso externo al manual';
 $string['handbook:apiaccess'] = 'Usar las funciones de servicio externo del manual';
+$string['handbook:apiproposemetadata'] = 'Proponer cambios de ficha (metadatos) del manual mediante la API';
 $string['handbook:manage'] = 'Administrar el plugin del manual';
 
 // Navigation and page titles.
@@ -489,3 +490,28 @@ $string['backtochangesets'] = 'Volver a los conjuntos de cambios';
 $string['draftmatchespublished'] = 'Este borrador coincide con la versión publicada: todavía no hay cambios.';
 $string['changesetnewpage'] = 'Página nueva (aún sin publicar)';
 $string['externalreference'] = 'Referencia externa';
+
+// Propuestas de ficha (metadatos) en los change sets (Fase 1).
+$string['metadatachangesummary'] = 'Metadatos: {$a}';
+$string['metadatafield'] = 'Campo';
+$string['metadatacurrentvalue'] = 'Actual';
+$string['metadataproposedvalue'] = 'Propuesto';
+$string['metadatanochanges'] = 'Esta propuesta no contiene cambios de campos.';
+$string['applychange'] = 'Aplicar cambio';
+$string['changeitemapproved'] = 'Cambio aprobado.';
+$string['changeitemapplied'] = 'Cambio aplicado y publicado.';
+$string['changeitemrejected'] = 'Cambio rechazado.';
+$string['metafield_title'] = 'Título';
+$string['metafield_summary'] = 'Resumen';
+$string['metafield_contenttype'] = 'Tipo de contenido';
+$string['metafield_authoritylevel'] = 'Nivel de autoridad';
+$string['metafield_criticality'] = 'Criticidad';
+$string['metafield_responsiblearea'] = 'Área responsable';
+$string['metafield_reviewdate'] = 'Fecha de revisión';
+$string['metafield_requiredreading'] = 'Lectura obligatoria';
+$string['conflict_metadataconcurrency'] = 'La ficha de la página cambió después de preparar esta propuesta; recárguela y propóngala de nuevo.';
+$string['errormetadatafieldunsupported'] = 'El campo de metadatos «{$a}» no puede cambiarse mediante una propuesta de metadatos.';
+$string['errormetadatavalue'] = 'El valor propuesto para «{$a}» no es válido.';
+$string['errormetadatapatchempty'] = 'Una propuesta de metadatos debe cambiar al menos un campo.';
+$string['errorunsupportedkind'] = 'Este tipo de cambio («{$a}») no puede aplicarse automáticamente.';
+$string['errorwrongitemkind'] = 'Esta acción no se aplica a una revisión de contenido de la página.';

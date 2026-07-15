@@ -42,6 +42,7 @@ $string['handbook:managechangesets'] = 'Review and act on handbook change sets';
 $string['handbook:viewreports'] = 'View handbook reports';
 $string['handbook:manageapi'] = 'Configure handbook external access';
 $string['handbook:apiaccess'] = 'Use handbook external-service functions';
+$string['handbook:apiproposemetadata'] = 'Propose handbook metadata (fiche) patches through the API';
 $string['handbook:manage'] = 'Administer the handbook plugin';
 
 // Navigation and page titles.
@@ -489,3 +490,28 @@ $string['backtochangesets'] = 'Back to change sets';
 $string['draftmatchespublished'] = 'This draft matches the published version — no changes yet.';
 $string['changesetnewpage'] = 'New page (not yet published)';
 $string['externalreference'] = 'External reference';
+
+// Metadata (fiche) proposals in change sets (Phase 1).
+$string['metadatachangesummary'] = 'Metadata: {$a}';
+$string['metadatafield'] = 'Field';
+$string['metadatacurrentvalue'] = 'Current';
+$string['metadataproposedvalue'] = 'Proposed';
+$string['metadatanochanges'] = 'This proposal contains no field changes.';
+$string['applychange'] = 'Apply change';
+$string['changeitemapproved'] = 'Change approved.';
+$string['changeitemapplied'] = 'Change applied and published.';
+$string['changeitemrejected'] = 'Change rejected.';
+$string['metafield_title'] = 'Title';
+$string['metafield_summary'] = 'Summary';
+$string['metafield_contenttype'] = 'Content type';
+$string['metafield_authoritylevel'] = 'Authority level';
+$string['metafield_criticality'] = 'Criticality';
+$string['metafield_responsiblearea'] = 'Responsible area';
+$string['metafield_reviewdate'] = 'Review date';
+$string['metafield_requiredreading'] = 'Required reading';
+$string['conflict_metadataconcurrency'] = 'The page fiche changed after this proposal was prepared; reload the page and propose again.';
+$string['errormetadatafieldunsupported'] = 'The metadata field "{$a}" cannot be changed through a metadata proposal.';
+$string['errormetadatavalue'] = 'The proposed value for "{$a}" is not valid.';
+$string['errormetadatapatchempty'] = 'A metadata proposal must change at least one field.';
+$string['errorunsupportedkind'] = 'This change kind ("{$a}") cannot be applied automatically.';
+$string['errorwrongitemkind'] = 'This action does not apply to a page content revision.';
