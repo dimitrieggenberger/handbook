@@ -194,14 +194,22 @@ if ($page) {
     $defaults->summary = $page->summary;
 }
 
-$defaults->content = $revision->content ?? '';
-$defaults->contentformat = (int)($revision->contentformat ?? FORMAT_HTML);
+// Without a working draft, the editor starts from the published content
+// (the draft itself is only created on save; spec 11.2).
+$sourcerevision = $revision;
+if (!$sourcerevision && $page && (int)$page->publishedrevisionid) {
+    $sourcerevision = $DB->get_record('local_handbook_revision',
+        ['id' => $page->publishedrevisionid]);
+}
+
+$defaults->content = $sourcerevision->content ?? '';
+$defaults->contentformat = (int)($sourcerevision->contentformat ?? FORMAT_HTML);
 $defaults->changesummary = $revision->changesummary ?? '';
 $defaults->requiresreack = (int)($revision->requiresreacknowledgement ?? 0);
 $defaults->revisiontimemodified = (int)($revision->timemodified ?? 0);
 
 $defaults = file_prepare_standard_editor($defaults, 'content', $editoroptions, $context,
-    'local_handbook', 'revision', $revision->id ?? null);
+    'local_handbook', 'revision', $sourcerevision->id ?? null);
 
 $form->set_data($defaults);
 

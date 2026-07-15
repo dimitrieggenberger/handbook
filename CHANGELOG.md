@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.5 (2026-07-14)
+
+- Fix empty editor when a published page has no working draft yet: the
+  content (and its embedded files) now prefill from the published
+  revision, so editing starts from the current text instead of a blank
+  field that would have wiped the page on save.
+
 ## 0.11.4 (2026-07-14)
 
 - Actually fix "Undefined constant EDITOR_UNLIMITED_FILES": in Moodle 5.2
