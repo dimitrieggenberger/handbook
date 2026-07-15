@@ -237,6 +237,12 @@ class page_service {
             $base->id ?? 0, $base->content ?? '', (int)($base->contentformat ?? FORMAT_HTML), '', $userid);
         $transaction->allow_commit();
 
+        // Inherited content may reference @@PLUGINFILE@@ files stored under
+        // the base revision's item id; copy them so the draft is complete.
+        if ($base) {
+            self::copy_revision_files((int)$base->id, (int)$revision->id);
+        }
+
         return $revision;
     }
 
@@ -482,6 +488,10 @@ class page_service {
             $userid);
         $transaction->allow_commit();
 
+        // The restored content's embedded files live under the OLD
+        // revision's item id; copy them to the new draft.
+        self::copy_revision_files((int)$revision->id, (int)$draft->id);
+
         return $draft;
     }
 
@@ -524,6 +534,34 @@ class page_service {
 
         $revision = $DB->get_record('local_handbook_revision', ['id' => $revision->id], '*', MUST_EXIST);
         self::publish($revision, $userid, $effectivefrom);
+    }
+
+    /**
+     * Copy a revision's stored files to another revision's file area.
+     *
+     * Content copied between revisions keeps its @@PLUGINFILE@@
+     * placeholders; the files must follow, or images break once the new
+     * revision is published (file area "revision", itemid = revision id).
+     *
+     * @param int $fromrevisionid Source revision id.
+     * @param int $torevisionid Target revision id.
+     * @return void
+     */
+    private static function copy_revision_files(int $fromrevisionid, int $torevisionid): void {
+        global $CFG;
+        require_once($CFG->libdir . '/filelib.php');
+
+        $fs = get_file_storage();
+        $contextid = context_system::instance()->id;
+
+        $files = $fs->get_area_files($contextid, 'local_handbook', 'revision',
+            $fromrevisionid, 'id', false);
+        foreach ($files as $file) {
+            if (!$fs->file_exists($contextid, 'local_handbook', 'revision', $torevisionid,
+                    $file->get_filepath(), $file->get_filename())) {
+                $fs->create_file_from_storedfile(['itemid' => $torevisionid], $file);
+            }
+        }
     }
 
     /**

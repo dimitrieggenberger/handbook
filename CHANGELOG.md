@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.6 (2026-07-14)
+
+- Embedded files now follow drafts created outside the web editor:
+  page_service copies a base/restored revision's stored files to the new
+  draft's file area, so API-created drafts and restored revisions keep
+  their images after publication. PHPUnit coverage for both paths.
+
 ## 0.11.5 (2026-07-14)
 
 - Fix empty editor when a published page has no working draft yet: the

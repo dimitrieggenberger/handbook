@@ -191,6 +191,51 @@ final class page_service_test extends advanced_testcase {
         page_service::update_draft($stale, '<p>Conflicting edit.</p>', FORMAT_HTML, '');
     }
 
+    public function test_embedded_files_follow_new_drafts(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Publish v1 with an attached file.
+        $page = $this->create_page($this->create_category());
+        $v1 = $page->draftrevision;
+        page_service::submit_for_review($v1, 'v1');
+        $v1 = $DB->get_record('local_handbook_revision', ['id' => $v1->id], '*', MUST_EXIST);
+        page_service::approve($v1);
+        $v1 = $DB->get_record('local_handbook_revision', ['id' => $v1->id], '*', MUST_EXIST);
+        page_service::publish($v1);
+
+        $fs = get_file_storage();
+        $contextid = \context_system::instance()->id;
+        $fs->create_file_from_string([
+            'contextid' => $contextid,
+            'component' => 'local_handbook',
+            'filearea' => 'revision',
+            'itemid' => $v1->id,
+            'filepath' => '/',
+            'filename' => 'plano.png',
+        ], 'fake image bytes');
+
+        // A service-created draft (the API path) must carry the file.
+        $page = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $draft = page_service::create_revision_draft($page);
+        $this->assertTrue($fs->file_exists($contextid, 'local_handbook', 'revision',
+            (int)$draft->id, '/', 'plano.png'));
+
+        // And so must a restored revision after v2 supersedes v1.
+        page_service::submit_for_review($draft, 'v2');
+        $draft = $DB->get_record('local_handbook_revision', ['id' => $draft->id], '*', MUST_EXIST);
+        page_service::approve($draft);
+        $draft = $DB->get_record('local_handbook_revision', ['id' => $draft->id], '*', MUST_EXIST);
+        page_service::publish($draft);
+
+        $v1 = $DB->get_record('local_handbook_revision', ['id' => $v1->id], '*', MUST_EXIST);
+        $restored = page_service::restore_revision($v1);
+        $this->assertTrue($fs->file_exists($contextid, 'local_handbook', 'revision',
+            (int)$restored->id, '/', 'plano.png'));
+    }
+
     public function test_archive_and_unarchive_preserve_history(): void {
         global $DB;
 
