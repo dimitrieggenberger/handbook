@@ -26,19 +26,25 @@ import { randomUUID, timingSafeEqual } from "node:crypto";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { homedir } from "node:os";
 import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { buildHandbookServer } from "./lib/handbook.mjs";
 
-// Load a local .env file (next to this script) if present, without adding a
-// dependency. Real environment variables always win over the file.
-const scriptdir = dirname(fileURLToPath(import.meta.url));
-const envfile = join(scriptdir, ".env");
-if (existsSync(envfile)) {
-  for (const line of readFileSync(envfile, "utf8").split(/\r?\n/)) {
+// Load KEY=VALUE lines from a file into process.env, without adding a
+// dependency. Only fills variables that are not already set, so real
+// environment variables and earlier files win.
+function loadEnvFile(filepath) {
+  if (!existsSync(filepath)) {
+    return;
+  }
+  for (const line of readFileSync(filepath, "utf8").split(/\r?\n/)) {
+    if (line.trimStart().startsWith("#")) {
+      continue;
+    }
     const match = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)\s*$/);
-    if (!match || line.trimStart().startsWith("#")) {
+    if (!match) {
       continue;
     }
     let value = match[2].trim();
@@ -51,6 +57,13 @@ if (existsSync(envfile)) {
     }
   }
 }
+
+// Secrets are read from, in order of precedence: real environment variables,
+// then a local .env in the deployed folder (dev/manual), then a persistent
+// ~/.handbook-mcp.env in the home directory that survives Git redeploys.
+const scriptdir = dirname(fileURLToPath(import.meta.url));
+loadEnvFile(join(scriptdir, ".env"));
+loadEnvFile(join(homedir(), ".handbook-mcp.env"));
 
 const baseUrl = (process.env.HANDBOOK_BASE_URL || "").replace(/\/+$/, "");
 const wstoken = process.env.HANDBOOK_WSTOKEN || "";
