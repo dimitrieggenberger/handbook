@@ -27,7 +27,8 @@ and structural reference: page shell, area actions, CSS scoping, build script.
 - `edit.php`: create page / edit its working draft, submit for review
 - `search.php`: dedicated handbook search with filters (spec §13.2)
 - `path.php` / `manage/paths.php`: reading paths (spec §15); `ack_service` + confirmation card in `view.php` (spec §16); audiences via `path_service` (cohorts/system roles)
-- `mcp/`: standalone MCP adapter (spec §18) — Node, not shipped in the ZIP, token via env vars only
+- `manage/changesets.php` + `manage/changeset.php` + `classes/local/service/changeset_service.php`: grouped multi-page AI draft proposals (spec §36; conservative upsert, per-item status synced via `classes/observer.php` + `db/events.php`); published authorship via `authoruserid` (set at approval, never `createdby`)
+- `mcp/`: standalone MCP adapter (spec §18) — Node, not shipped in the ZIP, token via env vars only; shared tool/REST logic in `mcp/lib/handbook.mjs`, stdio entry `mcp/server.mjs`, `HANDBOOK_MCP_MODE` = readwrite-drafts|readonly
 - `history.php` / `compare.php`: revision history and word-diff comparison (spec §11.4, `diff_service`)
 - `review.php`: review queue (approve, request changes, publish)
 - `report.php` / `manage/findings.php`: quality findings (spec §19, `finding_service`)

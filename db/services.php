@@ -118,6 +118,52 @@ $functions = [
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
     ],
+
+    // Context and working-draft reads (36.6).
+    'local_handbook_get_context_index' => [
+        'classname' => 'local_handbook\external\get_context_index',
+        'description' => 'Compact context index of AI-permitted pages (no content).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_get_working_page' => [
+        'classname' => 'local_handbook\external\get_working_page',
+        'description' => 'Read a page\'s current working draft without changing state.',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
+    ],
+
+    // Change sets (36.4). Draft authority only; no approve/publish function.
+    'local_handbook_create_changeset' => [
+        'classname' => 'local_handbook\external\create_changeset',
+        'description' => 'Create a change set grouping multi-page draft proposals.',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
+    ],
+    'local_handbook_get_changeset' => [
+        'classname' => 'local_handbook\external\get_changeset',
+        'description' => 'Get one change set with its items.',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_list_changesets' => [
+        'classname' => 'local_handbook\external\list_changesets',
+        'description' => 'List change sets with optional status/source filters.',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_upsert_changeset_draft' => [
+        'classname' => 'local_handbook\external\upsert_changeset_draft',
+        'description' => 'Create or update a change set\'s draft for one page (conservative; never publishes).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
+    ],
+    'local_handbook_submit_changeset_for_review' => [
+        'classname' => 'local_handbook\external\submit_changeset_for_review',
+        'description' => 'Submit a change set\'s eligible drafts for human review.',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
+    ],
 ];
 
 $services = [

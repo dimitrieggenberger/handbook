@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.14.0 (2026-07-14)
+
+Handbook AI change sets — Phase 3 (half A): external API surface and the
+local MCP adapter. The remote HTTPS transport for ChatGPT follows in half B.
+
+- Seven new external functions on the restricted service (all draft-authority
+  only; still no approve/publish anywhere): `get_context_index` (compact index
+  of AI-permitted pages with relations and working-draft flags, no content),
+  `get_working_page` (a page's working draft without changing state),
+  `create_changeset`, `get_changeset`, `list_changesets`,
+  `upsert_changeset_draft` (conservative — reuses the set's editable draft,
+  returns structured conflicts instead of overwriting), and
+  `submit_changeset_for_review` (per-page results). AI-access rules enforced on
+  every one; excluded pages omitted/denied, metadata_only refused for content.
+- MCP adapter refactored: all REST-client and tool-registration logic moved to
+  `mcp/lib/handbook.mjs`, consumed by the stdio `server.mjs`, so a later remote
+  transport advertises identical tools. New `HANDBOOK_MCP_MODE`
+  (`readwrite-drafts` default / `readonly`). Seven new MCP tools mirror the new
+  functions (`handbook_get_context_index`, `handbook_get_working_page`,
+  `handbook_create_change_set`, `handbook_get_change_set`,
+  `handbook_list_change_sets`, `handbook_upsert_change_set_draft`,
+  `handbook_submit_change_set_for_review`).
+- PHPUnit: context-index content-exclusion and AI-access, working-page
+  read-without-state-change, change-set create/get/list, API upsert + submit,
+  conflict-not-overwrite, metadata_only refusal — and a guard test proving no
+  external function can approve or publish. `docs/API.md` and `mcp/README.md`
+  updated.
+
 ## 0.13.0 (2026-07-14)
 
 Handbook AI change sets — Phase 2: the editorial interface (first

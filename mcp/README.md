@@ -24,6 +24,12 @@ Configuration via environment variables:
 
 - `HANDBOOK_BASE_URL` — e.g. `https://learn.europaschule.eu`
 - `HANDBOOK_WSTOKEN` — the service-account token (never commit it)
+- `HANDBOOK_MCP_MODE` — `readwrite-drafts` (default) or `readonly`. In
+  `readonly` mode no draft or change-set write tools are registered.
+
+All tool logic lives in `lib/handbook.mjs` (the REST client and tool
+registration); `server.mjs` is just the local stdio entry point that consumes
+it, so a future remote HTTP transport advertises identical tools.
 
 ## Claude Code
 
@@ -65,13 +71,23 @@ ChatGPT, a Custom GPT with Actions pointing directly at the REST API
 
 Read: `handbook_search`, `handbook_get_page`, `handbook_list_categories`,
 `handbook_list_pages`, `handbook_list_changes`, `handbook_get_related_pages`,
-`handbook_list_revisions`, `handbook_get_revision`.
+`handbook_list_revisions`, `handbook_get_revision`,
+`handbook_get_context_index` (compact whole-handbook index, no content),
+`handbook_get_working_page` (a page's current working draft).
 
 Draft (workflow-safe): `handbook_create_page_draft`, `handbook_create_draft`
 (with expected-base check), `handbook_update_draft` (mandatory concurrency
 token), `handbook_submit_for_review`.
 
+Change sets — grouped multi-page proposals (workflow-safe):
+`handbook_create_change_set`, `handbook_get_change_set`,
+`handbook_list_change_sets`, `handbook_upsert_change_set_draft` (conservative;
+reuses the same editable draft, returns conflicts instead of overwriting),
+`handbook_submit_change_set_for_review`.
+
 Findings (advisory): `handbook_record_finding`, `handbook_list_open_findings`.
+
+There is no approve or publish tool, by design — humans review and publish.
 
 Agent operating rules (spec §18.3) worth putting in your system prompt or
 project instructions: read the current published page before proposing

@@ -264,4 +264,113 @@ class helper {
         $page = max($page, 0);
         return [$page * $perpage, $perpage];
     }
+
+    /**
+     * Structure of a change-set record (specification 36.3).
+     *
+     * @return external_single_structure
+     */
+    public static function changeset_structure(): external_single_structure {
+        return new external_single_structure([
+            'id' => new external_value(PARAM_INT, 'Change-set id'),
+            'title' => new external_value(PARAM_TEXT, 'Title'),
+            'instructionsummary' => new external_value(PARAM_RAW, 'Approved instruction summary'),
+            'status' => new external_value(PARAM_ALPHANUMEXT, 'draft, in_review, partially_completed, completed, cancelled'),
+            'source' => new external_value(PARAM_ALPHANUMEXT, 'human or ai'),
+            'externalreference' => new external_value(PARAM_TEXT, 'Optional external reference (never a secret)'),
+            'sponsoruserid' => new external_value(PARAM_INT, 'Accountable human requester (0 = none)'),
+            'itemcount' => new external_value(PARAM_INT, 'Number of pages in the set'),
+            'timecreated' => new external_value(PARAM_INT, 'Creation time'),
+            'timemodified' => new external_value(PARAM_INT, 'Last modification time'),
+            'timesubmitted' => new external_value(PARAM_INT, 'Submission time (0 = not submitted)'),
+            'timecompleted' => new external_value(PARAM_INT, 'Completion time (0 = not completed)'),
+        ]);
+    }
+
+    /**
+     * Export a change-set record.
+     *
+     * @param stdClass $changeset Change-set record.
+     * @param int $itemcount Number of items in the set.
+     * @return array
+     */
+    public static function export_changeset(stdClass $changeset, int $itemcount): array {
+        return [
+            'id' => (int)$changeset->id,
+            'title' => (string)$changeset->title,
+            'instructionsummary' => (string)$changeset->instructionsummary,
+            'status' => (string)$changeset->status,
+            'source' => (string)$changeset->source,
+            'externalreference' => (string)$changeset->externalreference,
+            'sponsoruserid' => (int)$changeset->sponsoruserid,
+            'itemcount' => $itemcount,
+            'timecreated' => (int)$changeset->timecreated,
+            'timemodified' => (int)$changeset->timemodified,
+            'timesubmitted' => (int)$changeset->timesubmitted,
+            'timecompleted' => (int)$changeset->timecompleted,
+        ];
+    }
+
+    /**
+     * Structure of a change-item record (specification 36.3).
+     *
+     * @return external_single_structure
+     */
+    public static function changeitem_structure(): external_single_structure {
+        return new external_single_structure([
+            'id' => new external_value(PARAM_INT, 'Change-item id'),
+            'changesetid' => new external_value(PARAM_INT, 'Change-set id'),
+            'pageid' => new external_value(PARAM_INT, 'Page id'),
+            'pageslug' => new external_value(PARAM_ALPHANUMEXT, 'Page slug'),
+            'pagetitle' => new external_value(PARAM_TEXT, 'Page title'),
+            'revisionid' => new external_value(PARAM_INT, 'Working revision id (0 = none)'),
+            'itemstatus' => new external_value(PARAM_ALPHANUMEXT,
+                'draft, conflict, in_review, approved, published, rejected, skipped'),
+            'changesummary' => new external_value(PARAM_RAW, 'Change summary'),
+            'conflictnote' => new external_value(PARAM_RAW, 'Conflict explanation (empty when clear)'),
+            'sortorder' => new external_value(PARAM_INT, 'Order within the set'),
+        ]);
+    }
+
+    /**
+     * Export a change-item record joined with its page.
+     *
+     * @param stdClass $item Change-item record.
+     * @param string $pageslug Page slug.
+     * @param string $pagetitle Page title.
+     * @return array
+     */
+    public static function export_changeitem(stdClass $item, string $pageslug, string $pagetitle): array {
+        return [
+            'id' => (int)$item->id,
+            'changesetid' => (int)$item->changesetid,
+            'pageid' => (int)$item->pageid,
+            'pageslug' => $pageslug,
+            'pagetitle' => $pagetitle,
+            'revisionid' => (int)$item->revisionid,
+            'itemstatus' => (string)$item->itemstatus,
+            'changesummary' => (string)$item->changesummary,
+            'conflictnote' => (string)$item->conflictnote,
+            'sortorder' => (int)$item->sortorder,
+        ];
+    }
+
+    /**
+     * Structure of a per-page upsert/submit result (matches
+     * changeset_service::upsert_draft()).
+     *
+     * @return external_single_structure
+     */
+    public static function changeitem_result_structure(): external_single_structure {
+        return new external_single_structure([
+            'itemid' => new external_value(PARAM_INT, 'Change-item id'),
+            'changesetid' => new external_value(PARAM_INT, 'Change-set id'),
+            'pageid' => new external_value(PARAM_INT, 'Page id'),
+            'revisionid' => new external_value(PARAM_INT, 'Working revision id (0 = none)'),
+            'status' => new external_value(PARAM_ALPHANUMEXT, 'draft or conflict (or a workflow status)'),
+            'conflictnote' => new external_value(PARAM_RAW, 'Conflict explanation (empty when clear)'),
+            'timemodified' => new external_value(PARAM_INT,
+                'Revision timemodified; pass back as expectedtimemodified on the next upsert'),
+        ]);
+    }
 }

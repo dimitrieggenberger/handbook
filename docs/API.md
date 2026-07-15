@@ -74,6 +74,10 @@ Read (§17.2) — require `apiaccess` + `view`:
 | `local_handbook_list_changes` | Pages modified since a timestamp; returns `servertime` as the next cursor. |
 | `local_handbook_list_relations` | Typed relations of a page, both directions. |
 | `local_handbook_list_findings` | Quality findings (default: open + under review), with affected pages. |
+| `local_handbook_get_context_index` | Compact index of every AI-permitted page — metadata, category path, published hash, whether a working draft exists, relations both directions — **without content** (§36.6). Load first for cross-handbook analysis. |
+| `local_handbook_get_working_page` | The page's current working draft (content when permitted), its status and owning change set; never changes state (needs `edit`). |
+| `local_handbook_get_changeset` | One change set with its per-page items and statuses. |
+| `local_handbook_list_changesets` | Change sets, filterable by `status`/`source`. |
 
 Draft writes (§17.3) — additionally require `edit`:
 
@@ -85,8 +89,17 @@ Draft writes (§17.3) — additionally require `edit`:
 | `local_handbook_submit_draft_for_review` | Move the draft into the human review queue. Change summary required. |
 | `local_handbook_create_finding` | Advisory quality finding (contradiction, outdated reference, …) citing one or more pages with anchors/excerpts. Never changes content (§19.3). |
 
-There is **no publish function**. Review, approval and publication are human
-UI actions.
+Change sets (§36.4) — grouped multi-page proposals, additionally require `edit`:
+
+| Function | Purpose |
+|---|---|
+| `local_handbook_create_changeset` | Create a change set (marked source `ai`). |
+| `local_handbook_upsert_changeset_draft` | Create or update the set's draft for **one** page. Reuses the same editable draft on repeat calls (`expectedtimemodified`); returns a structured conflict — never an overwrite — for a human draft, a foreign change set's draft, an in-review revision, a stale published base (`expectedpublishedrevisionid`), or a concurrency mismatch. Never publishes. |
+| `local_handbook_submit_changeset_for_review` | Submit the set's eligible drafts; returns a per-page result (conflicts are skipped, not forced). |
+
+There is **no publish and no approve function** — for single drafts or change
+sets. Review, approval and publication are human UI actions, and this is
+asserted by an automated test.
 
 ## AI-access rules (§17.4)
 
