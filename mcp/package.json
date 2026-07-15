@@ -7,8 +7,9 @@
     "handbook-mcp": "server.mjs"
   },
   "scripts": {
-    "start": "node server.mjs",
-    "start:http": "node http-server.mjs"
+    "start": "node http-server.mjs",
+    "start:http": "node http-server.mjs",
+    "start:stdio": "node server.mjs"
   },
   "engines": {
     "node": ">=18"
