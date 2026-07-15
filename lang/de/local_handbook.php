@@ -258,6 +258,50 @@ $string['nocontentdiff'] = 'Keine Textänderungen zwischen diesen Versionen.';
 $string['createdby'] = 'Erstellt von';
 $string['backtopage'] = 'Zurück zur Seite';
 
+// Home personalization and reader polish (spec 12.1, 12.2).
+$string['pendingreadingcard'] = 'Ausstehende Pflichtlektüre';
+$string['noackpending'] = 'Alle Pflichtlektüre ist bestätigt.';
+$string['continuepath'] = 'Pfad fortsetzen';
+$string['continuereading'] = 'Lesen und bestätigen';
+$string['currentsection'] = 'Aktueller Abschnitt';
+$string['editorialwork'] = 'Redaktionelle Arbeit';
+$string['draftsawaiting'] = 'Entwürfe in der Prüfwarteschlange: {$a}';
+$string['changesrequestedcount'] = 'Änderungen angefordert: {$a}';
+$string['overduereviewcount'] = 'Überfällige Überprüfungen: {$a}';
+$string['safetycriticalpages'] = 'Sicherheitskritische Seiten';
+$string['quickguides'] = 'Kurzanleitungen';
+$string['formstemplates'] = 'Formulare und Vorlagen';
+$string['viewall'] = 'Alle ansehen';
+$string['onthispage'] = 'Auf dieser Seite';
+$string['printpage'] = 'Drucken';
+$string['printfooter'] = 'Gedruckt am {$a->date}. Gedruckte Kopien veralten: die gültige Version liegt unter {$a->url}';
+$string['authoritynote'] = 'Diese Kurzanleitung fasst {$a} zusammen. Bei Abweichungen gilt das vollständige Verfahren.';
+$string['partofpath'] = 'Teil des Lesepfads: {$a}';
+
+// Relation type labels (spec 9.2): forward and reverse.
+$string['relation_relatedto'] = 'Verwandt mit';
+$string['relationrev_relatedto'] = 'Verwandt mit';
+$string['relation_dependson'] = 'Setzt voraus';
+$string['relationrev_dependson'] = 'Vorausgesetzt von';
+$string['relation_implements'] = 'Setzt um';
+$string['relationrev_implements'] = 'Umgesetzt durch';
+$string['relation_replaces'] = 'Ersetzt';
+$string['relationrev_replaces'] = 'Ersetzt durch';
+$string['relation_supersedes'] = 'Löst ab';
+$string['relationrev_supersedes'] = 'Abgelöst durch';
+$string['relation_exceptionto'] = 'Ausnahme zu';
+$string['relationrev_exceptionto'] = 'Ausnahme definiert in';
+$string['relation_procedurefor'] = 'Verfahren für';
+$string['relationrev_procedurefor'] = 'Zugehöriges Verfahren';
+$string['relation_quickguidefor'] = 'Kurzanleitung für';
+$string['relationrev_quickguidefor'] = 'Kurzanleitung';
+$string['relation_templatefor'] = 'Vorlage für';
+$string['relationrev_templatefor'] = 'Vorlage';
+$string['relation_assessmentfor'] = 'Überprüfung für';
+$string['relationrev_assessmentfor'] = 'Verbundene Überprüfung';
+$string['relation_translationof'] = 'Übersetzung von';
+$string['relationrev_translationof'] = 'Übersetzt als';
+
 // Quality findings (spec 19).
 $string['reportproblem'] = 'Fehler melden';
 $string['reportintro'] = 'Beschreibe, was dir aufgefallen ist. Deine Meldung erzeugt einen Qualitätsbefund, erfasst mit deinem Nutzer und der veröffentlichten Version; die Redaktion sichtet ihn und dokumentiert die Lösung.';

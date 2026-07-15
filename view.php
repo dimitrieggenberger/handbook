@@ -29,6 +29,7 @@ require_once(__DIR__ . '/locallib.php');
 
 use local_handbook\local\service\ack_service;
 use local_handbook\local\service\page_service;
+use local_handbook\local\service\toc_service;
 
 $pageparam = required_param('page', PARAM_ALPHANUMEXT);
 $action = optional_param('action', '', PARAM_ALPHA);
@@ -86,12 +87,54 @@ if ((int)$page->requiredreading && $revision
     $ackstatus = ack_service::get_status((int)$USER->id, $page);
 }
 
+// Rendered content with heading anchors + on-page TOC (spec 10.2, 12.2).
+$contenthtml = '';
+$toc = [];
+if ($revision) {
+    $anchored = toc_service::add_anchors(
+        local_handbook_render_revision_content($revision, $context));
+    $contenthtml = $anchored->html;
+    $toc = $anchored->toc;
+}
+
+// Typed relations in both directions (spec 9.2).
+$outgoing = $DB->get_records_sql(
+    "SELECT rel.id, rel.relationtype, p.slug, p.title, p.publishedrevisionid, p.archived
+       FROM {local_handbook_relation} rel
+       JOIN {local_handbook_page} p ON p.id = rel.targetpageid
+      WHERE rel.sourcepageid = :pageid
+   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id]);
+$incoming = $DB->get_records_sql(
+    "SELECT rel.id, rel.relationtype, p.slug, p.title, p.publishedrevisionid, p.archived
+       FROM {local_handbook_relation} rel
+       JOIN {local_handbook_page} p ON p.id = rel.sourcepageid
+      WHERE rel.targetpageid = :pageid
+   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id]);
+
+// Reading paths that include this page (for the acknowledgement card).
+$memberpaths = $DB->get_records_sql(
+    "SELECT pa.id, pa.name, i.sectionname
+       FROM {local_handbook_pathitem} i
+       JOIN {local_handbook_path} pa ON pa.id = i.pathid
+      WHERE i.pageid = :pageid AND pa.active = 1
+   ORDER BY pa.schoolyear DESC", ['pageid' => $page->id]);
+
 echo $OUTPUT->header();
 echo local_handbook_render_area_actions('home', $context);
 
 echo local_handbook_render_category_trail((int)$page->categoryid);
 
 $actions = '';
+if ($revision) {
+    $printprimary = $page->contenttype === 'quickguide';
+    $actions .= html_writer::link(
+        new moodle_url('/local/handbook/print.php', ['page' => $page->slug]),
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-print me-2', 'aria-hidden' => 'true'])
+            . s(get_string('printpage', 'local_handbook')),
+        ['class' => 'btn btn-sm ' . ($printprimary ? 'btn-primary' : 'btn-outline-secondary'),
+            'target' => '_blank']
+    );
+}
 if (has_capability('local/handbook:edit', $context)) {
     $actions .= html_writer::link(
         new moodle_url('/local/handbook/edit.php', ['id' => $page->id]),
@@ -185,7 +228,24 @@ if ($revision) {
         'local-handbook-page-dates'
     );
 
-    echo local_handbook_render_revision_content($revision, $context);
+    // Quick-guide authority note (spec 10.3): the source procedure prevails.
+    if ($page->contenttype === 'quickguide') {
+        foreach ($outgoing as $relation) {
+            if ($relation->relationtype === 'quickguidefor') {
+                $targetlink = html_writer::link(
+                    new moodle_url('/local/handbook/view.php', ['page' => $relation->slug]),
+                    s($relation->title));
+                echo html_writer::div(
+                    html_writer::tag('i', '', ['class' => 'fa-solid fa-scale-balanced me-2 text-muted',
+                        'aria-hidden' => 'true'])
+                    . get_string('authoritynote', 'local_handbook', $targetlink),
+                    'local-handbook-authority-note');
+                break;
+            }
+        }
+    }
+
+    echo $contenthtml;
 } else {
     echo html_writer::div(s(get_string('notpublished', 'local_handbook')), 'alert alert-info');
 }
@@ -233,15 +293,44 @@ if ($ackstatus !== null) {
         $cardbody .= html_writer::end_tag('form');
     }
 
+    foreach ($memberpaths as $memberpath) {
+        $pathlabel = html_writer::link(
+            new moodle_url('/local/handbook/path.php', ['id' => $memberpath->id]),
+            s(format_string($memberpath->name)))
+            . ($memberpath->sectionname !== '' ? ' · ' . s($memberpath->sectionname) : '');
+        $cardbody .= html_writer::tag('p',
+            get_string('partofpath', 'local_handbook', $pathlabel),
+            ['class' => 'text-muted small mb-0 mt-3']);
+    }
+
     echo html_writer::div(html_writer::div($cardbody, 'card-body'),
         'card mt-4 local-handbook-ack', ['id' => 'confirmar']);
 }
 
 echo html_writer::end_div(); // .col-lg-8.
 
-// Rail: metadata card and typed relations.
+// Rail: on-page TOC, metadata card and typed relations.
 echo html_writer::start_div('col-lg-4');
 echo html_writer::start_div('local-handbook-rail');
+
+if (count($toc) >= 2) {
+    $tocitems = '';
+    foreach ($toc as $entry) {
+        $tocitems .= html_writer::tag('li',
+            html_writer::link('#' . $entry->id, s($entry->text)));
+    }
+    if ($ackstatus !== null) {
+        $tocitems .= html_writer::tag('li',
+            html_writer::link('#confirmar', s(get_string('readingconfirmation', 'local_handbook'))));
+    }
+    echo html_writer::div(
+        html_writer::div(
+            html_writer::tag('h3', s(get_string('onthispage', 'local_handbook')),
+                ['class' => 'h6 text-uppercase text-muted mb-3'])
+            . html_writer::tag('ul', $tocitems, ['class' => 'local-handbook-toc']),
+            'card-body'),
+        'card mb-3');
+}
 
 $rows = '';
 $rows .= html_writer::tag('dt', s(get_string('contenttype', 'local_handbook')), ['class' => 'col-5'])
@@ -281,27 +370,22 @@ echo html_writer::div(
     'card mb-3'
 );
 
-// Typed relations (both directions), published targets only for readers.
-$relations = $DB->get_records_sql(
-    "SELECT rel.id, rel.relationtype, p.id AS pageid, p.slug, p.title, p.publishedrevisionid, p.archived
-       FROM {local_handbook_relation} rel
-       JOIN {local_handbook_page} p ON p.id = rel.targetpageid
-      WHERE rel.sourcepageid = :pageid
-   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id]);
-
+// Typed relations, both directions, published targets only for readers.
 $relitems = '';
-foreach ($relations as $relation) {
-    if ((int)$relation->publishedrevisionid === 0 || (int)$relation->archived === 1) {
-        if (!$iseditorial) {
+foreach ([[$outgoing, false], [$incoming, true]] as [$relations, $reverse]) {
+    foreach ($relations as $relation) {
+        if (((int)$relation->publishedrevisionid === 0 || (int)$relation->archived === 1)
+                && !$iseditorial) {
             continue;
         }
+        $target = new stdClass();
+        $target->slug = $relation->slug;
+        $relitems .= html_writer::tag('li',
+            html_writer::span(s(local_handbook_relation_label($relation->relationtype, $reverse)),
+                'relation-type')
+            . html_writer::link(local_handbook_page_url($target), s($relation->title))
+        );
     }
-    $target = new stdClass();
-    $target->slug = $relation->slug;
-    $relitems .= html_writer::tag('li',
-        html_writer::span(s($relation->relationtype), 'relation-type')
-        . html_writer::link(local_handbook_page_url($target), s($relation->title))
-    );
 }
 
 if ($relitems !== '') {

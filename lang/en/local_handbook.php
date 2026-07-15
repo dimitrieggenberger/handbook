@@ -258,6 +258,50 @@ $string['nocontentdiff'] = 'No text changes between these versions.';
 $string['createdby'] = 'Created by';
 $string['backtopage'] = 'Back to the page';
 
+// Home personalization and reader polish (spec 12.1, 12.2).
+$string['pendingreadingcard'] = 'Pending required reading';
+$string['noackpending'] = 'You are up to date with all required reading.';
+$string['continuepath'] = 'Continue the path';
+$string['continuereading'] = 'Read and confirm';
+$string['currentsection'] = 'Current section';
+$string['editorialwork'] = 'Editorial work';
+$string['draftsawaiting'] = 'Drafts awaiting review: {$a}';
+$string['changesrequestedcount'] = 'Changes requested: {$a}';
+$string['overduereviewcount'] = 'Reviews overdue: {$a}';
+$string['safetycriticalpages'] = 'Safety-critical pages';
+$string['quickguides'] = 'Quick guides';
+$string['formstemplates'] = 'Forms and templates';
+$string['viewall'] = 'View all';
+$string['onthispage'] = 'On this page';
+$string['printpage'] = 'Print';
+$string['printfooter'] = 'Printed on {$a->date}. Printed copies age: the authoritative version lives at {$a->url}';
+$string['authoritynote'] = 'This guide summarises {$a}. If they differ, the full procedure prevails.';
+$string['partofpath'] = 'Part of the reading path: {$a}';
+
+// Relation type labels (spec 9.2): forward and reverse.
+$string['relation_relatedto'] = 'Related to';
+$string['relationrev_relatedto'] = 'Related to';
+$string['relation_dependson'] = 'Depends on';
+$string['relationrev_dependson'] = 'Required by';
+$string['relation_implements'] = 'Implements';
+$string['relationrev_implements'] = 'Implemented by';
+$string['relation_replaces'] = 'Replaces';
+$string['relationrev_replaces'] = 'Replaced by';
+$string['relation_supersedes'] = 'Supersedes';
+$string['relationrev_supersedes'] = 'Superseded by';
+$string['relation_exceptionto'] = 'Exception to';
+$string['relationrev_exceptionto'] = 'Exception defined in';
+$string['relation_procedurefor'] = 'Procedure for';
+$string['relationrev_procedurefor'] = 'Connected procedure';
+$string['relation_quickguidefor'] = 'Quick guide for';
+$string['relationrev_quickguidefor'] = 'Quick guide';
+$string['relation_templatefor'] = 'Template for';
+$string['relationrev_templatefor'] = 'Template';
+$string['relation_assessmentfor'] = 'Assessment for';
+$string['relationrev_assessmentfor'] = 'Connected assessment';
+$string['relation_translationof'] = 'Translation of';
+$string['relationrev_translationof'] = 'Translated as';
+
 // Quality findings (spec 19).
 $string['reportproblem'] = 'Report a problem';
 $string['reportintro'] = 'Describe what you found. Your report creates a quality finding, recorded with your user and the published version; the editorial team triages it and records the resolution.';

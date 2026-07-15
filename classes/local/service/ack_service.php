@@ -145,6 +145,36 @@ class ack_service {
     }
 
     /**
+     * Count pending/reconfirm required pages for a user in one query.
+     *
+     * Uses the same validity rule as get_status(): an acknowledgement
+     * counts while its version is at least the highest published version
+     * that demanded re-acknowledgement.
+     *
+     * @param int $userid User id.
+     * @return int
+     */
+    public static function count_pending_for_user(int $userid): int {
+        global $DB;
+
+        $sql = "SELECT COUNT(1)
+                  FROM {local_handbook_page} p
+                 WHERE p.requiredreading = 1 AND p.publishedrevisionid > 0 AND p.archived = 0
+                   AND NOT EXISTS (
+                       SELECT 1
+                         FROM {local_handbook_ack} a
+                         JOIN {local_handbook_revision} r ON r.id = a.revisionid
+                        WHERE a.userid = :userid AND a.pageid = p.id
+                          AND r.versionnumber >= COALESCE((
+                              SELECT MAX(r2.versionnumber)
+                                FROM {local_handbook_revision} r2
+                               WHERE r2.pageid = p.id AND r2.timepublished > 0
+                                 AND r2.requiresreacknowledgement = 1), 0)
+                   )";
+        return (int)$DB->count_records_sql($sql, ['userid' => $userid]);
+    }
+
+    /**
      * Pending and reconfirm items for a user across all required pages.
      *
      * @param int $userid User id.

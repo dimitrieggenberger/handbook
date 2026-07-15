@@ -28,6 +28,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_handbook\local\service\ack_service;
 use local_handbook\local\service\page_service;
 use local_handbook\local\service\path_service;
 
@@ -185,6 +186,8 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'iconclass' => 'fa-route',
             'visible' => !empty(path_service::visible_paths((int)$USER->id,
                 has_capability('local/handbook:managepaths', $context))),
+            'badge' => has_capability('local/handbook:acknowledge', $context)
+                ? ack_service::count_pending_for_user((int)$USER->id) : 0,
         ],
     ];
 
@@ -230,11 +233,14 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
 
         $classes = 'nav-link d-flex align-items-center';
         $classes .= $key === $currentpage ? ' active' : '';
+        $badge = !empty($item['badge'])
+            ? ' ' . html_writer::span((string)$item['badge'], 'badge badge-primary ml-2')
+            : '';
         $tabs .= html_writer::tag('li',
             html_writer::link($item['url'], html_writer::tag('i', '', [
                 'class' => 'fa-solid ' . $item['iconclass'] . ' me-2',
                 'aria-hidden' => 'true',
-            ]) . s($item['label']), ['class' => $classes]),
+            ]) . s($item['label']) . $badge, ['class' => $classes]),
             ['class' => 'nav-item']
         );
     }
@@ -457,6 +463,40 @@ function local_handbook_get_recently_published(int $limit = 5): array {
           ORDER BY r.timepublished DESC";
 
     return $DB->get_records_sql($sql, [], 0, $limit);
+}
+
+/**
+ * Localized label for a typed relation.
+ *
+ * @param string $type Relation type key (spec 9.2).
+ * @param bool $reverse Whether the relation points AT the current page.
+ * @return string
+ */
+function local_handbook_relation_label(string $type, bool $reverse = false): string {
+    $stringkey = 'relation' . ($reverse ? 'rev' : '') . '_' . $type;
+    if (get_string_manager()->string_exists($stringkey, 'local_handbook')) {
+        return get_string($stringkey, 'local_handbook');
+    }
+    return $type;
+}
+
+/**
+ * Render a compact list of pages as a card body list.
+ *
+ * @param stdClass[] $pages Page records (need slug + title).
+ * @param callable|null $metacallback Optional meta line per page.
+ * @return string
+ */
+function local_handbook_render_pagelist(array $pages, ?callable $metacallback = null): string {
+    $items = '';
+    foreach ($pages as $page) {
+        $meta = $metacallback !== null
+            ? html_writer::span(s($metacallback($page)), 'page-meta')
+            : '';
+        $items .= html_writer::tag('li',
+            html_writer::link(local_handbook_page_url($page), s($page->title)) . $meta);
+    }
+    return html_writer::tag('ul', $items, ['class' => 'local-handbook-pagelist']);
 }
 
 /**

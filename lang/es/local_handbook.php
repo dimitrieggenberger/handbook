@@ -258,6 +258,50 @@ $string['nocontentdiff'] = 'No hay cambios de texto entre estas versiones.';
 $string['createdby'] = 'Creada por';
 $string['backtopage'] = 'Volver a la página';
 
+// Home personalization and reader polish (spec 12.1, 12.2).
+$string['pendingreadingcard'] = 'Lectura obligatoria pendiente';
+$string['noackpending'] = 'Estás al día con toda la lectura obligatoria.';
+$string['continuepath'] = 'Continuar la ruta';
+$string['continuereading'] = 'Leer y confirmar';
+$string['currentsection'] = 'Sección actual';
+$string['editorialwork'] = 'Trabajo editorial';
+$string['draftsawaiting'] = 'Borradores esperando revisión: {$a}';
+$string['changesrequestedcount'] = 'Cambios solicitados: {$a}';
+$string['overduereviewcount'] = 'Revisiones vencidas: {$a}';
+$string['safetycriticalpages'] = 'Páginas críticas para la seguridad';
+$string['quickguides'] = 'Guías rápidas';
+$string['formstemplates'] = 'Formularios y plantillas';
+$string['viewall'] = 'Ver todo';
+$string['onthispage'] = 'En esta página';
+$string['printpage'] = 'Imprimir';
+$string['printfooter'] = 'Impreso el {$a->date}. Las copias impresas envejecen: la versión vigente vive en {$a->url}';
+$string['authoritynote'] = 'Esta guía resume {$a}. Ante cualquier diferencia, prevalece el procedimiento completo.';
+$string['partofpath'] = 'Forma parte de la ruta de lectura: {$a}';
+
+// Relation type labels (spec 9.2): forward and reverse.
+$string['relation_relatedto'] = 'Relacionada con';
+$string['relationrev_relatedto'] = 'Relacionada con';
+$string['relation_dependson'] = 'Depende de';
+$string['relationrev_dependson'] = 'Requerida por';
+$string['relation_implements'] = 'Implementa';
+$string['relationrev_implements'] = 'Implementada por';
+$string['relation_replaces'] = 'Reemplaza a';
+$string['relationrev_replaces'] = 'Reemplazada por';
+$string['relation_supersedes'] = 'Sustituye a';
+$string['relationrev_supersedes'] = 'Sustituida por';
+$string['relation_exceptionto'] = 'Excepción a';
+$string['relationrev_exceptionto'] = 'Excepción definida en';
+$string['relation_procedurefor'] = 'Procedimiento para';
+$string['relationrev_procedurefor'] = 'Procedimiento conexo';
+$string['relation_quickguidefor'] = 'Guía rápida de';
+$string['relationrev_quickguidefor'] = 'Guía rápida';
+$string['relation_templatefor'] = 'Plantilla para';
+$string['relationrev_templatefor'] = 'Plantilla';
+$string['relation_assessmentfor'] = 'Evaluación de';
+$string['relationrev_assessmentfor'] = 'Evaluación conectada';
+$string['relation_translationof'] = 'Traducción de';
+$string['relationrev_translationof'] = 'Traducida como';
+
 // Quality findings (spec 19).
 $string['reportproblem'] = 'Reportar un error';
 $string['reportintro'] = 'Describe lo que encontraste. Tu reporte crea un hallazgo de calidad, registrado con tu usuario y la versión publicada; el equipo editorial lo clasifica y registra la resolución.';

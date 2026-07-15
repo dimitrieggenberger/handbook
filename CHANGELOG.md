@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.11.0 (2026-07-14)
+
+Mockup parity: home personalization, reader polish, path navigation.
+
+- Home (spec §12.1): search hero, pending-required-reading card, reading-
+  path progress card with continue button, editorial-work card with live
+  counters, and rail cards for safety-critical pages, quick guides and
+  forms/templates; pending-count badge on the "Mi ruta" tab (single-query
+  validity rule in ack_service::count_pending_for_user).
+- Reader (spec §12.2): on-page table of contents with stable heading
+  anchors (toc_service, existing ids preserved), print-friendly view
+  (print.php with provenance footer and print CSS), localized relation
+  labels in BOTH directions (policies now show "Implementada por"),
+  automatic quick-guide authority note from the quickguidefor relation,
+  print as primary action on quick guides, reading-path membership shown
+  on the acknowledgement card.
+- Path (spec §15): "Continuar" card jumping to the next pending item and
+  current-section highlight.
+- TOC/authority-note/is-current/print styles ship in styles.css (mockup
+  candidate blocks trimmed); EN/ES/DE strings; toc_service PHPUnit tests.
+
 ## 0.10.1 (2026-07-14)
 
 Full handbook preseed.

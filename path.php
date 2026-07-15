@@ -135,6 +135,21 @@ foreach ($items as $item) {
     }
 }
 
+// The next required item still pending or needing reconfirmation drives the
+// "Continuar" card and the current-section highlight.
+$nextitem = null;
+foreach ($items as $item) {
+    if (!(int)$item->required || !(int)$item->requiredreading) {
+        continue;
+    }
+    $status = $statusbyitem[$item->id];
+    if ($status->status === ack_service::STATUS_PENDING
+            || $status->status === ack_service::STATUS_RECONFIRM) {
+        $nextitem = $item;
+        break;
+    }
+}
+
 // Progress summary card.
 $percent = $requiredtotal > 0 ? (int)round($confirmedtotal / $requiredtotal * 100) : 0;
 $summary = html_writer::div(
@@ -157,6 +172,33 @@ $summary .= html_writer::div(
 echo html_writer::div(html_writer::div($summary, 'card-body'),
     'card mb-3 local-handbook-path-summary');
 
+// "Continuar" card: jump to the next pending required item.
+if ($nextitem !== null) {
+    $continuestate = $statusbyitem[$nextitem->id]->status === ack_service::STATUS_RECONFIRM
+        ? get_string('reconfirmitem', 'local_handbook')
+        : get_string('pendingitem', 'local_handbook');
+    echo html_writer::div(
+        html_writer::div(
+            html_writer::tag('h3',
+                html_writer::tag('i', '', ['class' => 'fa-solid fa-forward me-2 text-primary',
+                    'aria-hidden' => 'true'])
+                . s(get_string('continuepath', 'local_handbook')),
+                ['class' => 'h6 text-uppercase text-muted mb-2'])
+            . html_writer::tag('p',
+                html_writer::link(new moodle_url('/local/handbook/view.php', ['page' => $nextitem->slug]),
+                    html_writer::tag('strong', s($nextitem->title)))
+                . html_writer::span(' · ' . s($nextitem->sectionname) . ' · ' . s($continuestate),
+                    'small text-muted'),
+                ['class' => 'mb-2'])
+            . html_writer::link(
+                new moodle_url('/local/handbook/view.php', ['page' => $nextitem->slug]),
+                html_writer::tag('i', '', ['class' => 'fa-solid fa-arrow-right me-2', 'aria-hidden' => 'true'])
+                    . s(get_string('continuereading', 'local_handbook')),
+                ['class' => 'btn btn-primary btn-sm']),
+            'card-body'),
+        'card mb-3');
+}
+
 if (!$sections) {
     echo html_writer::div(s(get_string('emptypath', 'local_handbook')), 'alert alert-info');
 }
@@ -176,8 +218,14 @@ foreach ($sections as $sectionname => $sectionitems) {
         }
     }
 
+    $iscurrent = $nextitem !== null && $nextitem->sectionname === $sectionname;
+
     $header = html_writer::tag('h3',
-        html_writer::span($sectionnumber . '.', 'section-number') . ' ' . s($sectionname),
+        html_writer::span($sectionnumber . '.', 'section-number') . ' ' . s($sectionname)
+        . ($iscurrent
+            ? ' ' . html_writer::span(s(get_string('currentsection', 'local_handbook')),
+                'badge badge-primary ml-2')
+            : ''),
         ['class' => 'h6 mb-0']);
     $progress = html_writer::span(
         s(get_string('sectionprogress', 'local_handbook', (object)[
@@ -241,7 +289,7 @@ foreach ($sections as $sectionname => $sectionitems) {
             . html_writer::tag('ul', $rows, ['class' => 'local-handbook-path-items']),
             'card-body py-3'
         ),
-        'card mb-2 local-handbook-path-section'
+        'card mb-2 local-handbook-path-section' . ($iscurrent ? ' is-current' : '')
     );
 }
 

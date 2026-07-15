@@ -152,6 +152,26 @@ class report_service {
     }
 
     /**
+     * Compact editorial counters for dashboard cards (spec 12.1).
+     *
+     * @return stdClass {inreview, changesrequested, overduereview, openfindings}
+     */
+    public static function editorial_counts(): stdClass {
+        global $DB;
+
+        return (object)[
+            'inreview' => $DB->count_records('local_handbook_revision',
+                ['status' => page_service::STATUS_IN_REVIEW]),
+            'changesrequested' => $DB->count_records('local_handbook_revision',
+                ['status' => page_service::STATUS_CHANGES_REQUESTED]),
+            'overduereview' => $DB->count_records_select('local_handbook_page',
+                'archived = 0 AND reviewdate > 0 AND reviewdate < :now AND publishedrevisionid > 0',
+                ['now' => time()]),
+            'openfindings' => finding_service::count_open(),
+        ];
+    }
+
+    /**
      * Editorial health lists (spec 12.4, 12.5).
      *
      * @param int $limit Max rows per list.

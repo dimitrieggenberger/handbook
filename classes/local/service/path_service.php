@@ -122,6 +122,50 @@ class path_service {
     }
 
     /**
+     * A user's progress and next pending item on a path.
+     *
+     * @param stdClass $path Path record.
+     * @param int $userid User id.
+     * @return stdClass {confirmed: int, total: int, nextitem: ?stdClass}
+     *         where nextitem carries slug/title/sectionname of the first
+     *         required item still pending or needing reconfirmation.
+     */
+    public static function user_progress(stdClass $path, int $userid): stdClass {
+        global $DB;
+
+        $sql = "SELECT i.id, i.sectionname, i.required, p.id AS pageid, p.slug, p.title,
+                       p.requiredreading, p.publishedrevisionid
+                  FROM {local_handbook_pathitem} i
+                  JOIN {local_handbook_page} p ON p.id = i.pageid
+                 WHERE i.pathid = :pathid AND p.archived = 0
+              ORDER BY i.sortorder ASC, i.id ASC";
+        $items = $DB->get_records_sql($sql, ['pathid' => $path->id]);
+
+        $confirmed = 0;
+        $total = 0;
+        $nextitem = null;
+        foreach ($items as $item) {
+            if (!(int)$item->required || !(int)$item->requiredreading
+                    || !(int)$item->publishedrevisionid) {
+                continue;
+            }
+            $total++;
+            $status = ack_service::get_status($userid, (object)[
+                'id' => $item->pageid,
+                'requiredreading' => 1,
+                'publishedrevisionid' => $item->publishedrevisionid,
+            ]);
+            if ($status->status === ack_service::STATUS_CONFIRMED) {
+                $confirmed++;
+            } else if ($nextitem === null) {
+                $nextitem = $item;
+            }
+        }
+
+        return (object)['confirmed' => $confirmed, 'total' => $total, 'nextitem' => $nextitem];
+    }
+
+    /**
      * Users in a path's audience (for completion reports). Unrestricted
      * paths fall back to all staff (report_service::get_staff_users).
      *
