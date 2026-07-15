@@ -133,6 +133,23 @@ foreach ($queue as $revision) {
         );
     }
 
+    // If this revision is part of a change set, link back to it (spec 36.3).
+    if (has_capability('local/handbook:managechangesets', $context)) {
+        $changeitem = $DB->get_record('local_handbook_changeitem', ['revisionid' => $revision->id]);
+        if ($changeitem) {
+            $changesetrec = $DB->get_record('local_handbook_changeset',
+                ['id' => $changeitem->changesetid], 'id, title');
+            if ($changesetrec) {
+                $body .= html_writer::div(
+                    s(get_string('changeset', 'local_handbook')) . ': '
+                    . html_writer::link(new moodle_url('/local/handbook/manage/changeset.php',
+                        ['id' => $changesetrec->id]), s(format_string($changesetrec->title))),
+                    'small mb-2'
+                );
+            }
+        }
+    }
+
     // Action row.
     $actions = '';
     if ($revision->status === page_service::STATUS_IN_REVIEW && $canapprove) {

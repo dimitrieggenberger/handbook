@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.13.0 (2026-07-14)
+
+Handbook AI change sets — Phase 2: the editorial interface (first
+user-visible slice; change sets can now be created, populated and reviewed
+entirely in Moodle).
+
+- Management → Change sets: a list with status filters and a create form
+  (`manage/changesets.php`), and a detail page (`manage/changeset.php`) that
+  shows the instruction summary, technical creator and source, lets an editor
+  add pages, and for each page renders the before/after word diff (published
+  vs the change set's draft), any conflict note, an "edit draft" link, and —
+  by capability — approve / request-changes / reject / publish actions. Submit
+  and cancel act on the whole set. Behind `local/handbook:managechangesets`.
+- Reader: the page-details card now shows the staff-facing author and (when
+  different) the approver, sourced from the revision's `authoruserid` /
+  `approvedby` — never from `createdby`, so an AI-prepared page never presents
+  Handbook AI as its author (spec 36.5).
+- Review queue: revisions that belong to a change set link back to it.
+- EN/ES/DE strings; the change-set word diff reuses the existing diff styles.
+
 ## 0.12.0 (2026-07-14)
 
 Handbook AI change sets — Phases 0-1: specification, schema and the

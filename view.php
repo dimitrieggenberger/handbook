@@ -353,6 +353,25 @@ if ((int)$page->owneruserid > 0) {
     }
 }
 
+// Staff-facing published author and approver (spec 36.5). Sourced from the
+// revision's authoruserid/approvedby, never from createdby, so an
+// AI-prepared page never shows Handbook AI as its author.
+if ($revision && (int)$revision->authoruserid > 0) {
+    $authoruser = core_user::get_user((int)$revision->authoruserid, '*', IGNORE_MISSING);
+    if ($authoruser) {
+        $rows .= html_writer::tag('dt', s(get_string('author', 'local_handbook')), ['class' => 'col-5'])
+            . html_writer::tag('dd', s(fullname($authoruser)), ['class' => 'col-7']);
+    }
+}
+if ($revision && (int)$revision->approvedby > 0
+        && (int)$revision->approvedby !== (int)($revision->authoruserid ?? 0)) {
+    $approveruser = core_user::get_user((int)$revision->approvedby, '*', IGNORE_MISSING);
+    if ($approveruser) {
+        $rows .= html_writer::tag('dt', s(get_string('approver', 'local_handbook')), ['class' => 'col-5'])
+            . html_writer::tag('dd', s(fullname($approveruser)), ['class' => 'col-7']);
+    }
+}
+
 $rows .= html_writer::tag('dt', s(get_string('effectivedate', 'local_handbook')), ['class' => 'col-5'])
     . html_writer::tag('dd', local_handbook_format_date((int)$page->effectivedate), ['class' => 'col-7']);
 $rows .= html_writer::tag('dt', s(get_string('reviewdate', 'local_handbook')), ['class' => 'col-5'])

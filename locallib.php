@@ -162,6 +162,29 @@ function local_handbook_render_page_heading(string $title, string $actions = '')
 }
 
 /**
+ * Build a single-action POST button for a change-set item (spec 36.4).
+ *
+ * @param moodle_url $url Form target (the change-set detail page).
+ * @param string $action Action key.
+ * @param int $revisionid Revision the action applies to.
+ * @param string $label Button label.
+ * @param string $btnclass Bootstrap button variant class.
+ * @return string
+ */
+function local_handbook_changeset_action_button(moodle_url $url, string $action, int $revisionid,
+        string $label, string $btnclass): string {
+    $form = html_writer::start_tag('form', ['method' => 'post', 'action' => $url->out(false),
+        'class' => 'd-inline']);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => $action]);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'rid', 'value' => $revisionid]);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    $form .= html_writer::tag('button', s($label),
+        ['type' => 'submit', 'class' => 'btn btn-sm ' . $btnclass]);
+    $form .= html_writer::end_tag('form');
+    return $form;
+}
+
+/**
  * Render the shared area navigation row (tab strip).
  *
  * @param string $currentpage Key of the current page.
@@ -217,6 +240,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/findings.php'),
             'visible' => has_capability('local/handbook:managefindings', $context),
         ],
+        'changesets' => [
+            'label' => get_string('changesets', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/changesets.php'),
+            'visible' => has_capability('local/handbook:managechangesets', $context),
+        ],
         'reports' => [
             'label' => get_string('reports', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/manage/reports.php'),
@@ -262,7 +290,7 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
 
     if ($dropdownitems !== '') {
         $isgroupactive = in_array($currentpage,
-            ['reviewqueue', 'categories', 'paths', 'findings', 'reports', 'import'], true);
+            ['reviewqueue', 'categories', 'paths', 'findings', 'changesets', 'reports', 'import'], true);
         $toggleclasses = 'nav-link d-flex align-items-center';
         $toggleclasses .= $isgroupactive ? ' active' : '';
 
