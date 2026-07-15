@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.3 (2026-07-14)
+
+- Fix "Undefined constant EDITOR_UNLIMITED_FILES" on edit.php: locallib
+  now also requires lib/editorlib.php (same load-order class of bug as the
+  0.11.1 filelib fix — edit.php uses the constant before formslib loads).
+
 ## 0.11.2 (2026-07-14)
 
 - Fix "El archivo subido no es JSON válido" on seed import: the 0.11.1
