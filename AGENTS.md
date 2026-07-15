@@ -85,6 +85,16 @@ local_grades-approved patterns (`/local/grades/dev/uireference.php`) → new
 `#page-local-handbook-area`. Keep strings in EN, ES and DE. Design new screens
 as `dev/<name>-mockup/index.html` mockups first (see `dev/README.md`).
 
+## Encoding Rules
+
+Repo text files are UTF-8 without BOM. Windows PowerShell 5.1 corrupts them
+silently: `Get-Content` without `-Encoding UTF8` misreads UTF-8 as
+Windows-1252 (mojibake like "CalificaciÃ³n"), and `Set-Content -Encoding
+utf8` adds a BOM that PHP's json_decode rejects. When scripting file edits,
+use `[System.IO.File]` APIs with `UTF8Encoding($false)` (or PHP), and after
+any scripted edit of a Spanish-content file, grep it for "Ã" before
+committing.
+
 ## Build and Test
 
 ```powershell
