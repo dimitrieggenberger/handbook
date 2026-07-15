@@ -363,6 +363,62 @@ final class changeset_service_test extends advanced_testcase {
         $this->assertNotEquals((int)$revision->createdby, (int)$revision->authoruserid);
     }
 
+    public function test_page_revision_item_uses_default_kind_and_empty_payload(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Política de evaluación');
+        $changeset = changeset_service::create((object)['title' => 'Update', 'source' => 'ai']);
+
+        changeset_service::upsert_draft($changeset->id, (int)$page->id,
+            '<h2>Nuevo</h2><p>Texto.</p>', FORMAT_HTML, 'Cambio');
+
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id], '*', MUST_EXIST);
+        $this->assertSame(changeset_service::KIND_PAGE_REVISION, $item->kind);
+        $this->assertSame('', $item->tempkey);
+        $this->assertNull($item->payloadjson);
+    }
+
+    public function test_change_set_allows_several_item_kinds_for_one_page(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Estructura institucional');
+        $changeset = changeset_service::create((object)['title' => 'Coordinated', 'source' => 'ai']);
+
+        // A page_revision item for this page.
+        changeset_service::upsert_draft($changeset->id, (int)$page->id,
+            '<h2>Nuevo</h2><p>Texto.</p>', FORMAT_HTML, 'Contenido');
+
+        // A second item of a different kind for the SAME page — impossible under
+        // the old unique (changesetid, pageid) index; allowed after Phase 0.
+        $now = time();
+        $DB->insert_record('local_handbook_changeitem', (object)[
+            'changesetid' => (int)$changeset->id,
+            'kind' => 'page_metadata',
+            'pageid' => (int)$page->id,
+            'tempkey' => '',
+            'revisionid' => 0,
+            'itemstatus' => changeset_service::ITEM_DRAFT,
+            'payloadjson' => json_encode(['title' => 'Nuevo título']),
+            'changesummary' => 'Metadatos',
+            'conflictnote' => '',
+            'sortorder' => 5,
+            'timecreated' => $now,
+            'timemodified' => $now,
+        ]);
+
+        $this->assertSame(2, $DB->count_records('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id]));
+    }
+
     /**
      * Read one item's status.
      *

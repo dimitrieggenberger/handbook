@@ -223,5 +223,50 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071419, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071502) {
+        // Phase 0: make change items polymorphic so a change set can carry more
+        // than a page content revision (metadata/taxonomy/lifecycle/glossary
+        // proposals arrive in later phases). Existing rows become page_revision.
+        $table = new xmldb_table('local_handbook_changeitem');
+
+        $kind = new xmldb_field('kind', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL,
+            null, 'page_revision', 'changesetid');
+        if (!$dbman->field_exists($table, $kind)) {
+            $dbman->add_field($table, $kind);
+        }
+
+        $tempkey = new xmldb_field('tempkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL,
+            null, '', 'pageid');
+        if (!$dbman->field_exists($table, $tempkey)) {
+            $dbman->add_field($table, $tempkey);
+        }
+
+        $payloadjson = new xmldb_field('payloadjson', XMLDB_TYPE_TEXT, null, null, null,
+            null, null, 'itemstatus');
+        if (!$dbman->field_exists($table, $payloadjson)) {
+            $dbman->add_field($table, $payloadjson);
+        }
+
+        // pageid may now be 0 (items with no bound page yet).
+        $pageid = new xmldb_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $dbman->change_field_default($table, $pageid);
+
+        // Relax the one-item-per-page rule: several items may touch one page.
+        $oldunique = new xmldb_index('changesetpage', XMLDB_INDEX_UNIQUE, ['changesetid', 'pageid']);
+        if ($dbman->index_exists($table, $oldunique)) {
+            $dbman->drop_index($table, $oldunique);
+        }
+        $newindex = new xmldb_index('changesetpage', XMLDB_INDEX_NOTUNIQUE, ['changesetid', 'pageid']);
+        if (!$dbman->index_exists($table, $newindex)) {
+            $dbman->add_index($table, $newindex);
+        }
+        $kindindex = new xmldb_index('changesetkind', XMLDB_INDEX_NOTUNIQUE, ['changesetid', 'kind']);
+        if (!$dbman->index_exists($table, $kindindex)) {
+            $dbman->add_index($table, $kindindex);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071502, 'local', 'handbook');
+    }
+
     return true;
 }

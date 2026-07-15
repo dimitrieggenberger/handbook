@@ -29,10 +29,14 @@ use stdClass;
  * ends at submitting drafts for human review: there is no approve or publish
  * operation here, by design (36.1).
  *
- * The model already guarantees at most one working revision per page, so a
- * change item maps a page to its single working revision. The conservative
- * upsert (36.4) reuses that draft when this change set owns it and refuses to
- * overwrite a human draft or a draft owned by another change set.
+ * Each change item carries a kind (see KIND_* ). Today every item is a
+ * page_revision: the model guarantees at most one working revision per page,
+ * so such an item maps a page to its single working revision, and the
+ * conservative upsert (36.4) reuses that draft when this change set owns it and
+ * refuses to overwrite a human draft or a draft owned by another change set.
+ * The schema also holds non-revision kinds (metadata, taxonomy, lifecycle,
+ * glossary) that later phases add; those are never approved or published here —
+ * they are applied only by the human-gated publish path.
  *
  * @package   local_handbook
  * @copyright Educación Helvética SA / EuropaSchule
@@ -65,6 +69,14 @@ class changeset_service {
     public const ITEM_REJECTED = 'rejected';
     /** @var string */
     public const ITEM_SKIPPED = 'skipped';
+
+    /**
+     * @var string A change item that proposes a new working content revision
+     * for a page — the only kind today. Later phases add metadata, taxonomy,
+     * lifecycle and glossary kinds; each is applied only by the human-gated
+     * publish path, never by the API (spec 36.1).
+     */
+    public const KIND_PAGE_REVISION = 'page_revision';
 
     /** @var string[] Change-set states that reject further drafting. */
     private const LOCKED_STATUSES = [self::STATUS_COMPLETED, self::STATUS_CANCELLED];
@@ -382,7 +394,8 @@ class changeset_service {
 
         $userid = $userid ?: (int)$USER->id;
 
-        $items = $DB->get_records('local_handbook_changeitem', ['revisionid' => $revisionid]);
+        $items = $DB->get_records('local_handbook_changeitem',
+            ['revisionid' => $revisionid, 'kind' => self::KIND_PAGE_REVISION]);
         if (!$items) {
             return;
         }
@@ -509,24 +522,30 @@ class changeset_service {
     }
 
     /**
-     * Insert or update the change item for one page (unique changesetid,pageid).
+     * Insert or update a change item.
+     *
+     * A change set holds at most one item of a given kind per page, so the item
+     * is keyed by (changesetid, pageid, kind). With the unique DB index relaxed
+     * for polymorphism, that one-per-(page,kind) guarantee is enforced here.
      *
      * @param stdClass $changeset Change-set record.
-     * @param int $pageid Page id.
+     * @param int $pageid Page id (0 for an item with no bound page yet).
      * @param int $revisionid Working revision id (0 = none/unowned).
      * @param string $itemstatus Item status.
      * @param string $conflictnote Conflict note ('' when clear).
      * @param string $changesummary Change summary (kept if non-empty).
      * @param int $userid Acting user.
+     * @param string $kind Item kind (default page_revision).
      * @return stdClass The change-item record.
      */
     private static function write_item(stdClass $changeset, int $pageid, int $revisionid,
-            string $itemstatus, string $conflictnote, string $changesummary, int $userid): stdClass {
+            string $itemstatus, string $conflictnote, string $changesummary, int $userid,
+            string $kind = self::KIND_PAGE_REVISION): stdClass {
         global $DB;
 
         $now = time();
         $item = $DB->get_record('local_handbook_changeitem',
-            ['changesetid' => $changeset->id, 'pageid' => $pageid]);
+            ['changesetid' => $changeset->id, 'pageid' => $pageid, 'kind' => $kind]);
 
         if ($item) {
             $item->revisionid = $revisionid;
@@ -543,6 +562,7 @@ class changeset_service {
                 . 'WHERE changesetid = ?', [$changeset->id]);
             $item = new stdClass();
             $item->changesetid = (int)$changeset->id;
+            $item->kind = $kind;
             $item->pageid = $pageid;
             $item->revisionid = $revisionid;
             $item->itemstatus = $itemstatus;
