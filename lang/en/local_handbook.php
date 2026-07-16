@@ -214,6 +214,14 @@ $string['requiresreack'] = 'Requires renewed acknowledgement when published';
 $string['requiresreack_help'] = 'Tick for materially changed versions of required-reading pages: after publication, everyone must confirm reading again. Leave unticked for minor corrections.';
 $string['errornotrequiredreading'] = 'This page is not marked as required reading.';
 
+// Shared reading completion for path-required articles (spec 8).
+$string['readingcompletion'] = 'Reading completion';
+$string['markasread'] = 'Mark as read';
+$string['completioncheckboxlabel'] = 'I have read the current version of "{$a}".';
+$string['completedrecord'] = 'Read on {$a->date} · published version v{$a->version}';
+$string['completionreread'] = 'This article changed since you last read it (now v{$a}). Please read it again.';
+$string['completioninfo'] = 'Marking an article as read counts toward every reading path that includes it. Reading it once is enough; a materially changed version may ask you to read it again.';
+
 // Reading paths (spec 15).
 $string['myreadingpath'] = 'My reading path';
 $string['managepaths'] = 'Manage reading paths';

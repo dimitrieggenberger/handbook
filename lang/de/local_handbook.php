@@ -214,6 +214,14 @@ $string['requiresreack'] = 'Erfordert bei Veröffentlichung erneute Bestätigung
 $string['requiresreack_help'] = 'Bei wesentlich geänderten Versionen von Pflichtlektüre-Seiten ankreuzen: Nach der Veröffentlichung müssen alle die Lektüre erneut bestätigen. Für kleinere Korrekturen nicht ankreuzen.';
 $string['errornotrequiredreading'] = 'Diese Seite ist nicht als Pflichtlektüre markiert.';
 
+// Geteilter Leseabschluss für pfad-erforderliche Artikel (Spez. 8).
+$string['readingcompletion'] = 'Leseabschluss';
+$string['markasread'] = 'Als gelesen markieren';
+$string['completioncheckboxlabel'] = 'Ich habe die aktuelle Version von „{$a}“ gelesen.';
+$string['completedrecord'] = 'Gelesen am {$a->date} · veröffentlichte Version v{$a->version}';
+$string['completionreread'] = 'Dieser Artikel hat sich seit Ihrem letzten Lesen geändert (jetzt v{$a}). Bitte lesen Sie ihn erneut.';
+$string['completioninfo'] = 'Einen Artikel als gelesen zu markieren zählt für jeden Lesepfad, der ihn enthält. Einmal lesen genügt; eine wesentlich geänderte Version kann ein erneutes Lesen verlangen.';
+
 // Reading paths (spec 15).
 $string['myreadingpath'] = 'Mein Lesepfad';
 $string['managepaths'] = 'Lesepfade verwalten';

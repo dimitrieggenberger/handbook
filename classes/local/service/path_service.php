@@ -124,11 +124,17 @@ class path_service {
     /**
      * A user's progress and next pending item on a path.
      *
+     * Path completion counts every required, published, non-archived item —
+     * regardless of the page's global required-reading flag (spec 8.3). An item
+     * counts as done when the user has completed its current published revision
+     * (a read receipt or a compliance acknowledgement), which carries across
+     * every path containing the article.
+     *
      * @param stdClass $path Path record.
      * @param int $userid User id.
      * @return stdClass {confirmed: int, total: int, nextitem: ?stdClass}
      *         where nextitem carries slug/title/sectionname of the first
-     *         required item still pending or needing reconfirmation.
+     *         required item still pending or needing a renewed read.
      */
     public static function user_progress(stdClass $path, int $userid): stdClass {
         global $DB;
@@ -145,17 +151,16 @@ class path_service {
         $total = 0;
         $nextitem = null;
         foreach ($items as $item) {
-            if (!(int)$item->required || !(int)$item->requiredreading
-                    || !(int)$item->publishedrevisionid) {
+            if (!(int)$item->required || !(int)$item->publishedrevisionid) {
+                // Optional items never block completion (spec 8.3).
                 continue;
             }
             $total++;
-            $status = ack_service::get_status($userid, (object)[
+            $status = completion_service::completion_status($userid, (object)[
                 'id' => $item->pageid,
-                'requiredreading' => 1,
                 'publishedrevisionid' => $item->publishedrevisionid,
             ]);
-            if ($status->status === ack_service::STATUS_CONFIRMED) {
+            if ($status->status === completion_service::STATUS_COMPLETED) {
                 $confirmed++;
             } else if ($nextitem === null) {
                 $nextitem = $item;
@@ -163,6 +168,25 @@ class path_service {
         }
 
         return (object)['confirmed' => $confirmed, 'total' => $total, 'nextitem' => $nextitem];
+    }
+
+    /**
+     * Whether a page is a required item in at least one active reading path
+     * (spec 8.3). Used to let a reader mark completion of a path-required
+     * article even when it is not globally required reading.
+     *
+     * @param int $pageid Page id.
+     * @return bool
+     */
+    public static function is_required_in_active_path(int $pageid): bool {
+        global $DB;
+
+        return $DB->record_exists_sql(
+            "SELECT 1
+               FROM {local_handbook_pathitem} i
+               JOIN {local_handbook_path} p ON p.id = i.pathid
+              WHERE i.pageid = :pageid AND i.required = 1 AND p.active = 1",
+            ['pageid' => $pageid]);
     }
 
     /**

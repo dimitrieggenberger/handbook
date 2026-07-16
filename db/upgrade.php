@@ -416,5 +416,28 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071514, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071518) {
+        // Article-level reading completion, shared across paths (spec 8).
+        $table = new xmldb_table('local_handbook_readreceipt');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('revisionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('completionmethod', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'reading_path');
+            $table->add_field('confirmationversion', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1');
+            $table->add_field('timecompleted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'], 'local_handbook_page', ['id']);
+            $table->add_key('revisionid', XMLDB_KEY_FOREIGN, ['revisionid'], 'local_handbook_revision', ['id']);
+            $table->add_index('userrevision', XMLDB_INDEX_UNIQUE, ['userid', 'revisionid']);
+            $table->add_index('userpage', XMLDB_INDEX_NOTUNIQUE, ['userid', 'pageid']);
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071518, 'local', 'handbook');
+    }
+
     return true;
 }

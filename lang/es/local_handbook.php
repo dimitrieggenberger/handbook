@@ -214,6 +214,14 @@ $string['requiresreack'] = 'Requiere nueva confirmación al publicarse';
 $string['requiresreack_help'] = 'Marca esta casilla en versiones con cambios sustanciales de páginas de lectura obligatoria: tras la publicación, todos deberán confirmar la lectura de nuevo. Déjala sin marcar para correcciones menores.';
 $string['errornotrequiredreading'] = 'Esta página no está marcada como lectura obligatoria.';
 
+// Finalización de lectura compartida para artículos obligatorios de una ruta (spec 8).
+$string['readingcompletion'] = 'Finalización de lectura';
+$string['markasread'] = 'Marcar como leído';
+$string['completioncheckboxlabel'] = 'He leído la versión actual de «{$a}».';
+$string['completedrecord'] = 'Leído el {$a->date} · versión publicada v{$a->version}';
+$string['completionreread'] = 'Este artículo cambió desde la última vez que lo leyó (ahora v{$a}). Vuelva a leerlo, por favor.';
+$string['completioninfo'] = 'Marcar un artículo como leído cuenta para todas las rutas de lectura que lo incluyen. Basta con leerlo una vez; una versión con cambios materiales puede pedirle que lo lea de nuevo.';
+
 // Reading paths (spec 15).
 $string['myreadingpath'] = 'Mi ruta de lectura';
 $string['managepaths'] = 'Gestionar rutas de lectura';
