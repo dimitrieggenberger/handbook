@@ -46,6 +46,7 @@ $string['handbook:apiproposemetadata'] = 'Metadaten-Änderungen (Steckbrief) des
 $string['handbook:apiproposerelations'] = 'Beziehungsänderungen zwischen Handbuchseiten über die API vorschlagen';
 $string['handbook:apiproposelifecycle'] = 'Archivierungs-/Wiederherstellungsaktionen des Handbuchs über die API vorschlagen';
 $string['handbook:apiproposetaxonomy'] = 'Kategorieänderungen des Handbuchs über die API vorschlagen';
+$string['handbook:apiproposepaths'] = 'Änderungen an Lesepfaden des Handbuchs über die API vorschlagen';
 $string['handbook:manage'] = 'Das Handbuch-Plugin administrieren';
 
 // Navigation and page titles.
@@ -626,3 +627,33 @@ $string['approveandapplyset'] = 'Gesamtes Change-Set freigeben &amp; anwenden';
 $string['approveset'] = 'Gesamtes Change-Set freigeben';
 $string['applyset'] = 'Freigegebenes Change-Set anwenden';
 $string['confirmapplyset'] = 'Das gesamte freigegebene Change-Set jetzt anwenden? Alle freigegebenen Elemente werden zusammen in einer Transaktion veröffentlicht; schlägt eines fehl, wird keines angewendet.';
+
+// Lesepfad-Vorschläge (Anforderungen der nächsten Version, Phase 3).
+$string['pathchangesummary'] = 'Lesepfad: {$a}';
+$string['conflict_pathconcurrency'] = 'Der Lesepfad wurde nach der Vorbereitung dieses Vorschlags geändert; neu laden und erneut vorschlagen.';
+$string['errorpathname'] = 'Ein Lesepfad benötigt einen Namen mit höchstens 255 Zeichen.';
+$string['errorpathnotfound'] = 'Der Lesepfad existiert nicht.';
+$string['errorpathtype'] = 'Dieser Lesepfad-Typ ist unbekannt.';
+$string['errorpathslug'] = 'Der Lesepfad benötigt einen gültigen Slug.';
+$string['errorpathsectionsempty'] = 'Ein Lesepfad-Vorschlag muss mindestens einen Abschnitt enthalten.';
+$string['errorpathitemsempty'] = 'Ein Lesepfad-Vorschlag muss mindestens eine Seite enthalten.';
+$string['errorpathpage'] = 'Ein Lesepfad-Element verweist auf eine nicht vorhandene Seite ({$a}).';
+$string['errorpathduplicatepage'] = 'Ein Lesepfad darf dieselbe Seite nicht zweimal enthalten.';
+$string['errorpathitemtarget'] = 'Jedes Lesepfad-Element benötigt eine Seiten-ID oder einen Seiten-Tempkey.';
+$string['itemkindreadingpath'] = 'Lesepfad';
+$string['pathnamelabel'] = 'Name';
+$string['pathoperation'] = 'Vorgang';
+$string['pathcreate'] = 'Lesepfad erstellen';
+$string['pathupdate'] = 'Lesepfad aktualisieren';
+$string['pathtypelabel'] = 'Typ';
+$string['pathschoolyear'] = 'Schuljahr';
+$string['pathactive'] = 'Aktiv';
+$string['pathestimatedminutes'] = 'Geschätzte Minuten';
+$string['pathnewpageitem'] = 'In diesem Set vorgeschlagene neue Seite ({$a})';
+$string['pathoptionalsuffix'] = '(optional)';
+$string['pathtype_onboarding'] = 'Einarbeitung';
+$string['pathtype_calendar_phase'] = 'Kalenderphase';
+$string['pathtype_role_based'] = 'Rollenbasiert';
+$string['pathtype_situational'] = 'Situativ';
+$string['pathtype_refresher'] = 'Auffrischung';
+$string['pathtype_compliance'] = 'Compliance';

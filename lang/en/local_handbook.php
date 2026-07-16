@@ -46,6 +46,7 @@ $string['handbook:apiproposemetadata'] = 'Propose handbook metadata (fiche) patc
 $string['handbook:apiproposerelations'] = 'Propose handbook page relation edits through the API';
 $string['handbook:apiproposelifecycle'] = 'Propose handbook archive/restore (lifecycle) actions through the API';
 $string['handbook:apiproposetaxonomy'] = 'Propose handbook category (taxonomy) changes through the API';
+$string['handbook:apiproposepaths'] = 'Propose handbook reading-path changes through the API';
 $string['handbook:manage'] = 'Administer the handbook plugin';
 
 // Navigation and page titles.
@@ -626,3 +627,33 @@ $string['approveandapplyset'] = 'Approve &amp; apply entire change set';
 $string['approveset'] = 'Approve entire change set';
 $string['applyset'] = 'Apply approved change set';
 $string['confirmapplyset'] = 'Apply the entire approved change set now? All approved items are published together in one transaction; if any fails, none is applied.';
+
+// Reading-path proposals (next-version requirements, phase 3).
+$string['pathchangesummary'] = 'Reading path: {$a}';
+$string['conflict_pathconcurrency'] = 'The reading path changed after this proposal was prepared; reload and propose again.';
+$string['errorpathname'] = 'A reading path needs a name of at most 255 characters.';
+$string['errorpathnotfound'] = 'The reading path does not exist.';
+$string['errorpathtype'] = 'That reading-path type is not recognised.';
+$string['errorpathslug'] = 'The reading path needs a valid slug.';
+$string['errorpathsectionsempty'] = 'A reading-path proposal must include at least one section.';
+$string['errorpathitemsempty'] = 'A reading-path proposal must include at least one page.';
+$string['errorpathpage'] = 'A reading-path item references a page that does not exist ({$a}).';
+$string['errorpathduplicatepage'] = 'A reading path cannot list the same page twice.';
+$string['errorpathitemtarget'] = 'Each reading-path item needs a page id or a page tempkey.';
+$string['itemkindreadingpath'] = 'Reading path';
+$string['pathnamelabel'] = 'Name';
+$string['pathoperation'] = 'Operation';
+$string['pathcreate'] = 'Create reading path';
+$string['pathupdate'] = 'Update reading path';
+$string['pathtypelabel'] = 'Type';
+$string['pathschoolyear'] = 'School year';
+$string['pathactive'] = 'Active';
+$string['pathestimatedminutes'] = 'Estimated minutes';
+$string['pathnewpageitem'] = 'New page proposed in this set ({$a})';
+$string['pathoptionalsuffix'] = '(optional)';
+$string['pathtype_onboarding'] = 'Onboarding';
+$string['pathtype_calendar_phase'] = 'Calendar phase';
+$string['pathtype_role_based'] = 'Role-based';
+$string['pathtype_situational'] = 'Situational';
+$string['pathtype_refresher'] = 'Refresher';
+$string['pathtype_compliance'] = 'Compliance';

@@ -393,5 +393,28 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071512, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071514) {
+        // Reading-path product-model fields (spec 6).
+        $path = new xmldb_table('local_handbook_path');
+        $pathfields = [
+            new xmldb_field('pathtype', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, '', 'active'),
+            new xmldb_field('estimatedminutes', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'pathtype'),
+            new xmldb_field('reviewdate', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'estimatedminutes'),
+        ];
+        foreach ($pathfields as $field) {
+            if (!$dbman->field_exists($path, $field)) {
+                $dbman->add_field($path, $field);
+            }
+        }
+
+        $pathitem = new xmldb_table('local_handbook_pathitem');
+        $rationale = new xmldb_field('rationale', XMLDB_TYPE_TEXT, null, null, null, null, null, 'quizcmid');
+        if (!$dbman->field_exists($pathitem, $rationale)) {
+            $dbman->add_field($pathitem, $rationale);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071514, 'local', 'handbook');
+    }
+
     return true;
 }

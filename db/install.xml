@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/handbook/db" VERSION="2026071506" COMMENT="XMLDB file for local_handbook (specification section 20)"
+<XMLDB PATH="local/handbook/db" VERSION="2026071514" COMMENT="XMLDB file for local_handbook (specification section 20)"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -149,6 +149,9 @@
         <FIELD NAME="audiencejson" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="schoolyear" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT=""/>
         <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="pathtype" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="" COMMENT="onboarding, calendar_phase, role_based, situational, refresher, compliance (spec 6.3)"/>
+        <FIELD NAME="estimatedminutes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="reviewdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="quizcmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
@@ -175,6 +178,7 @@
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="required" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
         <FIELD NAME="quizcmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="rationale" TYPE="text" NOTNULL="false" COMMENT="Why this article belongs in the path (spec 6.6)"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

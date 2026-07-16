@@ -114,6 +114,20 @@ class helper {
     }
 
     /**
+     * Capability check for reading-path proposal functions (spec 5, 7).
+     *
+     * A propose capability only — the path and its items are written solely by
+     * the human publish path.
+     *
+     * @param context_system $context System context.
+     * @return void
+     */
+    public static function require_propose_paths(context_system $context): void {
+        self::require_read($context);
+        require_capability('local/handbook:apiproposepaths', $context);
+    }
+
+    /**
      * Resolve a page by numeric id or slug.
      *
      * @param string $identifier Page id or slug.

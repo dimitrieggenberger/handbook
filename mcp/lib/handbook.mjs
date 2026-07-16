@@ -225,6 +225,21 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     handler(({ changesetid }) => ws("local_handbook_validate_changeset", { changesetid }))
   );
 
+  server.tool(
+    "handbook_list_reading_paths",
+    "List reading paths (onboarding, calendar-phase, role-based, ...) with their item counts. Use this to discover an existing path before proposing an edit, or to check whether one already covers a topic before proposing a new one.",
+    { activeonly: z.boolean().optional().describe("Only active paths") },
+    handler(({ activeonly }) =>
+      ws("local_handbook_list_reading_paths", { activeonly: activeonly ?? false }))
+  );
+
+  server.tool(
+    "handbook_get_reading_path",
+    "Get a reading path's full snapshot: header fields plus its ordered sections and pages. Read this before proposing an edit, then echo the sections back (changed as needed) to handbook_upsert_change_set_reading_path, passing timemodified as expectedtimemodified so a concurrent edit is detected.",
+    { pathid: z.number().int() },
+    handler(({ pathid }) => ws("local_handbook_get_reading_path", { pathid }))
+  );
+
   if (!writable) {
     return; // Read-only mode: no draft or change-set write tools.
   }
@@ -542,6 +557,64 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
         operation,
       });
     })
+  );
+
+  server.tool(
+    "handbook_upsert_change_set_reading_path",
+    "Propose a WHOLE reading path (create or update) inside THIS change set. Submit a COMPLETE snapshot: applying it makes the path match exactly (sections, page order, required flags). Omit pathid to create; pass it (with expectedtimemodified from handbook_get_reading_path) to edit. Each item targets an existing page (pageid) or a page proposed in this same set (pagetempkey). Staged as a draft; a human applies it in Moodle.",
+    {
+      changesetid: z.number().int(),
+      pathid: z.number().int().optional().describe("Existing path id to edit (omit to create)"),
+      name: z.string(),
+      slug: z.string().optional().describe("Slug (omit to derive from name); the old slug keeps resolving"),
+      description: z.string().optional(),
+      pathtype: z.enum(["onboarding", "calendar_phase", "role_based", "situational", "refresher", "compliance"])
+        .optional(),
+      schoolyear: z.string().optional().describe("e.g. 2025-2026 (omit for evergreen)"),
+      active: z.boolean().optional(),
+      reviewdate: z.number().int().optional().describe("Unix timestamp of the next review (0 = unset)"),
+      estimatedminutes: z.number().int().optional(),
+      audiencecohorts: z.array(z.number().int()).optional().describe("Cohort ids (omit = everyone)"),
+      audienceroles: z.array(z.number().int()).optional().describe("System role ids (omit = everyone)"),
+      expectedtimemodified: z.number().int().optional()
+        .describe("Path timemodified from handbook_get_reading_path (edit only)"),
+      sections: z.array(z.object({
+        name: z.string().optional().describe("Section heading (omit for a single default section)"),
+        items: z.array(z.object({
+          pageid: z.number().int().optional().describe("Existing page id"),
+          pagetempkey: z.string().optional().describe("Tempkey of a page proposed in this set (instead of pageid)"),
+          required: z.boolean().optional(),
+          rationale: z.string().optional().describe("Why this page belongs in the path"),
+          quizcmid: z.number().int().optional(),
+        })).min(1),
+      })).min(1),
+    },
+    handler((args) =>
+      ws("local_handbook_upsert_changeset_reading_path", {
+        changesetid: args.changesetid,
+        pathid: args.pathid ?? 0,
+        name: args.name,
+        slug: args.slug ?? "",
+        description: args.description ?? "",
+        pathtype: args.pathtype ?? "",
+        schoolyear: args.schoolyear ?? "",
+        active: args.active ?? true,
+        reviewdate: args.reviewdate ?? 0,
+        estimatedminutes: args.estimatedminutes ?? 0,
+        audiencecohorts: args.audiencecohorts ?? [],
+        audienceroles: args.audienceroles ?? [],
+        expectedtimemodified: args.expectedtimemodified ?? 0,
+        sections: args.sections.map((section) => ({
+          name: section.name ?? "",
+          items: section.items.map((it) => ({
+            pageid: it.pageid ?? 0,
+            pagetempkey: it.pagetempkey ?? "",
+            required: it.required ?? true,
+            rationale: it.rationale ?? "",
+            quizcmid: it.quizcmid ?? 0,
+          })),
+        })),
+      }))
   );
 
   server.tool(

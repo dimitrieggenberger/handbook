@@ -132,6 +132,18 @@ class changeset_service {
     /** @var string A change item that proposes moving a page to another category. */
     public const KIND_PAGE_MOVE = 'page_move';
 
+    /** @var string A change item carrying a complete reading-path snapshot (spec 7). */
+    public const KIND_READING_PATH = 'reading_path';
+
+    /**
+     * Reading-path types (spec 6.3).
+     *
+     * @return string[]
+     */
+    public static function path_types(): array {
+        return ['onboarding', 'calendar_phase', 'role_based', 'situational', 'refresher', 'compliance'];
+    }
+
     /**
      * Structured archive reasons (spec 22). 'other' requires a note.
      *
@@ -796,6 +808,209 @@ class changeset_service {
     }
 
     /**
+     * Create or update this change set's proposal for a whole reading path
+     * (spec 7). Draft only — the path and its items are written by the human
+     * publish path. A complete snapshot is carried: applying it makes the path
+     * match the snapshot exactly (sections and item order included).
+     *
+     * @param int $changesetid Change-set id.
+     * @param array $data Reading-path snapshot (see validate_reading_path_snapshot()).
+     * @param int $userid Acting user (0 = current user).
+     * @return array Per-item result.
+     */
+    public static function upsert_reading_path(int $changesetid, array $data, int $userid = 0): array {
+        global $DB, $USER;
+        $userid = $userid ?: (int)$USER->id;
+
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+
+        $normalised = self::validate_reading_path_snapshot($data);
+
+        // A page-less item keyed by tempkey: an update targets the existing
+        // path, a create is keyed by its proposed slug.
+        $tempkey = $normalised['pathid']
+            ? 'path:' . $normalised['pathid']
+            : 'newpath:' . $normalised['slug'];
+
+        // Optimistic concurrency for an existing path: a path edited elsewhere
+        // yields a structured conflict rather than a silent overwrite.
+        if ($normalised['pathid']) {
+            $path = $DB->get_record('local_handbook_path',
+                ['id' => $normalised['pathid']], '*', MUST_EXIST);
+            if ($normalised['expectedtimemodified']
+                    && (int)$path->timemodified !== $normalised['expectedtimemodified']) {
+                $note = get_string('conflict_pathconcurrency', 'local_handbook');
+                $item = self::write_item($changeset, 0, 0, self::ITEM_CONFLICT, $note, '',
+                    $userid, self::KIND_READING_PATH, json_encode($normalised), $tempkey);
+                return self::item_result($item, null);
+            }
+        }
+
+        $summary = get_string('pathchangesummary', 'local_handbook', $normalised['name']);
+        $item = self::write_item($changeset, 0, 0, self::ITEM_DRAFT, '', $summary,
+            $userid, self::KIND_READING_PATH, json_encode($normalised), $tempkey);
+        return self::item_result($item, null);
+    }
+
+    /**
+     * Validate and normalise a reading-path snapshot (throws on any problem).
+     *
+     * A snapshot is complete: name/slug/type/audience plus an ordered list of
+     * sections, each holding an ordered list of items. An item targets either
+     * an existing page (pageid) or a page created in the same set (pagetempkey).
+     *
+     * @param array $data Raw snapshot.
+     * @return array Normalised snapshot.
+     */
+    public static function validate_reading_path_snapshot(array $data): array {
+        global $DB;
+
+        $name = trim((string)($data['name'] ?? ''));
+        if ($name === '' || \core_text::strlen($name) > 255) {
+            throw new moodle_exception('errorpathname', 'local_handbook');
+        }
+
+        $pathid = (int)($data['pathid'] ?? 0);
+        if ($pathid && !$DB->record_exists('local_handbook_path', ['id' => $pathid])) {
+            throw new moodle_exception('errorpathnotfound', 'local_handbook');
+        }
+
+        $pathtype = (string)($data['pathtype'] ?? '');
+        if ($pathtype !== '' && !in_array($pathtype, self::path_types(), true)) {
+            throw new moodle_exception('errorpathtype', 'local_handbook');
+        }
+
+        $slug = !empty($data['slug'])
+            ? page_service::slugify((string)$data['slug'])
+            : page_service::slugify($name);
+        if ($slug === '') {
+            throw new moodle_exception('errorpathslug', 'local_handbook');
+        }
+
+        $cohorts = array_map('intval', (array)($data['audiencecohorts'] ?? []));
+        $roles = array_map('intval', (array)($data['audienceroles'] ?? []));
+        $audiencejson = path_service::encode_audience($cohorts, $roles);
+
+        $sectionsin = $data['sections'] ?? [];
+        if (!is_array($sectionsin) || !$sectionsin) {
+            throw new moodle_exception('errorpathsectionsempty', 'local_handbook');
+        }
+        $sections = [];
+        $seenpages = [];
+        $seentempkeys = [];
+        $itemcount = 0;
+        foreach ($sectionsin as $section) {
+            $sname = trim((string)($section['name'] ?? ''));
+            $itemsin = $section['items'] ?? [];
+            if (!is_array($itemsin)) {
+                $itemsin = [];
+            }
+            $items = [];
+            foreach ($itemsin as $it) {
+                $itempageid = (int)($it['pageid'] ?? 0);
+                $pagetempkey = trim((string)($it['pagetempkey'] ?? ''));
+                if ($itempageid) {
+                    if (!$DB->record_exists('local_handbook_page', ['id' => $itempageid])) {
+                        throw new moodle_exception('errorpathpage', 'local_handbook', '', $itempageid);
+                    }
+                    if (isset($seenpages[$itempageid])) {
+                        throw new moodle_exception('errorpathduplicatepage', 'local_handbook');
+                    }
+                    $seenpages[$itempageid] = true;
+                } else if ($pagetempkey !== '') {
+                    if (isset($seentempkeys[$pagetempkey])) {
+                        throw new moodle_exception('errorpathduplicatepage', 'local_handbook');
+                    }
+                    $seentempkeys[$pagetempkey] = true;
+                } else {
+                    throw new moodle_exception('errorpathitemtarget', 'local_handbook');
+                }
+                $items[] = [
+                    'pageid' => $itempageid,
+                    'pagetempkey' => \core_text::substr($pagetempkey, 0, 100),
+                    'required' => (int)((bool)($it['required'] ?? true)),
+                    'rationale' => (string)($it['rationale'] ?? ''),
+                    'quizcmid' => max(0, (int)($it['quizcmid'] ?? 0)),
+                ];
+                $itemcount++;
+            }
+            $sections[] = ['name' => \core_text::substr($sname, 0, 255), 'items' => $items];
+        }
+        if ($itemcount === 0) {
+            throw new moodle_exception('errorpathitemsempty', 'local_handbook');
+        }
+
+        return [
+            'pathid' => $pathid,
+            'name' => $name,
+            'slug' => $slug,
+            'description' => (string)($data['description'] ?? ''),
+            'pathtype' => $pathtype,
+            'schoolyear' => \core_text::substr(trim((string)($data['schoolyear'] ?? '')), 0, 20),
+            'active' => (int)((bool)($data['active'] ?? true)),
+            'reviewdate' => max(0, (int)($data['reviewdate'] ?? 0)),
+            'estimatedminutes' => max(0, (int)($data['estimatedminutes'] ?? 0)),
+            'audiencejson' => $audiencejson,
+            'expectedtimemodified' => max(0, (int)($data['expectedtimemodified'] ?? 0)),
+            'sections' => $sections,
+        ];
+    }
+
+    /**
+     * A complete snapshot of an existing reading path, in the shape the
+     * proposal API accepts, so the AI can base an edit on current state (spec
+     * 7.2). Read-only.
+     *
+     * @param int $pathid Path id.
+     * @return array Snapshot (pathid populated, plus timemodified for concurrency).
+     */
+    public static function reading_path_snapshot(int $pathid): array {
+        global $DB;
+
+        $path = $DB->get_record('local_handbook_path', ['id' => $pathid], '*', MUST_EXIST);
+        $rows = $DB->get_records('local_handbook_pathitem', ['pathid' => $pathid],
+            'sortorder ASC, id ASC');
+        $audience = path_service::get_audience($path);
+
+        // Group rows into sections, preserving first-seen section order.
+        $sections = [];
+        $index = [];
+        foreach ($rows as $row) {
+            $sname = (string)$row->sectionname;
+            if (!array_key_exists($sname, $index)) {
+                $index[$sname] = count($sections);
+                $sections[] = ['name' => $sname, 'items' => []];
+            }
+            $sections[$index[$sname]]['items'][] = [
+                'pageid' => (int)$row->pageid,
+                'pagetempkey' => '',
+                'required' => (int)$row->required,
+                'rationale' => (string)$row->rationale,
+                'quizcmid' => (int)$row->quizcmid,
+            ];
+        }
+
+        return [
+            'pathid' => (int)$path->id,
+            'name' => (string)$path->name,
+            'slug' => (string)$path->slug,
+            'description' => (string)$path->description,
+            'pathtype' => (string)$path->pathtype,
+            'schoolyear' => (string)$path->schoolyear,
+            'active' => (int)$path->active,
+            'reviewdate' => (int)$path->reviewdate,
+            'estimatedminutes' => (int)$path->estimatedminutes,
+            'audiencecohorts' => $audience->cohorts,
+            'audienceroles' => $audience->roles,
+            'timemodified' => (int)$path->timemodified,
+            'sections' => $sections,
+        ];
+    }
+
+    /**
      * Impact of archiving a page: inbound relations, active-path memberships,
      * and whether it is required reading (spec 25). Read-only.
      *
@@ -1228,6 +1443,9 @@ class changeset_service {
             case self::KIND_CATEGORY_CHANGE:
                 self::validate_category_op($payload);
                 break;
+            case self::KIND_READING_PATH:
+                self::validate_reading_path_snapshot($payload);
+                break;
             default:
                 // page_move (target may be a tempkey) and page_restore are
                 // checked at apply; nothing to pre-validate here.
@@ -1355,6 +1573,9 @@ class changeset_service {
         return match ($item->kind) {
             self::KIND_PAGE_CREATE => 15,
             self::KIND_PAGE_MOVE => 40,
+            // Reading paths may reference pages created in this set, so they
+            // apply after page_create; before archive/restore.
+            self::KIND_READING_PATH => 48,
             self::KIND_PAGE_ARCHIVE, self::KIND_PAGE_RESTORE => 50,
             default => 30,
         };
@@ -1488,6 +1709,9 @@ class changeset_service {
                 break;
             case self::KIND_PAGE_RESTORE:
                 self::apply_page_restore($item, $userid);
+                break;
+            case self::KIND_READING_PATH:
+                self::apply_reading_path($item, $userid);
                 break;
             default:
                 throw new moodle_exception('errorunsupportedkind', 'local_handbook', '', $item->kind);
@@ -1951,6 +2175,106 @@ class changeset_service {
             'timemodified' => time(),
             'modifiedby' => $userid,
         ]);
+    }
+
+    /**
+     * Apply a reading-path snapshot: create or update the path row, then
+     * replace its items wholesale so the path matches the snapshot exactly
+     * (sections, order, required flags, rationale). Items may reference pages
+     * created in the same set via pagetempkey.
+     *
+     * @param stdClass $item Change-item record (kind reading_path).
+     * @param int $userid Human publisher.
+     * @return void
+     */
+    private static function apply_reading_path(stdClass $item, int $userid): void {
+        global $DB;
+
+        $data = json_decode((string)$item->payloadjson, true);
+        if (!is_array($data)) {
+            throw new moodle_exception('errorpathname', 'local_handbook');
+        }
+        $data = self::validate_reading_path_snapshot($data);
+        $now = time();
+
+        $pathid = (int)$data['pathid'];
+        if ($pathid) {
+            $path = $DB->get_record('local_handbook_path', ['id' => $pathid], '*', MUST_EXIST);
+            // Keep the slug unique if the proposal renames it.
+            $slug = $data['slug'];
+            if ($slug !== $path->slug && $DB->record_exists_select('local_handbook_path',
+                    'slug = :s AND id <> :id', ['s' => $slug, 'id' => $pathid])) {
+                $slug = page_service::unique_slug('local_handbook_path', $slug);
+            }
+            $DB->update_record('local_handbook_path', (object)[
+                'id' => $pathid,
+                'name' => $data['name'],
+                'slug' => $slug,
+                'description' => $data['description'],
+                'descriptionformat' => FORMAT_HTML,
+                'audiencejson' => $data['audiencejson'],
+                'schoolyear' => $data['schoolyear'],
+                'active' => $data['active'],
+                'pathtype' => $data['pathtype'],
+                'estimatedminutes' => $data['estimatedminutes'],
+                'reviewdate' => $data['reviewdate'],
+                'timemodified' => $now,
+                'modifiedby' => $userid,
+            ]);
+        } else {
+            $slug = page_service::unique_slug('local_handbook_path', $data['slug']);
+            $pathid = (int)$DB->insert_record('local_handbook_path', (object)[
+                'name' => $data['name'],
+                'slug' => $slug,
+                'description' => $data['description'],
+                'descriptionformat' => FORMAT_HTML,
+                'audiencejson' => $data['audiencejson'],
+                'schoolyear' => $data['schoolyear'],
+                'active' => $data['active'],
+                'pathtype' => $data['pathtype'],
+                'estimatedminutes' => $data['estimatedminutes'],
+                'reviewdate' => $data['reviewdate'],
+                'quizcmid' => 0,
+                'timecreated' => $now,
+                'timemodified' => $now,
+                'createdby' => $userid,
+                'modifiedby' => $userid,
+            ]);
+            // Record the real id so later items resolve this path's tempkey.
+            self::record_tempref((int)$item->changesetid, (string)$item->tempkey, 'path', $pathid);
+        }
+
+        // Replace the path's items wholesale from the snapshot.
+        $DB->delete_records('local_handbook_pathitem', ['pathid' => $pathid]);
+        $sortorder = 0;
+        $seen = [];
+        foreach ($data['sections'] as $section) {
+            foreach ($section['items'] as $it) {
+                $itempageid = (int)$it['pageid'];
+                if (!$itempageid && $it['pagetempkey'] !== '') {
+                    $itempageid = self::resolve_tempkey_page((int)$item->changesetid,
+                        (string)$it['pagetempkey']);
+                }
+                if (!$itempageid || !$DB->record_exists('local_handbook_page', ['id' => $itempageid])) {
+                    throw new moodle_exception('errorpathpage', 'local_handbook', '', $itempageid);
+                }
+                // The pathitem index is unique on (pathid, pageid): a page that
+                // already appeared earlier in the path is kept only once.
+                if (isset($seen[$itempageid])) {
+                    continue;
+                }
+                $seen[$itempageid] = true;
+                $DB->insert_record('local_handbook_pathitem', (object)[
+                    'pathid' => $pathid,
+                    'pageid' => $itempageid,
+                    'sectionname' => $section['name'],
+                    'sortorder' => $sortorder++,
+                    'required' => (int)$it['required'],
+                    'quizcmid' => (int)$it['quizcmid'],
+                    'rationale' => $it['rationale'],
+                ]);
+            }
+        }
     }
 
     /**

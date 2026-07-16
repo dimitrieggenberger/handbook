@@ -358,6 +358,24 @@ foreach ($changeset->items as $item) {
         continue;
     }
 
+    // Reading-path proposal: page-less — rendered from its snapshot payload.
+    if ($item->kind === changeset_service::KIND_READING_PATH) {
+        $head = html_writer::span(
+            s(get_string('itemkindreadingpath', 'local_handbook')), 'font-weight-bold')
+            . ' ' . html_writer::span(s(get_string('itemstatus_' . $item->itemstatus, 'local_handbook')),
+                $itembadges[$item->itemstatus] ?? 'badge badge-secondary');
+        $body = html_writer::tag('h4', $head, ['class' => 'h6 mb-2']);
+        if ($item->itemstatus === changeset_service::ITEM_CONFLICT
+                && trim((string)$item->conflictnote) !== '') {
+            $body .= html_writer::div(s($item->conflictnote), 'alert alert-warning py-2 px-3 small mb-2');
+        }
+        $body .= local_handbook_render_reading_path_item($item);
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
     $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid]);
     if (!$page) {
         continue;

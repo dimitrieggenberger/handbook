@@ -199,6 +199,16 @@ $capabilities = [
         'archetypes' => [],
     ],
 
+    // Propose reading-path changes (create/update whole paths) through the API
+    // as change-set drafts (spec 5, 7). Propose-only; the path and its items are
+    // written solely by the human publish path. Granted only to service accounts.
+    'local/handbook:apiproposepaths' => [
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+
     'local/handbook:manage' => [
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',

@@ -218,6 +218,24 @@ $functions = [
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposetaxonomy',
     ],
+    'local_handbook_list_reading_paths' => [
+        'classname' => 'local_handbook\external\list_reading_paths',
+        'description' => 'List reading paths with item counts (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_get_reading_path' => [
+        'classname' => 'local_handbook\external\get_reading_path',
+        'description' => 'Get a reading path\'s complete snapshot (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_upsert_changeset_reading_path' => [
+        'classname' => 'local_handbook\external\upsert_changeset_reading_path',
+        'description' => 'Propose a whole reading path (create/update) in a change set (draft only; never applies).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposepaths',
+    ],
     'local_handbook_submit_changeset_for_review' => [
         'classname' => 'local_handbook\external\submit_changeset_for_review',
         'description' => 'Submit a change set\'s eligible drafts for human review.',

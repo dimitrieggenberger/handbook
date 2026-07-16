@@ -46,6 +46,7 @@ $string['handbook:apiproposemetadata'] = 'Proponer cambios de ficha (metadatos) 
 $string['handbook:apiproposerelations'] = 'Proponer cambios de relaciones entre páginas del manual mediante la API';
 $string['handbook:apiproposelifecycle'] = 'Proponer acciones de archivado/restauración del manual mediante la API';
 $string['handbook:apiproposetaxonomy'] = 'Proponer cambios de categorías del manual mediante la API';
+$string['handbook:apiproposepaths'] = 'Proponer cambios de rutas de lectura del manual mediante la API';
 $string['handbook:manage'] = 'Administrar el plugin del manual';
 
 // Navigation and page titles.
@@ -626,3 +627,33 @@ $string['approveandapplyset'] = 'Aprobar y aplicar todo el change set';
 $string['approveset'] = 'Aprobar todo el change set';
 $string['applyset'] = 'Aplicar el change set aprobado';
 $string['confirmapplyset'] = '¿Aplicar ahora todo el change set aprobado? Todos los ítems aprobados se publican juntos en una sola transacción; si alguno falla, no se aplica ninguno.';
+
+// Propuestas de rutas de lectura (requisitos de la próxima versión, fase 3).
+$string['pathchangesummary'] = 'Ruta de lectura: {$a}';
+$string['conflict_pathconcurrency'] = 'La ruta de lectura cambió después de preparar esta propuesta; recargue y vuelva a proponer.';
+$string['errorpathname'] = 'Una ruta de lectura necesita un nombre de 255 caracteres como máximo.';
+$string['errorpathnotfound'] = 'La ruta de lectura no existe.';
+$string['errorpathtype'] = 'Ese tipo de ruta de lectura no es válido.';
+$string['errorpathslug'] = 'La ruta de lectura necesita un slug válido.';
+$string['errorpathsectionsempty'] = 'Una propuesta de ruta de lectura debe incluir al menos una sección.';
+$string['errorpathitemsempty'] = 'Una propuesta de ruta de lectura debe incluir al menos una página.';
+$string['errorpathpage'] = 'Un ítem de la ruta de lectura hace referencia a una página que no existe ({$a}).';
+$string['errorpathduplicatepage'] = 'Una ruta de lectura no puede incluir la misma página dos veces.';
+$string['errorpathitemtarget'] = 'Cada ítem de la ruta de lectura necesita un id de página o un tempkey de página.';
+$string['itemkindreadingpath'] = 'Ruta de lectura';
+$string['pathnamelabel'] = 'Nombre';
+$string['pathoperation'] = 'Operación';
+$string['pathcreate'] = 'Crear ruta de lectura';
+$string['pathupdate'] = 'Actualizar ruta de lectura';
+$string['pathtypelabel'] = 'Tipo';
+$string['pathschoolyear'] = 'Año escolar';
+$string['pathactive'] = 'Activa';
+$string['pathestimatedminutes'] = 'Minutos estimados';
+$string['pathnewpageitem'] = 'Página nueva propuesta en este conjunto ({$a})';
+$string['pathoptionalsuffix'] = '(opcional)';
+$string['pathtype_onboarding'] = 'Incorporación';
+$string['pathtype_calendar_phase'] = 'Fase del calendario';
+$string['pathtype_role_based'] = 'Según el rol';
+$string['pathtype_situational'] = 'Situacional';
+$string['pathtype_refresher'] = 'Repaso';
+$string['pathtype_compliance'] = 'Cumplimiento';

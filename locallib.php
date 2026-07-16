@@ -532,6 +532,72 @@ function local_handbook_render_category_item(stdClass $item): string {
 }
 
 /**
+ * Render a reading-path proposal item for review (spec 7).
+ *
+ * The item carries a complete snapshot; this shows the header fields and the
+ * ordered sections and pages that the path would match once applied.
+ *
+ * @param stdClass $item Change-item record (reading_path).
+ * @return string HTML.
+ */
+function local_handbook_render_reading_path_item(stdClass $item): string {
+    global $DB;
+
+    $data = json_decode((string)$item->payloadjson, true) ?: [];
+
+    $rows = local_handbook_lifecycle_row('pathnamelabel', (string)($data['name'] ?? ''));
+    $pathid = (int)($data['pathid'] ?? 0);
+    $rows .= local_handbook_lifecycle_row('pathoperation',
+        get_string($pathid ? 'pathupdate' : 'pathcreate', 'local_handbook'));
+    if (!empty($data['pathtype'])) {
+        $rows .= local_handbook_lifecycle_row('pathtypelabel',
+            get_string('pathtype_' . $data['pathtype'], 'local_handbook'));
+    }
+    if (!empty($data['schoolyear'])) {
+        $rows .= local_handbook_lifecycle_row('pathschoolyear', (string)$data['schoolyear']);
+    }
+    $rows .= local_handbook_lifecycle_row('pathactive',
+        get_string(!empty($data['active']) ? 'yes' : 'no'));
+    if (!empty($data['estimatedminutes'])) {
+        $rows .= local_handbook_lifecycle_row('pathestimatedminutes', (string)(int)$data['estimatedminutes']);
+    }
+    $out = html_writer::tag('table', html_writer::tag('tbody', $rows),
+        ['class' => 'table table-sm table-bordered small mb-2']);
+
+    if (!empty($data['description'])) {
+        $out .= html_writer::div(s((string)$data['description']), 'small text-muted mb-2');
+    }
+
+    // Sections and their pages, in order.
+    foreach (($data['sections'] ?? []) as $section) {
+        $sname = trim((string)($section['name'] ?? ''));
+        if ($sname !== '') {
+            $out .= html_writer::tag('div', s($sname), ['class' => 'font-weight-bold small mt-2']);
+        }
+        $lis = '';
+        foreach (($section['items'] ?? []) as $it) {
+            $pageid = (int)($it['pageid'] ?? 0);
+            if ($pageid) {
+                $title = (string)$DB->get_field('local_handbook_page', 'title', ['id' => $pageid]);
+                $label = $title !== '' ? format_string($title) : ('#' . $pageid);
+            } else {
+                $label = get_string('pathnewpageitem', 'local_handbook',
+                    (string)($it['pagetempkey'] ?? ''));
+            }
+            if (empty($it['required'])) {
+                $label .= ' ' . get_string('pathoptionalsuffix', 'local_handbook');
+            }
+            $lis .= html_writer::tag('li', s($label));
+        }
+        if ($lis !== '') {
+            $out .= html_writer::tag('ol', $lis, ['class' => 'small mb-2']);
+        }
+    }
+
+    return $out;
+}
+
+/**
  * Render the shared area navigation row (tab strip).
  *
  * @param string $currentpage Key of the current page.
