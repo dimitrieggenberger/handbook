@@ -116,34 +116,52 @@ persists across updates. If you ever change tool schemas, use the connector's
 ## Keeping the deployment up to date (auto-deploy)
 
 The panel's **Build** button re-runs `npm install` and restarts, but it does
-**not** pull new commits from Git. So after you push to `main`, the deployed
-tools do not change until the checkout is updated. Pick one:
+**not** pull new commits from Git. So after you push to `main`, update the
+deployed checkout explicitly.
 
-### Option A — automatic deploy on push (recommended)
+### Deploy (canonical, command-based)
 
-Wire GitHub to trigger a deploy whenever `main` changes:
-
-1. In the Infomaniak site's **deployment settings** (Node.js → Git deployment),
-   confirm **Repository** = this repo and **Branch** = `main`, and enable
-   **automatic deployment**. Copy the **deploy webhook URL** it shows.
-2. In GitHub → **Settings → Webhooks → Add webhook**: paste that URL,
-   Content-type `application/json`, event **Just the push event**, Active.
-
-Now a push to `main` makes Infomaniak pull, `npm install`, and restart on its
-own. (Ask and I can add the GitHub webhook for you once you have the URL.)
-
-### Option B — manual one-command redeploy
-
-If auto-deploy is not available, over SSH from inside the deployed repo:
+Push, then update the deployed checkout over SSH:
 
 ```
-bash mcp/redeploy.sh          # fetch + hard-reset to origin/main
+git push origin main          # from your machine
+
+# then, in the Infomaniak SSH console:
+cd ~/sites/mcp.europaschule.eu && git fetch origin && git reset --hard origin/main
 ```
 
-Then click **Restart** in the panel — a plain pull leaves the running process
-on the old code, so the restart is what reloads the tools. Verify with
-`grep -c upsert_changeset_metadata mcp/lib/handbook.mjs` (should print `1` once
-that tool is deployed) and `GET /health`.
+That one line fetches and hard-resets the deployed files to `origin/main`.
+Once this commit is deployed the repo ships a wrapper that does the same:
+
+```
+bash ~/sites/mcp.europaschule.eu/mcp/redeploy.sh    # fetch + reset to origin/main
+```
+
+**Then restart the process** so it loads the new code — a plain pull leaves the
+running app on the old files:
+
+- **Panel:** click **Restart** in the Node.js control panel (always works).
+- **Command (try first, to skip the panel):**
+  `touch ~/sites/mcp.europaschule.eu/tmp/restart.txt` — restarts the app if it
+  runs under Passenger; harmless otherwise. If the log shows no fresh
+  `{"event":"listening",...}`, use the panel Restart.
+
+Verify: `grep -c upsert_changeset_metadata mcp/lib/handbook.mjs` (prints `1`
+once that tool is deployed), then `GET /health` →
+`{"status":"ok","mode":"readwrite-drafts"}` with a fresh `listening` log line.
+
+### Optional: one-command deploy via a webhook
+
+If the site's deployment settings expose a **deploy webhook URL**, trigger a
+deploy with a single command instead of the SSH steps:
+
+```
+curl -fsS -X POST "<INFOMANIAK_DEPLOY_WEBHOOK_URL>"
+```
+
+To make it fully automatic, add that URL as a GitHub webhook (**Settings →
+Webhooks → Add webhook**, Content-type `application/json`, *Just the push
+event*) so a push to `main` pulls, builds and restarts on its own.
 
 ### After any deploy: refresh the connector
 
