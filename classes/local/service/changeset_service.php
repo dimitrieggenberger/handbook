@@ -111,6 +111,18 @@ class changeset_service {
      */
     public const KIND_RELATION_CHANGE = 'relation_change';
 
+    /** @var string A change item that proposes a category create/update/move/merge (spec 11). */
+    public const KIND_CATEGORY_CHANGE = 'category_change';
+
+    /**
+     * Category operations a proposal may carry (spec 11).
+     *
+     * @return string[]
+     */
+    public static function category_ops(): array {
+        return ['create', 'update', 'move', 'merge'];
+    }
+
     /** @var string A change item that proposes archiving a page (spec 21). */
     public const KIND_PAGE_ARCHIVE = 'page_archive';
 
@@ -749,6 +761,168 @@ class changeset_service {
     }
 
     /**
+     * Create or update this change set's proposal for one category operation
+     * (create/update/move/merge, spec 11). Draft only — applied by the human
+     * publish path.
+     *
+     * @param int $changesetid Change-set id.
+     * @param array $op Operation (see validate_category_op()).
+     * @param int $userid Acting user (0 = current user).
+     * @return array Per-item result.
+     */
+    public static function upsert_category(int $changesetid, array $op, int $userid = 0): array {
+        global $DB, $USER;
+        $userid = $userid ?: (int)$USER->id;
+
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+
+        $normalised = self::validate_category_op($op);
+        // New categories use the provided tempkey; operations on an existing
+        // category are keyed by (category, op) so several may coexist.
+        if ($normalised['op'] === 'create') {
+            $tempkey = self::normalise_tempkey((string)($op['tempkey'] ?? ''));
+        } else if ($normalised['op'] === 'merge') {
+            $tempkey = 'cat:' . $normalised['sourceid'] . ':merge';
+        } else {
+            $tempkey = 'cat:' . $normalised['categoryid'] . ':' . $normalised['op'];
+        }
+
+        $summary = get_string('categorychangesummary_' . $normalised['op'], 'local_handbook');
+        $item = self::write_item($changeset, 0, 0, self::ITEM_DRAFT, '', $summary,
+            $userid, self::KIND_CATEGORY_CHANGE, json_encode($normalised), $tempkey);
+        return self::item_result($item, null);
+    }
+
+    /**
+     * Validate and normalise a category operation (throws on any problem).
+     *
+     * @param array $op Raw operation: op (create|update|move|merge) plus its
+     *        fields (name/parentid/description/icon/visible/sortorder for
+     *        create/update; categoryid/newparentid for move; sourceid/targetid
+     *        for merge).
+     * @return array Normalised operation.
+     */
+    public static function validate_category_op(array $op): array {
+        global $DB;
+
+        $action = (string)($op['op'] ?? '');
+        if (!in_array($action, self::category_ops(), true)) {
+            throw new moodle_exception('errorcategoryop', 'local_handbook');
+        }
+
+        if ($action === 'create') {
+            $name = trim((string)($op['name'] ?? ''));
+            if ($name === '' || \core_text::strlen($name) > 255) {
+                throw new moodle_exception('errorcategoryname', 'local_handbook');
+            }
+            $parentid = (int)($op['parentid'] ?? 0);
+            if ($parentid && !$DB->record_exists('local_handbook_category', ['id' => $parentid])) {
+                throw new moodle_exception('errorcategoryparent', 'local_handbook');
+            }
+            return [
+                'op' => 'create',
+                'name' => $name,
+                'slug' => !empty($op['slug']) ? page_service::slugify((string)$op['slug']) : '',
+                'parentid' => $parentid,
+                'description' => (string)($op['description'] ?? ''),
+                'icon' => preg_match('/^fa-[a-z0-9-]+$/', trim((string)($op['icon'] ?? '')))
+                    ? trim((string)$op['icon']) : '',
+                'visible' => (int)((bool)($op['visible'] ?? true)),
+                'sortorder' => (int)($op['sortorder'] ?? 0),
+            ];
+        }
+
+        if ($action === 'update') {
+            $categoryid = (int)($op['categoryid'] ?? 0);
+            if (!$categoryid || !$DB->record_exists('local_handbook_category', ['id' => $categoryid])) {
+                throw new moodle_exception('errorcategorynotfound', 'local_handbook');
+            }
+            $out = ['op' => 'update', 'categoryid' => $categoryid];
+            if (isset($op['name'])) {
+                $name = trim((string)$op['name']);
+                if ($name === '' || \core_text::strlen($name) > 255) {
+                    throw new moodle_exception('errorcategoryname', 'local_handbook');
+                }
+                $out['name'] = $name;
+            }
+            if (isset($op['description'])) {
+                $out['description'] = (string)$op['description'];
+            }
+            if (isset($op['icon'])) {
+                $out['icon'] = preg_match('/^fa-[a-z0-9-]+$/', trim((string)$op['icon']))
+                    ? trim((string)$op['icon']) : '';
+            }
+            if (isset($op['visible'])) {
+                $out['visible'] = (int)((bool)$op['visible']);
+            }
+            if (isset($op['sortorder'])) {
+                $out['sortorder'] = (int)$op['sortorder'];
+            }
+            if (count($out) <= 2) {
+                throw new moodle_exception('errorcategorynochange', 'local_handbook');
+            }
+            return $out;
+        }
+
+        if ($action === 'move') {
+            $categoryid = (int)($op['categoryid'] ?? 0);
+            if (!$categoryid || !$DB->record_exists('local_handbook_category', ['id' => $categoryid])) {
+                throw new moodle_exception('errorcategorynotfound', 'local_handbook');
+            }
+            $newparentid = (int)($op['newparentid'] ?? 0);
+            if ($newparentid) {
+                if (!$DB->record_exists('local_handbook_category', ['id' => $newparentid])) {
+                    throw new moodle_exception('errorcategoryparent', 'local_handbook');
+                }
+                if (self::category_is_descendant($newparentid, $categoryid)) {
+                    throw new moodle_exception('errorcategorycycle', 'local_handbook');
+                }
+            }
+            return ['op' => 'move', 'categoryid' => $categoryid, 'newparentid' => $newparentid];
+        }
+
+        // merge.
+        $sourceid = (int)($op['sourceid'] ?? 0);
+        $targetid = (int)($op['targetid'] ?? 0);
+        if (!$sourceid || !$targetid
+                || !$DB->record_exists('local_handbook_category', ['id' => $sourceid])
+                || !$DB->record_exists('local_handbook_category', ['id' => $targetid])) {
+            throw new moodle_exception('errorcategorynotfound', 'local_handbook');
+        }
+        if ($sourceid === $targetid) {
+            throw new moodle_exception('errorcategorymergeself', 'local_handbook');
+        }
+        if (self::category_is_descendant($targetid, $sourceid)) {
+            throw new moodle_exception('errorcategorycycle', 'local_handbook');
+        }
+        return ['op' => 'merge', 'sourceid' => $sourceid, 'targetid' => $targetid];
+    }
+
+    /**
+     * Whether $candidateid is $ancestorid or a descendant of it (cycle guard).
+     *
+     * @param int $candidateid Category to test.
+     * @param int $ancestorid Potential ancestor.
+     * @return bool
+     */
+    private static function category_is_descendant(int $candidateid, int $ancestorid): bool {
+        global $DB;
+
+        $cur = $candidateid;
+        $guard = 0;
+        while ($cur && $guard++ < 100) {
+            if ($cur === $ancestorid) {
+                return true;
+            }
+            $cur = (int)$DB->get_field('local_handbook_category', 'parentid', ['id' => $cur]);
+        }
+        return false;
+    }
+
+    /**
      * Normalise a tempkey (non-empty, capped).
      *
      * @param string $tempkey Raw tempkey.
@@ -1015,6 +1189,9 @@ class changeset_service {
             case self::KIND_RELATION_CHANGE:
                 self::apply_relations($item, $userid);
                 break;
+            case self::KIND_CATEGORY_CHANGE:
+                self::apply_category($item, $userid);
+                break;
             case self::KIND_PAGE_ARCHIVE:
                 self::apply_page_archive($item, $userid);
                 break;
@@ -1194,6 +1371,78 @@ class changeset_service {
             return (int)$item->pageid;
         }
         throw new moodle_exception('errorrelationunresolved', 'local_handbook', '', $tempkey);
+    }
+
+    /**
+     * Apply a category operation (create/update/move/merge, spec 11).
+     *
+     * @param stdClass $item Change-item record (kind category_change).
+     * @param int $userid Human publisher.
+     * @return void
+     */
+    private static function apply_category(stdClass $item, int $userid): void {
+        global $DB;
+
+        $op = json_decode((string)$item->payloadjson, true);
+        if (!is_array($op)) {
+            throw new moodle_exception('errorcategoryop', 'local_handbook');
+        }
+        $op = self::validate_category_op($op);
+        $now = time();
+
+        switch ($op['op']) {
+            case 'create':
+                $slug = page_service::unique_slug('local_handbook_category',
+                    page_service::slugify($op['slug'] !== '' ? $op['slug'] : $op['name']));
+                $DB->insert_record('local_handbook_category', (object)[
+                    'parentid' => (int)$op['parentid'],
+                    'name' => $op['name'],
+                    'slug' => $slug,
+                    'description' => $op['description'],
+                    'descriptionformat' => FORMAT_HTML,
+                    'sortorder' => (int)$op['sortorder'],
+                    'visible' => (int)$op['visible'],
+                    'icon' => $op['icon'],
+                    'audiencekey' => '',
+                    'timecreated' => $now,
+                    'timemodified' => $now,
+                    'createdby' => $userid,
+                    'modifiedby' => $userid,
+                ]);
+                break;
+
+            case 'update':
+                $update = (object)['id' => (int)$op['categoryid'],
+                    'timemodified' => $now, 'modifiedby' => $userid];
+                foreach (['name', 'description', 'icon', 'visible', 'sortorder'] as $field) {
+                    if (array_key_exists($field, $op)) {
+                        $update->$field = $op[$field];
+                    }
+                }
+                $DB->update_record('local_handbook_category', $update);
+                break;
+
+            case 'move':
+                if ($op['newparentid']
+                        && self::category_is_descendant((int)$op['newparentid'], (int)$op['categoryid'])) {
+                    throw new moodle_exception('errorcategorycycle', 'local_handbook');
+                }
+                $DB->update_record('local_handbook_category', (object)[
+                    'id' => (int)$op['categoryid'], 'parentid' => (int)$op['newparentid'],
+                    'timemodified' => $now, 'modifiedby' => $userid,
+                ]);
+                break;
+
+            case 'merge':
+                // Move the source's pages and child categories into the target,
+                // then delete the now-empty source (no page is left orphaned).
+                $DB->set_field('local_handbook_page', 'categoryid', (int)$op['targetid'],
+                    ['categoryid' => (int)$op['sourceid']]);
+                $DB->set_field('local_handbook_category', 'parentid', (int)$op['targetid'],
+                    ['parentid' => (int)$op['sourceid']]);
+                $DB->delete_records('local_handbook_category', ['id' => (int)$op['sourceid']]);
+                break;
+        }
     }
 
     /**

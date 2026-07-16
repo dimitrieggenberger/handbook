@@ -736,6 +736,74 @@ final class changeset_service_test extends advanced_testcase {
         $this->assertSame(0, (int)$DB->get_field('local_handbook_page', 'archived', ['id' => $page->id]));
     }
 
+    public function test_category_create_applies(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $changeset = changeset_service::create((object)['title' => 'Cats', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:gob', 'name' => 'Gobernanza nueva']);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:gob',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertTrue($DB->record_exists('local_handbook_category', ['name' => 'Gobernanza nueva']));
+    }
+
+    public function test_category_move_rejects_a_cycle(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $parent = $this->create_category();
+        $now = time();
+        $child = (int)$DB->insert_record('local_handbook_category', (object)[
+            'parentid' => $parent, 'name' => 'Hija', 'slug' => 'hija-' . random_string(5),
+            'description' => '', 'descriptionformat' => FORMAT_HTML, 'sortorder' => 0, 'visible' => 1,
+            'icon' => '', 'audiencekey' => '', 'timecreated' => $now, 'timemodified' => $now,
+            'createdby' => 2, 'modifiedby' => 2,
+        ]);
+
+        $changeset = changeset_service::create((object)['title' => 'x', 'source' => 'ai']);
+        // Moving the parent under its own child would create a cycle.
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'move', 'categoryid' => $parent, 'newparentid' => $child]);
+    }
+
+    public function test_category_merge_moves_pages_and_deletes_source(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $source = $this->create_category();
+        $target = $this->create_category();
+        $page = $this->publish_page($source, 'Página en origen');
+
+        $changeset = changeset_service::create((object)['title' => 'Merge', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'merge', 'sourceid' => $source, 'targetid' => $target]);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'cat:' . $source . ':merge',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertFalse($DB->record_exists('local_handbook_category', ['id' => $source]));
+        $this->assertSame($target,
+            (int)$DB->get_field('local_handbook_page', 'categoryid', ['id' => $page->id]));
+    }
+
     /**
      * Read one item's status.
      *

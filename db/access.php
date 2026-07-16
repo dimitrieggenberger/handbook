@@ -189,6 +189,16 @@ $capabilities = [
         'archetypes' => [],
     ],
 
+    // Propose taxonomy changes (categories: create/update/move/merge) through
+    // the API as change-set drafts (spec 5, 11). Propose-only; applied solely
+    // by the human publish path. Granted only to service accounts.
+    'local/handbook:apiproposetaxonomy' => [
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+
     'local/handbook:manage' => [
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',

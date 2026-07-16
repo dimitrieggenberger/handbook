@@ -462,6 +462,48 @@ function local_handbook_render_lifecycle_item(stdClass $page, stdClass $item): s
 }
 
 /**
+ * Render a category proposal item for review (spec 11).
+ *
+ * @param stdClass $item Change-item record (category_change).
+ * @return string HTML.
+ */
+function local_handbook_render_category_item(stdClass $item): string {
+    global $DB;
+
+    $op = json_decode((string)$item->payloadjson, true) ?: [];
+    $action = (string)($op['op'] ?? '');
+    $name = static function (int $id) use ($DB): string {
+        return $id ? (string)$DB->get_field('local_handbook_category', 'name', ['id' => $id]) : '';
+    };
+
+    $rows = local_handbook_lifecycle_row('categoryoplabel',
+        get_string('categoryop_' . ($action !== '' ? $action : 'update'), 'local_handbook'));
+
+    if ($action === 'create') {
+        $rows .= local_handbook_lifecycle_row('categoryname', (string)($op['name'] ?? ''));
+        if (!empty($op['parentid'])) {
+            $rows .= local_handbook_lifecycle_row('categoryparent', $name((int)$op['parentid']));
+        }
+    } else if ($action === 'update') {
+        $rows .= local_handbook_lifecycle_row('category', $name((int)($op['categoryid'] ?? 0)));
+        if (isset($op['name'])) {
+            $rows .= local_handbook_lifecycle_row('categoryname', (string)$op['name']);
+        }
+    } else if ($action === 'move') {
+        $rows .= local_handbook_lifecycle_row('category', $name((int)($op['categoryid'] ?? 0)));
+        $rows .= local_handbook_lifecycle_row('categoryparent',
+            (int)($op['newparentid'] ?? 0) ? $name((int)$op['newparentid'])
+                : get_string('topcategory', 'local_handbook'));
+    } else if ($action === 'merge') {
+        $rows .= local_handbook_lifecycle_row('categorymergesource', $name((int)($op['sourceid'] ?? 0)));
+        $rows .= local_handbook_lifecycle_row('categorymergetarget', $name((int)($op['targetid'] ?? 0)));
+    }
+
+    return html_writer::tag('table', html_writer::tag('tbody', $rows),
+        ['class' => 'table table-sm table-bordered small mb-2']);
+}
+
+/**
  * Render the shared area navigation row (tab strip).
  *
  * @param string $currentpage Key of the current page.

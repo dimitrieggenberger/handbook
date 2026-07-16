@@ -477,6 +477,40 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
   );
 
   server.tool(
+    "handbook_upsert_change_set_category",
+    "Propose a category change inside THIS change set: op = create (name, optional parentid), update (categoryid + fields to change), move (categoryid + newparentid), or merge (sourceid + targetid: moves the source's pages and subcategories into the target, then deletes the source). Cycles and merges into a descendant are rejected. Staged as a draft; a human applies it in Moodle.",
+    {
+      changesetid: z.number().int(),
+      op: z.enum(["create", "update", "move", "merge"]),
+      tempkey: z.string().optional().describe("Stable id for a new category (create)"),
+      name: z.string().optional(),
+      slug: z.string().optional(),
+      parentid: z.number().int().optional().describe("Parent id (create)"),
+      description: z.string().optional(),
+      icon: z.string().optional().describe("Font Awesome class, e.g. fa-folder-open"),
+      visible: z.boolean().optional(),
+      sortorder: z.number().int().optional(),
+      categoryid: z.number().int().optional().describe("Category id (update/move)"),
+      newparentid: z.number().int().optional().describe("New parent id (move; 0 = top level)"),
+      sourceid: z.number().int().optional().describe("Source category id (merge)"),
+      targetid: z.number().int().optional().describe("Target category id (merge)"),
+    },
+    handler((args) => {
+      const operation = { op: args.op };
+      for (const key of ["tempkey", "name", "slug", "parentid", "description", "icon",
+        "visible", "sortorder", "categoryid", "newparentid", "sourceid", "targetid"]) {
+        if (args[key] !== undefined) {
+          operation[key] = args[key];
+        }
+      }
+      return ws("local_handbook_upsert_changeset_category", {
+        changesetid: args.changesetid,
+        operation,
+      });
+    })
+  );
+
+  server.tool(
     "handbook_submit_change_set_for_review",
     "Submit a change set's eligible drafts for human review. Do this ONLY after the user explicitly asks. Returns a per-page result; conflicts are skipped, not forced. Review, approval and publication remain human actions in Moodle.",
     { changesetid: z.number().int() },

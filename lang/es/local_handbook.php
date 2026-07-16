@@ -45,6 +45,7 @@ $string['handbook:apiaccess'] = 'Usar las funciones de servicio externo del manu
 $string['handbook:apiproposemetadata'] = 'Proponer cambios de ficha (metadatos) del manual mediante la API';
 $string['handbook:apiproposerelations'] = 'Proponer cambios de relaciones entre páginas del manual mediante la API';
 $string['handbook:apiproposelifecycle'] = 'Proponer acciones de archivado/restauración del manual mediante la API';
+$string['handbook:apiproposetaxonomy'] = 'Proponer cambios de categorías del manual mediante la API';
 $string['handbook:manage'] = 'Administrar el plugin del manual';
 
 // Navigation and page titles.
@@ -586,3 +587,24 @@ $string['errorreplacementself'] = 'Una página no puede ser su propia reemplazan
 $string['errorreplacementinvalid'] = 'La página reemplazante no existe o está archivada.';
 $string['errorreplacementrequired'] = 'Un modo con redirección necesita una página reemplazante.';
 $string['errornotarchived'] = 'Esta página no está archivada.';
+
+// Propuestas de categorías (Fase 2).
+$string['categorychangesummary_create'] = 'Categoría nueva';
+$string['categorychangesummary_update'] = 'Actualización de categoría';
+$string['categorychangesummary_move'] = 'Mover categoría';
+$string['categorychangesummary_merge'] = 'Fusión de categorías';
+$string['categoryop_create'] = 'Crear categoría';
+$string['categoryop_update'] = 'Actualizar categoría';
+$string['categoryop_move'] = 'Mover categoría';
+$string['categoryop_merge'] = 'Fusionar categorías';
+$string['categoryoplabel'] = 'Operación';
+$string['categorymergesource'] = 'Fusionar desde';
+$string['categorymergetarget'] = 'Fusionar en';
+$string['itemkindcategory'] = 'Categoría';
+$string['errorcategoryop'] = 'Operación de categoría no válida.';
+$string['errorcategoryname'] = 'Se requiere un nombre de categoría válido.';
+$string['errorcategoryparent'] = 'La categoría principal no existe.';
+$string['errorcategorynotfound'] = 'La categoría no existe.';
+$string['errorcategorynochange'] = 'Una actualización de categoría debe cambiar al menos un campo.';
+$string['errorcategorycycle'] = 'Ese cambio crearía un ciclo de categorías.';
+$string['errorcategorymergeself'] = 'Una categoría no puede fusionarse consigo misma.';

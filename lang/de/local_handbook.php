@@ -45,6 +45,7 @@ $string['handbook:apiaccess'] = 'Externe Servicefunktionen des Handbuchs verwend
 $string['handbook:apiproposemetadata'] = 'Metadaten-Änderungen (Steckbrief) des Handbuchs über die API vorschlagen';
 $string['handbook:apiproposerelations'] = 'Beziehungsänderungen zwischen Handbuchseiten über die API vorschlagen';
 $string['handbook:apiproposelifecycle'] = 'Archivierungs-/Wiederherstellungsaktionen des Handbuchs über die API vorschlagen';
+$string['handbook:apiproposetaxonomy'] = 'Kategorieänderungen des Handbuchs über die API vorschlagen';
 $string['handbook:manage'] = 'Das Handbuch-Plugin administrieren';
 
 // Navigation and page titles.
@@ -586,3 +587,24 @@ $string['errorreplacementself'] = 'Eine Seite kann nicht ihre eigene Ersatzseite
 $string['errorreplacementinvalid'] = 'Die Ersatzseite existiert nicht oder ist archiviert.';
 $string['errorreplacementrequired'] = 'Ein Weiterleitungsmodus benötigt eine Ersatzseite.';
 $string['errornotarchived'] = 'Diese Seite ist nicht archiviert.';
+
+// Kategorievorschläge (Phase 2).
+$string['categorychangesummary_create'] = 'Neue Kategorie';
+$string['categorychangesummary_update'] = 'Kategorie-Aktualisierung';
+$string['categorychangesummary_move'] = 'Kategorie verschieben';
+$string['categorychangesummary_merge'] = 'Kategorien zusammenführen';
+$string['categoryop_create'] = 'Kategorie erstellen';
+$string['categoryop_update'] = 'Kategorie aktualisieren';
+$string['categoryop_move'] = 'Kategorie verschieben';
+$string['categoryop_merge'] = 'Kategorien zusammenführen';
+$string['categoryoplabel'] = 'Vorgang';
+$string['categorymergesource'] = 'Zusammenführen von';
+$string['categorymergetarget'] = 'Zusammenführen in';
+$string['itemkindcategory'] = 'Kategorie';
+$string['errorcategoryop'] = 'Ungültiger Kategorievorgang.';
+$string['errorcategoryname'] = 'Ein gültiger Kategoriename ist erforderlich.';
+$string['errorcategoryparent'] = 'Die übergeordnete Kategorie existiert nicht.';
+$string['errorcategorynotfound'] = 'Die Kategorie existiert nicht.';
+$string['errorcategorynochange'] = 'Eine Kategorie-Aktualisierung muss mindestens ein Feld ändern.';
+$string['errorcategorycycle'] = 'Diese Änderung würde einen Kategoriezyklus erzeugen.';
+$string['errorcategorymergeself'] = 'Eine Kategorie kann nicht mit sich selbst zusammengeführt werden.';

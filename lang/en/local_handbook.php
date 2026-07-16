@@ -45,6 +45,7 @@ $string['handbook:apiaccess'] = 'Use handbook external-service functions';
 $string['handbook:apiproposemetadata'] = 'Propose handbook metadata (fiche) patches through the API';
 $string['handbook:apiproposerelations'] = 'Propose handbook page relation edits through the API';
 $string['handbook:apiproposelifecycle'] = 'Propose handbook archive/restore (lifecycle) actions through the API';
+$string['handbook:apiproposetaxonomy'] = 'Propose handbook category (taxonomy) changes through the API';
 $string['handbook:manage'] = 'Administer the handbook plugin';
 
 // Navigation and page titles.
@@ -586,3 +587,24 @@ $string['errorreplacementself'] = 'A page cannot be its own replacement.';
 $string['errorreplacementinvalid'] = 'The replacement page does not exist or is archived.';
 $string['errorreplacementrequired'] = 'A redirecting mode needs a replacement page.';
 $string['errornotarchived'] = 'This page is not archived.';
+
+// Category proposals (Phase 2).
+$string['categorychangesummary_create'] = 'New category';
+$string['categorychangesummary_update'] = 'Category update';
+$string['categorychangesummary_move'] = 'Category move';
+$string['categorychangesummary_merge'] = 'Category merge';
+$string['categoryop_create'] = 'Create category';
+$string['categoryop_update'] = 'Update category';
+$string['categoryop_move'] = 'Move category';
+$string['categoryop_merge'] = 'Merge categories';
+$string['categoryoplabel'] = 'Operation';
+$string['categorymergesource'] = 'Merge from';
+$string['categorymergetarget'] = 'Merge into';
+$string['itemkindcategory'] = 'Category';
+$string['errorcategoryop'] = 'Invalid category operation.';
+$string['errorcategoryname'] = 'A valid category name is required.';
+$string['errorcategoryparent'] = 'The parent category does not exist.';
+$string['errorcategorynotfound'] = 'The category does not exist.';
+$string['errorcategorynochange'] = 'A category update must change at least one field.';
+$string['errorcategorycycle'] = 'That change would create a category cycle.';
+$string['errorcategorymergeself'] = 'A category cannot be merged into itself.';
