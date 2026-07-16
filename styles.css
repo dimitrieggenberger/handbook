@@ -495,3 +495,238 @@
         aspect-ratio: 2 / 1;
     }
 }
+
+/* =====================================================================
+ * Content patterns for articles (hb-*). Authors and the Handbook AI write
+ * plain, KSES-safe HTML with these classes; the rules below render them
+ * uniformly. Tokens derive from the theme so both light and dark work; soft
+ * tints are mixed into the current surface colour. No <input> or heading
+ * tags are used inside patterns (KSES strips inputs; headings get demoted).
+ * ===================================================================== */
+#page-local-handbook-area .local-handbook-page-body {
+    --hb-accent: var(--primary, #0078c3);
+    --hb-line: var(--bs-border-color, #dee2e6);
+    --hb-surface: var(--bs-body-bg, #ffffff);
+    --hb-ink: var(--bs-body-color, #1c2430);
+    --hb-muted: var(--bs-secondary-color, #6c757d);
+    --hb-navy: var(--dark, #343a40);
+    --hb-navy-ink: #ffffff;
+    --hb-ok: var(--success, #1e7d43);
+    --hb-warn: var(--warning, #9a6700);
+    --hb-danger: var(--danger, #b4232c);
+    --hb-accent-soft: color-mix(in srgb, var(--hb-accent) 12%, var(--hb-surface));
+    --hb-ok-soft: color-mix(in srgb, var(--hb-ok) 13%, var(--hb-surface));
+    --hb-warn-soft: color-mix(in srgb, var(--hb-warn) 16%, var(--hb-surface));
+    --hb-danger-soft: color-mix(in srgb, var(--hb-danger) 13%, var(--hb-surface));
+}
+
+/* ---- hb-steps: numbered procedure with substeps + role tags ---- */
+#page-local-handbook-area .hb-steps { list-style: none; counter-reset: hbstep; margin: 1.1rem 0; padding: 0; }
+#page-local-handbook-area .hb-steps > li { counter-increment: hbstep; position: relative; padding: 0 0 1.35rem 3.25rem; }
+#page-local-handbook-area .hb-steps > li::before {
+    content: counter(hbstep); position: absolute; left: 0; top: 0;
+    width: 2rem; height: 2rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--hb-accent-soft); color: var(--hb-accent);
+    font-weight: 600; border: 1px solid color-mix(in srgb, var(--hb-accent) 30%, transparent);
+}
+#page-local-handbook-area .hb-steps > li:not(:last-child)::after {
+    content: ""; position: absolute; left: 0.97rem; top: 2.25rem; bottom: 0.15rem; width: 1px; background: var(--hb-line);
+}
+#page-local-handbook-area .hb-steps > li:last-child { padding-bottom: 0.25rem; }
+#page-local-handbook-area .hb-step-title { font-weight: 600; margin: 0.25rem 0; color: var(--hb-ink); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+#page-local-handbook-area .hb-steps p { margin: 0 0 0.4rem; }
+#page-local-handbook-area .hb-role {
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--hb-muted); border: 1px solid var(--hb-line); border-radius: 999px; padding: 0.15rem 0.55rem;
+}
+#page-local-handbook-area .hb-substeps { list-style: none; counter-reset: hbsub; margin: 0.5rem 0 0.4rem; padding: 0; }
+#page-local-handbook-area .hb-substeps > li { counter-increment: hbsub; position: relative; padding: 0 0 0.6rem 2.1rem; }
+#page-local-handbook-area .hb-substeps > li::before {
+    content: counter(hbsub, lower-alpha); position: absolute; left: 0; top: 0.05rem;
+    width: 1.35rem; height: 1.35rem; border-radius: 0.35rem;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--hb-line); color: var(--hb-muted); background: var(--hb-surface);
+    font-weight: 600; font-size: 0.72rem;
+}
+#page-local-handbook-area .hb-substeps > li:last-child { padding-bottom: 0; }
+/* compact variant (quick guides) */
+#page-local-handbook-area .hb-steps.hb-compact > li { padding: 0 0 0.6rem 2.5rem; }
+#page-local-handbook-area .hb-steps.hb-compact > li::before { width: 1.5rem; height: 1.5rem; font-size: 0.8rem; }
+#page-local-handbook-area .hb-steps.hb-compact > li:not(:last-child)::after { left: 0.72rem; top: 1.75rem; }
+#page-local-handbook-area .hb-steps.hb-compact .hb-step-title { margin: 0.1rem 0; }
+#page-local-handbook-area .hb-steps.hb-compact p { margin-bottom: 0.1rem; }
+
+/* ---- callouts ---- */
+#page-local-handbook-area .hb-note,
+#page-local-handbook-area .hb-tip,
+#page-local-handbook-area .hb-warning,
+#page-local-handbook-area .hb-important {
+    border-radius: 0.55rem; padding: 0.7rem 0.85rem 0.7rem 2.5rem; position: relative; margin: 0.65rem 0;
+}
+#page-local-handbook-area .hb-note > :last-child,
+#page-local-handbook-area .hb-tip > :last-child,
+#page-local-handbook-area .hb-warning > :last-child,
+#page-local-handbook-area .hb-important > :last-child { margin-bottom: 0; }
+#page-local-handbook-area .hb-note::before,
+#page-local-handbook-area .hb-tip::before,
+#page-local-handbook-area .hb-warning::before,
+#page-local-handbook-area .hb-important::before { position: absolute; left: 0.85rem; top: 0.7rem; font-weight: 700; }
+#page-local-handbook-area .hb-note { background: var(--hb-accent-soft); }
+#page-local-handbook-area .hb-note::before { content: "\2139"; color: var(--hb-accent); }
+#page-local-handbook-area .hb-tip { background: var(--hb-ok-soft); }
+#page-local-handbook-area .hb-tip::before { content: "\2726"; color: var(--hb-ok); }
+#page-local-handbook-area .hb-warning { background: var(--hb-warn-soft); }
+#page-local-handbook-area .hb-warning::before { content: "\25B2"; color: var(--hb-warn); font-size: 0.8rem; top: 0.78rem; }
+#page-local-handbook-area .hb-important { background: var(--hb-danger-soft); }
+#page-local-handbook-area .hb-important::before { content: "\25CF"; color: var(--hb-danger); }
+
+/* ---- result box ---- */
+#page-local-handbook-area .hb-result {
+    border: 1px dashed color-mix(in srgb, var(--hb-ok) 50%, transparent);
+    background: var(--hb-ok-soft); border-radius: 0.55rem;
+    padding: 0.7rem 0.85rem 0.7rem 2.5rem; position: relative; margin: 0.9rem 0 0.25rem;
+}
+#page-local-handbook-area .hb-result::before { content: "\2713"; position: absolute; left: 0.85rem; top: 0.65rem; color: var(--hb-ok); font-weight: 700; }
+#page-local-handbook-area .hb-result > :last-child { margin-bottom: 0; }
+
+/* ---- decision branches ---- */
+#page-local-handbook-area .hb-branches { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; margin: 0.9rem 0; }
+#page-local-handbook-area .hb-branch { border: 1px solid var(--hb-line); border-left: 3px solid var(--hb-accent); border-radius: 0.55rem; padding: 0.75rem 0.95rem; background: var(--hb-surface); }
+#page-local-handbook-area .hb-branch-if { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hb-accent); margin: 0 0 0.4rem; }
+#page-local-handbook-area .hb-branch p { margin: 0 0 0.25rem; }
+#page-local-handbook-area .hb-branch ul { margin: 0.25rem 0 0; padding-left: 1.1rem; }
+
+/* ---- organigrama ---- */
+#page-local-handbook-area .hb-org { overflow-x: auto; padding: 0.4rem 0 0.6rem; }
+#page-local-handbook-area .hb-org ul { display: flex; justify-content: center; list-style: none; margin: 0; padding: 1.35rem 0 0; position: relative; }
+#page-local-handbook-area .hb-org li { list-style: none; text-align: center; position: relative; padding: 1.35rem 0.6rem 0; }
+#page-local-handbook-area .hb-org li::before,
+#page-local-handbook-area .hb-org li::after { content: ""; position: absolute; top: 0; height: 1.35rem; width: 50%; border-top: 2px solid var(--hb-line); }
+#page-local-handbook-area .hb-org li::before { right: 50%; }
+#page-local-handbook-area .hb-org li::after { left: 50%; border-left: 2px solid var(--hb-line); }
+#page-local-handbook-area .hb-org li:first-child::before { border: 0; }
+#page-local-handbook-area .hb-org li:last-child::after { border-top: 0; }
+#page-local-handbook-area .hb-org li:only-child::before,
+#page-local-handbook-area .hb-org li:only-child::after { display: none; }
+#page-local-handbook-area .hb-org ul ul::before { content: ""; position: absolute; top: 0; left: 50%; height: 1.35rem; border-left: 2px solid var(--hb-line); }
+#page-local-handbook-area .hb-org-node { display: inline-flex; flex-direction: column; gap: 0.1rem; border: 1px solid var(--hb-line); border-radius: 0.6rem; padding: 0.55rem 0.95rem; background: var(--hb-surface); min-width: 8rem; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+#page-local-handbook-area .hb-org-node .unit { font-weight: 600; color: var(--hb-ink); }
+#page-local-handbook-area .hb-org-node .holder { font-size: 0.78rem; color: var(--hb-muted); }
+#page-local-handbook-area .hb-org > ul > li > .hb-org-node { background: var(--hb-navy); border-color: var(--hb-navy); }
+#page-local-handbook-area .hb-org > ul > li > .hb-org-node .unit { color: var(--hb-navy-ink); }
+#page-local-handbook-area .hb-org > ul > li > .hb-org-node .holder { color: color-mix(in srgb, var(--hb-navy-ink) 72%, transparent); }
+/* team / committee: flat group of peers */
+#page-local-handbook-area .hb-org-team { display: inline-flex; flex-direction: column; gap: 0.55rem; border: 1.5px solid color-mix(in srgb, var(--hb-accent) 55%, var(--hb-line)); border-radius: 0.7rem; padding: 0.6rem 0.7rem 0.7rem; background: var(--hb-accent-soft); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+#page-local-handbook-area .hb-org-team > .team-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--hb-accent); text-align: center; }
+#page-local-handbook-area .hb-org-team > .team-members { display: flex; gap: 0.55rem; justify-content: center; flex-wrap: wrap; }
+#page-local-handbook-area .hb-org-member { border: 1px solid var(--hb-line); border-radius: 0.55rem; padding: 0.5rem 0.75rem; background: var(--hb-surface); min-width: 6.75rem; text-align: center; }
+#page-local-handbook-area .hb-org-member .name { display: block; font-weight: 600; color: var(--hb-ink); }
+#page-local-handbook-area .hb-org-member .role { display: block; font-size: 0.7rem; color: var(--hb-muted); margin-top: 0.05rem; }
+#page-local-handbook-area .hb-org-team.is-standalone { margin: 0.9rem 0; }
+
+/* ---- roles & responsibilities ---- */
+#page-local-handbook-area .hb-roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; margin: 1rem 0; }
+#page-local-handbook-area .hb-role-card { border: 1px solid var(--hb-line); border-radius: 0.65rem; padding: 0.85rem 1rem; background: var(--hb-surface); }
+#page-local-handbook-area .hb-role-card .role-name { font-weight: 600; margin: 0 0 0.1rem; color: var(--hb-ink); }
+#page-local-handbook-area .hb-role-card .who { font-size: 0.78rem; color: var(--hb-accent); font-weight: 500; margin: 0 0 0.55rem; }
+#page-local-handbook-area .hb-role-card ul { margin: 0; padding-left: 1.1rem; }
+
+/* ---- escalation ladder ---- */
+#page-local-handbook-area .hb-escalation { list-style: none; counter-reset: esc; margin: 1rem 0; padding: 0; max-width: 36rem; }
+#page-local-handbook-area .hb-escalation > li { counter-increment: esc; position: relative; padding: 0 0 0.9rem 3.25rem; }
+#page-local-handbook-area .hb-escalation > li::before { content: counter(esc); position: absolute; left: 0; top: 0; width: 2.15rem; height: 2.15rem; border-radius: 0.55rem; display: flex; align-items: center; justify-content: center; background: var(--hb-navy); color: var(--hb-navy-ink); font-weight: 700; }
+#page-local-handbook-area .hb-escalation > li:not(:last-child)::after { content: "\2193"; position: absolute; left: 0.78rem; top: 2.4rem; color: var(--hb-muted); }
+#page-local-handbook-area .hb-escalation .lvl-title { font-weight: 600; margin: 0.4rem 0 0.1rem; }
+#page-local-handbook-area .hb-escalation p { margin: 0; }
+
+/* ---- do / don't ---- */
+#page-local-handbook-area .hb-dodont { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin: 1rem 0; }
+#page-local-handbook-area .hb-do, #page-local-handbook-area .hb-dont { border-radius: 0.65rem; padding: 0.8rem 1rem 0.85rem; border: 1px solid var(--hb-line); }
+#page-local-handbook-area .hb-do { background: var(--hb-ok-soft); border-color: color-mix(in srgb, var(--hb-ok) 35%, transparent); }
+#page-local-handbook-area .hb-dont { background: var(--hb-danger-soft); border-color: color-mix(in srgb, var(--hb-danger) 35%, transparent); }
+#page-local-handbook-area .hb-do .col-title, #page-local-handbook-area .hb-dont .col-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin: 0 0 0.5rem; }
+#page-local-handbook-area .hb-do .col-title { color: var(--hb-ok); }
+#page-local-handbook-area .hb-dont .col-title { color: var(--hb-danger); }
+#page-local-handbook-area .hb-do ul, #page-local-handbook-area .hb-dont ul { list-style: none; margin: 0; padding: 0; }
+#page-local-handbook-area .hb-do li, #page-local-handbook-area .hb-dont li { padding: 0.2rem 0 0.2rem 1.4rem; position: relative; }
+#page-local-handbook-area .hb-do li::before { content: "\2713"; position: absolute; left: 0; color: var(--hb-ok); font-weight: 700; }
+#page-local-handbook-area .hb-dont li::before { content: "\2715"; position: absolute; left: 0; color: var(--hb-danger); font-weight: 700; }
+
+/* ---- timeline / phases ---- */
+#page-local-handbook-area .hb-timeline { list-style: none; margin: 1.1rem 0 0.4rem; padding: 0 0 0 1.35rem; border-left: 2px solid var(--hb-line); }
+#page-local-handbook-area .hb-timeline > li { position: relative; padding: 0 0 1.25rem 1.25rem; }
+#page-local-handbook-area .hb-timeline > li:last-child { padding-bottom: 0; }
+#page-local-handbook-area .hb-timeline > li::before { content: ""; position: absolute; left: -1.95rem; top: 0.15rem; width: 1rem; height: 1rem; border-radius: 50%; background: var(--hb-surface); border: 2px solid var(--hb-accent); }
+#page-local-handbook-area .hb-timeline > li.is-done::before { background: var(--hb-accent); }
+#page-local-handbook-area .hb-timeline .when { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--hb-accent); }
+#page-local-handbook-area .hb-timeline .what { font-weight: 600; margin: 0.05rem 0 0.1rem; }
+#page-local-handbook-area .hb-timeline p { margin: 0; }
+
+/* ---- contacts & emergency ---- */
+#page-local-handbook-area .hb-contacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0.9rem; margin: 1rem 0; }
+#page-local-handbook-area .hb-contact { display: flex; gap: 0.85rem; align-items: flex-start; border: 1px solid var(--hb-line); border-radius: 0.65rem; padding: 0.85rem 1rem; background: var(--hb-surface); }
+#page-local-handbook-area .hb-contact .ic { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 0.6rem; display: flex; align-items: center; justify-content: center; background: var(--hb-accent-soft); color: var(--hb-accent); font-size: 1.05rem; }
+#page-local-handbook-area .hb-contact.is-emergency .ic { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-contact .name { font-weight: 600; margin: 0; }
+#page-local-handbook-area .hb-contact .role { font-size: 0.78rem; color: var(--hb-muted); margin: 0.05rem 0 0.45rem; }
+#page-local-handbook-area .hb-contact dl { display: grid; grid-template-columns: auto 1fr; gap: 0.1rem 0.5rem; margin: 0; font-size: 0.82rem; }
+#page-local-handbook-area .hb-contact dt { color: var(--hb-muted); font-weight: 400; }
+#page-local-handbook-area .hb-contact dd { margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; }
+#page-local-handbook-area .hb-contact .when { margin: 0.5rem 0 0; }
+#page-local-handbook-area .hb-contact.is-emergency .when { color: var(--hb-danger); font-weight: 600; }
+
+/* ---- definition / glossary ---- */
+#page-local-handbook-area .hb-define { border: 1px solid var(--hb-line); border-left: 3px solid var(--hb-accent); border-radius: 0.55rem; padding: 0.75rem 1rem; background: var(--hb-surface); margin: 0.9rem 0; }
+#page-local-handbook-area .hb-define .eyebrow { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--hb-accent); }
+#page-local-handbook-area .hb-define .term { font-weight: 700; margin: 0.2rem 0; }
+#page-local-handbook-area .hb-define .term .abbr { font-weight: 500; color: var(--hb-muted); }
+#page-local-handbook-area .hb-define p { margin: 0; }
+#page-local-handbook-area .hb-term { border-bottom: 1px dashed var(--hb-accent); cursor: help; font-weight: 500; }
+
+/* ---- responsibility matrix (RACI) ---- */
+#page-local-handbook-area .hb-matrix-wrap { overflow-x: auto; margin: 1rem 0 0.5rem; }
+#page-local-handbook-area .hb-matrix { border-collapse: collapse; width: 100%; min-width: 29rem; }
+#page-local-handbook-area .hb-matrix caption { text-align: left; font-size: 0.78rem; color: var(--hb-muted); padding-bottom: 0.5rem; }
+#page-local-handbook-area .hb-matrix th, #page-local-handbook-area .hb-matrix td { border: 1px solid var(--hb-line); padding: 0.5rem 0.6rem; text-align: center; }
+#page-local-handbook-area .hb-matrix thead th { background: color-mix(in srgb, var(--hb-muted) 12%, var(--hb-surface)); font-weight: 600; }
+#page-local-handbook-area .hb-matrix tbody th { text-align: left; font-weight: 500; background: color-mix(in srgb, var(--hb-muted) 6%, var(--hb-surface)); }
+#page-local-handbook-area .raci { display: inline-flex; width: 1.4rem; height: 1.4rem; border-radius: 0.35rem; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+#page-local-handbook-area .raci-r { background: var(--hb-accent-soft); color: var(--hb-accent); }
+#page-local-handbook-area .raci-a { background: var(--hb-navy); color: var(--hb-navy-ink); }
+#page-local-handbook-area .raci-c { background: var(--hb-warn-soft); color: var(--hb-warn); }
+#page-local-handbook-area .raci-i { background: transparent; color: var(--hb-muted); border: 1px solid var(--hb-line); }
+#page-local-handbook-area .hb-matrix-legend { display: flex; flex-wrap: wrap; gap: 0.9rem; font-size: 0.78rem; color: var(--hb-muted); margin-top: 0.25rem; }
+#page-local-handbook-area .hb-matrix-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+
+/* ---- figure with caption ---- */
+#page-local-handbook-area .hb-figure { margin: 1rem 0; }
+#page-local-handbook-area .hb-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--hb-line); border-radius: 0.65rem; }
+#page-local-handbook-area .hb-figure figcaption { font-size: 0.8rem; color: var(--hb-muted); margin-top: 0.5rem; padding-left: 0.15rem; }
+
+/* ---- fact sheet / ficha ---- */
+#page-local-handbook-area .hb-keyvalue { border: 1px solid var(--hb-line); border-radius: 0.65rem; overflow: hidden; margin: 1rem 0; max-width: 36rem; }
+#page-local-handbook-area .hb-keyvalue .kv-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--hb-muted); padding: 0.6rem 0.95rem; background: color-mix(in srgb, var(--hb-muted) 8%, var(--hb-surface)); border-bottom: 1px solid var(--hb-line); }
+#page-local-handbook-area .hb-keyvalue dl { margin: 0; display: grid; grid-template-columns: minmax(8rem, auto) 1fr; }
+#page-local-handbook-area .hb-keyvalue dt, #page-local-handbook-area .hb-keyvalue dd { padding: 0.55rem 0.95rem; border-bottom: 1px solid var(--hb-line); margin: 0; }
+#page-local-handbook-area .hb-keyvalue dt { color: var(--hb-muted); background: color-mix(in srgb, var(--hb-muted) 5%, var(--hb-surface)); font-weight: 400; }
+#page-local-handbook-area .hb-keyvalue dd { font-weight: 500; }
+#page-local-handbook-area .hb-keyvalue dl > :nth-last-child(1),
+#page-local-handbook-area .hb-keyvalue dl > :nth-last-child(2) { border-bottom: 0; }
+
+/* ---- checklist (drawn boxes; KSES strips real inputs) ---- */
+#page-local-handbook-area .hb-checklist { list-style: none; margin: 1rem 0; padding: 0; max-width: 36rem; }
+#page-local-handbook-area .hb-checklist li { position: relative; padding: 0.55rem 0 0.55rem 1.9rem; border-bottom: 1px solid var(--hb-line); }
+#page-local-handbook-area .hb-checklist li:last-child { border-bottom: 0; }
+#page-local-handbook-area .hb-checklist li::before { content: ""; position: absolute; left: 0; top: 0.65rem; width: 1.05rem; height: 1.05rem; border: 1.5px solid var(--hb-muted); border-radius: 0.25rem; }
+#page-local-handbook-area .hb-checklist .sub { display: block; font-size: 0.78rem; color: var(--hb-muted); margin-top: 0.05rem; }
+
+/* Style-guide page: pattern preview + copy-paste source. */
+#page-local-handbook-area .local-handbook-sg-preview { background: var(--bs-body-bg, #fff); }
+#page-local-handbook-area .local-handbook-sg-code {
+    background: var(--bs-secondary-bg, #f1f3f7);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.5rem; padding: 0.85rem 1rem; margin: 0;
+    overflow-x: auto; white-space: pre; tab-size: 2;
+    font-size: 0.82rem; line-height: 1.6;
+}

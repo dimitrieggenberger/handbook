@@ -218,6 +218,42 @@ $string['errornotrequiredreading'] = 'This page is not marked as required readin
 $string['bannerimage'] = 'Banner image';
 $string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
 
+// Content style guide (hb-* patterns).
+$string['styleguide'] = 'Content style guide';
+$string['styleguideintro'] = 'Reusable formatting patterns for articles. Open a page in Edit, switch the editor to HTML source view, and paste a pattern below — adapting the text. The same catalogue is available to the Handbook AI, so generated drafts use these patterns too.';
+$string['styleguidepatterns'] = 'Patterns';
+$string['styleguidecopy'] = 'Copy this HTML into the editor\'s HTML source view:';
+$string['sgtitle_steps'] = 'Multi-step procedure';
+$string['sguse_steps'] = 'Numbered steps with optional role tags, lettered substeps and callouts. The backbone of any procedure.';
+$string['sgtitle_callouts'] = 'Callouts: note, tip, warning, important';
+$string['sguse_callouts'] = 'Set a remark off from the flow. Four levels: note (context), tip (good practice), warning (risk), important (never skip).';
+$string['sgtitle_branches'] = 'Decision branches';
+$string['sguse_branches'] = 'Side-by-side “if this, do that” options within a procedure.';
+$string['sgtitle_compact'] = 'Quick-guide steps';
+$string['sguse_compact'] = 'A tighter, checklist-like version of the step list for quick guides.';
+$string['sgtitle_org'] = 'Organisational chart';
+$string['sguse_org'] = 'Governance and reporting lines. A team (hb-org-team) is a flat group of peers; a unit (hb-org-node) is a single box.';
+$string['sgtitle_roles'] = 'Roles & responsibilities';
+$string['sguse_roles'] = 'Cards naming each role, who holds it and its duties.';
+$string['sgtitle_escalation'] = 'Escalation ladder';
+$string['sguse_escalation'] = 'The ordered path for raising an issue — who to approach, in order.';
+$string['sgtitle_dodont'] = 'Do / Don’t';
+$string['sguse_dodont'] = 'Two columns contrasting expected and unacceptable conduct.';
+$string['sgtitle_timeline'] = 'Timeline / phases';
+$string['sguse_timeline'] = 'Dated milestones in sequence; add class is-done to completed items.';
+$string['sgtitle_contact'] = 'Contacts & emergency';
+$string['sguse_contact'] = 'Who to reach and when. Add is-emergency for a red, high-visibility card.';
+$string['sgtitle_define'] = 'Definition / glossary';
+$string['sguse_define'] = 'Define institutional vocabulary, as a block or inline (hb-term).';
+$string['sgtitle_matrix'] = 'Responsibility matrix (RACI)';
+$string['sguse_matrix'] = 'Who is Responsible, Accountable, Consulted or Informed for each task.';
+$string['sgtitle_figure'] = 'Figure with caption';
+$string['sguse_figure'] = 'A framed image or diagram in the body with a caption. Replace the src with an uploaded image.';
+$string['sgtitle_keyvalue'] = 'Fact sheet (ficha)';
+$string['sguse_keyvalue'] = 'A compact label→value sheet for a committee, role or item.';
+$string['sgtitle_checklist'] = 'Checklist';
+$string['sguse_checklist'] = 'A printable checklist for a procedure. The boxes are for print/working use; ticks are not saved.';
+
 // Shared reading completion for path-required articles (spec 8).
 $string['readingcompletion'] = 'Reading completion';
 $string['markasread'] = 'Mark as read';

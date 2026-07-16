@@ -218,6 +218,12 @@ $functions = [
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposetaxonomy',
     ],
+    'local_handbook_get_style_guide' => [
+        'classname' => 'local_handbook\external\get_style_guide',
+        'description' => 'Handbook content style guide: the hb-* formatting patterns and example HTML (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
     'local_handbook_list_reading_paths' => [
         'classname' => 'local_handbook\external\list_reading_paths',
         'description' => 'List reading paths with item counts (read-only).',

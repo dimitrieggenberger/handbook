@@ -218,6 +218,42 @@ $string['errornotrequiredreading'] = 'Esta página no está marcada como lectura
 $string['bannerimage'] = 'Imagen de cabecera';
 $string['bannerimage_help'] = 'Opcional. Una imagen horizontal que se muestra en la tarjeta de la categoría (16:9) y en la cabecera del artículo (3:1). La imagen se recorta y centra automáticamente, sin recorte manual. Sin imagen, la tarjeta muestra un marcador discreto según el tipo de contenido.';
 
+// Guía de estilo de contenido (patrones hb-*).
+$string['styleguide'] = 'Guía de estilo de contenido';
+$string['styleguideintro'] = 'Patrones de formato reutilizables para los artículos. Abra una página en Editar, cambie el editor a vista de código HTML y pegue uno de los patrones de abajo, adaptando el texto. El mismo catálogo está disponible para la IA del manual, así que los borradores generados también los usan.';
+$string['styleguidepatterns'] = 'Patrones';
+$string['styleguidecopy'] = 'Copie este HTML en la vista de código HTML del editor:';
+$string['sgtitle_steps'] = 'Procedimiento de varios pasos';
+$string['sguse_steps'] = 'Pasos numerados con etiquetas de rol opcionales, subpasos con letra y avisos. La base de todo procedimiento.';
+$string['sgtitle_callouts'] = 'Avisos: nota, consejo, advertencia, importante';
+$string['sguse_callouts'] = 'Destaca una observación del texto. Cuatro niveles: nota (contexto), consejo (buena práctica), advertencia (riesgo), importante (nunca omitir).';
+$string['sgtitle_branches'] = 'Ramas de decisión';
+$string['sguse_branches'] = 'Opciones “si esto, haz aquello” lado a lado dentro de un procedimiento.';
+$string['sgtitle_compact'] = 'Pasos de guía rápida';
+$string['sguse_compact'] = 'Una versión más compacta de la lista de pasos, tipo lista de verificación, para guías rápidas.';
+$string['sgtitle_org'] = 'Organigrama';
+$string['sguse_org'] = 'Gobierno y líneas de reporte. Un equipo (hb-org-team) es un grupo horizontal de pares; una unidad (hb-org-node) es una sola caja.';
+$string['sgtitle_roles'] = 'Roles y responsabilidades';
+$string['sguse_roles'] = 'Tarjetas que nombran cada rol, quién lo ejerce y sus funciones.';
+$string['sgtitle_escalation'] = 'Escalera de escalamiento';
+$string['sguse_escalation'] = 'La vía ordenada para plantear un asunto: a quién acudir, en orden.';
+$string['sgtitle_dodont'] = 'Lo que sí / lo que no';
+$string['sguse_dodont'] = 'Dos columnas que contrastan la conducta esperada y la inaceptable.';
+$string['sgtitle_timeline'] = 'Línea de tiempo / fases';
+$string['sguse_timeline'] = 'Hitos con fecha en secuencia; agregue la clase is-done a los completados.';
+$string['sgtitle_contact'] = 'Contactos y emergencia';
+$string['sguse_contact'] = 'A quién contactar y cuándo. Agregue is-emergency para una tarjeta roja de alta visibilidad.';
+$string['sgtitle_define'] = 'Definición / glosario';
+$string['sguse_define'] = 'Define vocabulario institucional, como bloque o en línea (hb-term).';
+$string['sgtitle_matrix'] = 'Matriz de responsabilidades (RACI)';
+$string['sguse_matrix'] = 'Quién es Responsable, Aprueba, es Consultado o Informado en cada tarea.';
+$string['sgtitle_figure'] = 'Figura con leyenda';
+$string['sguse_figure'] = 'Una imagen o diagrama enmarcado en el cuerpo, con leyenda. Reemplace el src con una imagen subida.';
+$string['sgtitle_keyvalue'] = 'Ficha';
+$string['sguse_keyvalue'] = 'Una ficha compacta de etiqueta→valor para un comité, rol o elemento.';
+$string['sgtitle_checklist'] = 'Lista de verificación';
+$string['sguse_checklist'] = 'Una lista de verificación imprimible para un procedimiento. Las casillas son de uso impreso/de trabajo; las marcas no se guardan.';
+
 // Finalización de lectura compartida para artículos obligatorios de una ruta (spec 8).
 $string['readingcompletion'] = 'Finalización de lectura';
 $string['markasread'] = 'Marcar como leído';

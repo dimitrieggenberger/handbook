@@ -212,6 +212,13 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
   );
 
   server.tool(
+    "handbook_get_style_guide",
+    "The handbook's content style guide: the house 'hb-*' formatting patterns (multi-step procedures, callouts, org charts with teams, roles, escalation ladders, do/don't, RACI matrices, timelines, contacts, definitions, figures, fact sheets, checklists) with example HTML to adapt. Call this ONCE before writing or updating page content, then reuse the patterns so every article looks uniform. Formatting guidance only — it changes nothing.",
+    {},
+    handler(() => ws("local_handbook_get_style_guide", {}))
+  );
+
+  server.tool(
     "handbook_get_archive_impact",
     "Before proposing to archive a page, check its impact: how many other pages relate TO it, how many active reading paths include it, and whether it is required reading. Use this to decide whether to set a replacement page and redirect.",
     { identifier: z.string().describe("Page slug or numeric id") },
@@ -254,7 +261,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       category: z.string().describe("Category slug or id"),
       contenttype: z.string().describe("policy, procedure, standard, guideline, quickguide, template, example, roledescription"),
       summary: z.string(),
-      content: z.string().describe("Clean HTML, headings starting at h2"),
+      content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       slug: z.string().optional(),
       authoritylevel: z.number().int().min(1).max(6).optional(),
       criticality: z.string().optional().describe("reference, operational, mandatory, safetycritical"),
@@ -298,7 +305,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     "Update a draft revision's content. expectedtimemodified is REQUIRED: pass the timemodified from when you fetched/created the draft; a mismatch means someone else edited meanwhile.",
     {
       revisionid: z.number().int(),
-      content: z.string().describe("Clean HTML, headings starting at h2"),
+      content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       expectedtimemodified: z.number().int(),
       changesummary: z.string().optional(),
     },
@@ -346,7 +353,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     {
       changesetid: z.number().int(),
       identifier: z.string().describe("Page slug or numeric id"),
-      content: z.string().describe("Clean HTML, headings starting at h2"),
+      content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       changesummary: z.string().optional(),
       expectedpublishedrevisionid: z.number().int().optional(),
       expectedtimemodified: z.number().int().optional(),
@@ -408,7 +415,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       tempkey: z.string().describe("Stable id within this change set, e.g. newpage:slug"),
       title: z.string(),
       categoryid: z.number().int().describe("Existing category id"),
-      content: z.string().describe("Clean HTML, headings starting at h2"),
+      content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       slug: z.string().optional(),
       summary: z.string().optional(),
       contenttype: z.string().optional()

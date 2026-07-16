@@ -218,6 +218,42 @@ $string['errornotrequiredreading'] = 'Diese Seite ist nicht als Pflichtlektüre 
 $string['bannerimage'] = 'Bannerbild';
 $string['bannerimage_help'] = 'Optional. Ein Querformat-Bild, das auf der Kategoriekarte (16:9) und im Artikelkopf (3:1) angezeigt wird. Das Bild wird automatisch zugeschnitten und zentriert — kein manueller Zuschnitt nötig. Ohne Bild zeigt die Karte einen dezenten Platzhalter je nach Inhaltstyp.';
 
+// Inhalts-Stilrichtlinie (hb-*-Muster).
+$string['styleguide'] = 'Inhalts-Stilrichtlinie';
+$string['styleguideintro'] = 'Wiederverwendbare Formatmuster für Artikel. Öffnen Sie eine Seite im Bearbeitungsmodus, wechseln Sie im Editor zur HTML-Quelltextansicht und fügen Sie ein Muster von unten ein — den Text anpassen. Derselbe Katalog steht der Handbuch-KI zur Verfügung, sodass auch generierte Entwürfe diese Muster verwenden.';
+$string['styleguidepatterns'] = 'Muster';
+$string['styleguidecopy'] = 'Kopieren Sie dieses HTML in die HTML-Quelltextansicht des Editors:';
+$string['sgtitle_steps'] = 'Mehrstufiges Verfahren';
+$string['sguse_steps'] = 'Nummerierte Schritte mit optionalen Rollen-Tags, Buchstaben-Unterschritten und Hinweisen. Das Rückgrat jedes Verfahrens.';
+$string['sgtitle_callouts'] = 'Hinweise: Notiz, Tipp, Warnung, Wichtig';
+$string['sguse_callouts'] = 'Hebt eine Bemerkung vom Text ab. Vier Stufen: Notiz (Kontext), Tipp (gute Praxis), Warnung (Risiko), Wichtig (nie auslassen).';
+$string['sgtitle_branches'] = 'Entscheidungszweige';
+$string['sguse_branches'] = 'Nebeneinanderstehende „wenn dies, dann das“-Optionen innerhalb eines Verfahrens.';
+$string['sgtitle_compact'] = 'Kurzanleitungs-Schritte';
+$string['sguse_compact'] = 'Eine kompaktere, checklistenartige Version der Schrittliste für Kurzanleitungen.';
+$string['sgtitle_org'] = 'Organigramm';
+$string['sguse_org'] = 'Leitung und Berichtslinien. Ein Team (hb-org-team) ist eine flache Gruppe von Gleichrangigen; eine Einheit (hb-org-node) ist ein einzelnes Feld.';
+$string['sgtitle_roles'] = 'Rollen & Verantwortlichkeiten';
+$string['sguse_roles'] = 'Karten, die jede Rolle, ihre Inhaberin oder ihren Inhaber und die Aufgaben nennen.';
+$string['sgtitle_escalation'] = 'Eskalationsleiter';
+$string['sguse_escalation'] = 'Der geordnete Weg, ein Anliegen vorzubringen — an wen man sich der Reihe nach wendet.';
+$string['sgtitle_dodont'] = 'Erwünscht / Unerwünscht';
+$string['sguse_dodont'] = 'Zwei Spalten, die erwartetes und inakzeptables Verhalten gegenüberstellen.';
+$string['sgtitle_timeline'] = 'Zeitleiste / Phasen';
+$string['sguse_timeline'] = 'Datierte Meilensteine in Reihenfolge; fügen Sie abgeschlossenen Punkten die Klasse is-done hinzu.';
+$string['sgtitle_contact'] = 'Kontakte & Notfall';
+$string['sguse_contact'] = 'Wen man wann erreicht. Fügen Sie is-emergency für eine rote, gut sichtbare Karte hinzu.';
+$string['sgtitle_define'] = 'Definition / Glossar';
+$string['sguse_define'] = 'Definiert institutionelles Vokabular, als Block oder inline (hb-term).';
+$string['sgtitle_matrix'] = 'Verantwortlichkeitsmatrix (RACI)';
+$string['sguse_matrix'] = 'Wer ist je Aufgabe verantwortlich, rechenschaftspflichtig, konsultiert oder informiert.';
+$string['sgtitle_figure'] = 'Abbildung mit Bildunterschrift';
+$string['sguse_figure'] = 'Ein gerahmtes Bild oder Diagramm im Text mit Bildunterschrift. Ersetzen Sie das src durch ein hochgeladenes Bild.';
+$string['sgtitle_keyvalue'] = 'Datenblatt (Ficha)';
+$string['sguse_keyvalue'] = 'Ein kompaktes Bezeichnung→Wert-Blatt für ein Gremium, eine Rolle oder ein Objekt.';
+$string['sgtitle_checklist'] = 'Checkliste';
+$string['sguse_checklist'] = 'Eine druckbare Checkliste für ein Verfahren. Die Kästchen sind für Druck/Arbeitsgebrauch; Häkchen werden nicht gespeichert.';
+
 // Geteilter Leseabschluss für pfad-erforderliche Artikel (Spez. 8).
 $string['readingcompletion'] = 'Leseabschluss';
 $string['markasread'] = 'Als gelesen markieren';
