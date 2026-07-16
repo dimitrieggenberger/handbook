@@ -497,6 +497,8 @@ function local_handbook_render_category_item(stdClass $item): string {
     } else if ($action === 'merge') {
         $rows .= local_handbook_lifecycle_row('categorymergesource', $name((int)($op['sourceid'] ?? 0)));
         $rows .= local_handbook_lifecycle_row('categorymergetarget', $name((int)($op['targetid'] ?? 0)));
+    } else if ($action === 'delete_empty') {
+        $rows .= local_handbook_lifecycle_row('category', $name((int)($op['categoryid'] ?? 0)));
     }
 
     return html_writer::tag('table', html_writer::tag('tbody', $rows),

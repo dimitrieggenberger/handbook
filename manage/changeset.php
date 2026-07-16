@@ -374,6 +374,20 @@ foreach ($changeset->items as $item) {
         continue;
     }
 
+    // Page move proposal.
+    if ($item->kind === changeset_service::KIND_PAGE_MOVE) {
+        $payload = json_decode((string)$item->payloadjson, true) ?: [];
+        $targetid = (int)($payload['targetcategoryid'] ?? 0);
+        $targetname = $targetid
+            ? (string)$DB->get_field('local_handbook_category', 'name', ['id' => $targetid]) : '';
+        $body .= html_writer::div(
+            s(get_string('pagemoveto', 'local_handbook', $targetname)), 'small mb-2');
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
     // Before/after diff (published vs the item's draft).
     $draft = (int)$item->revisionid
         ? $DB->get_record('local_handbook_revision', ['id' => $item->revisionid]) : null;

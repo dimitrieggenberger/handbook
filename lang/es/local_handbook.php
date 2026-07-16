@@ -608,3 +608,12 @@ $string['errorcategorynotfound'] = 'La categoría no existe.';
 $string['errorcategorynochange'] = 'Una actualización de categoría debe cambiar al menos un campo.';
 $string['errorcategorycycle'] = 'Ese cambio crearía un ciclo de categorías.';
 $string['errorcategorymergeself'] = 'Una categoría no puede fusionarse consigo misma.';
+$string['categoryop_delete_empty'] = 'Disolver categoría vacía';
+$string['categorychangesummary_delete_empty'] = 'Disolver categoría vacía';
+
+// Movimientos de páginas (requisitos de la siguiente versión, taxonomía fase 1).
+$string['pagemovechangesummary'] = 'Mover: {$a}';
+$string['pagemoveto'] = 'Mover a la categoría: {$a}';
+$string['conflict_pagemove'] = 'La página se movió o cambió después de preparar esta propuesta; recárguela y propóngala de nuevo.';
+$string['errorpagemovesame'] = 'La página ya está en esa categoría.';
+$string['event_page_moved'] = 'Página del manual movida';

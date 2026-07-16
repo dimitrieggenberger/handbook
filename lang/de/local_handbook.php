@@ -608,3 +608,12 @@ $string['errorcategorynotfound'] = 'Die Kategorie existiert nicht.';
 $string['errorcategorynochange'] = 'Eine Kategorie-Aktualisierung muss mindestens ein Feld ändern.';
 $string['errorcategorycycle'] = 'Diese Änderung würde einen Kategoriezyklus erzeugen.';
 $string['errorcategorymergeself'] = 'Eine Kategorie kann nicht mit sich selbst zusammengeführt werden.';
+$string['categoryop_delete_empty'] = 'Leere Kategorie auflösen';
+$string['categorychangesummary_delete_empty'] = 'Leere Kategorie auflösen';
+
+// Seitenverschiebungen (Anforderungen der nächsten Version, Taxonomie Phase 1).
+$string['pagemovechangesummary'] = 'Verschieben: {$a}';
+$string['pagemoveto'] = 'In Kategorie verschieben: {$a}';
+$string['conflict_pagemove'] = 'Die Seite wurde nach Erstellung dieses Vorschlags verschoben oder geändert; bitte neu laden und erneut vorschlagen.';
+$string['errorpagemovesame'] = 'Die Seite befindet sich bereits in dieser Kategorie.';
+$string['event_page_moved'] = 'Handbuchseite verschoben';

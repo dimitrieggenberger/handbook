@@ -477,11 +477,33 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
   );
 
   server.tool(
-    "handbook_upsert_change_set_category",
-    "Propose a category change inside THIS change set: op = create (name, optional parentid), update (categoryid + fields to change), move (categoryid + newparentid), or merge (sourceid + targetid: moves the source's pages and subcategories into the target, then deletes the source). Cycles and merges into a descendant are rejected. Staged as a draft; a human applies it in Moodle.",
+    "handbook_upsert_change_set_page_move",
+    "Propose moving ONE page to another category inside THIS change set. Preserves the page's id, slug, revisions, acknowledgements and relations — only its category changes. Pass expectedcategoryid and expectedpagetimemodified from the page you read for a safe (conflict-detecting) move. Staged as a draft; a human applies it in Moodle.",
     {
       changesetid: z.number().int(),
-      op: z.enum(["create", "update", "move", "merge"]),
+      identifier: z.string().describe("Page slug or id to move"),
+      targetcategoryid: z.number().int().describe("Destination category id"),
+      expectedcategoryid: z.number().int().optional(),
+      expectedpagetimemodified: z.number().int().optional(),
+      changesummary: z.string().optional(),
+    },
+    handler((args) =>
+      ws("local_handbook_upsert_changeset_page_move", {
+        changesetid: args.changesetid,
+        identifier: args.identifier,
+        targetcategoryid: args.targetcategoryid,
+        expectedcategoryid: args.expectedcategoryid ?? 0,
+        expectedpagetimemodified: args.expectedpagetimemodified ?? 0,
+        changesummary: args.changesummary ?? "",
+      }))
+  );
+
+  server.tool(
+    "handbook_upsert_change_set_category",
+    "Propose a category change inside THIS change set: op = create (name, optional parentid), update (categoryid + fields to change), move (categoryid + newparentid), merge (sourceid + targetid: moves the source's pages and subcategories into the target, then deletes the source), or delete_empty (categoryid: dissolve a category that has no pages and no subcategories). Cycles and merges into a descendant are rejected. Staged as a draft; a human applies it in Moodle.",
+    {
+      changesetid: z.number().int(),
+      op: z.enum(["create", "update", "move", "merge", "delete_empty"]),
       tempkey: z.string().optional().describe("Stable id for a new category (create)"),
       name: z.string().optional(),
       slug: z.string().optional(),

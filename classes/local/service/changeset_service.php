@@ -120,7 +120,7 @@ class changeset_service {
      * @return string[]
      */
     public static function category_ops(): array {
-        return ['create', 'update', 'move', 'merge'];
+        return ['create', 'update', 'move', 'merge', 'delete_empty'];
     }
 
     /** @var string A change item that proposes archiving a page (spec 21). */
@@ -128,6 +128,9 @@ class changeset_service {
 
     /** @var string A change item that proposes restoring an archived page (spec 26). */
     public const KIND_PAGE_RESTORE = 'page_restore';
+
+    /** @var string A change item that proposes moving a page to another category. */
+    public const KIND_PAGE_MOVE = 'page_move';
 
     /**
      * Structured archive reasons (spec 22). 'other' requires a note.
@@ -736,6 +739,58 @@ class changeset_service {
     }
 
     /**
+     * Propose moving a page to another category (spec 4.1). Draft only — the
+     * page id, slug, revisions, acknowledgements and relations are preserved;
+     * only categoryid changes, applied by the human publish path.
+     *
+     * @param int $changesetid Change-set id.
+     * @param int $pageid Page to move.
+     * @param int $targetcategoryid Destination category.
+     * @param int $expectedcategoryid Category the caller saw (0 = skip).
+     * @param int $expectedpagetimemodified Page timemodified seen (0 = skip).
+     * @param string $changesummary Optional summary.
+     * @param int $userid Acting user (0 = current user).
+     * @return array Per-item result.
+     */
+    public static function upsert_page_move(int $changesetid, int $pageid, int $targetcategoryid,
+            int $expectedcategoryid = 0, int $expectedpagetimemodified = 0,
+            string $changesummary = '', int $userid = 0): array {
+        global $DB, $USER;
+        $userid = $userid ?: (int)$USER->id;
+
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+        $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
+        if (!$DB->record_exists('local_handbook_category', ['id' => $targetcategoryid])) {
+            throw new moodle_exception('errorcategorynotfound', 'local_handbook');
+        }
+        if ($targetcategoryid === (int)$page->categoryid) {
+            throw new moodle_exception('errorpagemovesame', 'local_handbook');
+        }
+
+        // Optimistic concurrency: a page already moved or edited elsewhere
+        // yields a structured conflict instead of a silent overwrite.
+        if (($expectedcategoryid && (int)$page->categoryid !== $expectedcategoryid)
+                || ($expectedpagetimemodified && (int)$page->timemodified !== $expectedpagetimemodified)) {
+            return self::record_conflict($changeset, $pageid, 0, 'conflict_pagemove',
+                0, $changesummary, $userid, self::KIND_PAGE_MOVE);
+        }
+
+        $payload = [
+            'sourcecategoryid' => (int)$page->categoryid,
+            'targetcategoryid' => $targetcategoryid,
+            'expectedpagetimemodified' => $expectedpagetimemodified,
+        ];
+        $summary = trim($changesummary) !== '' ? $changesummary
+            : get_string('pagemovechangesummary', 'local_handbook', format_string($page->title));
+        $item = self::write_item($changeset, $pageid, 0, self::ITEM_DRAFT, '', $summary,
+            $userid, self::KIND_PAGE_MOVE, json_encode($payload));
+        return self::item_result($item, null);
+    }
+
+    /**
      * Impact of archiving a page: inbound relations, active-path memberships,
      * and whether it is required reading (spec 25). Read-only.
      *
@@ -882,6 +937,19 @@ class changeset_service {
                 }
             }
             return ['op' => 'move', 'categoryid' => $categoryid, 'newparentid' => $newparentid];
+        }
+
+        if ($action === 'delete_empty') {
+            $categoryid = (int)($op['categoryid'] ?? 0);
+            if (!$categoryid || !$DB->record_exists('local_handbook_category', ['id' => $categoryid])) {
+                throw new moodle_exception('errorcategorynotfound', 'local_handbook');
+            }
+            // Only a truly empty category may be dissolved (spec 4.2).
+            if ($DB->record_exists('local_handbook_page', ['categoryid' => $categoryid])
+                    || $DB->record_exists('local_handbook_category', ['parentid' => $categoryid])) {
+                throw new moodle_exception('categorynotempty', 'local_handbook');
+            }
+            return ['op' => 'delete_empty', 'categoryid' => $categoryid];
         }
 
         // merge.
@@ -1192,6 +1260,9 @@ class changeset_service {
             case self::KIND_CATEGORY_CHANGE:
                 self::apply_category($item, $userid);
                 break;
+            case self::KIND_PAGE_MOVE:
+                self::apply_page_move($item, $userid);
+                break;
             case self::KIND_PAGE_ARCHIVE:
                 self::apply_page_archive($item, $userid);
                 break;
@@ -1436,13 +1507,66 @@ class changeset_service {
             case 'merge':
                 // Move the source's pages and child categories into the target,
                 // then delete the now-empty source (no page is left orphaned).
+                // Capture the moved pages first so their timestamp/attribution
+                // can be updated (audit, spec 4.6).
+                $movedpageids = $DB->get_fieldset_select('local_handbook_page', 'id',
+                    'categoryid = ?', [(int)$op['sourceid']]);
                 $DB->set_field('local_handbook_page', 'categoryid', (int)$op['targetid'],
                     ['categoryid' => (int)$op['sourceid']]);
+                if ($movedpageids) {
+                    [$insql, $inparams] = $DB->get_in_or_equal($movedpageids);
+                    $DB->execute("UPDATE {local_handbook_page}
+                                     SET timemodified = ?, modifiedby = ?
+                                   WHERE id $insql",
+                        array_merge([$now, $userid], $inparams));
+                }
                 $DB->set_field('local_handbook_category', 'parentid', (int)$op['targetid'],
                     ['parentid' => (int)$op['sourceid']]);
                 $DB->delete_records('local_handbook_category', ['id' => (int)$op['sourceid']]);
                 break;
+
+            case 'delete_empty':
+                // Re-check emptiness at apply time; a category that gained pages
+                // or subcategories since the proposal must not be deleted.
+                $catid = (int)$op['categoryid'];
+                if ($DB->record_exists('local_handbook_page', ['categoryid' => $catid])
+                        || $DB->record_exists('local_handbook_category', ['parentid' => $catid])) {
+                    throw new moodle_exception('categorynotempty', 'local_handbook');
+                }
+                $DB->delete_records('local_handbook_category', ['id' => $catid]);
+                break;
         }
+    }
+
+    /**
+     * Apply a page move: change the page's category, preserving everything
+     * else, and record a page-moved event with the before/after category.
+     *
+     * @param stdClass $item Change-item record (kind page_move).
+     * @param int $userid Human publisher.
+     * @return void
+     */
+    private static function apply_page_move(stdClass $item, int $userid): void {
+        global $DB;
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid], '*', MUST_EXIST);
+        $payload = json_decode((string)$item->payloadjson, true);
+        $targetid = is_array($payload) ? (int)($payload['targetcategoryid'] ?? 0) : 0;
+        if (!$targetid || !$DB->record_exists('local_handbook_category', ['id' => $targetid])) {
+            throw new moodle_exception('errorcategorynotfound', 'local_handbook');
+        }
+
+        $fromcat = (int)$page->categoryid;
+        $DB->update_record('local_handbook_page', (object)[
+            'id' => (int)$page->id, 'categoryid' => $targetid,
+            'timemodified' => time(), 'modifiedby' => $userid,
+        ]);
+
+        \local_handbook\event\page_moved::create([
+            'context' => context_system::instance(),
+            'objectid' => (int)$page->id,
+            'other' => ['fromcategoryid' => $fromcat, 'tocategoryid' => $targetid],
+        ])->trigger();
     }
 
     /**

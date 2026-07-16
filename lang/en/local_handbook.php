@@ -608,3 +608,12 @@ $string['errorcategorynotfound'] = 'The category does not exist.';
 $string['errorcategorynochange'] = 'A category update must change at least one field.';
 $string['errorcategorycycle'] = 'That change would create a category cycle.';
 $string['errorcategorymergeself'] = 'A category cannot be merged into itself.';
+$string['categoryop_delete_empty'] = 'Dissolve empty category';
+$string['categorychangesummary_delete_empty'] = 'Dissolve empty category';
+
+// Page moves (next-version requirements, taxonomy phase 1).
+$string['pagemovechangesummary'] = 'Move: {$a}';
+$string['pagemoveto'] = 'Move to category: {$a}';
+$string['conflict_pagemove'] = 'The page moved or changed after this proposal was prepared; reload and propose again.';
+$string['errorpagemovesame'] = 'The page is already in that category.';
+$string['event_page_moved'] = 'Handbook page moved';

@@ -804,6 +804,82 @@ final class changeset_service_test extends advanced_testcase {
             (int)$DB->get_field('local_handbook_page', 'categoryid', ['id' => $page->id]));
     }
 
+    public function test_page_move_applies_and_preserves_the_page(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $from = $this->create_category();
+        $to = $this->create_category();
+        $page = $this->publish_page($from, 'Página movible');
+        $publishedrev = (int)$page->publishedrevisionid;
+
+        $changeset = changeset_service::create((object)['title' => 'Move', 'source' => 'ai']);
+        changeset_service::upsert_page_move($changeset->id, (int)$page->id, $to);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_MOVE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $updated = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $this->assertSame($to, (int)$updated->categoryid);
+        // Identity and history are preserved by a move.
+        $this->assertSame($page->slug, $updated->slug);
+        $this->assertSame($publishedrev, (int)$updated->publishedrevisionid);
+    }
+
+    public function test_page_move_flags_a_stale_category(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $from = $this->create_category();
+        $to = $this->create_category();
+        $page = $this->publish_page($from, 'Página');
+        $changeset = changeset_service::create((object)['title' => 'Move', 'source' => 'ai']);
+
+        // Expected category does not match the page's real one.
+        $result = changeset_service::upsert_page_move($changeset->id, (int)$page->id, $to, 999999);
+        $this->assertSame(changeset_service::ITEM_CONFLICT, $result['status']);
+    }
+
+    public function test_delete_empty_category_applies(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $empty = $this->create_category();
+        $changeset = changeset_service::create((object)['title' => 'Tidy', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'delete_empty', 'categoryid' => $empty]);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'cat:' . $empty . ':delete_empty',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertFalse($DB->record_exists('local_handbook_category', ['id' => $empty]));
+    }
+
+    public function test_delete_empty_rejects_a_non_empty_category(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $this->publish_page($cat, 'Con contenido');
+        $changeset = changeset_service::create((object)['title' => 'x', 'source' => 'ai']);
+
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'delete_empty', 'categoryid' => $cat]);
+    }
+
     /**
      * Read one item's status.
      *

@@ -202,7 +202,13 @@ $functions = [
     ],
     'local_handbook_upsert_changeset_category' => [
         'classname' => 'local_handbook\external\upsert_changeset_category',
-        'description' => 'Propose a category operation (create/update/move/merge) in a change set (draft only).',
+        'description' => 'Propose a category operation (create/update/move/merge/delete_empty) in a change set (draft only).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposetaxonomy',
+    ],
+    'local_handbook_upsert_changeset_page_move' => [
+        'classname' => 'local_handbook\external\upsert_changeset_page_move',
+        'description' => 'Propose moving a page to another category in a change set (draft only).',
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposetaxonomy',
     ],
