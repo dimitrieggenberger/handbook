@@ -389,6 +389,79 @@ function local_handbook_render_relation_ops(array $ops): string {
 }
 
 /**
+ * One before/after style row for a lifecycle proposal table.
+ *
+ * @param string $labelkey Lang key for the row label.
+ * @param string $value Display value.
+ * @return string
+ */
+function local_handbook_lifecycle_row(string $labelkey, string $value): string {
+    return html_writer::tag('tr',
+        html_writer::tag('th', s(get_string($labelkey, 'local_handbook')),
+            ['scope' => 'row', 'class' => 'text-nowrap'])
+        . html_writer::tag('td', s($value)));
+}
+
+/**
+ * Render an archive or restore proposal item for review (spec 21, 25, 26).
+ *
+ * @param stdClass $page The affected page.
+ * @param stdClass $item Change-item record (page_archive or page_restore).
+ * @return string HTML.
+ */
+function local_handbook_render_lifecycle_item(stdClass $page, stdClass $item): string {
+    global $DB;
+
+    $service = \local_handbook\local\service\changeset_service::class;
+    $payload = json_decode((string)$item->payloadjson, true) ?: [];
+
+    if ($item->kind === $service::KIND_PAGE_RESTORE) {
+        $out = html_writer::div(html_writer::tag('strong',
+            s(get_string('restoreproposal', 'local_handbook'))), 'small mb-2');
+        if (!empty($payload['note'])) {
+            $out .= html_writer::div(s($payload['note']), 'small text-muted mb-2');
+        }
+        return $out;
+    }
+
+    // Archive proposal.
+    $out = html_writer::div(html_writer::tag('strong',
+        s(get_string('archiveproposal', 'local_handbook'))), 'small mb-1');
+
+    $rows = '';
+    $reason = (string)($payload['reason'] ?? '');
+    if ($reason !== '') {
+        $rows .= local_handbook_lifecycle_row('archivereasonlabel',
+            get_string('archivereason_' . $reason, 'local_handbook'));
+    }
+    $repid = (int)($payload['replacementpageid'] ?? 0);
+    if ($repid) {
+        $rep = $DB->get_record('local_handbook_page', ['id' => $repid], 'id, title');
+        $rows .= local_handbook_lifecycle_row('replacementpage',
+            $rep ? format_string($rep->title) : (string)$repid);
+    }
+    $mode = (string)($payload['redirectmode'] ?? '');
+    if ($mode !== '') {
+        $rows .= local_handbook_lifecycle_row('redirectmodelabel',
+            get_string('redirectmode_' . $mode, 'local_handbook'));
+    }
+    $out .= html_writer::tag('table', html_writer::tag('tbody', $rows),
+        ['class' => 'table table-sm table-bordered small mb-2']);
+    if (!empty($payload['note'])) {
+        $out .= html_writer::div(s($payload['note']), 'small text-muted mb-2');
+    }
+
+    $impact = $service::archive_impact((int)$page->id);
+    $out .= html_writer::div(
+        s(get_string('archiveimpact', 'local_handbook', (object)[
+            'relations' => $impact['inboundrelations'],
+            'paths' => $impact['activepaths'],
+        ])),
+        'alert alert-info py-2 px-3 small mb-2');
+    return $out;
+}
+
+/**
  * Render the shared area navigation row (tab strip).
  *
  * @param string $currentpage Key of the current page.

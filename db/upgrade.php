@@ -343,5 +343,23 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071505, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071508) {
+        // Phase 2: page archive/restore lifecycle fields (spec 22-24).
+        $table = new xmldb_table('local_handbook_page');
+        $fields = [
+            new xmldb_field('archivereason', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, '', 'archived'),
+            new xmldb_field('replacementpageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'archivereason'),
+            new xmldb_field('redirectmode', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, '', 'replacementpageid'),
+            new xmldb_field('archivenote', XMLDB_TYPE_TEXT, null, null, null, null, null, 'redirectmode'),
+        ];
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026071508, 'local', 'handbook');
+    }
+
     return true;
 }

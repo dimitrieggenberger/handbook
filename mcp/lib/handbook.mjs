@@ -211,6 +211,13 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     handler(() => ws("local_handbook_list_areas", {}))
   );
 
+  server.tool(
+    "handbook_get_archive_impact",
+    "Before proposing to archive a page, check its impact: how many other pages relate TO it, how many active reading paths include it, and whether it is required reading. Use this to decide whether to set a replacement page and redirect.",
+    { identifier: z.string().describe("Page slug or numeric id") },
+    handler(({ identifier }) => ws("local_handbook_get_archive_impact", { identifier }))
+  );
+
   if (!writable) {
     return; // Read-only mode: no draft or change-set write tools.
   }
@@ -426,6 +433,46 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
         changesetid: args.changesetid,
         identifier: args.identifier,
         operations: args.operations,
+      }))
+  );
+
+  server.tool(
+    "handbook_upsert_change_set_archive",
+    "Propose ARCHIVING a page inside THIS change set (retire it from navigation, search and active paths). Give a structured reason and, when it is superseded, a replacement page + redirect mode so old links still lead somewhere. Consider handbook_get_archive_impact first. Staged as a draft — a human applies it in Moodle. Never archives directly.",
+    {
+      changesetid: z.number().int(),
+      identifier: z.string().describe("Page slug or id to archive"),
+      reason: z.string()
+        .describe("obsolete, superseded, duplicate, merged, temporary_content_expired, role_no_longer_exists, procedure_no_longer_used, incorrect_legacy_import, other"),
+      replacement: z.string().optional().describe("Replacement page slug or id (required for a redirecting mode)"),
+      redirectmode: z.string().optional()
+        .describe("notice_only (default), redirect_with_notice, automatic_redirect, no_redirect"),
+      note: z.string().optional().describe("Explanation (required when reason is other)"),
+    },
+    handler((args) =>
+      ws("local_handbook_upsert_changeset_archive", {
+        changesetid: args.changesetid,
+        identifier: args.identifier,
+        reason: args.reason,
+        replacement: args.replacement ?? "",
+        redirectmode: args.redirectmode ?? "notice_only",
+        note: args.note ?? "",
+      }))
+  );
+
+  server.tool(
+    "handbook_upsert_change_set_restore",
+    "Propose RESTORING an archived page inside THIS change set (make it visible again and clear its redirect). Staged as a draft — a human applies it in Moodle.",
+    {
+      changesetid: z.number().int(),
+      identifier: z.string().describe("Archived page slug or id to restore"),
+      note: z.string().optional(),
+    },
+    handler((args) =>
+      ws("local_handbook_upsert_changeset_restore", {
+        changesetid: args.changesetid,
+        identifier: args.identifier,
+        note: args.note ?? "",
       }))
   );
 

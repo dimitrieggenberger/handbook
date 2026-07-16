@@ -343,6 +343,16 @@ foreach ($changeset->items as $item) {
         continue;
     }
 
+    // Archive / restore lifecycle proposal.
+    if (in_array($item->kind, [changeset_service::KIND_PAGE_ARCHIVE,
+            changeset_service::KIND_PAGE_RESTORE], true)) {
+        $body .= local_handbook_render_lifecycle_item($page, $item);
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
     // Before/after diff (published vs the item's draft).
     $draft = (int)$item->revisionid
         ? $DB->get_record('local_handbook_revision', ['id' => $item->revisionid]) : null;

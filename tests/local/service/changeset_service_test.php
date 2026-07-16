@@ -653,6 +653,89 @@ final class changeset_service_test extends advanced_testcase {
             ['oldslug' => $oldslug, 'pageid' => $page->id]));
     }
 
+    public function test_archive_proposal_sets_lifecycle_fields_on_apply(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Reglamento antiguo');
+        $rep = $this->publish_page($cat, 'Reglamento vigente');
+        $changeset = changeset_service::create((object)['title' => 'Retire', 'source' => 'ai']);
+
+        changeset_service::upsert_page_archive($changeset->id, (int)$page->id, [
+            'reason' => 'superseded',
+            'replacementpageid' => (int)$rep->id,
+            'redirectmode' => 'redirect_with_notice',
+            'note' => 'Replaced for 2027.',
+        ]);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_ARCHIVE], '*', MUST_EXIST);
+
+        // Staged only: still published/visible before apply.
+        $this->assertSame(0, (int)$DB->get_field('local_handbook_page', 'archived', ['id' => $page->id]));
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $updated = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $this->assertSame(1, (int)$updated->archived);
+        $this->assertSame('superseded', $updated->archivereason);
+        $this->assertSame((int)$rep->id, (int)$updated->replacementpageid);
+        $this->assertSame('redirect_with_notice', $updated->redirectmode);
+    }
+
+    public function test_archive_rejects_invalid_reason(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Página');
+        $changeset = changeset_service::create((object)['title' => 'x', 'source' => 'ai']);
+
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_page_archive($changeset->id, (int)$page->id, ['reason' => 'bogus']);
+    }
+
+    public function test_redirecting_archive_requires_a_replacement(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Página');
+        $changeset = changeset_service::create((object)['title' => 'x', 'source' => 'ai']);
+
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_page_archive($changeset->id, (int)$page->id,
+            ['reason' => 'obsolete', 'redirectmode' => 'automatic_redirect']);
+    }
+
+    public function test_restore_proposal_unarchives_on_apply(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Archivada');
+        page_service::set_archived($page, true);
+
+        $changeset = changeset_service::create((object)['title' => 'Bring back', 'source' => 'ai']);
+        changeset_service::upsert_page_restore($changeset->id, (int)$page->id, 'Still needed.');
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_RESTORE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertSame(0, (int)$DB->get_field('local_handbook_page', 'archived', ['id' => $page->id]));
+    }
+
     /**
      * Read one item's status.
      *
