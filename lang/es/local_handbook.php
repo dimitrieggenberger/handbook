@@ -536,3 +536,20 @@ $string['errorrelationempty'] = 'Una propuesta de relaciones debe contener al me
 $string['errorrelationunresolved'] = 'No se pudo resolver el destino de la relación «{$a}»; aplique primero la página nueva a la que apunta.';
 $string['errortempkeyrequired'] = 'Una propuesta de página nueva necesita un tempkey estable.';
 $string['errorunknownarea'] = 'El área responsable «{$a}» no está en el vocabulario controlado.';
+
+// Gestión del vocabulario de áreas responsables (Fase 1).
+$string['manageareas'] = 'Áreas responsables';
+$string['manageareas_help'] = 'El vocabulario controlado de áreas responsables. Las propuestas de metadatos y de páginas nuevas deben referirse a un área activa de esta lista.';
+$string['newarea'] = 'Área nueva';
+$string['editarea'] = 'Editar área';
+$string['areaname'] = 'Nombre';
+$string['areakey'] = 'Clave';
+$string['areakey_help'] = 'Una clave estable (minúsculas, números y guiones). Déjela vacía para generarla a partir del nombre. La API puede referirse a un área por su clave o por su nombre.';
+$string['areaactive'] = 'Activa';
+$string['areainactive'] = 'Inactiva';
+$string['areaactivate'] = 'Activar';
+$string['areadeactivate'] = 'Desactivar';
+$string['areasaved'] = 'Área responsable guardada.';
+$string['areadeleted'] = 'Área responsable eliminada.';
+$string['noareas'] = 'Todavía no se han definido áreas responsables.';
+$string['confirmdeletearea'] = '¿Eliminar el área responsable «{$a}»? Las páginas que ya usan este nombre lo conservan; solo se elimina la entrada del vocabulario.';

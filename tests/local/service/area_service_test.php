@@ -65,4 +65,31 @@ final class area_service_test extends advanced_testcase {
         $this->expectException(\moodle_exception::class);
         area_service::resolve_name('Área inexistente');
     }
+
+    public function test_save_generates_a_unique_key_and_resolves(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $id1 = area_service::save((object)['name' => 'Gerencia General', 'active' => 1], 2);
+        $id2 = area_service::save((object)['name' => 'Gerencia General', 'active' => 1], 2);
+
+        $a1 = $DB->get_record('local_handbook_area', ['id' => $id1], '*', MUST_EXIST);
+        $a2 = $DB->get_record('local_handbook_area', ['id' => $id2], '*', MUST_EXIST);
+        $this->assertSame('gerencia-general', $a1->areakey);
+        $this->assertNotSame($a1->areakey, $a2->areakey, 'Keys must be unique');
+        $this->assertSame('Gerencia General', area_service::resolve_name('gerencia-general'));
+    }
+
+    public function test_inactive_area_is_not_accepted(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $id = area_service::save((object)['name' => 'Antigua Área', 'active' => 1], 2);
+        area_service::set_active($id, false, 2);
+
+        $this->expectException(\moodle_exception::class);
+        area_service::resolve_name('Antigua Área');
+    }
 }

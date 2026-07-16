@@ -536,3 +536,20 @@ $string['errorrelationempty'] = 'Ein Beziehungsvorschlag muss mindestens einen V
 $string['errorrelationunresolved'] = 'Das Beziehungsziel „{$a}" konnte nicht aufgelöst werden; wenden Sie zuerst die neue Seite an, auf die es verweist.';
 $string['errortempkeyrequired'] = 'Ein Vorschlag für eine neue Seite benötigt einen stabilen Tempkey.';
 $string['errorunknownarea'] = 'Der verantwortliche Bereich „{$a}" ist nicht im kontrollierten Vokabular enthalten.';
+
+// Verwaltung des Vokabulars verantwortlicher Bereiche (Phase 1).
+$string['manageareas'] = 'Verantwortliche Bereiche';
+$string['manageareas_help'] = 'Das kontrollierte Vokabular der verantwortlichen Bereiche. Metadaten- und Neue-Seite-Vorschläge müssen einen aktiven Bereich aus dieser Liste verwenden.';
+$string['newarea'] = 'Neuer Bereich';
+$string['editarea'] = 'Bereich bearbeiten';
+$string['areaname'] = 'Name';
+$string['areakey'] = 'Schlüssel';
+$string['areakey_help'] = 'Ein stabiler Schlüssel (Kleinbuchstaben, Zahlen, Bindestriche). Leer lassen, um ihn aus dem Namen zu erzeugen. Die API kann einen Bereich über den Schlüssel oder den Namen referenzieren.';
+$string['areaactive'] = 'Aktiv';
+$string['areainactive'] = 'Inaktiv';
+$string['areaactivate'] = 'Aktivieren';
+$string['areadeactivate'] = 'Deaktivieren';
+$string['areasaved'] = 'Verantwortlicher Bereich gespeichert.';
+$string['areadeleted'] = 'Verantwortlicher Bereich gelöscht.';
+$string['noareas'] = 'Es wurden noch keine verantwortlichen Bereiche definiert.';
+$string['confirmdeletearea'] = 'Den verantwortlichen Bereich „{$a}" löschen? Seiten, die diesen Namen bereits verwenden, behalten ihn; nur der Vokabulareintrag wird entfernt.';

@@ -536,3 +536,20 @@ $string['errorrelationempty'] = 'A relation proposal must contain at least one o
 $string['errorrelationunresolved'] = 'The relation target "{$a}" could not be resolved; apply the new page it points to first.';
 $string['errortempkeyrequired'] = 'A new-page proposal needs a stable tempkey.';
 $string['errorunknownarea'] = 'The responsible area "{$a}" is not in the controlled vocabulary.';
+
+// Responsible-area vocabulary management (Phase 1).
+$string['manageareas'] = 'Responsible areas';
+$string['manageareas_help'] = 'The controlled vocabulary of responsible areas. Metadata and new-page proposals must reference an active area from this list.';
+$string['newarea'] = 'New area';
+$string['editarea'] = 'Edit area';
+$string['areaname'] = 'Name';
+$string['areakey'] = 'Key';
+$string['areakey_help'] = 'A stable machine key (lowercase letters, numbers, hyphens). Leave blank to generate one from the name. The API can reference an area by this key or by its name.';
+$string['areaactive'] = 'Active';
+$string['areainactive'] = 'Inactive';
+$string['areaactivate'] = 'Activate';
+$string['areadeactivate'] = 'Deactivate';
+$string['areasaved'] = 'Responsible area saved.';
+$string['areadeleted'] = 'Responsible area deleted.';
+$string['noareas'] = 'No responsible areas have been defined yet.';
+$string['confirmdeletearea'] = 'Delete the responsible area "{$a}"? Pages already using this name keep it; only the vocabulary entry is removed.';

@@ -112,3 +112,57 @@ persists across updates. If you ever change tool schemas, use the connector's
 - **Roll back code** → in the panel, redeploy a previous commit (or revert on
   `main` and Build). To take the service offline, **Stop** the app or enable
   website maintenance. Secrets in `~/.handbook-mcp.env` are unaffected.
+
+## Keeping the deployment up to date (auto-deploy)
+
+The panel's **Build** button re-runs `npm install` and restarts, but it does
+**not** pull new commits from Git. So after you push to `main`, the deployed
+tools do not change until the checkout is updated. Pick one:
+
+### Option A — automatic deploy on push (recommended)
+
+Wire GitHub to trigger a deploy whenever `main` changes:
+
+1. In the Infomaniak site's **deployment settings** (Node.js → Git deployment),
+   confirm **Repository** = this repo and **Branch** = `main`, and enable
+   **automatic deployment**. Copy the **deploy webhook URL** it shows.
+2. In GitHub → **Settings → Webhooks → Add webhook**: paste that URL,
+   Content-type `application/json`, event **Just the push event**, Active.
+
+Now a push to `main` makes Infomaniak pull, `npm install`, and restart on its
+own. (Ask and I can add the GitHub webhook for you once you have the URL.)
+
+### Option B — manual one-command redeploy
+
+If auto-deploy is not available, over SSH from inside the deployed repo:
+
+```
+bash mcp/redeploy.sh          # fetch + hard-reset to origin/main
+```
+
+Then click **Restart** in the panel — a plain pull leaves the running process
+on the old code, so the restart is what reloads the tools. Verify with
+`grep -c upsert_changeset_metadata mcp/lib/handbook.mjs` (should print `1` once
+that tool is deployed) and `GET /health`.
+
+### After any deploy: refresh the connector
+
+The MCP client (ChatGPT custom connector) caches the tool list. After the
+server restarts with new tools, remove and re-add the connector (same
+`/mcp` URL + Bearer token) and start a new chat so it re-reads them.
+
+## Granting the editorial propose capabilities
+
+Beyond `apiaccess`, `view`, `viewhistory`, `edit`, the `handbook-ai` account's
+role must also hold the propose capabilities for the editorial tools to work:
+
+| Capability | Enables |
+|---|---|
+| `local/handbook:apiproposemetadata` | metadata/fiche patches + slug rename |
+| `local/handbook:apiproposerelations` | page relation edits |
+
+New pages use `edit` (already granted). These are **propose-only** — they never
+grant review, approval, application or publication; a human still approves and
+applies every change in Moodle. Grant them in **Site administration → Users →
+Permissions → Define roles →** the service-account role → set each to **Allow**.
+They ship with no default assignment, so they are off until you add them.

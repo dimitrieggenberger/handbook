@@ -434,6 +434,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/categories.php'),
             'visible' => has_capability('local/handbook:managecategories', $context),
         ],
+        'areas' => [
+            'label' => get_string('manageareas', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/areas.php'),
+            'visible' => has_capability('local/handbook:managecategories', $context),
+        ],
         'paths' => [
             'label' => get_string('managepaths', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/manage/paths.php'),
