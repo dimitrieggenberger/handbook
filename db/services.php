@@ -188,6 +188,12 @@ $functions = [
         'type' => 'read',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
     ],
+    'local_handbook_validate_changeset' => [
+        'classname' => 'local_handbook\external\validate_changeset',
+        'description' => 'Validate every item of a change set against current state (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
     'local_handbook_upsert_changeset_archive' => [
         'classname' => 'local_handbook\external\upsert_changeset_archive',
         'description' => 'Propose archiving a page inside a change set (draft only; never archives directly).',

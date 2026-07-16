@@ -976,6 +976,69 @@ final class changeset_service_test extends advanced_testcase {
             (int)$DB->get_field('local_handbook_category', 'parentid', ['id' => $childid]));
     }
 
+    public function test_approve_all_then_publish_all_applies_a_metadata_item(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Ficha');
+        $changeset = changeset_service::create((object)['title' => 'Batch', 'source' => 'ai']);
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id, ['title' => 'Título nuevo']);
+        changeset_service::submit($changeset->id);
+
+        changeset_service::approve_all($changeset->id);
+        changeset_service::publish_all($changeset->id);
+
+        $this->assertSame('Título nuevo',
+            (string)$DB->get_field('local_handbook_page', 'title', ['id' => $page->id]));
+        $this->assertSame(changeset_service::STATUS_COMPLETED,
+            (string)$DB->get_field('local_handbook_changeset', 'status', ['id' => $changeset->id]));
+    }
+
+    public function test_publish_all_applies_items_in_dependency_order(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create a category and move a page into it — in ONE set. publish_all
+        // must apply the category creation before the page move.
+        $from = $this->create_category();
+        $page = $this->publish_page($from, 'Migrable');
+        $changeset = changeset_service::create((object)['title' => 'Migration', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:dest', 'name' => 'Destino']);
+        changeset_service::upsert_page_move($changeset->id, (int)$page->id, 0, 0, 0, '', 0,
+            'newcat:dest');
+        changeset_service::submit($changeset->id);
+
+        changeset_service::approve_all($changeset->id);
+        changeset_service::publish_all($changeset->id);
+
+        $newcatid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:dest']);
+        $this->assertGreaterThan(0, $newcatid);
+        $this->assertSame($newcatid,
+            (int)$DB->get_field('local_handbook_page', 'categoryid', ['id' => $page->id]));
+    }
+
+    public function test_validate_all_reports_ok_for_a_valid_item(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Validable');
+        $changeset = changeset_service::create((object)['title' => 'V', 'source' => 'ai']);
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id, ['title' => 'X']);
+
+        $results = changeset_service::validate_all($changeset->id);
+        $this->assertNotEmpty($results);
+        $this->assertTrue($results[0]['ok']);
+        $this->assertSame('', $results[0]['error']);
+    }
+
     /**
      * Read one item's status.
      *

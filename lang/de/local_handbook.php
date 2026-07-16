@@ -618,3 +618,11 @@ $string['conflict_pagemove'] = 'Die Seite wurde nach Erstellung dieses Vorschlag
 $string['errorpagemovesame'] = 'Die Seite befindet sich bereits in dieser Kategorie.';
 $string['event_page_moved'] = 'Handbuchseite verschoben';
 $string['errortemprefunresolved'] = 'Die Kategorie „{$a}" wird in diesem Change-Set vorgeschlagen, wurde aber noch nicht erstellt; wenden Sie zuerst ihre Erstellung an.';
+
+// Autorisierung des gesamten Change-Sets (Anforderungen der nächsten Version, Phase 2).
+$string['changesetapproved'] = 'Change-Set freigegeben.';
+$string['changesetapplied'] = 'Change-Set angewendet.';
+$string['approveandapplyset'] = 'Gesamtes Change-Set freigeben &amp; anwenden';
+$string['approveset'] = 'Gesamtes Change-Set freigeben';
+$string['applyset'] = 'Freigegebenes Change-Set anwenden';
+$string['confirmapplyset'] = 'Das gesamte freigegebene Change-Set jetzt anwenden? Alle freigegebenen Elemente werden zusammen in einer Transaktion veröffentlicht; schlägt eines fehl, wird keines angewendet.';

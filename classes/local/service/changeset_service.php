@@ -1156,6 +1156,211 @@ class changeset_service {
     }
 
     /**
+     * Validate every non-terminal item of a change set against the current
+     * published state, without applying anything (spec 5.1). Read-only.
+     *
+     * @param int $changesetid Change-set id.
+     * @return array Per-item [itemid, kind, ok, error].
+     */
+    public static function validate_all(int $changesetid): array {
+        global $DB;
+
+        $items = $DB->get_records('local_handbook_changeitem',
+            ['changesetid' => $changesetid], 'sortorder ASC');
+        $results = [];
+        foreach ($items as $item) {
+            if (in_array($item->itemstatus, self::ITEM_TERMINAL, true)) {
+                continue;
+            }
+            $ok = true;
+            $error = '';
+            try {
+                self::validate_item($item);
+            } catch (\moodle_exception $e) {
+                $ok = false;
+                $error = $e->getMessage();
+            }
+            $results[] = [
+                'itemid' => (int)$item->id,
+                'kind' => (string)$item->kind,
+                'ok' => $ok,
+                'error' => $error,
+            ];
+        }
+        return $results;
+    }
+
+    /**
+     * Validate one item against current state (throws on any problem).
+     *
+     * @param stdClass $item Change-item record.
+     * @return void
+     */
+    private static function validate_item(stdClass $item): void {
+        global $DB;
+
+        $payload = json_decode((string)$item->payloadjson, true);
+        $payload = is_array($payload) ? $payload : [];
+
+        switch ($item->kind) {
+            case self::KIND_PAGE_REVISION:
+                if (!(int)$item->revisionid
+                        || !$DB->record_exists('local_handbook_revision', ['id' => $item->revisionid])) {
+                    throw new moodle_exception('errorworkflowstate', 'local_handbook');
+                }
+                break;
+            case self::KIND_PAGE_METADATA:
+                self::validate_metadata_patch(
+                    $DB->get_record('local_handbook_page', ['id' => $item->pageid], '*', MUST_EXIST),
+                    $payload);
+                break;
+            case self::KIND_PAGE_CREATE:
+                self::validate_new_page($payload);
+                break;
+            case self::KIND_RELATION_CHANGE:
+                self::validate_relations((int)$item->pageid, $payload['ops'] ?? []);
+                break;
+            case self::KIND_PAGE_ARCHIVE:
+                self::validate_archive(
+                    $DB->get_record('local_handbook_page', ['id' => $item->pageid], '*', MUST_EXIST),
+                    $payload);
+                break;
+            case self::KIND_CATEGORY_CHANGE:
+                self::validate_category_op($payload);
+                break;
+            default:
+                // page_move (target may be a tempkey) and page_restore are
+                // checked at apply; nothing to pre-validate here.
+                break;
+        }
+    }
+
+    /**
+     * Approve every in-review item of a change set (spec 5.4). The caller MUST
+     * have checked local/handbook:approve.
+     *
+     * @param int $changesetid Change-set id.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function approve_all(int $changesetid, int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+
+        $items = $DB->get_records('local_handbook_changeitem',
+            ['changesetid' => $changesetid], 'sortorder ASC');
+        foreach ($items as $item) {
+            if ($item->itemstatus !== self::ITEM_IN_REVIEW) {
+                continue;
+            }
+            if ($item->kind === self::KIND_PAGE_REVISION) {
+                $revision = $DB->get_record('local_handbook_revision', ['id' => $item->revisionid]);
+                if ($revision && $revision->status === page_service::STATUS_IN_REVIEW) {
+                    page_service::approve($revision, $userid);
+                }
+            } else {
+                $DB->update_record('local_handbook_changeitem', (object)[
+                    'id' => (int)$item->id, 'itemstatus' => self::ITEM_APPROVED, 'timemodified' => time(),
+                ]);
+            }
+        }
+        self::recompute_status($changesetid, $userid);
+    }
+
+    /**
+     * Apply every approved item of a change set atomically (spec 5.3). The
+     * caller MUST have checked local/handbook:publish.
+     *
+     * Items are applied in dependency order (categories created first,
+     * dissolution last) inside ONE transaction; any failure rolls the whole
+     * set back so no part becomes published. There is no external/MCP route to
+     * this method.
+     *
+     * @param int $changesetid Change-set id.
+     * @param int $userid Acting user (0 = current user).
+     * @return array ['applied' => int[]].
+     */
+    public static function publish_all(int $changesetid, int $userid = 0): array {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+
+        $items = array_values($DB->get_records('local_handbook_changeitem',
+            ['changesetid' => $changesetid]));
+        usort($items, function ($a, $b) {
+            return self::apply_priority($a) <=> self::apply_priority($b);
+        });
+
+        $applied = [];
+        $transaction = $DB->start_delegated_transaction();
+        try {
+            foreach ($items as $item) {
+                if ($item->itemstatus !== self::ITEM_APPROVED) {
+                    continue;
+                }
+                if ($item->kind === self::KIND_PAGE_REVISION) {
+                    $revision = $DB->get_record('local_handbook_revision',
+                        ['id' => $item->revisionid], '*', MUST_EXIST);
+                    if ($revision->status === page_service::STATUS_APPROVED) {
+                        // The observer marks the item published after commit.
+                        page_service::publish($revision, $userid);
+                    }
+                } else {
+                    self::apply_item($item, $userid);
+                    $DB->update_record('local_handbook_changeitem', (object)[
+                        'id' => (int)$item->id, 'itemstatus' => self::ITEM_PUBLISHED, 'timemodified' => time(),
+                    ]);
+                }
+                $applied[] = (int)$item->id;
+            }
+            $transaction->allow_commit();
+        } catch (\Exception $e) {
+            $transaction->rollback($e);
+            throw $e;
+        }
+
+        self::recompute_status($changesetid, $userid);
+        return ['applied' => $applied];
+    }
+
+    /**
+     * Apply-order priority for an item (lower = applied first). Categories are
+     * created before pages move into them; merges and dissolutions come last.
+     *
+     * @param stdClass $item Change-item record.
+     * @return int
+     */
+    private static function apply_priority(stdClass $item): int {
+        if ($item->kind === self::KIND_CATEGORY_CHANGE) {
+            $op = json_decode((string)$item->payloadjson, true);
+            $action = is_array($op) ? (string)($op['op'] ?? '') : '';
+            return match ($action) {
+                'create' => 10,
+                'update' => 20,
+                'move' => 45,
+                'merge' => 55,
+                'delete_empty' => 60,
+                default => 30,
+            };
+        }
+        return match ($item->kind) {
+            self::KIND_PAGE_CREATE => 15,
+            self::KIND_PAGE_MOVE => 40,
+            self::KIND_PAGE_ARCHIVE, self::KIND_PAGE_RESTORE => 50,
+            default => 30,
+        };
+    }
+
+    /**
      * Approve a non-revision proposal item (in_review -> approved).
      *
      * The caller MUST have checked local/handbook:approve first. Page-revision

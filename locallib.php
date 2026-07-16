@@ -265,6 +265,32 @@ function local_handbook_render_metadata_diff(stdClass $page, array $patch): stri
 }
 
 /**
+ * A set-level change-set action button (posts an action + sesskey), with an
+ * optional confirmation prompt.
+ *
+ * @param moodle_url $url Change-set detail URL.
+ * @param string $action Action name.
+ * @param string $label Button label.
+ * @param string $btnclass Bootstrap button class suffix.
+ * @param string $confirmmsg Optional confirmation message.
+ * @return string
+ */
+function local_handbook_changeset_set_button(moodle_url $url, string $action, string $label,
+        string $btnclass, string $confirmmsg = ''): string {
+    $attrs = ['method' => 'post', 'action' => $url->out(false), 'class' => 'd-inline'];
+    if ($confirmmsg !== '') {
+        $attrs['onsubmit'] = 'return confirm(' . json_encode($confirmmsg) . ');';
+    }
+    $form = html_writer::start_tag('form', $attrs);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => $action]);
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    $form .= html_writer::tag('button', s($label),
+        ['type' => 'submit', 'class' => 'btn btn-sm ' . $btnclass]);
+    $form .= html_writer::end_tag('form');
+    return $form;
+}
+
+/**
  * A remove-item form for a non-revision change item.
  *
  * @param moodle_url $url Change-set detail URL.

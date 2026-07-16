@@ -74,6 +74,26 @@ if ($action !== '') {
         redirect($url, get_string('changesetsubmittednotice', 'local_handbook'));
     }
 
+    // Whole-set authorization (spec 5.3, 5.4): approve and/or apply the entire
+    // set. The apply is atomic — every approved item in one transaction.
+    if ($action === 'approveset' && !$locked) {
+        require_capability('local/handbook:approve', $context);
+        changeset_service::approve_all($id);
+        redirect($url, get_string('changesetapproved', 'local_handbook'));
+    }
+    if ($action === 'applyset' && !$locked) {
+        require_capability('local/handbook:publish', $context);
+        changeset_service::publish_all($id);
+        redirect($url, get_string('changesetapplied', 'local_handbook'));
+    }
+    if ($action === 'approveandapplyset' && !$locked) {
+        require_capability('local/handbook:approve', $context);
+        require_capability('local/handbook:publish', $context);
+        changeset_service::approve_all($id);
+        changeset_service::publish_all($id);
+        redirect($url, get_string('changesetapplied', 'local_handbook'));
+    }
+
     if ($action === 'cancel' && !$locked) {
         changeset_service::cancel($id);
         redirect(new moodle_url('/local/handbook/manage/changesets.php'),
@@ -212,6 +232,29 @@ if (!$locked) {
     $cancelform .= html_writer::end_tag('form');
 
     echo html_writer::div($submitform . ' ' . $cancelform, 'mb-3 d-flex flex-wrap gap-2');
+
+    // Whole-set authorization (spec 5.4): one action to approve and apply the
+    // complete set. Shown once the set has items to act on.
+    if (!empty($changeset->items)) {
+        $setbuttons = '';
+        if ($canapprove && $canpublish) {
+            $setbuttons .= local_handbook_changeset_set_button($url, 'approveandapplyset',
+                get_string('approveandapplyset', 'local_handbook'), 'btn-success',
+                get_string('confirmapplyset', 'local_handbook'));
+        }
+        if ($canapprove) {
+            $setbuttons .= ' ' . local_handbook_changeset_set_button($url, 'approveset',
+                get_string('approveset', 'local_handbook'), 'btn-outline-primary');
+        }
+        if ($canpublish) {
+            $setbuttons .= ' ' . local_handbook_changeset_set_button($url, 'applyset',
+                get_string('applyset', 'local_handbook'), 'btn-outline-primary',
+                get_string('confirmapplyset', 'local_handbook'));
+        }
+        if ($setbuttons !== '') {
+            echo html_writer::div($setbuttons, 'mb-3 d-flex flex-wrap gap-2 align-items-center');
+        }
+    }
 }
 
 // ---- Add a page -----------------------------------------------------------.

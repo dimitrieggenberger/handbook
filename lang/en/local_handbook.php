@@ -618,3 +618,11 @@ $string['conflict_pagemove'] = 'The page moved or changed after this proposal wa
 $string['errorpagemovesame'] = 'The page is already in that category.';
 $string['event_page_moved'] = 'Handbook page moved';
 $string['errortemprefunresolved'] = 'The category "{$a}" is proposed in this change set but has not been created yet; apply its creation first.';
+
+// Whole-change-set authorization (next-version requirements, phase 2).
+$string['changesetapproved'] = 'Change set approved.';
+$string['changesetapplied'] = 'Change set applied.';
+$string['approveandapplyset'] = 'Approve &amp; apply entire change set';
+$string['approveset'] = 'Approve entire change set';
+$string['applyset'] = 'Apply approved change set';
+$string['confirmapplyset'] = 'Apply the entire approved change set now? All approved items are published together in one transaction; if any fails, none is applied.';

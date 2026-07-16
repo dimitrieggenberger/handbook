@@ -218,6 +218,13 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     handler(({ identifier }) => ws("local_handbook_get_archive_impact", { identifier }))
   );
 
+  server.tool(
+    "handbook_validate_change_set",
+    "Validate every item of a change set against the current published state without applying anything. Returns per-item ok/error. Use it before asking a human to apply the whole set. Approval and application remain human actions in Moodle.",
+    { changesetid: z.number().int() },
+    handler(({ changesetid }) => ws("local_handbook_validate_changeset", { changesetid }))
+  );
+
   if (!writable) {
     return; // Read-only mode: no draft or change-set write tools.
   }

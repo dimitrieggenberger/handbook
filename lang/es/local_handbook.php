@@ -618,3 +618,11 @@ $string['conflict_pagemove'] = 'La página se movió o cambió después de prepa
 $string['errorpagemovesame'] = 'La página ya está en esa categoría.';
 $string['event_page_moved'] = 'Página del manual movida';
 $string['errortemprefunresolved'] = 'La categoría «{$a}» se propone en este change set pero aún no se ha creado; aplique primero su creación.';
+
+// Autorización de todo el change set (requisitos de la siguiente versión, fase 2).
+$string['changesetapproved'] = 'Change set aprobado.';
+$string['changesetapplied'] = 'Change set aplicado.';
+$string['approveandapplyset'] = 'Aprobar y aplicar todo el change set';
+$string['approveset'] = 'Aprobar todo el change set';
+$string['applyset'] = 'Aplicar el change set aprobado';
+$string['confirmapplyset'] = '¿Aplicar ahora todo el change set aprobado? Todos los ítems aprobados se publican juntos en una sola transacción; si alguno falla, no se aplica ninguno.';
