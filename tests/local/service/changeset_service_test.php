@@ -1250,6 +1250,64 @@ final class changeset_service_test extends advanced_testcase {
         ]);
     }
 
+    public function test_reading_path_diff_reports_added_removed_and_changes(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $a = $this->publish_page($cat, 'A');
+        $b = $this->publish_page($cat, 'B');
+        $c = $this->publish_page($cat, 'C');
+
+        // Current path: A (required, "Intro") and B (required, "Intro").
+        $now = time();
+        $pathid = (int)$DB->insert_record('local_handbook_path', (object)[
+            'name' => 'Ruta', 'slug' => 'ruta-' . random_string(5), 'description' => '',
+            'descriptionformat' => FORMAT_HTML, 'audiencejson' => '', 'schoolyear' => '2024',
+            'active' => 1, 'pathtype' => '', 'estimatedminutes' => 0, 'reviewdate' => 0,
+            'quizcmid' => 0, 'timecreated' => $now, 'timemodified' => $now,
+            'createdby' => 2, 'modifiedby' => 2,
+        ]);
+        foreach ([$a, $b] as $i => $page) {
+            $DB->insert_record('local_handbook_pathitem', (object)[
+                'pathid' => $pathid, 'pageid' => (int)$page->id, 'sectionname' => 'Intro',
+                'sortorder' => $i, 'required' => 1, 'quizcmid' => 0, 'rationale' => null,
+            ]);
+        }
+
+        // Proposed: rename, B moved to "Avanzado" and now optional, C added, A dropped.
+        $snapshot = [
+            'pathid' => $pathid,
+            'name' => 'Ruta nueva',
+            'schoolyear' => '2024',
+            'active' => 1,
+            'sections' => [
+                ['name' => 'Avanzado', 'items' => [
+                    ['pageid' => (int)$b->id, 'required' => false],
+                    ['pageid' => (int)$c->id, 'required' => true],
+                ]],
+            ],
+        ];
+        $diff = changeset_service::reading_path_diff($snapshot);
+
+        $this->assertFalse($diff['iscreate']);
+        $this->assertArrayHasKey('name', $diff['fields']);
+        $this->assertSame('Ruta', $diff['fields']['name']['old']);
+        $this->assertSame([(int)$a->id], $diff['removed']);
+
+        $byid = [];
+        foreach ($diff['items'] as $it) {
+            $byid[$it['pageid']] = $it;
+        }
+        $this->assertSame('kept', $byid[(int)$b->id]['status']);
+        $this->assertTrue($byid[(int)$b->id]['sectionchanged']);
+        $this->assertTrue($byid[(int)$b->id]['requiredchanged']);
+        $this->assertSame('Intro', $byid[(int)$b->id]['oldsection']);
+        $this->assertSame('new', $byid[(int)$c->id]['status']);
+    }
+
     /**
      * Read one item's status.
      *

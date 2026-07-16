@@ -1011,6 +1011,103 @@ class changeset_service {
     }
 
     /**
+     * Compute the effect of a reading-path snapshot against the current path
+     * (spec 7.2): which header fields change, and which pages are added,
+     * removed, moved between sections, or change required/optional. Read-only;
+     * used by the review UI so a reviewer sees exactly what an update does.
+     *
+     * @param array $snapshot A normalised snapshot (as stored in the payload).
+     * @return array {iscreate, fields:{field=>{old,new}}, items:[...ordered...], removed:int[]}
+     */
+    public static function reading_path_diff(array $snapshot): array {
+        global $DB;
+
+        $pathid = (int)($snapshot['pathid'] ?? 0);
+        $iscreate = ($pathid === 0);
+
+        // Flatten proposed items in order.
+        $proposed = [];
+        foreach (($snapshot['sections'] ?? []) as $section) {
+            $sname = (string)($section['name'] ?? '');
+            foreach (($section['items'] ?? []) as $it) {
+                $proposed[] = [
+                    'pageid' => (int)($it['pageid'] ?? 0),
+                    'pagetempkey' => (string)($it['pagetempkey'] ?? ''),
+                    'section' => $sname,
+                    'required' => (int)((bool)($it['required'] ?? true)),
+                ];
+            }
+        }
+
+        $fields = [];
+        $current = [];
+        if (!$iscreate) {
+            $path = $DB->get_record('local_handbook_path', ['id' => $pathid]);
+            if ($path) {
+                $comparable = [
+                    'name' => (string)$path->name,
+                    'slug' => (string)$path->slug,
+                    'description' => (string)$path->description,
+                    'pathtype' => (string)$path->pathtype,
+                    'schoolyear' => (string)$path->schoolyear,
+                    'active' => (int)$path->active,
+                    'estimatedminutes' => (int)$path->estimatedminutes,
+                    'reviewdate' => (int)$path->reviewdate,
+                    'audiencejson' => (string)$path->audiencejson,
+                ];
+                $ints = ['active', 'estimatedminutes', 'reviewdate'];
+                foreach ($comparable as $key => $old) {
+                    $new = in_array($key, $ints, true)
+                        ? (int)($snapshot[$key] ?? 0) : (string)($snapshot[$key] ?? '');
+                    if ((string)$old !== (string)$new) {
+                        $fields[$key] = ['old' => $old, 'new' => $new];
+                    }
+                }
+                foreach ($DB->get_records('local_handbook_pathitem', ['pathid' => $pathid]) as $row) {
+                    $current[(int)$row->pageid] = [
+                        'section' => (string)$row->sectionname,
+                        'required' => (int)$row->required,
+                    ];
+                }
+            }
+        }
+
+        $items = [];
+        $seen = [];
+        foreach ($proposed as $p) {
+            $pid = $p['pageid'];
+            $entry = $p;
+            if ($pid && isset($current[$pid])) {
+                $entry['status'] = 'kept';
+                $entry['sectionchanged'] = ($current[$pid]['section'] !== $p['section']);
+                $entry['requiredchanged'] = ($current[$pid]['required'] !== $p['required']);
+                $entry['oldsection'] = $current[$pid]['section'];
+                $seen[$pid] = true;
+            } else {
+                $entry['status'] = 'new';
+                $entry['sectionchanged'] = false;
+                $entry['requiredchanged'] = false;
+                $entry['oldsection'] = '';
+            }
+            $items[] = $entry;
+        }
+
+        $removed = [];
+        foreach (array_keys($current) as $pid) {
+            if (!isset($seen[$pid])) {
+                $removed[] = (int)$pid;
+            }
+        }
+
+        return [
+            'iscreate' => $iscreate,
+            'fields' => $fields,
+            'items' => $items,
+            'removed' => $removed,
+        ];
+    }
+
+    /**
      * Impact of archiving a page: inbound relations, active-path memberships,
      * and whether it is required reading (spec 25). Read-only.
      *

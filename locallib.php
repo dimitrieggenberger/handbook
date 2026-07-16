@@ -544,9 +544,19 @@ function local_handbook_render_reading_path_item(stdClass $item): string {
     global $DB;
 
     $data = json_decode((string)$item->payloadjson, true) ?: [];
-
-    $rows = local_handbook_lifecycle_row('pathnamelabel', (string)($data['name'] ?? ''));
+    $service = \local_handbook\local\service\changeset_service::class;
+    $diff = $service::reading_path_diff($data);
+    $changed = $diff['fields'];
     $pathid = (int)($data['pathid'] ?? 0);
+
+    // Annotate a header value with its previous value when the field changed.
+    $was = static function (string $key) use ($changed): string {
+        return isset($changed[$key])
+            ? ' ' . get_string('pathwas', 'local_handbook', (string)$changed[$key]['old']) : '';
+    };
+
+    $rows = local_handbook_lifecycle_row('pathnamelabel',
+        (string)($data['name'] ?? '') . $was('name'));
     $rows .= local_handbook_lifecycle_row('pathoperation',
         get_string($pathid ? 'pathupdate' : 'pathcreate', 'local_handbook'));
     if (!empty($data['pathtype'])) {
@@ -554,12 +564,18 @@ function local_handbook_render_reading_path_item(stdClass $item): string {
             get_string('pathtype_' . $data['pathtype'], 'local_handbook'));
     }
     if (!empty($data['schoolyear'])) {
-        $rows .= local_handbook_lifecycle_row('pathschoolyear', (string)$data['schoolyear']);
+        $rows .= local_handbook_lifecycle_row('pathschoolyear',
+            (string)$data['schoolyear'] . $was('schoolyear'));
     }
-    $rows .= local_handbook_lifecycle_row('pathactive',
-        get_string(!empty($data['active']) ? 'yes' : 'no'));
+    $activeval = get_string(!empty($data['active']) ? 'yes' : 'no');
+    if (isset($changed['active'])) {
+        $activeval .= ' ' . get_string('pathwas', 'local_handbook',
+            get_string($changed['active']['old'] ? 'yes' : 'no'));
+    }
+    $rows .= local_handbook_lifecycle_row('pathactive', $activeval);
     if (!empty($data['estimatedminutes'])) {
-        $rows .= local_handbook_lifecycle_row('pathestimatedminutes', (string)(int)$data['estimatedminutes']);
+        $rows .= local_handbook_lifecycle_row('pathestimatedminutes',
+            (string)(int)$data['estimatedminutes'] . $was('estimatedminutes'));
     }
     $out = html_writer::tag('table', html_writer::tag('tbody', $rows),
         ['class' => 'table table-sm table-bordered small mb-2']);
@@ -568,30 +584,65 @@ function local_handbook_render_reading_path_item(stdClass $item): string {
         $out .= html_writer::div(s((string)$data['description']), 'small text-muted mb-2');
     }
 
-    // Sections and their pages, in order.
-    foreach (($data['sections'] ?? []) as $section) {
-        $sname = trim((string)($section['name'] ?? ''));
-        if ($sname !== '') {
-            $out .= html_writer::tag('div', s($sname), ['class' => 'font-weight-bold small mt-2']);
+    // Proposed items, in order, grouped by section and annotated against the
+    // current path (New / Now required|optional / Moved from ...).
+    $pagetitle = static function (int $pid, string $tempkey) use ($DB): string {
+        if ($pid) {
+            $title = (string)$DB->get_field('local_handbook_page', 'title', ['id' => $pid]);
+            return $title !== '' ? format_string($title) : ('#' . $pid);
         }
-        $lis = '';
-        foreach (($section['items'] ?? []) as $it) {
-            $pageid = (int)($it['pageid'] ?? 0);
-            if ($pageid) {
-                $title = (string)$DB->get_field('local_handbook_page', 'title', ['id' => $pageid]);
-                $label = $title !== '' ? format_string($title) : ('#' . $pageid);
-            } else {
-                $label = get_string('pathnewpageitem', 'local_handbook',
-                    (string)($it['pagetempkey'] ?? ''));
-            }
-            if (empty($it['required'])) {
-                $label .= ' ' . get_string('pathoptionalsuffix', 'local_handbook');
-            }
-            $lis .= html_writer::tag('li', s($label));
+        return get_string('pathnewpageitem', 'local_handbook', $tempkey);
+    };
+
+    $blocks = [];
+    $lastsection = null;
+    foreach ($diff['items'] as $it) {
+        $section = (string)$it['section'];
+        if ($lastsection === null || $section !== $lastsection) {
+            $blocks[] = ['name' => $section, 'lis' => ''];
+            $lastsection = $section;
         }
-        if ($lis !== '') {
-            $out .= html_writer::tag('ol', $lis, ['class' => 'small mb-2']);
+        $idx = count($blocks) - 1;
+
+        $label = s($pagetitle((int)$it['pageid'], (string)$it['pagetempkey']));
+        if ($it['status'] === 'new' && !$diff['iscreate']) {
+            $label .= ' ' . html_writer::span(s(get_string('pathitemnew', 'local_handbook')),
+                'badge badge-success');
         }
+        if (!empty($it['requiredchanged'])) {
+            $label .= ' ' . html_writer::span(
+                s(get_string($it['required'] ? 'pathitemnowrequired' : 'pathitemnowoptional',
+                    'local_handbook')), 'badge badge-warning');
+        } else if (empty($it['required'])) {
+            $label .= ' ' . html_writer::span(
+                s(get_string('pathoptionalsuffix', 'local_handbook')), 'text-muted');
+        }
+        if (!empty($it['sectionchanged'])) {
+            $from = (string)$it['oldsection'] !== '' ? (string)$it['oldsection']
+                : get_string('pathnosection', 'local_handbook');
+            $label .= ' ' . html_writer::span(
+                s(get_string('pathitemmovedsection', 'local_handbook', $from)), 'badge badge-info');
+        }
+        $blocks[$idx]['lis'] .= html_writer::tag('li', $label);
+    }
+    foreach ($blocks as $block) {
+        if ($block['name'] !== '') {
+            $out .= html_writer::tag('div', s($block['name']), ['class' => 'font-weight-bold small mt-2']);
+        }
+        if ($block['lis'] !== '') {
+            $out .= html_writer::tag('ol', $block['lis'], ['class' => 'small mb-2']);
+        }
+    }
+
+    // Pages the update drops from the path.
+    if (!empty($diff['removed'])) {
+        $rl = '';
+        foreach ($diff['removed'] as $pid) {
+            $rl .= html_writer::tag('li', s($pagetitle((int)$pid, '')));
+        }
+        $out .= html_writer::div(s(get_string('pathremovedheading', 'local_handbook')),
+            'font-weight-bold small mt-2 text-danger');
+        $out .= html_writer::tag('ul', $rl, ['class' => 'small mb-2 text-danger']);
     }
 
     return $out;
