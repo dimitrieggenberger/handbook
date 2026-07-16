@@ -218,6 +218,28 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     handler(({ identifier }) => ws("local_handbook_get_archive_impact", { identifier }))
   );
 
+  server.tool(
+    "handbook_validate_change_set",
+    "Validate every item of a change set against the current published state without applying anything. Returns per-item ok/error. Use it before asking a human to apply the whole set. Approval and application remain human actions in Moodle.",
+    { changesetid: z.number().int() },
+    handler(({ changesetid }) => ws("local_handbook_validate_changeset", { changesetid }))
+  );
+
+  server.tool(
+    "handbook_list_reading_paths",
+    "List reading paths (onboarding, calendar-phase, role-based, ...) with their item counts. Use this to discover an existing path before proposing an edit, or to check whether one already covers a topic before proposing a new one.",
+    { activeonly: z.boolean().optional().describe("Only active paths") },
+    handler(({ activeonly }) =>
+      ws("local_handbook_list_reading_paths", { activeonly: activeonly ?? false }))
+  );
+
+  server.tool(
+    "handbook_get_reading_path",
+    "Get a reading path's full snapshot: header fields plus its ordered sections and pages. Read this before proposing an edit, then echo the sections back (changed as needed) to handbook_upsert_change_set_reading_path, passing timemodified as expectedtimemodified so a concurrent edit is detected.",
+    { pathid: z.number().int() },
+    handler(({ pathid }) => ws("local_handbook_get_reading_path", { pathid }))
+  );
+
   if (!writable) {
     return; // Read-only mode: no draft or change-set write tools.
   }
@@ -477,28 +499,55 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
   );
 
   server.tool(
-    "handbook_upsert_change_set_category",
-    "Propose a category change inside THIS change set: op = create (name, optional parentid), update (categoryid + fields to change), move (categoryid + newparentid), or merge (sourceid + targetid: moves the source's pages and subcategories into the target, then deletes the source). Cycles and merges into a descendant are rejected. Staged as a draft; a human applies it in Moodle.",
+    "handbook_upsert_change_set_page_move",
+    "Propose moving ONE page to another category inside THIS change set. Preserves the page's id, slug, revisions, acknowledgements and relations — only its category changes. Pass expectedcategoryid and expectedpagetimemodified from the page you read for a safe (conflict-detecting) move. Staged as a draft; a human applies it in Moodle.",
     {
       changesetid: z.number().int(),
-      op: z.enum(["create", "update", "move", "merge"]),
+      identifier: z.string().describe("Page slug or id to move"),
+      targetcategoryid: z.number().int().optional().describe("Destination category id"),
+      targetcategorytempkey: z.string().optional()
+        .describe("Tempkey of a category created in this same change set (instead of targetcategoryid)"),
+      expectedcategoryid: z.number().int().optional(),
+      expectedpagetimemodified: z.number().int().optional(),
+      changesummary: z.string().optional(),
+    },
+    handler((args) =>
+      ws("local_handbook_upsert_changeset_page_move", {
+        changesetid: args.changesetid,
+        identifier: args.identifier,
+        targetcategoryid: args.targetcategoryid ?? 0,
+        targetcategorytempkey: args.targetcategorytempkey ?? "",
+        expectedcategoryid: args.expectedcategoryid ?? 0,
+        expectedpagetimemodified: args.expectedpagetimemodified ?? 0,
+        changesummary: args.changesummary ?? "",
+      }))
+  );
+
+  server.tool(
+    "handbook_upsert_change_set_category",
+    "Propose a category change inside THIS change set: op = create (name, optional parentid), update (categoryid + fields to change), move (categoryid + newparentid), merge (sourceid + targetid: moves the source's pages and subcategories into the target, then deletes the source), or delete_empty (categoryid: dissolve a category that has no pages and no subcategories). Cycles and merges into a descendant are rejected. Staged as a draft; a human applies it in Moodle.",
+    {
+      changesetid: z.number().int(),
+      op: z.enum(["create", "update", "move", "merge", "delete_empty"]),
       tempkey: z.string().optional().describe("Stable id for a new category (create)"),
       name: z.string().optional(),
-      slug: z.string().optional(),
+      slug: z.string().optional().describe("Slug for create/update; the old slug keeps resolving"),
       parentid: z.number().int().optional().describe("Parent id (create)"),
+      parenttempkey: z.string().optional().describe("Tempkey of a parent created in this set (create)"),
+      newparenttempkey: z.string().optional().describe("Tempkey of a new parent created in this set (move)"),
       description: z.string().optional(),
       icon: z.string().optional().describe("Font Awesome class, e.g. fa-folder-open"),
       visible: z.boolean().optional(),
       sortorder: z.number().int().optional(),
-      categoryid: z.number().int().optional().describe("Category id (update/move)"),
+      categoryid: z.number().int().optional().describe("Category id (update/move/delete_empty)"),
       newparentid: z.number().int().optional().describe("New parent id (move; 0 = top level)"),
       sourceid: z.number().int().optional().describe("Source category id (merge)"),
       targetid: z.number().int().optional().describe("Target category id (merge)"),
     },
     handler((args) => {
       const operation = { op: args.op };
-      for (const key of ["tempkey", "name", "slug", "parentid", "description", "icon",
-        "visible", "sortorder", "categoryid", "newparentid", "sourceid", "targetid"]) {
+      for (const key of ["tempkey", "name", "slug", "parentid", "parenttempkey", "newparenttempkey",
+        "description", "icon", "visible", "sortorder", "categoryid", "newparentid", "sourceid", "targetid"]) {
         if (args[key] !== undefined) {
           operation[key] = args[key];
         }
@@ -508,6 +557,64 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
         operation,
       });
     })
+  );
+
+  server.tool(
+    "handbook_upsert_change_set_reading_path",
+    "Propose a WHOLE reading path (create or update) inside THIS change set. Submit a COMPLETE snapshot: applying it makes the path match exactly (sections, page order, required flags). Omit pathid to create; pass it (with expectedtimemodified from handbook_get_reading_path) to edit. Each item targets an existing page (pageid) or a page proposed in this same set (pagetempkey). Staged as a draft; a human applies it in Moodle.",
+    {
+      changesetid: z.number().int(),
+      pathid: z.number().int().optional().describe("Existing path id to edit (omit to create)"),
+      name: z.string(),
+      slug: z.string().optional().describe("Slug (omit to derive from name); the old slug keeps resolving"),
+      description: z.string().optional(),
+      pathtype: z.enum(["onboarding", "calendar_phase", "role_based", "situational", "refresher", "compliance"])
+        .optional(),
+      schoolyear: z.string().optional().describe("e.g. 2025-2026 (omit for evergreen)"),
+      active: z.boolean().optional(),
+      reviewdate: z.number().int().optional().describe("Unix timestamp of the next review (0 = unset)"),
+      estimatedminutes: z.number().int().optional(),
+      audiencecohorts: z.array(z.number().int()).optional().describe("Cohort ids (omit = everyone)"),
+      audienceroles: z.array(z.number().int()).optional().describe("System role ids (omit = everyone)"),
+      expectedtimemodified: z.number().int().optional()
+        .describe("Path timemodified from handbook_get_reading_path (edit only)"),
+      sections: z.array(z.object({
+        name: z.string().optional().describe("Section heading (omit for a single default section)"),
+        items: z.array(z.object({
+          pageid: z.number().int().optional().describe("Existing page id"),
+          pagetempkey: z.string().optional().describe("Tempkey of a page proposed in this set (instead of pageid)"),
+          required: z.boolean().optional(),
+          rationale: z.string().optional().describe("Why this page belongs in the path"),
+          quizcmid: z.number().int().optional(),
+        })).min(1),
+      })).min(1),
+    },
+    handler((args) =>
+      ws("local_handbook_upsert_changeset_reading_path", {
+        changesetid: args.changesetid,
+        pathid: args.pathid ?? 0,
+        name: args.name,
+        slug: args.slug ?? "",
+        description: args.description ?? "",
+        pathtype: args.pathtype ?? "",
+        schoolyear: args.schoolyear ?? "",
+        active: args.active ?? true,
+        reviewdate: args.reviewdate ?? 0,
+        estimatedminutes: args.estimatedminutes ?? 0,
+        audiencecohorts: args.audiencecohorts ?? [],
+        audienceroles: args.audienceroles ?? [],
+        expectedtimemodified: args.expectedtimemodified ?? 0,
+        sections: args.sections.map((section) => ({
+          name: section.name ?? "",
+          items: section.items.map((it) => ({
+            pageid: it.pageid ?? 0,
+            pagetempkey: it.pagetempkey ?? "",
+            required: it.required ?? true,
+            rationale: it.rationale ?? "",
+            quizcmid: it.quizcmid ?? 0,
+          })),
+        })),
+      }))
   );
 
   server.tool(

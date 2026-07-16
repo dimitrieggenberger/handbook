@@ -29,7 +29,7 @@
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
-use local_handbook\local\service\ack_service;
+use local_handbook\local\service\completion_service;
 use local_handbook\local\service\path_service;
 
 $pathid = optional_param('id', 0, PARAM_INT);
@@ -117,36 +117,34 @@ foreach ($items as $item) {
     $sections[$item->sectionname][] = $item;
 }
 
+// Completion counts every required item regardless of the page's global
+// required-reading flag (spec 8.3); optional items never block completion.
 $requiredtotal = 0;
 $confirmedtotal = 0;
 $statusbyitem = [];
 foreach ($items as $item) {
-    $pagerecord = (object)[
+    $status = completion_service::completion_status((int)$USER->id, (object)[
         'id' => $item->pageid,
-        'requiredreading' => $item->requiredreading,
         'publishedrevisionid' => $item->publishedrevisionid,
-    ];
-    $status = ack_service::get_status((int)$USER->id, $pagerecord);
+    ]);
     $statusbyitem[$item->id] = $status;
 
-    if ((int)$item->required && (int)$item->requiredreading) {
+    if ((int)$item->required) {
         $requiredtotal++;
-        if ($status->status === ack_service::STATUS_CONFIRMED) {
+        if ($status->status === completion_service::STATUS_COMPLETED) {
             $confirmedtotal++;
         }
     }
 }
 
-// The next required item still pending or needing reconfirmation drives the
+// The next required item still pending or needing a renewed read drives the
 // "Continuar" card and the current-section highlight.
 $nextitem = null;
 foreach ($items as $item) {
-    if (!(int)$item->required || !(int)$item->requiredreading) {
+    if (!(int)$item->required) {
         continue;
     }
-    $status = $statusbyitem[$item->id];
-    if ($status->status === ack_service::STATUS_PENDING
-            || $status->status === ack_service::STATUS_RECONFIRM) {
+    if ($statusbyitem[$item->id]->status !== completion_service::STATUS_COMPLETED) {
         $nextitem = $item;
         break;
     }
@@ -176,7 +174,7 @@ echo html_writer::div(html_writer::div($summary, 'card-body'),
 
 // "Continuar" card: jump to the next pending required item.
 if ($nextitem !== null) {
-    $continuestate = $statusbyitem[$nextitem->id]->status === ack_service::STATUS_RECONFIRM
+    $continuestate = $statusbyitem[$nextitem->id]->status === completion_service::STATUS_RECONFIRM
         ? get_string('reconfirmitem', 'local_handbook')
         : get_string('pendingitem', 'local_handbook');
     echo html_writer::div(
@@ -212,9 +210,9 @@ foreach ($sections as $sectionname => $sectionitems) {
     $sectionconfirmed = 0;
     $sectionrequired = 0;
     foreach ($sectionitems as $item) {
-        if ((int)$item->required && (int)$item->requiredreading) {
+        if ((int)$item->required) {
             $sectionrequired++;
-            if ($statusbyitem[$item->id]->status === ack_service::STATUS_CONFIRMED) {
+            if ($statusbyitem[$item->id]->status === completion_service::STATUS_COMPLETED) {
                 $sectionconfirmed++;
             }
         }
@@ -242,29 +240,27 @@ foreach ($sections as $sectionname => $sectionitems) {
         $status = $statusbyitem[$item->id];
         $pageurl = new moodle_url('/local/handbook/view.php', ['page' => $item->slug]);
 
+        $completed = $status->status === completion_service::STATUS_COMPLETED;
         if (!(int)$item->required) {
-            $rowclass = 'is-pending';
-            $icon = 'fa-bolt';
+            // Optional items never block completion, but show a tick once read.
+            $rowclass = $completed ? 'is-confirmed' : 'is-pending';
+            $icon = $completed ? 'fa-circle-check' : 'fa-bolt';
             $state = get_string('optionalitem', 'local_handbook');
-        } else if ($status->status === ack_service::STATUS_CONFIRMED) {
+        } else if ($completed) {
             $rowclass = 'is-confirmed';
             $icon = 'fa-circle-check';
-            $state = $status->ack
+            $state = $status->record
                 ? get_string('ackconfirmedshort', 'local_handbook',
-                    userdate((int)$status->ack->timeacknowledged, get_string('strftimedate', 'langconfig')))
+                    userdate((int)$status->record->timecompleted, get_string('strftimedate', 'langconfig')))
                 : get_string('status_published', 'local_handbook');
-        } else if ($status->status === ack_service::STATUS_RECONFIRM) {
+        } else if ($status->status === completion_service::STATUS_RECONFIRM) {
             $rowclass = 'is-reconfirm';
             $icon = 'fa-rotate';
             $state = get_string('reconfirmitem', 'local_handbook');
-        } else if ($status->status === ack_service::STATUS_NOT_REQUIRED) {
+        } else {
             $rowclass = 'is-pending';
             $icon = 'fa-book-open';
             $state = get_string('readitem', 'local_handbook');
-        } else {
-            $rowclass = 'is-pending';
-            $icon = 'fa-circle';
-            $state = get_string('pendingitem', 'local_handbook');
         }
 
         $titlehtml = html_writer::link($pageurl, s($item->title));

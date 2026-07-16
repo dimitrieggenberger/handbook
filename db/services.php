@@ -188,6 +188,12 @@ $functions = [
         'type' => 'read',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
     ],
+    'local_handbook_validate_changeset' => [
+        'classname' => 'local_handbook\external\validate_changeset',
+        'description' => 'Validate every item of a change set against current state (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
     'local_handbook_upsert_changeset_archive' => [
         'classname' => 'local_handbook\external\upsert_changeset_archive',
         'description' => 'Propose archiving a page inside a change set (draft only; never archives directly).',
@@ -202,9 +208,33 @@ $functions = [
     ],
     'local_handbook_upsert_changeset_category' => [
         'classname' => 'local_handbook\external\upsert_changeset_category',
-        'description' => 'Propose a category operation (create/update/move/merge) in a change set (draft only).',
+        'description' => 'Propose a category operation (create/update/move/merge/delete_empty) in a change set (draft only).',
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposetaxonomy',
+    ],
+    'local_handbook_upsert_changeset_page_move' => [
+        'classname' => 'local_handbook\external\upsert_changeset_page_move',
+        'description' => 'Propose moving a page to another category in a change set (draft only).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposetaxonomy',
+    ],
+    'local_handbook_list_reading_paths' => [
+        'classname' => 'local_handbook\external\list_reading_paths',
+        'description' => 'List reading paths with item counts (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_get_reading_path' => [
+        'classname' => 'local_handbook\external\get_reading_path',
+        'description' => 'Get a reading path\'s complete snapshot (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_upsert_changeset_reading_path' => [
+        'classname' => 'local_handbook\external\upsert_changeset_reading_path',
+        'description' => 'Propose a whole reading path (create/update) in a change set (draft only; never applies).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposepaths',
     ],
     'local_handbook_submit_changeset_for_review' => [
         'classname' => 'local_handbook\external\submit_changeset_for_review',

@@ -46,6 +46,7 @@ $string['handbook:apiproposemetadata'] = 'Proponer cambios de ficha (metadatos) 
 $string['handbook:apiproposerelations'] = 'Proponer cambios de relaciones entre páginas del manual mediante la API';
 $string['handbook:apiproposelifecycle'] = 'Proponer acciones de archivado/restauración del manual mediante la API';
 $string['handbook:apiproposetaxonomy'] = 'Proponer cambios de categorías del manual mediante la API';
+$string['handbook:apiproposepaths'] = 'Proponer cambios de rutas de lectura del manual mediante la API';
 $string['handbook:manage'] = 'Administrar el plugin del manual';
 
 // Navigation and page titles.
@@ -212,6 +213,14 @@ $string['ackrecordinfo'] = 'La confirmación queda registrada con tu usuario, la
 $string['requiresreack'] = 'Requiere nueva confirmación al publicarse';
 $string['requiresreack_help'] = 'Marca esta casilla en versiones con cambios sustanciales de páginas de lectura obligatoria: tras la publicación, todos deberán confirmar la lectura de nuevo. Déjala sin marcar para correcciones menores.';
 $string['errornotrequiredreading'] = 'Esta página no está marcada como lectura obligatoria.';
+
+// Finalización de lectura compartida para artículos obligatorios de una ruta (spec 8).
+$string['readingcompletion'] = 'Finalización de lectura';
+$string['markasread'] = 'Marcar como leído';
+$string['completioncheckboxlabel'] = 'He leído la versión actual de «{$a}».';
+$string['completedrecord'] = 'Leído el {$a->date} · versión publicada v{$a->version}';
+$string['completionreread'] = 'Este artículo cambió desde la última vez que lo leyó (ahora v{$a}). Vuelva a leerlo, por favor.';
+$string['completioninfo'] = 'Marcar un artículo como leído cuenta para todas las rutas de lectura que lo incluyen. Basta con leerlo una vez; una versión con cambios materiales puede pedirle que lo lea de nuevo.';
 
 // Reading paths (spec 15).
 $string['myreadingpath'] = 'Mi ruta de lectura';
@@ -608,3 +617,58 @@ $string['errorcategorynotfound'] = 'La categoría no existe.';
 $string['errorcategorynochange'] = 'Una actualización de categoría debe cambiar al menos un campo.';
 $string['errorcategorycycle'] = 'Ese cambio crearía un ciclo de categorías.';
 $string['errorcategorymergeself'] = 'Una categoría no puede fusionarse consigo misma.';
+$string['categoryop_delete_empty'] = 'Disolver categoría vacía';
+$string['categorychangesummary_delete_empty'] = 'Disolver categoría vacía';
+
+// Movimientos de páginas (requisitos de la siguiente versión, taxonomía fase 1).
+$string['pagemovechangesummary'] = 'Mover: {$a}';
+$string['pagemoveto'] = 'Mover a la categoría: {$a}';
+$string['conflict_pagemove'] = 'La página se movió o cambió después de preparar esta propuesta; recárguela y propóngala de nuevo.';
+$string['errorpagemovesame'] = 'La página ya está en esa categoría.';
+$string['event_page_moved'] = 'Página del manual movida';
+$string['errortemprefunresolved'] = 'La categoría «{$a}» se propone en este change set pero aún no se ha creado; aplique primero su creación.';
+
+// Autorización de todo el change set (requisitos de la siguiente versión, fase 2).
+$string['changesetapproved'] = 'Change set aprobado.';
+$string['changesetapplied'] = 'Change set aplicado.';
+$string['approveandapplyset'] = 'Aprobar y aplicar todo el change set';
+$string['approveset'] = 'Aprobar todo el change set';
+$string['applyset'] = 'Aplicar el change set aprobado';
+$string['confirmapplyset'] = '¿Aplicar ahora todo el change set aprobado? Todos los ítems aprobados se publican juntos en una sola transacción; si alguno falla, no se aplica ninguno.';
+
+// Propuestas de rutas de lectura (requisitos de la próxima versión, fase 3).
+$string['pathchangesummary'] = 'Ruta de lectura: {$a}';
+$string['conflict_pathconcurrency'] = 'La ruta de lectura cambió después de preparar esta propuesta; recargue y vuelva a proponer.';
+$string['errorpathname'] = 'Una ruta de lectura necesita un nombre de 255 caracteres como máximo.';
+$string['errorpathnotfound'] = 'La ruta de lectura no existe.';
+$string['errorpathtype'] = 'Ese tipo de ruta de lectura no es válido.';
+$string['errorpathslug'] = 'La ruta de lectura necesita un slug válido.';
+$string['errorpathsectionsempty'] = 'Una propuesta de ruta de lectura debe incluir al menos una sección.';
+$string['errorpathitemsempty'] = 'Una propuesta de ruta de lectura debe incluir al menos una página.';
+$string['errorpathpage'] = 'Un ítem de la ruta de lectura hace referencia a una página que no existe ({$a}).';
+$string['errorpathduplicatepage'] = 'Una ruta de lectura no puede incluir la misma página dos veces.';
+$string['errorpathitemtarget'] = 'Cada ítem de la ruta de lectura necesita un id de página o un tempkey de página.';
+$string['itemkindreadingpath'] = 'Ruta de lectura';
+$string['pathnamelabel'] = 'Nombre';
+$string['pathoperation'] = 'Operación';
+$string['pathcreate'] = 'Crear ruta de lectura';
+$string['pathupdate'] = 'Actualizar ruta de lectura';
+$string['pathtypelabel'] = 'Tipo';
+$string['pathschoolyear'] = 'Año escolar';
+$string['pathactive'] = 'Activa';
+$string['pathestimatedminutes'] = 'Minutos estimados';
+$string['pathnewpageitem'] = 'Página nueva propuesta en este conjunto ({$a})';
+$string['pathoptionalsuffix'] = '(opcional)';
+$string['pathtype_onboarding'] = 'Incorporación';
+$string['pathtype_calendar_phase'] = 'Fase del calendario';
+$string['pathtype_role_based'] = 'Según el rol';
+$string['pathtype_situational'] = 'Situacional';
+$string['pathtype_refresher'] = 'Repaso';
+$string['pathtype_compliance'] = 'Cumplimiento';
+$string['pathwas'] = '(antes: {$a})';
+$string['pathitemnew'] = 'Nueva';
+$string['pathitemnowrequired'] = 'Ahora obligatoria';
+$string['pathitemnowoptional'] = 'Ahora opcional';
+$string['pathitemmovedsection'] = 'Movida desde «{$a}»';
+$string['pathnosection'] = '(sin sección)';
+$string['pathremovedheading'] = 'Eliminadas de la ruta';

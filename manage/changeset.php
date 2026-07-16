@@ -74,6 +74,26 @@ if ($action !== '') {
         redirect($url, get_string('changesetsubmittednotice', 'local_handbook'));
     }
 
+    // Whole-set authorization (spec 5.3, 5.4): approve and/or apply the entire
+    // set. The apply is atomic — every approved item in one transaction.
+    if ($action === 'approveset' && !$locked) {
+        require_capability('local/handbook:approve', $context);
+        changeset_service::approve_all($id);
+        redirect($url, get_string('changesetapproved', 'local_handbook'));
+    }
+    if ($action === 'applyset' && !$locked) {
+        require_capability('local/handbook:publish', $context);
+        changeset_service::publish_all($id);
+        redirect($url, get_string('changesetapplied', 'local_handbook'));
+    }
+    if ($action === 'approveandapplyset' && !$locked) {
+        require_capability('local/handbook:approve', $context);
+        require_capability('local/handbook:publish', $context);
+        changeset_service::approve_all($id);
+        changeset_service::publish_all($id);
+        redirect($url, get_string('changesetapplied', 'local_handbook'));
+    }
+
     if ($action === 'cancel' && !$locked) {
         changeset_service::cancel($id);
         redirect(new moodle_url('/local/handbook/manage/changesets.php'),
@@ -212,6 +232,29 @@ if (!$locked) {
     $cancelform .= html_writer::end_tag('form');
 
     echo html_writer::div($submitform . ' ' . $cancelform, 'mb-3 d-flex flex-wrap gap-2');
+
+    // Whole-set authorization (spec 5.4): one action to approve and apply the
+    // complete set. Shown once the set has items to act on.
+    if (!empty($changeset->items)) {
+        $setbuttons = '';
+        if ($canapprove && $canpublish) {
+            $setbuttons .= local_handbook_changeset_set_button($url, 'approveandapplyset',
+                get_string('approveandapplyset', 'local_handbook'), 'btn-success',
+                get_string('confirmapplyset', 'local_handbook'));
+        }
+        if ($canapprove) {
+            $setbuttons .= ' ' . local_handbook_changeset_set_button($url, 'approveset',
+                get_string('approveset', 'local_handbook'), 'btn-outline-primary');
+        }
+        if ($canpublish) {
+            $setbuttons .= ' ' . local_handbook_changeset_set_button($url, 'applyset',
+                get_string('applyset', 'local_handbook'), 'btn-outline-primary',
+                get_string('confirmapplyset', 'local_handbook'));
+        }
+        if ($setbuttons !== '') {
+            echo html_writer::div($setbuttons, 'mb-3 d-flex flex-wrap gap-2 align-items-center');
+        }
+    }
 }
 
 // ---- Add a page -----------------------------------------------------------.
@@ -315,6 +358,24 @@ foreach ($changeset->items as $item) {
         continue;
     }
 
+    // Reading-path proposal: page-less — rendered from its snapshot payload.
+    if ($item->kind === changeset_service::KIND_READING_PATH) {
+        $head = html_writer::span(
+            s(get_string('itemkindreadingpath', 'local_handbook')), 'font-weight-bold')
+            . ' ' . html_writer::span(s(get_string('itemstatus_' . $item->itemstatus, 'local_handbook')),
+                $itembadges[$item->itemstatus] ?? 'badge badge-secondary');
+        $body = html_writer::tag('h4', $head, ['class' => 'h6 mb-2']);
+        if ($item->itemstatus === changeset_service::ITEM_CONFLICT
+                && trim((string)$item->conflictnote) !== '') {
+            $body .= html_writer::div(s($item->conflictnote), 'alert alert-warning py-2 px-3 small mb-2');
+        }
+        $body .= local_handbook_render_reading_path_item($item);
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
     $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid]);
     if (!$page) {
         continue;
@@ -368,6 +429,20 @@ foreach ($changeset->items as $item) {
     if (in_array($item->kind, [changeset_service::KIND_PAGE_ARCHIVE,
             changeset_service::KIND_PAGE_RESTORE], true)) {
         $body .= local_handbook_render_lifecycle_item($page, $item);
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
+    // Page move proposal.
+    if ($item->kind === changeset_service::KIND_PAGE_MOVE) {
+        $payload = json_decode((string)$item->payloadjson, true) ?: [];
+        $targetid = (int)($payload['targetcategoryid'] ?? 0);
+        $targetname = $targetid
+            ? (string)$DB->get_field('local_handbook_category', 'name', ['id' => $targetid]) : '';
+        $body .= html_writer::div(
+            s(get_string('pagemoveto', 'local_handbook', $targetname)), 'small mb-2');
         $body .= local_handbook_changeset_nonrevision_actions($url, $item,
             $canapprove, $canpublish, $canreview);
         echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');

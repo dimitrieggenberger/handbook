@@ -110,4 +110,87 @@ final class path_service_test extends advanced_testcase {
         $this->assertSame([3, 5], $decoded->cohorts);
         $this->assertSame([7], $decoded->roles);
     }
+
+    /**
+     * Publish a page (optionally globally required) and add it to a path.
+     *
+     * @param stdClass $path Path record.
+     * @param string $slug Page slug.
+     * @param bool $globalrequired Global required-reading flag.
+     * @param bool $pathrequired Whether the path item is required.
+     * @return stdClass Page record.
+     */
+    private function add_page(stdClass $path, string $slug, bool $globalrequired,
+            bool $pathrequired): stdClass {
+        global $DB;
+
+        set_config('bootstrapmode', 1, 'local_handbook');
+        import_service::import(json_decode(json_encode([
+            'categories' => [['slug' => 'ops', 'name' => 'Operaciones']],
+            'pages' => [[
+                'slug' => $slug, 'title' => ucfirst($slug), 'category' => 'ops',
+                'contenttype' => 'procedure', 'requiredreading' => $globalrequired ? 1 : 0,
+                'summary' => 'S.', 'content' => '<h2>H</h2><p>C.</p>',
+            ]],
+        ])), true);
+        $page = $DB->get_record('local_handbook_page', ['slug' => $slug], '*', MUST_EXIST);
+
+        $sort = (int)$DB->count_records('local_handbook_pathitem', ['pathid' => $path->id]);
+        $DB->insert_record('local_handbook_pathitem', (object)[
+            'pathid' => (int)$path->id, 'pageid' => (int)$page->id, 'sectionname' => 'S1',
+            'sortorder' => $sort, 'required' => $pathrequired ? 1 : 0, 'quizcmid' => 0,
+            'rationale' => null,
+        ]);
+        return $page;
+    }
+
+    public function test_progress_counts_path_required_even_when_not_globally_required(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $user = $this->getDataGenerator()->create_user();
+        $path = $this->create_path('');
+
+        // Path-required, but NOT globally required reading.
+        $page = $this->add_page($path, 'induccion', false, true);
+
+        $before = path_service::user_progress($path, (int)$user->id);
+        $this->assertSame(1, $before->total);
+        $this->assertSame(0, $before->confirmed);
+        $this->assertNotNull($before->nextitem);
+
+        completion_service::record_receipt((int)$user->id, $page);
+
+        $after = path_service::user_progress($path, (int)$user->id);
+        $this->assertSame(1, $after->total);
+        $this->assertSame(1, $after->confirmed);
+        $this->assertNull($after->nextitem);
+    }
+
+    public function test_optional_items_do_not_block_completion(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $user = $this->getDataGenerator()->create_user();
+        $path = $this->create_path('');
+
+        $this->add_page($path, 'requerida', false, true);
+        $this->add_page($path, 'opcional', false, false);
+
+        $progress = path_service::user_progress($path, (int)$user->id);
+        // Only the required item is counted in the total.
+        $this->assertSame(1, $progress->total);
+    }
+
+    public function test_is_required_in_active_path(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $path = $this->create_path('');
+        $required = $this->add_page($path, 'obligatoria', false, true);
+        $optional = $this->add_page($path, 'sugerida', false, false);
+
+        $this->assertTrue(path_service::is_required_in_active_path((int)$required->id));
+        $this->assertFalse(path_service::is_required_in_active_path((int)$optional->id));
+    }
 }

@@ -361,5 +361,83 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071508, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071512) {
+        // Taxonomy phase 1: category slug aliases + change-set temp references.
+        $alias = new xmldb_table('local_handbook_categoryalias');
+        $alias->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $alias->add_field('categoryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $alias->add_field('oldslug', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $alias->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $alias->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $alias->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $alias->add_key('categoryid', XMLDB_KEY_FOREIGN, ['categoryid'], 'local_handbook_category', ['id']);
+        $alias->add_index('oldslug', XMLDB_INDEX_UNIQUE, ['oldslug']);
+        if (!$dbman->table_exists($alias)) {
+            $dbman->create_table($alias);
+        }
+
+        $tempref = new xmldb_table('local_handbook_tempref');
+        $tempref->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $tempref->add_field('changesetid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $tempref->add_field('tempkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $tempref->add_field('entitytype', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL);
+        $tempref->add_field('entityid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $tempref->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $tempref->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $tempref->add_key('changesetid', XMLDB_KEY_FOREIGN, ['changesetid'], 'local_handbook_changeset', ['id']);
+        $tempref->add_index('changesettempkey', XMLDB_INDEX_UNIQUE, ['changesetid', 'tempkey']);
+        if (!$dbman->table_exists($tempref)) {
+            $dbman->create_table($tempref);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071512, 'local', 'handbook');
+    }
+
+    if ($oldversion < 2026071514) {
+        // Reading-path product-model fields (spec 6).
+        $path = new xmldb_table('local_handbook_path');
+        $pathfields = [
+            new xmldb_field('pathtype', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, '', 'active'),
+            new xmldb_field('estimatedminutes', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'pathtype'),
+            new xmldb_field('reviewdate', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'estimatedminutes'),
+        ];
+        foreach ($pathfields as $field) {
+            if (!$dbman->field_exists($path, $field)) {
+                $dbman->add_field($path, $field);
+            }
+        }
+
+        $pathitem = new xmldb_table('local_handbook_pathitem');
+        $rationale = new xmldb_field('rationale', XMLDB_TYPE_TEXT, null, null, null, null, null, 'quizcmid');
+        if (!$dbman->field_exists($pathitem, $rationale)) {
+            $dbman->add_field($pathitem, $rationale);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071514, 'local', 'handbook');
+    }
+
+    if ($oldversion < 2026071518) {
+        // Article-level reading completion, shared across paths (spec 8).
+        $table = new xmldb_table('local_handbook_readreceipt');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('revisionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('completionmethod', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'reading_path');
+            $table->add_field('confirmationversion', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1');
+            $table->add_field('timecompleted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'], 'local_handbook_page', ['id']);
+            $table->add_key('revisionid', XMLDB_KEY_FOREIGN, ['revisionid'], 'local_handbook_revision', ['id']);
+            $table->add_index('userrevision', XMLDB_INDEX_UNIQUE, ['userid', 'revisionid']);
+            $table->add_index('userpage', XMLDB_INDEX_NOTUNIQUE, ['userid', 'pageid']);
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071518, 'local', 'handbook');
+    }
+
     return true;
 }

@@ -28,7 +28,9 @@ require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
 use local_handbook\local\service\ack_service;
+use local_handbook\local\service\completion_service;
 use local_handbook\local\service\page_service;
+use local_handbook\local\service\path_service;
 use local_handbook\local\service\toc_service;
 
 $pageparam = required_param('page', PARAM_ALPHANUMEXT);
@@ -101,20 +103,36 @@ if ($action === 'archive' || $action === 'unarchive') {
         get_string($action === 'archive' ? 'pagearchived' : 'pageunarchived', 'local_handbook'));
 }
 
-// Record a required-reading acknowledgement (spec 16).
+// Record reading completion (spec 8, 16). A globally required page keeps its
+// formal compliance acknowledgement; a path-required page (not globally
+// required) records an article-level read receipt. Either satisfies every path
+// containing the article.
 if ($action === 'acknowledge') {
     require_sesskey();
     require_capability('local/handbook:acknowledge', $context);
     $pathid = optional_param('pathid', 0, PARAM_INT);
-    ack_service::acknowledge((int)$USER->id, $page, $pathid);
+    if ((int)$page->requiredreading) {
+        ack_service::acknowledge((int)$USER->id, $page, $pathid);
+    } else if (path_service::is_required_in_active_path((int)$page->id)) {
+        completion_service::record_receipt((int)$USER->id, $page,
+            $pathid ? 'reading_path' : 'manual');
+    } else {
+        throw new moodle_exception('errornotrequiredreading', 'local_handbook');
+    }
     redirect(new moodle_url(local_handbook_page_url($page), [], 'confirmar'),
         get_string('ackrecorded', 'local_handbook'));
 }
 
+// Compliance status drives the required-reading card; completion status drives
+// the lighter "mark as read" card for path-required (non-global) articles.
 $ackstatus = null;
-if ((int)$page->requiredreading && $revision
-        && has_capability('local/handbook:acknowledge', $context)) {
-    $ackstatus = ack_service::get_status((int)$USER->id, $page);
+$completionstatus = null;
+if ($revision && has_capability('local/handbook:acknowledge', $context)) {
+    if ((int)$page->requiredreading) {
+        $ackstatus = ack_service::get_status((int)$USER->id, $page);
+    } else if (path_service::is_required_in_active_path((int)$page->id)) {
+        $completionstatus = completion_service::completion_status((int)$USER->id, $page);
+    }
 }
 
 // Rendered content with heading anchors + on-page TOC (spec 10.2, 12.2).
@@ -346,6 +364,65 @@ if ($ackstatus !== null) {
         'card mt-4 local-handbook-ack', ['id' => 'confirmar']);
 }
 
+// "Mark as read" card for a path-required article that is not globally required
+// reading (spec 8.3). Records an article-level read receipt, shared across paths.
+if ($completionstatus !== null) {
+    $cardbody = html_writer::tag('h3', s(get_string('readingcompletion', 'local_handbook')),
+        ['class' => 'h5 mb-2']);
+
+    if ($completionstatus->status === completion_service::STATUS_COMPLETED) {
+        $done = $completionstatus->record;
+        $cardbody .= html_writer::tag('p',
+            html_writer::tag('i', '', ['class' => 'fa-solid fa-circle-check text-success me-2',
+                'aria-hidden' => 'true'])
+            . s(get_string('completedrecord', 'local_handbook', (object)[
+                'date' => userdate((int)$done->timecompleted, get_string('strftimedate', 'langconfig')),
+                'version' => (int)$done->versionnumber,
+            ])), ['class' => 'mb-1']);
+        $cardbody .= html_writer::tag('p', s(get_string('completioninfo', 'local_handbook')),
+            ['class' => 'text-muted small mb-0']);
+    } else {
+        if ($completionstatus->status === completion_service::STATUS_RECONFIRM) {
+            $cardbody .= html_writer::tag('p',
+                s(get_string('completionreread', 'local_handbook', (int)$revision->versionnumber)),
+                ['class' => 'mb-2']);
+        }
+        $cardbody .= html_writer::tag('p', s(get_string('completioninfo', 'local_handbook')),
+            ['class' => 'text-muted small']);
+        $cardbody .= html_writer::start_tag('form', [
+            'method' => 'post', 'action' => local_handbook_page_url($page)->out(false)]);
+        $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action',
+            'value' => 'acknowledge']);
+        $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',
+            'value' => sesskey()]);
+        $cardbody .= html_writer::div(
+            html_writer::empty_tag('input', ['type' => 'checkbox', 'id' => 'read-check',
+                'class' => 'form-check-input', 'required' => 'required'])
+            . html_writer::tag('label',
+                s(get_string('completioncheckboxlabel', 'local_handbook', format_string($page->title))),
+                ['for' => 'read-check', 'class' => 'form-check-label']),
+            'form-check mb-3');
+        $cardbody .= html_writer::tag('button',
+            html_writer::tag('i', '', ['class' => 'fa-solid fa-check me-2', 'aria-hidden' => 'true'])
+            . s(get_string('markasread', 'local_handbook')),
+            ['type' => 'submit', 'class' => 'btn btn-primary']);
+        $cardbody .= html_writer::end_tag('form');
+    }
+
+    foreach ($memberpaths as $memberpath) {
+        $pathlabel = html_writer::link(
+            new moodle_url('/local/handbook/path.php', ['id' => $memberpath->id]),
+            s(format_string($memberpath->name)))
+            . ($memberpath->sectionname !== '' ? ' · ' . s($memberpath->sectionname) : '');
+        $cardbody .= html_writer::tag('p',
+            get_string('partofpath', 'local_handbook', $pathlabel),
+            ['class' => 'text-muted small mb-0 mt-3']);
+    }
+
+    echo html_writer::div(html_writer::div($cardbody, 'card-body'),
+        'card mt-4 local-handbook-ack', ['id' => 'confirmar']);
+}
+
 echo html_writer::end_div(); // .col-lg-8.
 
 // Rail: on-page TOC, metadata card and typed relations.
@@ -358,9 +435,11 @@ if (count($toc) >= 2) {
         $tocitems .= html_writer::tag('li',
             html_writer::link('#' . $entry->id, s($entry->text)));
     }
-    if ($ackstatus !== null) {
+    if ($ackstatus !== null || $completionstatus !== null) {
         $tocitems .= html_writer::tag('li',
-            html_writer::link('#confirmar', s(get_string('readingconfirmation', 'local_handbook'))));
+            html_writer::link('#confirmar', s($ackstatus !== null
+                ? get_string('readingconfirmation', 'local_handbook')
+                : get_string('readingcompletion', 'local_handbook'))));
     }
     echo html_writer::div(
         html_writer::div(

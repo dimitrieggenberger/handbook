@@ -45,11 +45,15 @@ class upsert_changeset_category extends external_api {
         return new external_function_parameters([
             'changesetid' => new external_value(PARAM_INT, 'Change-set id'),
             'operation' => new external_single_structure([
-                'op' => new external_value(PARAM_ALPHA, 'create, update, move or merge'),
+                'op' => new external_value(PARAM_ALPHA, 'create, update, move, merge or delete_empty'),
                 'tempkey' => new external_value(PARAM_TEXT, 'Stable id for a new category', VALUE_OPTIONAL),
                 'name' => new external_value(PARAM_TEXT, 'Category name', VALUE_OPTIONAL),
-                'slug' => new external_value(PARAM_TEXT, 'Preferred slug', VALUE_OPTIONAL),
+                'slug' => new external_value(PARAM_TEXT, 'Preferred slug (create/update; old slug kept)', VALUE_OPTIONAL),
                 'parentid' => new external_value(PARAM_INT, 'Parent category id (create)', VALUE_OPTIONAL),
+                'parenttempkey' => new external_value(PARAM_TEXT,
+                    'Tempkey of a parent category proposed in this set (create)', VALUE_OPTIONAL),
+                'newparenttempkey' => new external_value(PARAM_TEXT,
+                    'Tempkey of a new parent category proposed in this set (move)', VALUE_OPTIONAL),
                 'description' => new external_value(PARAM_RAW, 'Description', VALUE_OPTIONAL),
                 'icon' => new external_value(PARAM_ALPHANUMEXT, 'Font Awesome icon (fa-*)', VALUE_OPTIONAL),
                 'visible' => new external_value(PARAM_BOOL, 'Visible', VALUE_OPTIONAL),

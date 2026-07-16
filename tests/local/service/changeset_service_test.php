@@ -804,6 +804,510 @@ final class changeset_service_test extends advanced_testcase {
             (int)$DB->get_field('local_handbook_page', 'categoryid', ['id' => $page->id]));
     }
 
+    public function test_page_move_applies_and_preserves_the_page(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $from = $this->create_category();
+        $to = $this->create_category();
+        $page = $this->publish_page($from, 'Página movible');
+        $publishedrev = (int)$page->publishedrevisionid;
+
+        $changeset = changeset_service::create((object)['title' => 'Move', 'source' => 'ai']);
+        changeset_service::upsert_page_move($changeset->id, (int)$page->id, $to);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_MOVE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $updated = $DB->get_record('local_handbook_page', ['id' => $page->id], '*', MUST_EXIST);
+        $this->assertSame($to, (int)$updated->categoryid);
+        // Identity and history are preserved by a move.
+        $this->assertSame($page->slug, $updated->slug);
+        $this->assertSame($publishedrev, (int)$updated->publishedrevisionid);
+    }
+
+    public function test_page_move_flags_a_stale_category(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $from = $this->create_category();
+        $to = $this->create_category();
+        $page = $this->publish_page($from, 'Página');
+        $changeset = changeset_service::create((object)['title' => 'Move', 'source' => 'ai']);
+
+        // Expected category does not match the page's real one.
+        $result = changeset_service::upsert_page_move($changeset->id, (int)$page->id, $to, 999999);
+        $this->assertSame(changeset_service::ITEM_CONFLICT, $result['status']);
+    }
+
+    public function test_delete_empty_category_applies(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $empty = $this->create_category();
+        $changeset = changeset_service::create((object)['title' => 'Tidy', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'delete_empty', 'categoryid' => $empty]);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'cat:' . $empty . ':delete_empty',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertFalse($DB->record_exists('local_handbook_category', ['id' => $empty]));
+    }
+
+    public function test_delete_empty_rejects_a_non_empty_category(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $this->publish_page($cat, 'Con contenido');
+        $changeset = changeset_service::create((object)['title' => 'x', 'source' => 'ai']);
+
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'delete_empty', 'categoryid' => $cat]);
+    }
+
+    public function test_category_slug_rename_registers_an_alias(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $oldslug = (string)$DB->get_field('local_handbook_category', 'slug', ['id' => $cat]);
+        $changeset = changeset_service::create((object)['title' => 'Rename', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'update', 'categoryid' => $cat, 'slug' => 'nuevo-slug-cat']);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'cat:' . $cat . ':update',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertSame('nuevo-slug-cat',
+            (string)$DB->get_field('local_handbook_category', 'slug', ['id' => $cat]));
+        $this->assertTrue($DB->record_exists('local_handbook_categoryalias',
+            ['oldslug' => $oldslug, 'categoryid' => $cat]));
+    }
+
+    public function test_page_move_into_a_proposed_category_resolves_the_tempkey(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $from = $this->create_category();
+        $page = $this->publish_page($from, 'Movible');
+        $changeset = changeset_service::create((object)['title' => 'Migrate', 'source' => 'ai']);
+
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:destino', 'name' => 'Destino nuevo']);
+        changeset_service::upsert_page_move($changeset->id, (int)$page->id, 0, 0, 0, '', 0,
+            'newcat:destino');
+        changeset_service::submit($changeset->id);
+
+        // Apply the category creation first so the tempkey resolves.
+        $catitem = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:destino',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$catitem->id);
+        changeset_service::publish_item((int)$catitem->id);
+        $newcatid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:destino']);
+        $this->assertGreaterThan(0, $newcatid);
+
+        // Then the page move resolves to the created category.
+        $moveitem = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_MOVE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$moveitem->id);
+        changeset_service::publish_item((int)$moveitem->id);
+
+        $this->assertSame($newcatid,
+            (int)$DB->get_field('local_handbook_page', 'categoryid', ['id' => $page->id]));
+    }
+
+    public function test_category_created_under_a_proposed_parent(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $changeset = changeset_service::create((object)['title' => 'Tree', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:parent', 'name' => 'Padre']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:child', 'name' => 'Hija',
+                'parenttempkey' => 'newcat:parent']);
+        changeset_service::submit($changeset->id);
+
+        $parentitem = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:parent',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$parentitem->id);
+        changeset_service::publish_item((int)$parentitem->id);
+        $parentid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:parent']);
+
+        $childitem = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:child',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$childitem->id);
+        changeset_service::publish_item((int)$childitem->id);
+        $childid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:child']);
+
+        $this->assertSame($parentid,
+            (int)$DB->get_field('local_handbook_category', 'parentid', ['id' => $childid]));
+    }
+
+    public function test_approve_all_then_publish_all_applies_a_metadata_item(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Ficha');
+        $changeset = changeset_service::create((object)['title' => 'Batch', 'source' => 'ai']);
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id, ['title' => 'Título nuevo']);
+        changeset_service::submit($changeset->id);
+
+        changeset_service::approve_all($changeset->id);
+        changeset_service::publish_all($changeset->id);
+
+        $this->assertSame('Título nuevo',
+            (string)$DB->get_field('local_handbook_page', 'title', ['id' => $page->id]));
+        $this->assertSame(changeset_service::STATUS_COMPLETED,
+            (string)$DB->get_field('local_handbook_changeset', 'status', ['id' => $changeset->id]));
+    }
+
+    public function test_publish_all_applies_items_in_dependency_order(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create a category and move a page into it — in ONE set. publish_all
+        // must apply the category creation before the page move.
+        $from = $this->create_category();
+        $page = $this->publish_page($from, 'Migrable');
+        $changeset = changeset_service::create((object)['title' => 'Migration', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:dest', 'name' => 'Destino']);
+        changeset_service::upsert_page_move($changeset->id, (int)$page->id, 0, 0, 0, '', 0,
+            'newcat:dest');
+        changeset_service::submit($changeset->id);
+
+        changeset_service::approve_all($changeset->id);
+        changeset_service::publish_all($changeset->id);
+
+        $newcatid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:dest']);
+        $this->assertGreaterThan(0, $newcatid);
+        $this->assertSame($newcatid,
+            (int)$DB->get_field('local_handbook_page', 'categoryid', ['id' => $page->id]));
+    }
+
+    public function test_validate_all_reports_ok_for_a_valid_item(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Validable');
+        $changeset = changeset_service::create((object)['title' => 'V', 'source' => 'ai']);
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id, ['title' => 'X']);
+
+        $results = changeset_service::validate_all($changeset->id);
+        $this->assertNotEmpty($results);
+        $this->assertTrue($results[0]['ok']);
+        $this->assertSame('', $results[0]['error']);
+    }
+
+    public function test_reading_path_create_applies_on_publish(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $one = $this->publish_page($cat, 'Bienvenida');
+        $two = $this->publish_page($cat, 'Reglamento');
+
+        $changeset = changeset_service::create((object)['title' => 'Path', 'source' => 'ai']);
+        changeset_service::upsert_reading_path($changeset->id, [
+            'name' => 'Onboarding docentes',
+            'pathtype' => 'onboarding',
+            'schoolyear' => '2025-2026',
+            'estimatedminutes' => 45,
+            'sections' => [
+                ['name' => 'Primer día', 'items' => [
+                    ['pageid' => (int)$one->id, 'required' => true, 'rationale' => 'Empezar aquí'],
+                    ['pageid' => (int)$two->id, 'required' => false],
+                ]],
+            ],
+        ]);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'kind' => changeset_service::KIND_READING_PATH],
+            '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $path = $DB->get_record('local_handbook_path', ['name' => 'Onboarding docentes'], '*', MUST_EXIST);
+        $this->assertSame('onboarding', (string)$path->pathtype);
+        $this->assertSame(45, (int)$path->estimatedminutes);
+
+        $rows = array_values($DB->get_records('local_handbook_pathitem',
+            ['pathid' => $path->id], 'sortorder ASC'));
+        $this->assertCount(2, $rows);
+        $this->assertSame((int)$one->id, (int)$rows[0]->pageid);
+        $this->assertSame('Primer día', (string)$rows[0]->sectionname);
+        $this->assertSame(1, (int)$rows[0]->required);
+        $this->assertSame('Empezar aquí', (string)$rows[0]->rationale);
+        $this->assertSame(0, (int)$rows[1]->required);
+        // The created path is resolvable by its tempkey.
+        $this->assertSame((int)$path->id, (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newpath:' . $path->slug]));
+    }
+
+    public function test_reading_path_update_replaces_items_wholesale(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $a = $this->publish_page($cat, 'A');
+        $b = $this->publish_page($cat, 'B');
+        $c = $this->publish_page($cat, 'C');
+
+        // Seed an existing path with A and B.
+        $now = time();
+        $pathid = (int)$DB->insert_record('local_handbook_path', (object)[
+            'name' => 'Ruta', 'slug' => 'ruta-' . random_string(5), 'description' => '',
+            'descriptionformat' => FORMAT_HTML, 'audiencejson' => '', 'schoolyear' => '',
+            'active' => 1, 'pathtype' => '', 'estimatedminutes' => 0, 'reviewdate' => 0,
+            'quizcmid' => 0, 'timecreated' => $now, 'timemodified' => $now,
+            'createdby' => 2, 'modifiedby' => 2,
+        ]);
+        foreach ([$a, $b] as $i => $page) {
+            $DB->insert_record('local_handbook_pathitem', (object)[
+                'pathid' => $pathid, 'pageid' => (int)$page->id, 'sectionname' => '',
+                'sortorder' => $i, 'required' => 1, 'quizcmid' => 0, 'rationale' => null,
+            ]);
+        }
+
+        // Propose a snapshot with only B and C.
+        $changeset = changeset_service::create((object)['title' => 'Edit', 'source' => 'ai']);
+        changeset_service::upsert_reading_path($changeset->id, [
+            'pathid' => $pathid,
+            'name' => 'Ruta renombrada',
+            'sections' => [
+                ['name' => '', 'items' => [
+                    ['pageid' => (int)$b->id, 'required' => true],
+                    ['pageid' => (int)$c->id, 'required' => true],
+                ]],
+            ],
+        ]);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'kind' => changeset_service::KIND_READING_PATH],
+            '*', MUST_EXIST);
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertSame('Ruta renombrada',
+            (string)$DB->get_field('local_handbook_path', 'name', ['id' => $pathid]));
+        $pageids = $DB->get_fieldset_select('local_handbook_pathitem', 'pageid',
+            'pathid = ? ORDER BY sortorder ASC', [$pathid]);
+        $this->assertSame([(int)$b->id, (int)$c->id], array_map('intval', $pageids));
+    }
+
+    public function test_reading_path_snapshot_round_trips(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Única');
+        $now = time();
+        $pathid = (int)$DB->insert_record('local_handbook_path', (object)[
+            'name' => 'Snap', 'slug' => 'snap-' . random_string(5), 'description' => 'D',
+            'descriptionformat' => FORMAT_HTML, 'audiencejson' => '', 'schoolyear' => '2024',
+            'active' => 1, 'pathtype' => 'refresher', 'estimatedminutes' => 12, 'reviewdate' => 0,
+            'quizcmid' => 0, 'timecreated' => $now, 'timemodified' => $now,
+            'createdby' => 2, 'modifiedby' => 2,
+        ]);
+        $DB->insert_record('local_handbook_pathitem', (object)[
+            'pathid' => $pathid, 'pageid' => (int)$page->id, 'sectionname' => 'S1',
+            'sortorder' => 0, 'required' => 1, 'quizcmid' => 0, 'rationale' => 'porque sí',
+        ]);
+
+        $snapshot = changeset_service::reading_path_snapshot($pathid);
+        $this->assertSame('refresher', $snapshot['pathtype']);
+        $this->assertSame(12, $snapshot['estimatedminutes']);
+        $this->assertCount(1, $snapshot['sections']);
+        $this->assertSame('S1', $snapshot['sections'][0]['name']);
+        $this->assertSame((int)$page->id, $snapshot['sections'][0]['items'][0]['pageid']);
+        $this->assertSame('porque sí', $snapshot['sections'][0]['items'][0]['rationale']);
+    }
+
+    public function test_reading_path_item_resolves_a_new_page_tempkey(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $changeset = changeset_service::create((object)['title' => 'Combo', 'source' => 'ai']);
+
+        // A new page proposed in the same set, referenced by the path.
+        changeset_service::upsert_new_page($changeset->id, 'newpage:intro', [
+            'title' => 'Introducción', 'categoryid' => $cat,
+            'content' => '<h2>Hola</h2><p>Bienvenido.</p>',
+        ]);
+        changeset_service::upsert_reading_path($changeset->id, [
+            'name' => 'Ruta con página nueva',
+            'sections' => [
+                ['name' => '', 'items' => [
+                    ['pagetempkey' => 'newpage:intro', 'required' => true],
+                ]],
+            ],
+        ]);
+        changeset_service::submit($changeset->id);
+
+        changeset_service::approve_all($changeset->id);
+        changeset_service::publish_all($changeset->id);
+
+        $path = $DB->get_record('local_handbook_path',
+            ['name' => 'Ruta con página nueva'], '*', MUST_EXIST);
+        $newpageid = (int)$DB->get_field('local_handbook_page', 'id', ['title' => 'Introducción']);
+        $this->assertGreaterThan(0, $newpageid);
+        $this->assertSame($newpageid, (int)$DB->get_field('local_handbook_pathitem', 'pageid',
+            ['pathid' => $path->id]));
+    }
+
+    public function test_reading_path_flags_a_stale_path(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'P');
+        $now = time();
+        $pathid = (int)$DB->insert_record('local_handbook_path', (object)[
+            'name' => 'Stale', 'slug' => 'stale-' . random_string(5), 'description' => '',
+            'descriptionformat' => FORMAT_HTML, 'audiencejson' => '', 'schoolyear' => '',
+            'active' => 1, 'pathtype' => '', 'estimatedminutes' => 0, 'reviewdate' => 0,
+            'quizcmid' => 0, 'timecreated' => $now, 'timemodified' => $now,
+            'createdby' => 2, 'modifiedby' => 2,
+        ]);
+
+        $changeset = changeset_service::create((object)['title' => 'x', 'source' => 'ai']);
+        $result = changeset_service::upsert_reading_path($changeset->id, [
+            'pathid' => $pathid,
+            'name' => 'Stale',
+            'expectedtimemodified' => 999999,
+            'sections' => [['name' => '', 'items' => [['pageid' => (int)$page->id]]]],
+        ]);
+        $this->assertSame(changeset_service::ITEM_CONFLICT, $result['status']);
+    }
+
+    public function test_reading_path_rejects_a_duplicate_page(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Dup');
+        $changeset = changeset_service::create((object)['title' => 'x', 'source' => 'ai']);
+
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_reading_path($changeset->id, [
+            'name' => 'Duplicada',
+            'sections' => [
+                ['name' => 'A', 'items' => [['pageid' => (int)$page->id]]],
+                ['name' => 'B', 'items' => [['pageid' => (int)$page->id]]],
+            ],
+        ]);
+    }
+
+    public function test_reading_path_diff_reports_added_removed_and_changes(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $a = $this->publish_page($cat, 'A');
+        $b = $this->publish_page($cat, 'B');
+        $c = $this->publish_page($cat, 'C');
+
+        // Current path: A (required, "Intro") and B (required, "Intro").
+        $now = time();
+        $pathid = (int)$DB->insert_record('local_handbook_path', (object)[
+            'name' => 'Ruta', 'slug' => 'ruta-' . random_string(5), 'description' => '',
+            'descriptionformat' => FORMAT_HTML, 'audiencejson' => '', 'schoolyear' => '2024',
+            'active' => 1, 'pathtype' => '', 'estimatedminutes' => 0, 'reviewdate' => 0,
+            'quizcmid' => 0, 'timecreated' => $now, 'timemodified' => $now,
+            'createdby' => 2, 'modifiedby' => 2,
+        ]);
+        foreach ([$a, $b] as $i => $page) {
+            $DB->insert_record('local_handbook_pathitem', (object)[
+                'pathid' => $pathid, 'pageid' => (int)$page->id, 'sectionname' => 'Intro',
+                'sortorder' => $i, 'required' => 1, 'quizcmid' => 0, 'rationale' => null,
+            ]);
+        }
+
+        // Proposed: rename, B moved to "Avanzado" and now optional, C added, A dropped.
+        $snapshot = [
+            'pathid' => $pathid,
+            'name' => 'Ruta nueva',
+            'schoolyear' => '2024',
+            'active' => 1,
+            'sections' => [
+                ['name' => 'Avanzado', 'items' => [
+                    ['pageid' => (int)$b->id, 'required' => false],
+                    ['pageid' => (int)$c->id, 'required' => true],
+                ]],
+            ],
+        ];
+        $diff = changeset_service::reading_path_diff($snapshot);
+
+        $this->assertFalse($diff['iscreate']);
+        $this->assertArrayHasKey('name', $diff['fields']);
+        $this->assertSame('Ruta', $diff['fields']['name']['old']);
+        $this->assertSame([(int)$a->id], $diff['removed']);
+
+        $byid = [];
+        foreach ($diff['items'] as $it) {
+            $byid[$it['pageid']] = $it;
+        }
+        $this->assertSame('kept', $byid[(int)$b->id]['status']);
+        $this->assertTrue($byid[(int)$b->id]['sectionchanged']);
+        $this->assertTrue($byid[(int)$b->id]['requiredchanged']);
+        $this->assertSame('Intro', $byid[(int)$b->id]['oldsection']);
+        $this->assertSame('new', $byid[(int)$c->id]['status']);
+    }
+
     /**
      * Read one item's status.
      *

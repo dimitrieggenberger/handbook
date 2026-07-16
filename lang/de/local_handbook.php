@@ -46,6 +46,7 @@ $string['handbook:apiproposemetadata'] = 'Metadaten-Änderungen (Steckbrief) des
 $string['handbook:apiproposerelations'] = 'Beziehungsänderungen zwischen Handbuchseiten über die API vorschlagen';
 $string['handbook:apiproposelifecycle'] = 'Archivierungs-/Wiederherstellungsaktionen des Handbuchs über die API vorschlagen';
 $string['handbook:apiproposetaxonomy'] = 'Kategorieänderungen des Handbuchs über die API vorschlagen';
+$string['handbook:apiproposepaths'] = 'Änderungen an Lesepfaden des Handbuchs über die API vorschlagen';
 $string['handbook:manage'] = 'Das Handbuch-Plugin administrieren';
 
 // Navigation and page titles.
@@ -212,6 +213,14 @@ $string['ackrecordinfo'] = 'Die Bestätigung wird mit Nutzer, veröffentlichter 
 $string['requiresreack'] = 'Erfordert bei Veröffentlichung erneute Bestätigung';
 $string['requiresreack_help'] = 'Bei wesentlich geänderten Versionen von Pflichtlektüre-Seiten ankreuzen: Nach der Veröffentlichung müssen alle die Lektüre erneut bestätigen. Für kleinere Korrekturen nicht ankreuzen.';
 $string['errornotrequiredreading'] = 'Diese Seite ist nicht als Pflichtlektüre markiert.';
+
+// Geteilter Leseabschluss für pfad-erforderliche Artikel (Spez. 8).
+$string['readingcompletion'] = 'Leseabschluss';
+$string['markasread'] = 'Als gelesen markieren';
+$string['completioncheckboxlabel'] = 'Ich habe die aktuelle Version von „{$a}“ gelesen.';
+$string['completedrecord'] = 'Gelesen am {$a->date} · veröffentlichte Version v{$a->version}';
+$string['completionreread'] = 'Dieser Artikel hat sich seit Ihrem letzten Lesen geändert (jetzt v{$a}). Bitte lesen Sie ihn erneut.';
+$string['completioninfo'] = 'Einen Artikel als gelesen zu markieren zählt für jeden Lesepfad, der ihn enthält. Einmal lesen genügt; eine wesentlich geänderte Version kann ein erneutes Lesen verlangen.';
 
 // Reading paths (spec 15).
 $string['myreadingpath'] = 'Mein Lesepfad';
@@ -608,3 +617,58 @@ $string['errorcategorynotfound'] = 'Die Kategorie existiert nicht.';
 $string['errorcategorynochange'] = 'Eine Kategorie-Aktualisierung muss mindestens ein Feld ändern.';
 $string['errorcategorycycle'] = 'Diese Änderung würde einen Kategoriezyklus erzeugen.';
 $string['errorcategorymergeself'] = 'Eine Kategorie kann nicht mit sich selbst zusammengeführt werden.';
+$string['categoryop_delete_empty'] = 'Leere Kategorie auflösen';
+$string['categorychangesummary_delete_empty'] = 'Leere Kategorie auflösen';
+
+// Seitenverschiebungen (Anforderungen der nächsten Version, Taxonomie Phase 1).
+$string['pagemovechangesummary'] = 'Verschieben: {$a}';
+$string['pagemoveto'] = 'In Kategorie verschieben: {$a}';
+$string['conflict_pagemove'] = 'Die Seite wurde nach Erstellung dieses Vorschlags verschoben oder geändert; bitte neu laden und erneut vorschlagen.';
+$string['errorpagemovesame'] = 'Die Seite befindet sich bereits in dieser Kategorie.';
+$string['event_page_moved'] = 'Handbuchseite verschoben';
+$string['errortemprefunresolved'] = 'Die Kategorie „{$a}" wird in diesem Change-Set vorgeschlagen, wurde aber noch nicht erstellt; wenden Sie zuerst ihre Erstellung an.';
+
+// Autorisierung des gesamten Change-Sets (Anforderungen der nächsten Version, Phase 2).
+$string['changesetapproved'] = 'Change-Set freigegeben.';
+$string['changesetapplied'] = 'Change-Set angewendet.';
+$string['approveandapplyset'] = 'Gesamtes Change-Set freigeben &amp; anwenden';
+$string['approveset'] = 'Gesamtes Change-Set freigeben';
+$string['applyset'] = 'Freigegebenes Change-Set anwenden';
+$string['confirmapplyset'] = 'Das gesamte freigegebene Change-Set jetzt anwenden? Alle freigegebenen Elemente werden zusammen in einer Transaktion veröffentlicht; schlägt eines fehl, wird keines angewendet.';
+
+// Lesepfad-Vorschläge (Anforderungen der nächsten Version, Phase 3).
+$string['pathchangesummary'] = 'Lesepfad: {$a}';
+$string['conflict_pathconcurrency'] = 'Der Lesepfad wurde nach der Vorbereitung dieses Vorschlags geändert; neu laden und erneut vorschlagen.';
+$string['errorpathname'] = 'Ein Lesepfad benötigt einen Namen mit höchstens 255 Zeichen.';
+$string['errorpathnotfound'] = 'Der Lesepfad existiert nicht.';
+$string['errorpathtype'] = 'Dieser Lesepfad-Typ ist unbekannt.';
+$string['errorpathslug'] = 'Der Lesepfad benötigt einen gültigen Slug.';
+$string['errorpathsectionsempty'] = 'Ein Lesepfad-Vorschlag muss mindestens einen Abschnitt enthalten.';
+$string['errorpathitemsempty'] = 'Ein Lesepfad-Vorschlag muss mindestens eine Seite enthalten.';
+$string['errorpathpage'] = 'Ein Lesepfad-Element verweist auf eine nicht vorhandene Seite ({$a}).';
+$string['errorpathduplicatepage'] = 'Ein Lesepfad darf dieselbe Seite nicht zweimal enthalten.';
+$string['errorpathitemtarget'] = 'Jedes Lesepfad-Element benötigt eine Seiten-ID oder einen Seiten-Tempkey.';
+$string['itemkindreadingpath'] = 'Lesepfad';
+$string['pathnamelabel'] = 'Name';
+$string['pathoperation'] = 'Vorgang';
+$string['pathcreate'] = 'Lesepfad erstellen';
+$string['pathupdate'] = 'Lesepfad aktualisieren';
+$string['pathtypelabel'] = 'Typ';
+$string['pathschoolyear'] = 'Schuljahr';
+$string['pathactive'] = 'Aktiv';
+$string['pathestimatedminutes'] = 'Geschätzte Minuten';
+$string['pathnewpageitem'] = 'In diesem Set vorgeschlagene neue Seite ({$a})';
+$string['pathoptionalsuffix'] = '(optional)';
+$string['pathtype_onboarding'] = 'Einarbeitung';
+$string['pathtype_calendar_phase'] = 'Kalenderphase';
+$string['pathtype_role_based'] = 'Rollenbasiert';
+$string['pathtype_situational'] = 'Situativ';
+$string['pathtype_refresher'] = 'Auffrischung';
+$string['pathtype_compliance'] = 'Compliance';
+$string['pathwas'] = '(vorher: {$a})';
+$string['pathitemnew'] = 'Neu';
+$string['pathitemnowrequired'] = 'Jetzt erforderlich';
+$string['pathitemnowoptional'] = 'Jetzt optional';
+$string['pathitemmovedsection'] = 'Verschoben aus „{$a}“';
+$string['pathnosection'] = '(kein Abschnitt)';
+$string['pathremovedheading'] = 'Aus dem Pfad entfernt';
