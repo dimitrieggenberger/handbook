@@ -209,7 +209,7 @@ if (has_capability('local/handbook:publish', $context)) {
             'data-confirmation' => 'modal',
             'data-confirmation-content' => get_string('confirm' . $archiveaction, 'local_handbook',
                 format_string($page->title)),
-            'data-confirmation-yes-button-str' => get_string($archiveaction . 'page', 'local_handbook'),
+            'data-confirmation-yes-button' => get_string($archiveaction . 'page', 'local_handbook'),
         ]
     );
 }

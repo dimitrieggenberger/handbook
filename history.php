@@ -149,7 +149,7 @@ foreach ($revisions as $revision) {
             'data-confirmation' => 'modal',
             'data-confirmation-content' => get_string('confirmrestore', 'local_handbook',
                 (int)$revision->versionnumber),
-            'data-confirmation-yes-button-str' => get_string('restoreasdraft', 'local_handbook'),
+            'data-confirmation-yes-button' => get_string('restoreasdraft', 'local_handbook'),
         ]);
     }
     if ($links) {
