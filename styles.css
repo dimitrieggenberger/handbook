@@ -219,8 +219,47 @@
     background: var(--gray-100, #f8f9fa);
     border: 1px solid var(--bs-border-color, var(--gray-300, #dee2e6));
 }
-#page-local-handbook-area .local-handbook-search .form-control-lg {
+/* Compose input + button into ONE control: the group carries the border and
+   radius; the input goes borderless inside it and the button is clipped by
+   the group's rounded corners, so the theme's rounded .form-control never
+   collides with the rectangular button. */
+#page-local-handbook-area .local-handbook-search .input-group {
     max-width: 46rem;
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, var(--gray-300, #dee2e6));
+    border-radius: 2rem;
+    overflow: hidden;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+#page-local-handbook-area .local-handbook-search .input-group:focus-within {
+    border-color: var(--primary, #0078c3);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary, #0078c3) 22%, transparent);
+}
+#page-local-handbook-area .local-handbook-search .form-control-lg {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding-left: 1.35rem;
+}
+#page-local-handbook-area .local-handbook-search .form-control-lg:focus {
+    border: 0;
+    box-shadow: none;
+    outline: none;
+    background: transparent;
+}
+#page-local-handbook-area .local-handbook-search .input-group-append { margin: 0; }
+#page-local-handbook-area .local-handbook-search .input-group .btn {
+    border: 0;
+    border-radius: 0;
+    padding-left: 1.5rem;
+    padding-right: 1.65rem;
+}
+#page-local-handbook-area .local-handbook-search .input-group .btn:focus-visible {
+    outline: 2px solid var(--bs-body-bg, #fff);
+    outline-offset: -4px;
 }
 
 /* Required-reading acknowledgement box (spec 16). */
