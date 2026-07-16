@@ -704,10 +704,20 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/paths.php'),
             'visible' => has_capability('local/handbook:managepaths', $context),
         ],
+        'recommendations' => [
+            'label' => get_string('recommendations', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/recommendations.php'),
+            'visible' => has_capability('local/handbook:managepaths', $context),
+        ],
         'findings' => [
             'label' => get_string('managefindings', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/manage/findings.php'),
             'visible' => has_capability('local/handbook:managefindings', $context),
+        ],
+        'styleguide' => [
+            'label' => get_string('styleguide', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/styleguide.php'),
+            'visible' => has_capability('local/handbook:edit', $context),
         ],
         'changesets' => [
             'label' => get_string('changesets', 'local_handbook'),
@@ -978,6 +988,268 @@ function local_handbook_category_icon(stdClass $category): string {
         return $icon;
     }
     return 'fa-folder-open';
+}
+
+/**
+ * URL of a page's banner image, or null when none is set.
+ *
+ * The banner lives in file area "bannerimage" (itemid = page id) and is used
+ * twice: cropped to 16:9 on category cards and to 3:1 at the top of the
+ * article — both crops are CSS (object-fit: cover), one upload serves both.
+ *
+ * @param int $pageid Page id.
+ * @return moodle_url|null
+ */
+function local_handbook_banner_url(int $pageid): ?moodle_url {
+    $fs = get_file_storage();
+    $files = $fs->get_area_files(context_system::instance()->id, 'local_handbook',
+        'bannerimage', $pageid, 'itemid, filepath, filename', false);
+    foreach ($files as $file) {
+        if ($file->is_valid_image()) {
+            return moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(),
+                $file->get_filearea(), $file->get_itemid(), $file->get_filepath(),
+                $file->get_filename());
+        }
+    }
+    return null;
+}
+
+/**
+ * Font Awesome icon for a content type (used by the no-image card fallback).
+ *
+ * @param string $contenttype Content type key.
+ * @return string A safe fa-* class name.
+ */
+function local_handbook_contenttype_icon(string $contenttype): string {
+    $map = [
+        'policy' => 'fa-scale-balanced',
+        'procedure' => 'fa-list-check',
+        'standard' => 'fa-clipboard-check',
+        'guideline' => 'fa-compass',
+        'quickguide' => 'fa-bolt',
+        'template' => 'fa-clone',
+        'example' => 'fa-lightbulb',
+        'roledescription' => 'fa-user-tie',
+    ];
+    return $map[$contenttype] ?? 'fa-book-open';
+}
+
+/**
+ * The handbook content-pattern catalogue (the "hb-*" house style).
+ *
+ * Single source of truth shared by the editor style guide (manage/styleguide.php)
+ * and the API (external\get_style_guide, which feeds the Handbook AI). Each entry
+ * carries a stable key, a localized title and "when to use" line, and an
+ * example of KSES-safe HTML the author copies into the editor. The example is
+ * both rendered (as a live preview) and shown as source.
+ *
+ * @return stdClass[] Each: {key, title, whenuse, html}.
+ */
+function local_handbook_style_patterns(): array {
+    $patterns = [];
+    $add = static function (string $key, string $html) use (&$patterns): void {
+        $patterns[] = (object)[
+            'key' => $key,
+            'title' => get_string('sgtitle_' . $key, 'local_handbook'),
+            'whenuse' => get_string('sguse_' . $key, 'local_handbook'),
+            'html' => trim($html),
+        ];
+    };
+
+    $add('steps', <<<'HTML'
+<ol class="hb-steps">
+  <li>
+    <p class="hb-step-title">Planificar la salida <span class="hb-role">Docente responsable</span></p>
+    <p>Definir el objetivo pedagógico, la fecha y el costo por estudiante.</p>
+    <ol class="hb-substeps">
+      <li>Completar el formulario de salida pedagógica.</li>
+      <li>Adjuntar el presupuesto de transporte.</li>
+    </ol>
+  </li>
+  <li>
+    <p class="hb-step-title">Obtener la autorización <span class="hb-role">Coordinación</span></p>
+    <div class="hb-note"><p><strong>Nota:</strong> salidas fuera del municipio requieren visto bueno de Rectorado.</p></div>
+  </li>
+</ol>
+<div class="hb-result"><p><strong>Resultado esperado:</strong> salida documentada de inicio a fin.</p></div>
+HTML);
+
+    $add('callouts', <<<'HTML'
+<div class="hb-note"><p><strong>Nota:</strong> información contextual que ayuda pero no cambia el procedimiento.</p></div>
+<div class="hb-tip"><p><strong>Consejo:</strong> una práctica recomendada, opcional.</p></div>
+<div class="hb-warning"><p><strong>Advertencia:</strong> riesgo de error o retrabajo si se omite.</p></div>
+<div class="hb-important"><p><strong>Importante:</strong> obligación normativa o de seguridad; nunca omitir.</p></div>
+HTML);
+
+    $add('branches', <<<'HTML'
+<div class="hb-branches">
+  <div class="hb-branch">
+    <p class="hb-branch-if">Si el estudiante es menor de edad</p>
+    <ul><li>Contactar primero al responsable legal.</li><li>Registrar la comunicación.</li></ul>
+  </div>
+  <div class="hb-branch">
+    <p class="hb-branch-if">Si el estudiante es mayor de edad</p>
+    <ul><li>Informar al estudiante directamente.</li></ul>
+  </div>
+</div>
+HTML);
+
+    $add('compact', <<<'HTML'
+<ol class="hb-steps hb-compact">
+  <li><p class="hb-step-title">Asegurar al estudiante</p><p>Atención inmediata; no dejarlo solo.</p></li>
+  <li><p class="hb-step-title">Avisar a enfermería</p><p>Extensión 114.</p></li>
+  <li><p class="hb-step-title">Registrar el incidente</p><p>Formulario el mismo día.</p></li>
+</ol>
+HTML);
+
+    $add('org', <<<'HTML'
+<div class="hb-org">
+  <ul>
+    <li>
+      <div class="hb-org-node"><span class="unit">Rectorado</span><span class="holder">Dirección general</span></div>
+      <ul>
+        <li>
+          <div class="hb-org-team">
+            <span class="team-label">Equipo de Liderazgo Educativo</span>
+            <div class="team-members">
+              <div class="hb-org-member"><span class="name">Dirección</span></div>
+              <div class="hb-org-member"><span class="name">Coordinación</span></div>
+              <div class="hb-org-member"><span class="name">Convivencia</span></div>
+              <div class="hb-org-member"><span class="name">Consejería</span></div>
+            </div>
+          </div>
+          <ul>
+            <li><div class="hb-org-node"><span class="unit">Docentes</span></div></li>
+          </ul>
+        </li>
+        <li><div class="hb-org-node"><span class="unit">Administración</span></div></li>
+      </ul>
+    </li>
+  </ul>
+</div>
+HTML);
+
+    $add('roles', <<<'HTML'
+<div class="hb-roles">
+  <div class="hb-role-card">
+    <p class="role-name">Docente responsable</p>
+    <p class="who">Área académica</p>
+    <ul><li>Planifica y ejecuta la actividad.</li><li>Custodia las autorizaciones.</li></ul>
+  </div>
+  <div class="hb-role-card">
+    <p class="role-name">Coordinación Académica</p>
+    <p class="who">Coordinación</p>
+    <ul><li>Autoriza salidas y proyectos.</li><li>Escala a Rectorado cuando corresponde.</li></ul>
+  </div>
+</div>
+HTML);
+
+    $add('escalation', <<<'HTML'
+<ol class="hb-escalation">
+  <li><p class="lvl-title">Con la persona</p><p>Plantear el desacuerdo directa y respetuosamente con la persona involucrada.</p></li>
+  <li><p class="lvl-title">Jefatura de área</p><p>Si no se resuelve, llevarlo a la jefatura correspondiente.</p></li>
+  <li><p class="lvl-title">Coordinación</p><p>La coordinación media y deja constancia en la bitácora.</p></li>
+  <li><p class="lvl-title">Rectorado</p><p>Última instancia interna.</p></li>
+</ol>
+HTML);
+
+    $add('dodont', <<<'HTML'
+<div class="hb-dodont">
+  <div class="hb-do">
+    <p class="col-title">Lo que esperamos</p>
+    <ul><li>Puntualidad en clases y turnos.</li><li>Comunicación por los canales internos.</li></ul>
+  </div>
+  <div class="hb-dont">
+    <p class="col-title">Lo que no aceptamos</p>
+    <ul><li>Contactar familias por mensajería personal.</li><li>Exponer desacuerdos frente a estudiantes.</li></ul>
+  </div>
+</div>
+HTML);
+
+    $add('timeline', <<<'HTML'
+<ol class="hb-timeline">
+  <li class="is-done"><span class="when">Julio</span><p class="what">Planificación institucional</p><p>Definición de prioridades y calendario.</p></li>
+  <li class="is-done"><span class="when">Agosto</span><p class="what">Inducción del personal</p></li>
+  <li><span class="when">Septiembre</span><p class="what">Inicio de clases</p></li>
+</ol>
+HTML);
+
+    $add('contact', <<<'HTML'
+<div class="hb-contacts">
+  <div class="hb-contact is-emergency">
+    <div class="ic">+</div>
+    <div>
+      <p class="name">Enfermería</p>
+      <p class="role">Atención de salud</p>
+      <dl><dt>Extensión</dt><dd>114</dd><dt>Ubicación</dt><dd>Planta baja, ala norte</dd></dl>
+      <p class="when">Llamar de inmediato ante cualquier incidente físico.</p>
+    </div>
+  </div>
+  <div class="hb-contact">
+    <div class="ic">&#9742;</div>
+    <div>
+      <p class="name">Secretaría académica</p>
+      <p class="role">Administración</p>
+      <dl><dt>Extensión</dt><dd>101</dd><dt>Horario</dt><dd>7:00&ndash;15:00</dd></dl>
+      <p class="when">Autorizaciones, circulares y archivo de documentos.</p>
+    </div>
+  </div>
+</div>
+HTML);
+
+    $add('define', <<<'HTML'
+<div class="hb-define">
+  <span class="eyebrow">Definición</span>
+  <p class="term">Salida pedagógica <span class="abbr">(salida)</span></p>
+  <p>Actividad educativa fuera del campus, planificada por un docente y autorizada por Coordinación, con autorización firmada de las familias.</p>
+</div>
+<p>Toda <span class="hb-term" title="Actividad educativa fuera del campus autorizada por Coordinación.">salida pedagógica</span> requiere autorización con 15 días de anticipación.</p>
+HTML);
+
+    $add('matrix', <<<'HTML'
+<div class="hb-matrix-wrap">
+  <table class="hb-matrix">
+    <caption>Responsabilidades por etapa</caption>
+    <thead><tr><th scope="col">Tarea</th><th scope="col">Docente</th><th scope="col">Coordinación</th><th scope="col">Secretaría</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Planificar</th><td><span class="raci raci-r">R</span></td><td><span class="raci raci-c">C</span></td><td></td></tr>
+      <tr><th scope="row">Autorizar</th><td></td><td><span class="raci raci-a">A</span></td><td></td></tr>
+      <tr><th scope="row">Comunicar familias</th><td><span class="raci raci-c">C</span></td><td><span class="raci raci-i">I</span></td><td><span class="raci raci-r">R</span></td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="hb-matrix-legend"><span><span class="raci raci-r">R</span> Responsable</span><span><span class="raci raci-a">A</span> Aprueba</span><span><span class="raci raci-c">C</span> Consultado</span><span><span class="raci raci-i">I</span> Informado</span></div>
+HTML);
+
+    $add('figure', <<<'HTML'
+<figure class="hb-figure">
+  <img src="URL_DE_LA_IMAGEN" alt="Descripción de la imagen para lectores de pantalla">
+  <figcaption><strong>Figura 1.</strong> Zonas de supervisión durante el recreo, por turno.</figcaption>
+</figure>
+HTML);
+
+    $add('keyvalue', <<<'HTML'
+<div class="hb-keyvalue">
+  <div class="kv-title">Ficha &mdash; Comité de Protección del Menor</div>
+  <dl>
+    <dt>Coordina</dt><dd>Consejería</dd>
+    <dt>Integrantes</dt><dd>Consejería, Convivencia, Dirección, Enfermería</dd>
+    <dt>Reuniones</dt><dd>Mensual &middot; primer martes</dd>
+    <dt>Reporta a</dt><dd>Rectorado</dd>
+  </dl>
+</div>
+HTML);
+
+    $add('checklist', <<<'HTML'
+<ul class="hb-checklist">
+  <li>Formulario de salida completo<span class="sub">Con presupuesto adjunto.</span></li>
+  <li>Autorizaciones firmadas recibidas<span class="sub">Una por cada estudiante menor de edad.</span></li>
+  <li>Nómina impresa y en el teléfono</li>
+  <li>Botiquín y contactos de emergencia</li>
+</ul>
+HTML);
+
+    return $patterns;
 }
 
 /**

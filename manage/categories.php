@@ -179,9 +179,10 @@ function local_handbook_manage_category_row(stdClass $category, int $depth, arra
         [
             'class' => 'btn btn-outline-secondary btn-sm',
             'data-confirmation' => 'modal',
+            'data-confirmation-type' => 'delete',
             'data-confirmation-content' => get_string('confirmdeletecategory', 'local_handbook',
                 format_string($category->name)),
-            'data-confirmation-yes-button-str' => get_string('delete', 'core'),
+            'data-confirmation-yes-button' => get_string('delete', 'core'),
         ]
     );
 

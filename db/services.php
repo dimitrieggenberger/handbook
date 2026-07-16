@@ -218,6 +218,12 @@ $functions = [
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposetaxonomy',
     ],
+    'local_handbook_get_style_guide' => [
+        'classname' => 'local_handbook\external\get_style_guide',
+        'description' => 'Handbook content style guide: the hb-* formatting patterns and example HTML (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
     'local_handbook_list_reading_paths' => [
         'classname' => 'local_handbook\external\list_reading_paths',
         'description' => 'List reading paths with item counts (read-only).',
@@ -233,6 +239,48 @@ $functions = [
     'local_handbook_upsert_changeset_reading_path' => [
         'classname' => 'local_handbook\external\upsert_changeset_reading_path',
         'description' => 'Propose a whole reading path (create/update) in a change set (draft only; never applies).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposepaths',
+    ],
+    'local_handbook_get_reading_path_coverage' => [
+        'classname' => 'local_handbook\external\get_reading_path_coverage',
+        'description' => 'Aggregate reading-path coverage and overlap (read-only; no individual completion data).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_audit_reading_paths' => [
+        'classname' => 'local_handbook\external\audit_reading_paths',
+        'description' => 'Handbook-wide reading-path audit: orphans, review-due, no-required, oversized (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_recommend_paths_for_page' => [
+        'classname' => 'local_handbook\external\recommend_paths_for_page',
+        'description' => 'Deterministic reading-path candidates for a page, from relations and category (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_list_path_recommendations' => [
+        'classname' => 'local_handbook\external\list_path_recommendations',
+        'description' => 'List advisory reading-path recommendations (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_get_path_recommendation' => [
+        'classname' => 'local_handbook\external\get_path_recommendation',
+        'description' => 'Get one advisory reading-path recommendation (read-only).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_create_path_recommendation' => [
+        'classname' => 'local_handbook\external\create_path_recommendation',
+        'description' => 'Record an advisory reading-path recommendation for human triage (never edits a path).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_accept_path_recommendation' => [
+        'classname' => 'local_handbook\external\accept_path_recommendation',
+        'description' => 'Accept a recommendation into a change set as a draft reading-path revision (draft only).',
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposepaths',
     ],

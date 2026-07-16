@@ -209,7 +209,7 @@ if (has_capability('local/handbook:publish', $context)) {
             'data-confirmation' => 'modal',
             'data-confirmation-content' => get_string('confirm' . $archiveaction, 'local_handbook',
                 format_string($page->title)),
-            'data-confirmation-yes-button-str' => get_string($archiveaction . 'page', 'local_handbook'),
+            'data-confirmation-yes-button' => get_string($archiveaction . 'page', 'local_handbook'),
         ]
     );
 }
@@ -267,6 +267,15 @@ if ($iseditorial) {
 
 echo html_writer::start_div('row');
 echo html_writer::start_div('col-lg-8');
+
+// Banner image (spec: fixed 3:1, masked with object-fit cover, centered both
+// axes). When no banner is set the block is simply not rendered.
+$bannerurl = local_handbook_banner_url((int)$page->id);
+if ($bannerurl) {
+    echo html_writer::div(
+        html_writer::empty_tag('img', ['src' => $bannerurl->out(false), 'alt' => '']),
+        'local-handbook-page-banner');
+}
 
 echo local_handbook_render_page_badges($page);
 

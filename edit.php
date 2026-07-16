@@ -88,6 +88,12 @@ $editoroptions = [
     'context' => $context,
     'subdirs' => 0,
 ];
+$banneroptions = [
+    'maxfiles' => 1,
+    'maxbytes' => 0,
+    'subdirs' => 0,
+    'accepted_types' => ['web_image'],
+];
 
 $candirectpublish = page_service::bootstrap_mode_enabled()
     && has_capability('local/handbook:publish', $context);
@@ -97,6 +103,7 @@ $form = new page_form($url->out(false), [
     'page' => $page,
     'revision' => $revision,
     'editoroptions' => $editoroptions,
+    'banneroptions' => $banneroptions,
     'candirectpublish' => $candirectpublish,
 ]);
 
@@ -152,6 +159,10 @@ if ($data = $form->get_data()) {
             throw new moodle_exception('errorrevisionconflict', 'local_handbook');
         }
     }
+
+    // Store the banner image against the page (file area keyed by page id).
+    $data = file_postupdate_standard_filemanager($data, 'bannerimage', $banneroptions, $context,
+        'local_handbook', 'bannerimage', (int)$page->id);
 
     // Move editor draft files into the revision's file area, then save.
     $data = file_postupdate_standard_editor($data, 'content', $editoroptions, $context,
@@ -210,6 +221,8 @@ $defaults->revisiontimemodified = (int)($revision->timemodified ?? 0);
 
 $defaults = file_prepare_standard_editor($defaults, 'content', $editoroptions, $context,
     'local_handbook', 'revision', $sourcerevision->id ?? null);
+$defaults = file_prepare_standard_filemanager($defaults, 'bannerimage', $banneroptions, $context,
+    'local_handbook', 'bannerimage', $page->id ?? null);
 
 $form->set_data($defaults);
 

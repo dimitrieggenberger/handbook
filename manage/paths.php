@@ -260,9 +260,10 @@ if (!$paths) {
                     [
                         'class' => 'btn btn-outline-secondary btn-sm',
                         'data-confirmation' => 'modal',
+                        'data-confirmation-type' => 'delete',
                         'data-confirmation-content' => get_string('confirmdeletepath', 'local_handbook',
                             format_string($path->name)),
-                        'data-confirmation-yes-button-str' => get_string('delete', 'core'),
+                        'data-confirmation-yes-button' => get_string('delete', 'core'),
                     ]),
                 'd-flex gap-2'),
             'd-flex flex-wrap align-items-center justify-content-between gap-2 py-2 border-bottom'

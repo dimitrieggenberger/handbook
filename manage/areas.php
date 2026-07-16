@@ -129,9 +129,10 @@ foreach ($areas as $area) {
         [
             'class' => 'btn btn-outline-secondary btn-sm',
             'data-confirmation' => 'modal',
+            'data-confirmation-type' => 'delete',
             'data-confirmation-content' => get_string('confirmdeletearea', 'local_handbook',
                 format_string($area->name)),
-            'data-confirmation-yes-button-str' => get_string('delete', 'core'),
+            'data-confirmation-yes-button' => get_string('delete', 'core'),
         ]);
 
     $rows .= html_writer::div(

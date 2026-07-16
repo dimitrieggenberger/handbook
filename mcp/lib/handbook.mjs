@@ -212,6 +212,13 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
   );
 
   server.tool(
+    "handbook_get_style_guide",
+    "The handbook's content style guide: the house 'hb-*' formatting patterns (multi-step procedures, callouts, org charts with teams, roles, escalation ladders, do/don't, RACI matrices, timelines, contacts, definitions, figures, fact sheets, checklists) with example HTML to adapt. Call this ONCE before writing or updating page content, then reuse the patterns so every article looks uniform. Formatting guidance only — it changes nothing.",
+    {},
+    handler(() => ws("local_handbook_get_style_guide", {}))
+  );
+
+  server.tool(
     "handbook_get_archive_impact",
     "Before proposing to archive a page, check its impact: how many other pages relate TO it, how many active reading paths include it, and whether it is required reading. Use this to decide whether to set a replacement page and redirect.",
     { identifier: z.string().describe("Page slug or numeric id") },
@@ -240,6 +247,51 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     handler(({ pathid }) => ws("local_handbook_get_reading_path", { pathid }))
   );
 
+  server.tool(
+    "handbook_get_reading_path_coverage",
+    "Aggregate reading-path coverage: how many published pages sit in at least one active path, how many are orphaned, required-reading coverage, overlap, and per-path item counts. No individual staff completion data. Use it to spot gaps before recommending paths.",
+    {},
+    handler(() => ws("local_handbook_get_reading_path_coverage", {}))
+  );
+
+  server.tool(
+    "handbook_audit_reading_paths",
+    "Handbook-wide reading-path audit: deterministic advisory findings — required pages in no active path, paths past their review date, paths with no required item, oversized paths. Read-only; changes nothing.",
+    {},
+    handler(() => ws("local_handbook_audit_reading_paths", {}))
+  );
+
+  server.tool(
+    "handbook_recommend_paths_for_page",
+    "Which active reading paths a page is a good candidate for, from typed relations (a quickguidefor/templatefor/implements target already in a path is a strong signal) and shared category. Read-only — nothing is recorded. To record one for human triage, use handbook_create_path_recommendation.",
+    { identifier: z.string().describe("Page slug or numeric id") },
+    handler(({ identifier }) => ws("local_handbook_recommend_paths_for_page", { identifier }))
+  );
+
+  server.tool(
+    "handbook_list_path_recommendations",
+    "List advisory reading-path recommendations (default: open). Advisory records only; no completion data.",
+    {
+      status: z.string().optional().describe("open, accepted, dismissed, deferred, already_covered, intentional_omission, resolved (empty = all)"),
+      pathid: z.number().int().optional(),
+      pageid: z.number().int().optional(),
+    },
+    handler((args) =>
+      ws("local_handbook_list_path_recommendations", {
+        status: args.status ?? "open",
+        pathid: args.pathid ?? 0,
+        pageid: args.pageid ?? 0,
+      }))
+  );
+
+  server.tool(
+    "handbook_get_path_recommendation",
+    "Get one advisory reading-path recommendation by id.",
+    { recommendationid: z.number().int() },
+    handler(({ recommendationid }) =>
+      ws("local_handbook_get_path_recommendation", { recommendationid }))
+  );
+
   if (!writable) {
     return; // Read-only mode: no draft or change-set write tools.
   }
@@ -254,7 +306,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       category: z.string().describe("Category slug or id"),
       contenttype: z.string().describe("policy, procedure, standard, guideline, quickguide, template, example, roledescription"),
       summary: z.string(),
-      content: z.string().describe("Clean HTML, headings starting at h2"),
+      content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       slug: z.string().optional(),
       authoritylevel: z.number().int().min(1).max(6).optional(),
       criticality: z.string().optional().describe("reference, operational, mandatory, safetycritical"),
@@ -298,7 +350,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     "Update a draft revision's content. expectedtimemodified is REQUIRED: pass the timemodified from when you fetched/created the draft; a mismatch means someone else edited meanwhile.",
     {
       revisionid: z.number().int(),
-      content: z.string().describe("Clean HTML, headings starting at h2"),
+      content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       expectedtimemodified: z.number().int(),
       changesummary: z.string().optional(),
     },
@@ -346,7 +398,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     {
       changesetid: z.number().int(),
       identifier: z.string().describe("Page slug or numeric id"),
-      content: z.string().describe("Clean HTML, headings starting at h2"),
+      content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       changesummary: z.string().optional(),
       expectedpublishedrevisionid: z.number().int().optional(),
       expectedtimemodified: z.number().int().optional(),
@@ -408,7 +460,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       tempkey: z.string().describe("Stable id within this change set, e.g. newpage:slug"),
       title: z.string(),
       categoryid: z.number().int().describe("Existing category id"),
-      content: z.string().describe("Clean HTML, headings starting at h2"),
+      content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       slug: z.string().optional(),
       summary: z.string().optional(),
       contenttype: z.string().optional()
@@ -615,6 +667,43 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
           })),
         })),
       }))
+  );
+
+  server.tool(
+    "handbook_create_path_recommendation",
+    "Record an ADVISORY recommendation to change a reading path (e.g. add a new quick guide beside the canonical procedure already in the path). It never edits the active path — it creates a pending record a human triages. Prefer this over editing a path directly when you spot a relevant page.",
+    {
+      pathid: z.number().int().describe("Target path id"),
+      identifier: z.string().optional().describe("Article slug or id (omit for a path-level recommendation)"),
+      rectype: z.enum(["add", "remove", "reorder", "replace", "split_path", "merge_paths", "update_required_status"]).optional(),
+      confidence: z.enum(["low", "medium", "high"]).optional(),
+      rationale: z.string().optional().describe("Why this is recommended"),
+      suggestedsection: z.string().optional(),
+      suggestedrequired: z.boolean().optional(),
+      suggestedafterpageid: z.number().int().optional().describe("Place after this page (0 = end)"),
+    },
+    handler((args) =>
+      ws("local_handbook_create_path_recommendation", {
+        pathid: args.pathid,
+        identifier: args.identifier ?? "",
+        rectype: args.rectype ?? "add",
+        confidence: args.confidence ?? "medium",
+        rationale: args.rationale ?? "",
+        suggestedsection: args.suggestedsection ?? "",
+        suggestedrequired: args.suggestedrequired ?? true,
+        suggestedafterpageid: args.suggestedafterpageid ?? 0,
+      }))
+  );
+
+  server.tool(
+    "handbook_accept_path_recommendation",
+    "Accept a recommendation into a change set as a DRAFT reading-path revision. The active path is not touched: the recommendation is applied to a copy and staged as a path proposal for a human to review, approve and publish. Do this only when the user asks to act on a recommendation.",
+    {
+      recommendationid: z.number().int(),
+      changesetid: z.number().int().describe("Change set to draft the revision into"),
+    },
+    handler(({ recommendationid, changesetid }) =>
+      ws("local_handbook_accept_path_recommendation", { recommendationid, changesetid }))
   );
 
   server.tool(
