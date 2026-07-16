@@ -335,6 +335,41 @@
       </INDEXES>
     </TABLE>
 
+    <TABLE NAME="local_handbook_categoryalias" COMMENT="Retired category slugs that still resolve (spec 4.4)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="oldslug" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="categoryid" TYPE="foreign" FIELDS="categoryid" REFTABLE="local_handbook_category" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="oldslug" UNIQUE="true" FIELDS="oldslug"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_tempref" COMMENT="Temporary-key to real-id map for entities created within a change set (spec 4.3)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="changesetid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="tempkey" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="entitytype" TYPE="char" LENGTH="30" NOTNULL="true" COMMENT="category, page, ..."/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="changesetid" TYPE="foreign" FIELDS="changesetid" REFTABLE="local_handbook_changeset" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="changesettempkey" UNIQUE="true" FIELDS="changesetid, tempkey"/>
+      </INDEXES>
+    </TABLE>
+
     <TABLE NAME="local_handbook_area" COMMENT="Controlled vocabulary of responsible areas (spec 9)">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

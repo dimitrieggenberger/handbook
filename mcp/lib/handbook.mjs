@@ -482,7 +482,9 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     {
       changesetid: z.number().int(),
       identifier: z.string().describe("Page slug or id to move"),
-      targetcategoryid: z.number().int().describe("Destination category id"),
+      targetcategoryid: z.number().int().optional().describe("Destination category id"),
+      targetcategorytempkey: z.string().optional()
+        .describe("Tempkey of a category created in this same change set (instead of targetcategoryid)"),
       expectedcategoryid: z.number().int().optional(),
       expectedpagetimemodified: z.number().int().optional(),
       changesummary: z.string().optional(),
@@ -491,7 +493,8 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       ws("local_handbook_upsert_changeset_page_move", {
         changesetid: args.changesetid,
         identifier: args.identifier,
-        targetcategoryid: args.targetcategoryid,
+        targetcategoryid: args.targetcategoryid ?? 0,
+        targetcategorytempkey: args.targetcategorytempkey ?? "",
         expectedcategoryid: args.expectedcategoryid ?? 0,
         expectedpagetimemodified: args.expectedpagetimemodified ?? 0,
         changesummary: args.changesummary ?? "",
@@ -506,21 +509,23 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       op: z.enum(["create", "update", "move", "merge", "delete_empty"]),
       tempkey: z.string().optional().describe("Stable id for a new category (create)"),
       name: z.string().optional(),
-      slug: z.string().optional(),
+      slug: z.string().optional().describe("Slug for create/update; the old slug keeps resolving"),
       parentid: z.number().int().optional().describe("Parent id (create)"),
+      parenttempkey: z.string().optional().describe("Tempkey of a parent created in this set (create)"),
+      newparenttempkey: z.string().optional().describe("Tempkey of a new parent created in this set (move)"),
       description: z.string().optional(),
       icon: z.string().optional().describe("Font Awesome class, e.g. fa-folder-open"),
       visible: z.boolean().optional(),
       sortorder: z.number().int().optional(),
-      categoryid: z.number().int().optional().describe("Category id (update/move)"),
+      categoryid: z.number().int().optional().describe("Category id (update/move/delete_empty)"),
       newparentid: z.number().int().optional().describe("New parent id (move; 0 = top level)"),
       sourceid: z.number().int().optional().describe("Source category id (merge)"),
       targetid: z.number().int().optional().describe("Target category id (merge)"),
     },
     handler((args) => {
       const operation = { op: args.op };
-      for (const key of ["tempkey", "name", "slug", "parentid", "description", "icon",
-        "visible", "sortorder", "categoryid", "newparentid", "sourceid", "targetid"]) {
+      for (const key of ["tempkey", "name", "slug", "parentid", "parenttempkey", "newparenttempkey",
+        "description", "icon", "visible", "sortorder", "categoryid", "newparentid", "sourceid", "targetid"]) {
         if (args[key] !== undefined) {
           operation[key] = args[key];
         }

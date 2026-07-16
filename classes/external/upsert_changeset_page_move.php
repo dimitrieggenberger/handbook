@@ -46,7 +46,10 @@ class upsert_changeset_page_move extends external_api {
         return new external_function_parameters([
             'changesetid' => new external_value(PARAM_INT, 'Change-set id'),
             'identifier' => new external_value(PARAM_ALPHANUMEXT, 'Page id or slug'),
-            'targetcategoryid' => new external_value(PARAM_INT, 'Destination category id'),
+            'targetcategoryid' => new external_value(PARAM_INT, 'Destination category id', VALUE_DEFAULT, 0),
+            'targetcategorytempkey' => new external_value(PARAM_TEXT,
+                'Tempkey of a category proposed in this set (instead of targetcategoryid)',
+                VALUE_DEFAULT, ''),
             'expectedcategoryid' => new external_value(PARAM_INT,
                 'Category the page was in when read (0 = skip the check)', VALUE_DEFAULT, 0),
             'expectedpagetimemodified' => new external_value(PARAM_INT,
@@ -66,13 +69,14 @@ class upsert_changeset_page_move extends external_api {
      * @param string $changesummary Summary.
      * @return array
      */
-    public static function execute(int $changesetid, string $identifier, int $targetcategoryid,
-            int $expectedcategoryid = 0, int $expectedpagetimemodified = 0,
-            string $changesummary = ''): array {
+    public static function execute(int $changesetid, string $identifier, int $targetcategoryid = 0,
+            string $targetcategorytempkey = '', int $expectedcategoryid = 0,
+            int $expectedpagetimemodified = 0, string $changesummary = ''): array {
         $params = self::validate_parameters(self::execute_parameters(), [
             'changesetid' => $changesetid,
             'identifier' => $identifier,
             'targetcategoryid' => $targetcategoryid,
+            'targetcategorytempkey' => $targetcategorytempkey,
             'expectedcategoryid' => $expectedcategoryid,
             'expectedpagetimemodified' => $expectedpagetimemodified,
             'changesummary' => $changesummary,
@@ -87,7 +91,8 @@ class upsert_changeset_page_move extends external_api {
 
         return changeset_service::upsert_page_move($params['changesetid'], (int)$page->id,
             $params['targetcategoryid'], $params['expectedcategoryid'],
-            $params['expectedpagetimemodified'], $params['changesummary']);
+            $params['expectedpagetimemodified'], $params['changesummary'], 0,
+            $params['targetcategorytempkey']);
     }
 
     /**

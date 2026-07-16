@@ -617,3 +617,4 @@ $string['pagemoveto'] = 'Move to category: {$a}';
 $string['conflict_pagemove'] = 'The page moved or changed after this proposal was prepared; reload and propose again.';
 $string['errorpagemovesame'] = 'The page is already in that category.';
 $string['event_page_moved'] = 'Handbook page moved';
+$string['errortemprefunresolved'] = 'The category "{$a}" is proposed in this change set but has not been created yet; apply its creation first.';

@@ -617,3 +617,4 @@ $string['pagemoveto'] = 'Mover a la categoría: {$a}';
 $string['conflict_pagemove'] = 'La página se movió o cambió después de preparar esta propuesta; recárguela y propóngala de nuevo.';
 $string['errorpagemovesame'] = 'La página ya está en esa categoría.';
 $string['event_page_moved'] = 'Página del manual movida';
+$string['errortemprefunresolved'] = 'La categoría «{$a}» se propone en este change set pero aún no se ha creado; aplique primero su creación.';

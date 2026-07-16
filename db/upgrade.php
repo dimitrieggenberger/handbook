@@ -361,5 +361,37 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071508, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071512) {
+        // Taxonomy phase 1: category slug aliases + change-set temp references.
+        $alias = new xmldb_table('local_handbook_categoryalias');
+        $alias->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $alias->add_field('categoryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $alias->add_field('oldslug', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $alias->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $alias->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $alias->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $alias->add_key('categoryid', XMLDB_KEY_FOREIGN, ['categoryid'], 'local_handbook_category', ['id']);
+        $alias->add_index('oldslug', XMLDB_INDEX_UNIQUE, ['oldslug']);
+        if (!$dbman->table_exists($alias)) {
+            $dbman->create_table($alias);
+        }
+
+        $tempref = new xmldb_table('local_handbook_tempref');
+        $tempref->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $tempref->add_field('changesetid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $tempref->add_field('tempkey', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+        $tempref->add_field('entitytype', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL);
+        $tempref->add_field('entityid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $tempref->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $tempref->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $tempref->add_key('changesetid', XMLDB_KEY_FOREIGN, ['changesetid'], 'local_handbook_changeset', ['id']);
+        $tempref->add_index('changesettempkey', XMLDB_INDEX_UNIQUE, ['changesetid', 'tempkey']);
+        if (!$dbman->table_exists($tempref)) {
+            $dbman->create_table($tempref);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071512, 'local', 'handbook');
+    }
+
     return true;
 }

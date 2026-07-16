@@ -617,3 +617,4 @@ $string['pagemoveto'] = 'In Kategorie verschieben: {$a}';
 $string['conflict_pagemove'] = 'Die Seite wurde nach Erstellung dieses Vorschlags verschoben oder geändert; bitte neu laden und erneut vorschlagen.';
 $string['errorpagemovesame'] = 'Die Seite befindet sich bereits in dieser Kategorie.';
 $string['event_page_moved'] = 'Handbuchseite verschoben';
+$string['errortemprefunresolved'] = 'Die Kategorie „{$a}" wird in diesem Change-Set vorgeschlagen, wurde aber noch nicht erstellt; wenden Sie zuerst ihre Erstellung an.';

@@ -880,6 +880,102 @@ final class changeset_service_test extends advanced_testcase {
             ['op' => 'delete_empty', 'categoryid' => $cat]);
     }
 
+    public function test_category_slug_rename_registers_an_alias(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $oldslug = (string)$DB->get_field('local_handbook_category', 'slug', ['id' => $cat]);
+        $changeset = changeset_service::create((object)['title' => 'Rename', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'update', 'categoryid' => $cat, 'slug' => 'nuevo-slug-cat']);
+        changeset_service::submit($changeset->id);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'cat:' . $cat . ':update',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+
+        $this->assertSame('nuevo-slug-cat',
+            (string)$DB->get_field('local_handbook_category', 'slug', ['id' => $cat]));
+        $this->assertTrue($DB->record_exists('local_handbook_categoryalias',
+            ['oldslug' => $oldslug, 'categoryid' => $cat]));
+    }
+
+    public function test_page_move_into_a_proposed_category_resolves_the_tempkey(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $from = $this->create_category();
+        $page = $this->publish_page($from, 'Movible');
+        $changeset = changeset_service::create((object)['title' => 'Migrate', 'source' => 'ai']);
+
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:destino', 'name' => 'Destino nuevo']);
+        changeset_service::upsert_page_move($changeset->id, (int)$page->id, 0, 0, 0, '', 0,
+            'newcat:destino');
+        changeset_service::submit($changeset->id);
+
+        // Apply the category creation first so the tempkey resolves.
+        $catitem = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:destino',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$catitem->id);
+        changeset_service::publish_item((int)$catitem->id);
+        $newcatid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:destino']);
+        $this->assertGreaterThan(0, $newcatid);
+
+        // Then the page move resolves to the created category.
+        $moveitem = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_MOVE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$moveitem->id);
+        changeset_service::publish_item((int)$moveitem->id);
+
+        $this->assertSame($newcatid,
+            (int)$DB->get_field('local_handbook_page', 'categoryid', ['id' => $page->id]));
+    }
+
+    public function test_category_created_under_a_proposed_parent(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $changeset = changeset_service::create((object)['title' => 'Tree', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:parent', 'name' => 'Padre']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:child', 'name' => 'Hija',
+                'parenttempkey' => 'newcat:parent']);
+        changeset_service::submit($changeset->id);
+
+        $parentitem = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:parent',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$parentitem->id);
+        changeset_service::publish_item((int)$parentitem->id);
+        $parentid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:parent']);
+
+        $childitem = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:child',
+                'kind' => changeset_service::KIND_CATEGORY_CHANGE], '*', MUST_EXIST);
+        changeset_service::approve_item((int)$childitem->id);
+        changeset_service::publish_item((int)$childitem->id);
+        $childid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:child']);
+
+        $this->assertSame($parentid,
+            (int)$DB->get_field('local_handbook_category', 'parentid', ['id' => $childid]));
+    }
+
     /**
      * Read one item's status.
      *

@@ -754,7 +754,7 @@ class changeset_service {
      */
     public static function upsert_page_move(int $changesetid, int $pageid, int $targetcategoryid,
             int $expectedcategoryid = 0, int $expectedpagetimemodified = 0,
-            string $changesummary = '', int $userid = 0): array {
+            string $changesummary = '', int $userid = 0, string $targetcategorytempkey = ''): array {
         global $DB, $USER;
         $userid = $userid ?: (int)$USER->id;
 
@@ -763,11 +763,15 @@ class changeset_service {
             throw new moodle_exception('errorchangesetlocked', 'local_handbook');
         }
         $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
-        if (!$DB->record_exists('local_handbook_category', ['id' => $targetcategoryid])) {
-            throw new moodle_exception('errorcategorynotfound', 'local_handbook');
-        }
-        if ($targetcategoryid === (int)$page->categoryid) {
-            throw new moodle_exception('errorpagemovesame', 'local_handbook');
+        // A tempkey target (a category created in the same set) is resolved and
+        // checked at apply time.
+        if ($targetcategorytempkey === '') {
+            if (!$DB->record_exists('local_handbook_category', ['id' => $targetcategoryid])) {
+                throw new moodle_exception('errorcategorynotfound', 'local_handbook');
+            }
+            if ($targetcategoryid === (int)$page->categoryid) {
+                throw new moodle_exception('errorpagemovesame', 'local_handbook');
+            }
         }
 
         // Optimistic concurrency: a page already moved or edited elsewhere
@@ -781,6 +785,7 @@ class changeset_service {
         $payload = [
             'sourcecategoryid' => (int)$page->categoryid,
             'targetcategoryid' => $targetcategoryid,
+            'targetcategorytempkey' => $targetcategorytempkey,
             'expectedpagetimemodified' => $expectedpagetimemodified,
         ];
         $summary = trim($changesummary) !== '' ? $changesummary
@@ -873,8 +878,10 @@ class changeset_service {
             if ($name === '' || \core_text::strlen($name) > 255) {
                 throw new moodle_exception('errorcategoryname', 'local_handbook');
             }
+            $parenttempkey = trim((string)($op['parenttempkey'] ?? ''));
             $parentid = (int)($op['parentid'] ?? 0);
-            if ($parentid && !$DB->record_exists('local_handbook_category', ['id' => $parentid])) {
+            if ($parenttempkey === '' && $parentid
+                    && !$DB->record_exists('local_handbook_category', ['id' => $parentid])) {
                 throw new moodle_exception('errorcategoryparent', 'local_handbook');
             }
             return [
@@ -882,6 +889,7 @@ class changeset_service {
                 'name' => $name,
                 'slug' => !empty($op['slug']) ? page_service::slugify((string)$op['slug']) : '',
                 'parentid' => $parentid,
+                'parenttempkey' => $parenttempkey,
                 'description' => (string)($op['description'] ?? ''),
                 'icon' => preg_match('/^fa-[a-z0-9-]+$/', trim((string)($op['icon'] ?? '')))
                     ? trim((string)$op['icon']) : '',
@@ -916,6 +924,9 @@ class changeset_service {
             if (isset($op['sortorder'])) {
                 $out['sortorder'] = (int)$op['sortorder'];
             }
+            if (isset($op['slug']) && ($slug = page_service::slugify((string)$op['slug'])) !== '') {
+                $out['slug'] = $slug;
+            }
             if (count($out) <= 2) {
                 throw new moodle_exception('errorcategorynochange', 'local_handbook');
             }
@@ -927,8 +938,11 @@ class changeset_service {
             if (!$categoryid || !$DB->record_exists('local_handbook_category', ['id' => $categoryid])) {
                 throw new moodle_exception('errorcategorynotfound', 'local_handbook');
             }
+            $newparenttempkey = trim((string)($op['newparenttempkey'] ?? ''));
             $newparentid = (int)($op['newparentid'] ?? 0);
-            if ($newparentid) {
+            // A tempkey parent (a category created in the same set) is checked
+            // for existence and cycles at apply time.
+            if ($newparenttempkey === '' && $newparentid) {
                 if (!$DB->record_exists('local_handbook_category', ['id' => $newparentid])) {
                     throw new moodle_exception('errorcategoryparent', 'local_handbook');
                 }
@@ -936,7 +950,8 @@ class changeset_service {
                     throw new moodle_exception('errorcategorycycle', 'local_handbook');
                 }
             }
-            return ['op' => 'move', 'categoryid' => $categoryid, 'newparentid' => $newparentid];
+            return ['op' => 'move', 'categoryid' => $categoryid,
+                'newparentid' => $newparentid, 'newparenttempkey' => $newparenttempkey];
         }
 
         if ($action === 'delete_empty') {
@@ -1445,6 +1460,92 @@ class changeset_service {
     }
 
     /**
+     * Record a temporary key -> real id mapping for a change set (spec 4.3).
+     *
+     * @param int $changesetid Change-set id.
+     * @param string $tempkey Temporary key.
+     * @param string $entitytype Entity type (e.g. category).
+     * @param int $entityid Created real id.
+     * @return void
+     */
+    private static function record_tempref(int $changesetid, string $tempkey, string $entitytype,
+            int $entityid): void {
+        global $DB;
+
+        if (trim($tempkey) === '') {
+            return;
+        }
+        $existing = $DB->get_record('local_handbook_tempref',
+            ['changesetid' => $changesetid, 'tempkey' => $tempkey]);
+        if ($existing) {
+            $DB->set_field('local_handbook_tempref', 'entityid', $entityid, ['id' => $existing->id]);
+            return;
+        }
+        $DB->insert_record('local_handbook_tempref', (object)[
+            'changesetid' => $changesetid,
+            'tempkey' => $tempkey,
+            'entitytype' => $entitytype,
+            'entityid' => $entityid,
+            'timecreated' => time(),
+        ]);
+    }
+
+    /**
+     * Resolve a category tempkey to its created id (throws if not applied yet).
+     *
+     * @param int $changesetid Change-set id.
+     * @param string $tempkey Category tempkey.
+     * @return int Created category id.
+     */
+    private static function resolve_tempkey_category(int $changesetid, string $tempkey): int {
+        global $DB;
+
+        $ref = $DB->get_record('local_handbook_tempref',
+            ['changesetid' => $changesetid, 'tempkey' => $tempkey, 'entitytype' => 'category']);
+        if ($ref && (int)$ref->entityid > 0) {
+            return (int)$ref->entityid;
+        }
+        throw new moodle_exception('errortemprefunresolved', 'local_handbook', '', $tempkey);
+    }
+
+    /**
+     * Apply a category slug rename: verify uniqueness and keep the old slug
+     * resolvable as an alias (spec 4.4).
+     *
+     * @param stdClass $category Category being renamed.
+     * @param string $newslug New canonical slug (already slugified upstream).
+     * @param int $userid Acting user.
+     * @return void
+     */
+    private static function apply_category_slug_change(stdClass $category, string $newslug,
+            int $userid): void {
+        global $DB;
+
+        $newslug = page_service::slugify($newslug);
+        if ($newslug === '' || $newslug === $category->slug) {
+            return;
+        }
+        if ($DB->record_exists_select('local_handbook_category', 'slug = :s AND id <> :id',
+                ['s' => $newslug, 'id' => $category->id])) {
+            throw new moodle_exception('errorslugtaken', 'local_handbook', '', $newslug);
+        }
+        if ($DB->record_exists_select('local_handbook_categoryalias', 'oldslug = :s AND categoryid <> :id',
+                ['s' => $newslug, 'id' => $category->id])) {
+            throw new moodle_exception('errorslugtaken', 'local_handbook', '', $newslug);
+        }
+        if (!$DB->record_exists('local_handbook_categoryalias', ['oldslug' => $category->slug])) {
+            $DB->insert_record('local_handbook_categoryalias', (object)[
+                'categoryid' => (int)$category->id,
+                'oldslug' => $category->slug,
+                'timecreated' => time(),
+                'createdby' => $userid,
+            ]);
+        }
+        $DB->delete_records('local_handbook_categoryalias',
+            ['oldslug' => $newslug, 'categoryid' => (int)$category->id]);
+    }
+
+    /**
      * Apply a category operation (create/update/move/merge, spec 11).
      *
      * @param stdClass $item Change-item record (kind category_change).
@@ -1463,10 +1564,15 @@ class changeset_service {
 
         switch ($op['op']) {
             case 'create':
+                $parentid = (int)$op['parentid'];
+                if (!empty($op['parenttempkey'])) {
+                    $parentid = self::resolve_tempkey_category((int)$item->changesetid,
+                        (string)$op['parenttempkey']);
+                }
                 $slug = page_service::unique_slug('local_handbook_category',
                     page_service::slugify($op['slug'] !== '' ? $op['slug'] : $op['name']));
-                $DB->insert_record('local_handbook_category', (object)[
-                    'parentid' => (int)$op['parentid'],
+                $newid = (int)$DB->insert_record('local_handbook_category', (object)[
+                    'parentid' => $parentid,
                     'name' => $op['name'],
                     'slug' => $slug,
                     'description' => $op['description'],
@@ -1480,12 +1586,22 @@ class changeset_service {
                     'createdby' => $userid,
                     'modifiedby' => $userid,
                 ]);
+                // Record the real id so later items resolve this category's tempkey.
+                self::record_tempref((int)$item->changesetid, (string)$item->tempkey, 'category', $newid);
                 break;
 
             case 'update':
+                $category = $DB->get_record('local_handbook_category',
+                    ['id' => (int)$op['categoryid']], '*', MUST_EXIST);
+                // A slug rename keeps the old slug resolvable and stays unique.
+                if (isset($op['slug']) && $op['slug'] !== $category->slug) {
+                    self::apply_category_slug_change($category, (string)$op['slug'], $userid);
+                } else {
+                    unset($op['slug']);
+                }
                 $update = (object)['id' => (int)$op['categoryid'],
                     'timemodified' => $now, 'modifiedby' => $userid];
-                foreach (['name', 'description', 'icon', 'visible', 'sortorder'] as $field) {
+                foreach (['name', 'description', 'icon', 'visible', 'sortorder', 'slug'] as $field) {
                     if (array_key_exists($field, $op)) {
                         $update->$field = $op[$field];
                     }
@@ -1494,12 +1610,17 @@ class changeset_service {
                 break;
 
             case 'move':
-                if ($op['newparentid']
-                        && self::category_is_descendant((int)$op['newparentid'], (int)$op['categoryid'])) {
+                $newparentid = (int)$op['newparentid'];
+                if (!empty($op['newparenttempkey'])) {
+                    $newparentid = self::resolve_tempkey_category((int)$item->changesetid,
+                        (string)$op['newparenttempkey']);
+                }
+                if ($newparentid
+                        && self::category_is_descendant($newparentid, (int)$op['categoryid'])) {
                     throw new moodle_exception('errorcategorycycle', 'local_handbook');
                 }
                 $DB->update_record('local_handbook_category', (object)[
-                    'id' => (int)$op['categoryid'], 'parentid' => (int)$op['newparentid'],
+                    'id' => (int)$op['categoryid'], 'parentid' => $newparentid,
                     'timemodified' => $now, 'modifiedby' => $userid,
                 ]);
                 break;
@@ -1552,6 +1673,10 @@ class changeset_service {
         $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid], '*', MUST_EXIST);
         $payload = json_decode((string)$item->payloadjson, true);
         $targetid = is_array($payload) ? (int)($payload['targetcategoryid'] ?? 0) : 0;
+        if (!$targetid && is_array($payload) && !empty($payload['targetcategorytempkey'])) {
+            $targetid = self::resolve_tempkey_category((int)$item->changesetid,
+                (string)$payload['targetcategorytempkey']);
+        }
         if (!$targetid || !$DB->record_exists('local_handbook_category', ['id' => $targetid])) {
             throw new moodle_exception('errorcategorynotfound', 'local_handbook');
         }
