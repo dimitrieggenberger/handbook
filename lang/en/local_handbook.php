@@ -214,6 +214,10 @@ $string['requiresreack'] = 'Requires renewed acknowledgement when published';
 $string['requiresreack_help'] = 'Tick for materially changed versions of required-reading pages: after publication, everyone must confirm reading again. Leave unticked for minor corrections.';
 $string['errornotrequiredreading'] = 'This page is not marked as required reading.';
 
+// Banner image (category cards + article header).
+$string['bannerimage'] = 'Banner image';
+$string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
+
 // Shared reading completion for path-required articles (spec 8).
 $string['readingcompletion'] = 'Reading completion';
 $string['markasread'] = 'Mark as read';

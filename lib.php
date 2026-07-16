@@ -48,7 +48,8 @@ function local_handbook_pluginfile($course, $cm, $context, string $filearea, arr
         bool $forcedownload, array $options = []): bool {
     global $DB;
 
-    if ($context->contextlevel !== CONTEXT_SYSTEM || $filearea !== 'revision') {
+    if ($context->contextlevel !== CONTEXT_SYSTEM
+            || !in_array($filearea, ['revision', 'bannerimage'], true)) {
         return false;
     }
 
@@ -56,6 +57,25 @@ function local_handbook_pluginfile($course, $cm, $context, string $filearea, arr
 
     if (!has_capability('local/handbook:view', $context)) {
         return false;
+    }
+
+    // Banner images (file area "bannerimage", itemid = page id): decorative
+    // page imagery, visible to anyone who may view the handbook.
+    if ($filearea === 'bannerimage') {
+        $pageid = (int)array_shift($args);
+        if (!$DB->record_exists('local_handbook_page', ['id' => $pageid])) {
+            return false;
+        }
+        $filename = array_pop($args);
+        $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+        $fs = get_file_storage();
+        $file = $fs->get_file($context->id, 'local_handbook', $filearea, $pageid, $filepath, $filename);
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+        // Cache aggressively: the URL changes when the file changes.
+        send_stored_file($file, DAYSECS, 0, $forcedownload, $options);
+        return true;
     }
 
     $revisionid = (int)array_shift($args);

@@ -214,6 +214,10 @@ $string['requiresreack'] = 'Requiere nueva confirmación al publicarse';
 $string['requiresreack_help'] = 'Marca esta casilla en versiones con cambios sustanciales de páginas de lectura obligatoria: tras la publicación, todos deberán confirmar la lectura de nuevo. Déjala sin marcar para correcciones menores.';
 $string['errornotrequiredreading'] = 'Esta página no está marcada como lectura obligatoria.';
 
+// Imagen de cabecera (tarjetas de categoría + cabecera del artículo).
+$string['bannerimage'] = 'Imagen de cabecera';
+$string['bannerimage_help'] = 'Opcional. Una imagen horizontal que se muestra en la tarjeta de la categoría (16:9) y en la cabecera del artículo (3:1). La imagen se recorta y centra automáticamente, sin recorte manual. Sin imagen, la tarjeta muestra un marcador discreto según el tipo de contenido.';
+
 // Finalización de lectura compartida para artículos obligatorios de una ruta (spec 8).
 $string['readingcompletion'] = 'Finalización de lectura';
 $string['markasread'] = 'Marcar como leído';

@@ -214,6 +214,10 @@ $string['requiresreack'] = 'Erfordert bei Veröffentlichung erneute Bestätigung
 $string['requiresreack_help'] = 'Bei wesentlich geänderten Versionen von Pflichtlektüre-Seiten ankreuzen: Nach der Veröffentlichung müssen alle die Lektüre erneut bestätigen. Für kleinere Korrekturen nicht ankreuzen.';
 $string['errornotrequiredreading'] = 'Diese Seite ist nicht als Pflichtlektüre markiert.';
 
+// Bannerbild (Kategoriekarten + Artikelkopf).
+$string['bannerimage'] = 'Bannerbild';
+$string['bannerimage_help'] = 'Optional. Ein Querformat-Bild, das auf der Kategoriekarte (16:9) und im Artikelkopf (3:1) angezeigt wird. Das Bild wird automatisch zugeschnitten und zentriert — kein manueller Zuschnitt nötig. Ohne Bild zeigt die Karte einen dezenten Platzhalter je nach Inhaltstyp.';
+
 // Geteilter Leseabschluss für pfad-erforderliche Artikel (Spez. 8).
 $string['readingcompletion'] = 'Leseabschluss';
 $string['markasread'] = 'Als gelesen markieren';

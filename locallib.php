@@ -981,6 +981,50 @@ function local_handbook_category_icon(stdClass $category): string {
 }
 
 /**
+ * URL of a page's banner image, or null when none is set.
+ *
+ * The banner lives in file area "bannerimage" (itemid = page id) and is used
+ * twice: cropped to 16:9 on category cards and to 3:1 at the top of the
+ * article — both crops are CSS (object-fit: cover), one upload serves both.
+ *
+ * @param int $pageid Page id.
+ * @return moodle_url|null
+ */
+function local_handbook_banner_url(int $pageid): ?moodle_url {
+    $fs = get_file_storage();
+    $files = $fs->get_area_files(context_system::instance()->id, 'local_handbook',
+        'bannerimage', $pageid, 'itemid, filepath, filename', false);
+    foreach ($files as $file) {
+        if ($file->is_valid_image()) {
+            return moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(),
+                $file->get_filearea(), $file->get_itemid(), $file->get_filepath(),
+                $file->get_filename());
+        }
+    }
+    return null;
+}
+
+/**
+ * Font Awesome icon for a content type (used by the no-image card fallback).
+ *
+ * @param string $contenttype Content type key.
+ * @return string A safe fa-* class name.
+ */
+function local_handbook_contenttype_icon(string $contenttype): string {
+    $map = [
+        'policy' => 'fa-scale-balanced',
+        'procedure' => 'fa-list-check',
+        'standard' => 'fa-clipboard-check',
+        'guideline' => 'fa-compass',
+        'quickguide' => 'fa-bolt',
+        'template' => 'fa-clone',
+        'example' => 'fa-lightbulb',
+        'roledescription' => 'fa-user-tie',
+    ];
+    return $map[$contenttype] ?? 'fa-book-open';
+}
+
+/**
  * Localized label for a typed relation.
  *
  * @param string $type Relation type key (spec 9.2).

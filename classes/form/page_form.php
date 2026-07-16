@@ -109,6 +109,13 @@ class page_form extends \moodleform {
         $mform->setType('summary', PARAM_TEXT);
         $mform->addRule('summary', null, 'required', null, 'client');
 
+        // Banner image (optional): shown on the category card (16:9) and at
+        // the top of the article (3:1); both crops are CSS from one upload.
+        $mform->addElement('filemanager', 'bannerimage_filemanager',
+            get_string('bannerimage', 'local_handbook'), null,
+            $this->_customdata['banneroptions']);
+        $mform->addHelpButton('bannerimage_filemanager', 'bannerimage', 'local_handbook');
+
         // Draft content.
         $mform->addElement('editor', 'content_editor', get_string('pagecontent', 'local_handbook'), null,
             $this->_customdata['editoroptions']);
