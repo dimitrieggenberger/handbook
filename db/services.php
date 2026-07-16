@@ -182,6 +182,30 @@ $functions = [
         'type' => 'read',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
     ],
+    'local_handbook_get_archive_impact' => [
+        'classname' => 'local_handbook\external\get_archive_impact',
+        'description' => 'Impact of archiving a page: inbound relations, active paths, required reading.',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
+    'local_handbook_upsert_changeset_archive' => [
+        'classname' => 'local_handbook\external\upsert_changeset_archive',
+        'description' => 'Propose archiving a page inside a change set (draft only; never archives directly).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposelifecycle',
+    ],
+    'local_handbook_upsert_changeset_restore' => [
+        'classname' => 'local_handbook\external\upsert_changeset_restore',
+        'description' => 'Propose restoring an archived page inside a change set (draft only).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposelifecycle',
+    ],
+    'local_handbook_upsert_changeset_category' => [
+        'classname' => 'local_handbook\external\upsert_changeset_category',
+        'description' => 'Propose a category operation (create/update/move/merge) in a change set (draft only).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:apiproposetaxonomy',
+    ],
     'local_handbook_submit_changeset_for_review' => [
         'classname' => 'local_handbook\external\submit_changeset_for_review',
         'description' => 'Submit a change set\'s eligible drafts for human review.',

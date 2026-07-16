@@ -68,9 +68,28 @@ if ($page->publishedrevisionid) {
     $revision = $DB->get_record('local_handbook_revision', ['id' => $page->publishedrevisionid]);
 }
 
-// Readers only see published, non-archived pages; editors may preview.
-if ((!$revision || (int)$page->archived === 1) && !$iseditorial) {
+// Unpublished pages: readers get a 404 (editors may preview).
+if (!$revision && !$iseditorial) {
     throw new moodle_exception('errorpagenotfound', 'local_handbook');
+}
+
+// Archived pages: readers are redirected to the replacement or shown a notice
+// per the page's redirect mode; otherwise a 404 (editors always preview).
+if ((int)$page->archived === 1 && !$iseditorial) {
+    $replacement = (int)$page->replacementpageid
+        ? $DB->get_record('local_handbook_page', ['id' => $page->replacementpageid]) : null;
+    $mode = (string)$page->redirectmode;
+    if ($replacement && $mode === 'automatic_redirect') {
+        redirect(local_handbook_page_url($replacement));
+    }
+    if ($replacement && $mode === 'redirect_with_notice') {
+        redirect(local_handbook_page_url($replacement),
+            get_string('archivedredirectnotice', 'local_handbook', format_string($page->title)));
+    }
+    if ($mode !== 'notice_only') {
+        throw new moodle_exception('errorpagenotfound', 'local_handbook');
+    }
+    // notice_only: fall through and render the page with an archived banner.
 }
 
 // Archive / unarchive (publishers only; history is never deleted, 11.3).
@@ -179,7 +198,16 @@ if (has_capability('local/handbook:publish', $context)) {
 echo local_handbook_render_page_heading(format_string($page->title), $actions);
 
 if ((int)$page->archived === 1) {
-    echo html_writer::div(s(get_string('archivedpage', 'local_handbook')), 'alert alert-warning');
+    $archivedmsg = s(get_string('archivedpage', 'local_handbook'));
+    if ((int)$page->replacementpageid) {
+        $replacementpage = $DB->get_record('local_handbook_page', ['id' => $page->replacementpageid]);
+        if ($replacementpage) {
+            $archivedmsg .= ' ' . get_string('archivedseereplacement', 'local_handbook',
+                html_writer::link(local_handbook_page_url($replacementpage),
+                    s(format_string($replacementpage->title))));
+        }
+    }
+    echo html_writer::div($archivedmsg, 'alert alert-warning');
 }
 
 // Required-reading status notice (spec 16; mirrors the reader mockups).

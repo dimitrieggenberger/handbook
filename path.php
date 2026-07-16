@@ -102,11 +102,13 @@ if (trim((string)$path->description) !== '') {
 
 // ---- Items grouped into sections, with per-user acknowledgement status --.
 
+// Archived pages drop out of active reading paths (spec 23), consistent with
+// the progress calculation in path_service.
 $sql = "SELECT i.*, p.slug, p.title, p.requiredreading, p.publishedrevisionid, p.archived,
                p.categoryid, p.contenttype
           FROM {local_handbook_pathitem} i
           JOIN {local_handbook_page} p ON p.id = i.pageid
-         WHERE i.pathid = :pathid
+         WHERE i.pathid = :pathid AND p.archived = 0
       ORDER BY i.sortorder ASC, i.id ASC";
 $items = $DB->get_records_sql($sql, ['pathid' => $path->id]);
 

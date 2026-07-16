@@ -44,6 +44,8 @@ $string['handbook:manageapi'] = 'Externen Zugriff auf das Handbuch konfigurieren
 $string['handbook:apiaccess'] = 'Externe Servicefunktionen des Handbuchs verwenden';
 $string['handbook:apiproposemetadata'] = 'Metadaten-Änderungen (Steckbrief) des Handbuchs über die API vorschlagen';
 $string['handbook:apiproposerelations'] = 'Beziehungsänderungen zwischen Handbuchseiten über die API vorschlagen';
+$string['handbook:apiproposelifecycle'] = 'Archivierungs-/Wiederherstellungsaktionen des Handbuchs über die API vorschlagen';
+$string['handbook:apiproposetaxonomy'] = 'Kategorieänderungen des Handbuchs über die API vorschlagen';
 $string['handbook:manage'] = 'Das Handbuch-Plugin administrieren';
 
 // Navigation and page titles.
@@ -553,3 +555,56 @@ $string['areasaved'] = 'Verantwortlicher Bereich gespeichert.';
 $string['areadeleted'] = 'Verantwortlicher Bereich gelöscht.';
 $string['noareas'] = 'Es wurden noch keine verantwortlichen Bereiche definiert.';
 $string['confirmdeletearea'] = 'Den verantwortlichen Bereich „{$a}" löschen? Seiten, die diesen Namen bereits verwenden, behalten ihn; nur der Vokabulareintrag wird entfernt.';
+
+// Archivierungs-/Wiederherstellungs-Lebenszyklus (Phase 2).
+$string['archivechangesummary'] = 'Archivieren: {$a}';
+$string['restorechangesummary'] = 'Wiederherstellen: {$a}';
+$string['archiveproposal'] = 'Archivierungsvorschlag';
+$string['restoreproposal'] = 'Diese archivierte Seite wiederherstellen';
+$string['archivereasonlabel'] = 'Grund';
+$string['replacementpage'] = 'Ersatzseite';
+$string['redirectmodelabel'] = 'Weiterleitung';
+$string['archiveimpact'] = 'Auswirkung: {$a->relations} eingehende Beziehung(en); {$a->paths} aktive(r) Lesepfad(e).';
+$string['archivedredirectnotice'] = 'Die Seite „{$a}" wurde archiviert; Sie wurden zur aktuellen Seite geleitet.';
+$string['archivedseereplacement'] = 'Aktuelle Seite: {$a}.';
+$string['archivereason_obsolete'] = 'Veraltet';
+$string['archivereason_superseded'] = 'Ersetzt';
+$string['archivereason_duplicate'] = 'Duplikat';
+$string['archivereason_merged'] = 'Zusammengeführt';
+$string['archivereason_temporary_content_expired'] = 'Temporärer Inhalt abgelaufen';
+$string['archivereason_role_no_longer_exists'] = 'Funktion existiert nicht mehr';
+$string['archivereason_procedure_no_longer_used'] = 'Verfahren nicht mehr verwendet';
+$string['archivereason_incorrect_legacy_import'] = 'Fehlerhafter Altimport';
+$string['archivereason_other'] = 'Sonstiges';
+$string['redirectmode_notice_only'] = 'Nur Hinweis';
+$string['redirectmode_redirect_with_notice'] = 'Weiterleitung mit Hinweis';
+$string['redirectmode_automatic_redirect'] = 'Automatische Weiterleitung';
+$string['redirectmode_no_redirect'] = 'Keine Weiterleitung';
+$string['errorarchivereason'] = 'Ein gültiger Archivierungsgrund ist erforderlich.';
+$string['errorarchivenote'] = 'Bei Grund „Sonstiges" ist eine Erklärung erforderlich.';
+$string['errorredirectmode'] = 'Ungültiger Weiterleitungsmodus.';
+$string['errorreplacementself'] = 'Eine Seite kann nicht ihre eigene Ersatzseite sein.';
+$string['errorreplacementinvalid'] = 'Die Ersatzseite existiert nicht oder ist archiviert.';
+$string['errorreplacementrequired'] = 'Ein Weiterleitungsmodus benötigt eine Ersatzseite.';
+$string['errornotarchived'] = 'Diese Seite ist nicht archiviert.';
+
+// Kategorievorschläge (Phase 2).
+$string['categorychangesummary_create'] = 'Neue Kategorie';
+$string['categorychangesummary_update'] = 'Kategorie-Aktualisierung';
+$string['categorychangesummary_move'] = 'Kategorie verschieben';
+$string['categorychangesummary_merge'] = 'Kategorien zusammenführen';
+$string['categoryop_create'] = 'Kategorie erstellen';
+$string['categoryop_update'] = 'Kategorie aktualisieren';
+$string['categoryop_move'] = 'Kategorie verschieben';
+$string['categoryop_merge'] = 'Kategorien zusammenführen';
+$string['categoryoplabel'] = 'Vorgang';
+$string['categorymergesource'] = 'Zusammenführen von';
+$string['categorymergetarget'] = 'Zusammenführen in';
+$string['itemkindcategory'] = 'Kategorie';
+$string['errorcategoryop'] = 'Ungültiger Kategorievorgang.';
+$string['errorcategoryname'] = 'Ein gültiger Kategoriename ist erforderlich.';
+$string['errorcategoryparent'] = 'Die übergeordnete Kategorie existiert nicht.';
+$string['errorcategorynotfound'] = 'Die Kategorie existiert nicht.';
+$string['errorcategorynochange'] = 'Eine Kategorie-Aktualisierung muss mindestens ein Feld ändern.';
+$string['errorcategorycycle'] = 'Diese Änderung würde einen Kategoriezyklus erzeugen.';
+$string['errorcategorymergeself'] = 'Eine Kategorie kann nicht mit sich selbst zusammengeführt werden.';

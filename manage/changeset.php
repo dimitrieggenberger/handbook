@@ -294,6 +294,27 @@ foreach ($changeset->items as $item) {
         continue;
     }
 
+    // Category proposal: no page — rendered from its operation payload.
+    if ($item->kind === changeset_service::KIND_CATEGORY_CHANGE) {
+        $op = json_decode((string)$item->payloadjson, true) ?: [];
+        $head = html_writer::span(
+            s(get_string('categoryop_' . ($op['op'] ?? 'update'), 'local_handbook')), 'font-weight-bold')
+            . ' ' . html_writer::span(s(get_string('itemkindcategory', 'local_handbook')),
+                'badge badge-light border')
+            . ' ' . html_writer::span(s(get_string('itemstatus_' . $item->itemstatus, 'local_handbook')),
+                $itembadges[$item->itemstatus] ?? 'badge badge-secondary');
+        $body = html_writer::tag('h4', $head, ['class' => 'h6 mb-2']);
+        if ($item->itemstatus === changeset_service::ITEM_CONFLICT
+                && trim((string)$item->conflictnote) !== '') {
+            $body .= html_writer::div(s($item->conflictnote), 'alert alert-warning py-2 px-3 small mb-2');
+        }
+        $body .= local_handbook_render_category_item($item);
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
     $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid]);
     if (!$page) {
         continue;
@@ -337,6 +358,16 @@ foreach ($changeset->items as $item) {
             $body .= html_writer::div(s(get_string('metadatanochanges', 'local_handbook')),
                 'small text-muted mb-2');
         }
+        $body .= local_handbook_changeset_nonrevision_actions($url, $item,
+            $canapprove, $canpublish, $canreview);
+        echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');
+        continue;
+    }
+
+    // Archive / restore lifecycle proposal.
+    if (in_array($item->kind, [changeset_service::KIND_PAGE_ARCHIVE,
+            changeset_service::KIND_PAGE_RESTORE], true)) {
+        $body .= local_handbook_render_lifecycle_item($page, $item);
         $body .= local_handbook_changeset_nonrevision_actions($url, $item,
             $canapprove, $canpublish, $canreview);
         echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');

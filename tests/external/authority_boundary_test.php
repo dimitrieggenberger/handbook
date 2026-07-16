@@ -46,22 +46,41 @@ final class authority_boundary_test extends advanced_testcase {
         require($CFG->dirroot . '/local/handbook/db/services.php');
         $this->assertNotEmpty($functions, 'No external functions were loaded.');
 
-        // Verbs that would represent applying a change to published state.
-        $forbiddenverbs = ['approve', 'publish', 'apply', 'archive', 'restore', 'delete'];
+        // Verbs that always represent applying a change to published state; no
+        // external function may be named after one.
+        $directverbs = ['approve', 'publish', 'apply', 'delete'];
+        // archive/restore are legitimate as change-set proposals (draft), so a
+        // write function using those verbs must be a change-set proposal, never
+        // a direct action.
+        $proposalverbs = ['archive', 'restore'];
         // Capabilities that authorise applying a change; the API must never need one.
         $authoritycaps = ['review', 'approve', 'publish', 'managechangesets', 'manageapi', 'manage'];
 
         foreach ($functions as $name => $definition) {
-            foreach ($forbiddenverbs as $verb) {
-                $this->assertStringNotContainsStringIgnoringCase($verb, $name,
-                    "External function {$name} must not expose a '{$verb}' operation.");
-            }
-
             $caps = array_filter(array_map('trim',
                 explode(',', (string)($definition['capabilities'] ?? ''))));
+
+            // Capability floor applies to every function.
             foreach ($authoritycaps as $cap) {
                 $this->assertNotContains("local/handbook:{$cap}", $caps,
                     "External function {$name} must not require local/handbook:{$cap}.");
+            }
+
+            // Read functions cannot mutate state, so the verb checks are for
+            // write functions only.
+            if (($definition['type'] ?? 'read') !== 'write') {
+                continue;
+            }
+
+            foreach ($directverbs as $verb) {
+                $this->assertStringNotContainsStringIgnoringCase($verb, $name,
+                    "Write function {$name} must not expose a direct '{$verb}' operation.");
+            }
+            foreach ($proposalverbs as $verb) {
+                if (stripos($name, $verb) !== false) {
+                    $this->assertStringContainsString('changeset', $name,
+                        "Write function {$name} may use '{$verb}' only as a change-set proposal.");
+                }
             }
         }
     }

@@ -389,6 +389,121 @@ function local_handbook_render_relation_ops(array $ops): string {
 }
 
 /**
+ * One before/after style row for a lifecycle proposal table.
+ *
+ * @param string $labelkey Lang key for the row label.
+ * @param string $value Display value.
+ * @return string
+ */
+function local_handbook_lifecycle_row(string $labelkey, string $value): string {
+    return html_writer::tag('tr',
+        html_writer::tag('th', s(get_string($labelkey, 'local_handbook')),
+            ['scope' => 'row', 'class' => 'text-nowrap'])
+        . html_writer::tag('td', s($value)));
+}
+
+/**
+ * Render an archive or restore proposal item for review (spec 21, 25, 26).
+ *
+ * @param stdClass $page The affected page.
+ * @param stdClass $item Change-item record (page_archive or page_restore).
+ * @return string HTML.
+ */
+function local_handbook_render_lifecycle_item(stdClass $page, stdClass $item): string {
+    global $DB;
+
+    $service = \local_handbook\local\service\changeset_service::class;
+    $payload = json_decode((string)$item->payloadjson, true) ?: [];
+
+    if ($item->kind === $service::KIND_PAGE_RESTORE) {
+        $out = html_writer::div(html_writer::tag('strong',
+            s(get_string('restoreproposal', 'local_handbook'))), 'small mb-2');
+        if (!empty($payload['note'])) {
+            $out .= html_writer::div(s($payload['note']), 'small text-muted mb-2');
+        }
+        return $out;
+    }
+
+    // Archive proposal.
+    $out = html_writer::div(html_writer::tag('strong',
+        s(get_string('archiveproposal', 'local_handbook'))), 'small mb-1');
+
+    $rows = '';
+    $reason = (string)($payload['reason'] ?? '');
+    if ($reason !== '') {
+        $rows .= local_handbook_lifecycle_row('archivereasonlabel',
+            get_string('archivereason_' . $reason, 'local_handbook'));
+    }
+    $repid = (int)($payload['replacementpageid'] ?? 0);
+    if ($repid) {
+        $rep = $DB->get_record('local_handbook_page', ['id' => $repid], 'id, title');
+        $rows .= local_handbook_lifecycle_row('replacementpage',
+            $rep ? format_string($rep->title) : (string)$repid);
+    }
+    $mode = (string)($payload['redirectmode'] ?? '');
+    if ($mode !== '') {
+        $rows .= local_handbook_lifecycle_row('redirectmodelabel',
+            get_string('redirectmode_' . $mode, 'local_handbook'));
+    }
+    $out .= html_writer::tag('table', html_writer::tag('tbody', $rows),
+        ['class' => 'table table-sm table-bordered small mb-2']);
+    if (!empty($payload['note'])) {
+        $out .= html_writer::div(s($payload['note']), 'small text-muted mb-2');
+    }
+
+    $impact = $service::archive_impact((int)$page->id);
+    $out .= html_writer::div(
+        s(get_string('archiveimpact', 'local_handbook', (object)[
+            'relations' => $impact['inboundrelations'],
+            'paths' => $impact['activepaths'],
+        ])),
+        'alert alert-info py-2 px-3 small mb-2');
+    return $out;
+}
+
+/**
+ * Render a category proposal item for review (spec 11).
+ *
+ * @param stdClass $item Change-item record (category_change).
+ * @return string HTML.
+ */
+function local_handbook_render_category_item(stdClass $item): string {
+    global $DB;
+
+    $op = json_decode((string)$item->payloadjson, true) ?: [];
+    $action = (string)($op['op'] ?? '');
+    $name = static function (int $id) use ($DB): string {
+        return $id ? (string)$DB->get_field('local_handbook_category', 'name', ['id' => $id]) : '';
+    };
+
+    $rows = local_handbook_lifecycle_row('categoryoplabel',
+        get_string('categoryop_' . ($action !== '' ? $action : 'update'), 'local_handbook'));
+
+    if ($action === 'create') {
+        $rows .= local_handbook_lifecycle_row('categoryname', (string)($op['name'] ?? ''));
+        if (!empty($op['parentid'])) {
+            $rows .= local_handbook_lifecycle_row('categoryparent', $name((int)$op['parentid']));
+        }
+    } else if ($action === 'update') {
+        $rows .= local_handbook_lifecycle_row('category', $name((int)($op['categoryid'] ?? 0)));
+        if (isset($op['name'])) {
+            $rows .= local_handbook_lifecycle_row('categoryname', (string)$op['name']);
+        }
+    } else if ($action === 'move') {
+        $rows .= local_handbook_lifecycle_row('category', $name((int)($op['categoryid'] ?? 0)));
+        $rows .= local_handbook_lifecycle_row('categoryparent',
+            (int)($op['newparentid'] ?? 0) ? $name((int)$op['newparentid'])
+                : get_string('topcategory', 'local_handbook'));
+    } else if ($action === 'merge') {
+        $rows .= local_handbook_lifecycle_row('categorymergesource', $name((int)($op['sourceid'] ?? 0)));
+        $rows .= local_handbook_lifecycle_row('categorymergetarget', $name((int)($op['targetid'] ?? 0)));
+    }
+
+    return html_writer::tag('table', html_writer::tag('tbody', $rows),
+        ['class' => 'table table-sm table-bordered small mb-2']);
+}
+
+/**
  * Render the shared area navigation row (tab strip).
  *
  * @param string $currentpage Key of the current page.

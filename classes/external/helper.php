@@ -86,6 +86,34 @@ class helper {
     }
 
     /**
+     * Capability check for lifecycle (archive/restore) proposal functions.
+     *
+     * A propose capability only — archiving/restoring is applied solely by the
+     * human publish path (spec 5, 21, 26).
+     *
+     * @param context_system $context System context.
+     * @return void
+     */
+    public static function require_propose_lifecycle(context_system $context): void {
+        self::require_read($context);
+        require_capability('local/handbook:apiproposelifecycle', $context);
+    }
+
+    /**
+     * Capability check for taxonomy (category) proposal functions.
+     *
+     * A propose capability only — category changes are applied solely by the
+     * human publish path (spec 5, 11).
+     *
+     * @param context_system $context System context.
+     * @return void
+     */
+    public static function require_propose_taxonomy(context_system $context): void {
+        self::require_read($context);
+        require_capability('local/handbook:apiproposetaxonomy', $context);
+    }
+
+    /**
      * Resolve a page by numeric id or slug.
      *
      * @param string $identifier Page id or slug.

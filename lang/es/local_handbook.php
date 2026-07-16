@@ -44,6 +44,8 @@ $string['handbook:manageapi'] = 'Configurar el acceso externo al manual';
 $string['handbook:apiaccess'] = 'Usar las funciones de servicio externo del manual';
 $string['handbook:apiproposemetadata'] = 'Proponer cambios de ficha (metadatos) del manual mediante la API';
 $string['handbook:apiproposerelations'] = 'Proponer cambios de relaciones entre páginas del manual mediante la API';
+$string['handbook:apiproposelifecycle'] = 'Proponer acciones de archivado/restauración del manual mediante la API';
+$string['handbook:apiproposetaxonomy'] = 'Proponer cambios de categorías del manual mediante la API';
 $string['handbook:manage'] = 'Administrar el plugin del manual';
 
 // Navigation and page titles.
@@ -553,3 +555,56 @@ $string['areasaved'] = 'Área responsable guardada.';
 $string['areadeleted'] = 'Área responsable eliminada.';
 $string['noareas'] = 'Todavía no se han definido áreas responsables.';
 $string['confirmdeletearea'] = '¿Eliminar el área responsable «{$a}»? Las páginas que ya usan este nombre lo conservan; solo se elimina la entrada del vocabulario.';
+
+// Ciclo de vida de archivado/restauración (Fase 2).
+$string['archivechangesummary'] = 'Archivar: {$a}';
+$string['restorechangesummary'] = 'Restaurar: {$a}';
+$string['archiveproposal'] = 'Propuesta de archivado';
+$string['restoreproposal'] = 'Restaurar esta página archivada';
+$string['archivereasonlabel'] = 'Motivo';
+$string['replacementpage'] = 'Página reemplazante';
+$string['redirectmodelabel'] = 'Redirección';
+$string['archiveimpact'] = 'Impacto: {$a->relations} relación(es) entrante(s); {$a->paths} ruta(s) de lectura activa(s).';
+$string['archivedredirectnotice'] = 'La página «{$a}» fue archivada; se le ha llevado a la página vigente.';
+$string['archivedseereplacement'] = 'Página vigente: {$a}.';
+$string['archivereason_obsolete'] = 'Obsoleta';
+$string['archivereason_superseded'] = 'Sustituida';
+$string['archivereason_duplicate'] = 'Duplicada';
+$string['archivereason_merged'] = 'Fusionada';
+$string['archivereason_temporary_content_expired'] = 'Contenido temporal caducado';
+$string['archivereason_role_no_longer_exists'] = 'La función ya no existe';
+$string['archivereason_procedure_no_longer_used'] = 'Procedimiento en desuso';
+$string['archivereason_incorrect_legacy_import'] = 'Importación heredada incorrecta';
+$string['archivereason_other'] = 'Otro';
+$string['redirectmode_notice_only'] = 'Solo aviso';
+$string['redirectmode_redirect_with_notice'] = 'Redirigir con aviso';
+$string['redirectmode_automatic_redirect'] = 'Redirección automática';
+$string['redirectmode_no_redirect'] = 'Sin redirección';
+$string['errorarchivereason'] = 'Se requiere un motivo de archivado válido.';
+$string['errorarchivenote'] = 'Se requiere una explicación cuando el motivo es «otro».';
+$string['errorredirectmode'] = 'Modo de redirección no válido.';
+$string['errorreplacementself'] = 'Una página no puede ser su propia reemplazante.';
+$string['errorreplacementinvalid'] = 'La página reemplazante no existe o está archivada.';
+$string['errorreplacementrequired'] = 'Un modo con redirección necesita una página reemplazante.';
+$string['errornotarchived'] = 'Esta página no está archivada.';
+
+// Propuestas de categorías (Fase 2).
+$string['categorychangesummary_create'] = 'Categoría nueva';
+$string['categorychangesummary_update'] = 'Actualización de categoría';
+$string['categorychangesummary_move'] = 'Mover categoría';
+$string['categorychangesummary_merge'] = 'Fusión de categorías';
+$string['categoryop_create'] = 'Crear categoría';
+$string['categoryop_update'] = 'Actualizar categoría';
+$string['categoryop_move'] = 'Mover categoría';
+$string['categoryop_merge'] = 'Fusionar categorías';
+$string['categoryoplabel'] = 'Operación';
+$string['categorymergesource'] = 'Fusionar desde';
+$string['categorymergetarget'] = 'Fusionar en';
+$string['itemkindcategory'] = 'Categoría';
+$string['errorcategoryop'] = 'Operación de categoría no válida.';
+$string['errorcategoryname'] = 'Se requiere un nombre de categoría válido.';
+$string['errorcategoryparent'] = 'La categoría principal no existe.';
+$string['errorcategorynotfound'] = 'La categoría no existe.';
+$string['errorcategorynochange'] = 'Una actualización de categoría debe cambiar al menos un campo.';
+$string['errorcategorycycle'] = 'Ese cambio crearía un ciclo de categorías.';
+$string['errorcategorymergeself'] = 'Una categoría no puede fusionarse consigo misma.';

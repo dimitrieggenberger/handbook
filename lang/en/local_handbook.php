@@ -44,6 +44,8 @@ $string['handbook:manageapi'] = 'Configure handbook external access';
 $string['handbook:apiaccess'] = 'Use handbook external-service functions';
 $string['handbook:apiproposemetadata'] = 'Propose handbook metadata (fiche) patches through the API';
 $string['handbook:apiproposerelations'] = 'Propose handbook page relation edits through the API';
+$string['handbook:apiproposelifecycle'] = 'Propose handbook archive/restore (lifecycle) actions through the API';
+$string['handbook:apiproposetaxonomy'] = 'Propose handbook category (taxonomy) changes through the API';
 $string['handbook:manage'] = 'Administer the handbook plugin';
 
 // Navigation and page titles.
@@ -553,3 +555,56 @@ $string['areasaved'] = 'Responsible area saved.';
 $string['areadeleted'] = 'Responsible area deleted.';
 $string['noareas'] = 'No responsible areas have been defined yet.';
 $string['confirmdeletearea'] = 'Delete the responsible area "{$a}"? Pages already using this name keep it; only the vocabulary entry is removed.';
+
+// Archive / restore lifecycle (Phase 2).
+$string['archivechangesummary'] = 'Archive: {$a}';
+$string['restorechangesummary'] = 'Restore: {$a}';
+$string['archiveproposal'] = 'Archive proposal';
+$string['restoreproposal'] = 'Restore this archived page';
+$string['archivereasonlabel'] = 'Reason';
+$string['replacementpage'] = 'Replacement page';
+$string['redirectmodelabel'] = 'Redirect';
+$string['archiveimpact'] = 'Impact: {$a->relations} inbound relation(s); {$a->paths} active reading path(s).';
+$string['archivedredirectnotice'] = 'The page "{$a}" was archived; you have been taken to the current page.';
+$string['archivedseereplacement'] = 'Current page: {$a}.';
+$string['archivereason_obsolete'] = 'Obsolete';
+$string['archivereason_superseded'] = 'Superseded';
+$string['archivereason_duplicate'] = 'Duplicate';
+$string['archivereason_merged'] = 'Merged';
+$string['archivereason_temporary_content_expired'] = 'Temporary content expired';
+$string['archivereason_role_no_longer_exists'] = 'Role no longer exists';
+$string['archivereason_procedure_no_longer_used'] = 'Procedure no longer used';
+$string['archivereason_incorrect_legacy_import'] = 'Incorrect legacy import';
+$string['archivereason_other'] = 'Other';
+$string['redirectmode_notice_only'] = 'Notice only';
+$string['redirectmode_redirect_with_notice'] = 'Redirect with notice';
+$string['redirectmode_automatic_redirect'] = 'Automatic redirect';
+$string['redirectmode_no_redirect'] = 'No redirect';
+$string['errorarchivereason'] = 'A valid archive reason is required.';
+$string['errorarchivenote'] = 'An explanation is required when the reason is "other".';
+$string['errorredirectmode'] = 'Invalid redirect mode.';
+$string['errorreplacementself'] = 'A page cannot be its own replacement.';
+$string['errorreplacementinvalid'] = 'The replacement page does not exist or is archived.';
+$string['errorreplacementrequired'] = 'A redirecting mode needs a replacement page.';
+$string['errornotarchived'] = 'This page is not archived.';
+
+// Category proposals (Phase 2).
+$string['categorychangesummary_create'] = 'New category';
+$string['categorychangesummary_update'] = 'Category update';
+$string['categorychangesummary_move'] = 'Category move';
+$string['categorychangesummary_merge'] = 'Category merge';
+$string['categoryop_create'] = 'Create category';
+$string['categoryop_update'] = 'Update category';
+$string['categoryop_move'] = 'Move category';
+$string['categoryop_merge'] = 'Merge categories';
+$string['categoryoplabel'] = 'Operation';
+$string['categorymergesource'] = 'Merge from';
+$string['categorymergetarget'] = 'Merge into';
+$string['itemkindcategory'] = 'Category';
+$string['errorcategoryop'] = 'Invalid category operation.';
+$string['errorcategoryname'] = 'A valid category name is required.';
+$string['errorcategoryparent'] = 'The parent category does not exist.';
+$string['errorcategorynotfound'] = 'The category does not exist.';
+$string['errorcategorynochange'] = 'A category update must change at least one field.';
+$string['errorcategorycycle'] = 'That change would create a category cycle.';
+$string['errorcategorymergeself'] = 'A category cannot be merged into itself.';
