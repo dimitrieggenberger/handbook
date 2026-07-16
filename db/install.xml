@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/handbook/db" VERSION="2026071518" COMMENT="XMLDB file for local_handbook (specification section 20)"
+<XMLDB PATH="local/handbook/db" VERSION="2026071526" COMMENT="XMLDB file for local_handbook (specification section 20)"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -188,6 +188,39 @@
       <INDEXES>
         <INDEX NAME="pathorder" UNIQUE="false" FIELDS="pathid, sortorder"/>
         <INDEX NAME="pathpage" UNIQUE="true" FIELDS="pathid, pageid"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="local_handbook_pathrec" COMMENT="Advisory reading-path recommendations; never alter an active path (specification 10)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pathid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Target path (0 = path-level suggestion)"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Article the recommendation is about (0 = none)"/>
+        <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Revision the recommendation was made against"/>
+        <FIELD NAME="rectype" TYPE="char" LENGTH="30" NOTNULL="true" COMMENT="add, remove, reorder, replace, split_path, merge_paths, update_required_status"/>
+        <FIELD NAME="confidence" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="medium"/>
+        <FIELD NAME="rationale" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="suggestedsection" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT=""/>
+        <FIELD NAME="suggestedrequired" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" COMMENT="1 required, 0 optional (for add / update_required_status)"/>
+        <FIELD NAME="suggestedafterpageid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Ordering hint: place after this page (0 = end)"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="open" COMMENT="open, accepted, dismissed, deferred, already_covered, intentional_omission, resolved"/>
+        <FIELD NAME="triggerkind" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="manual" COMMENT="page_published, page_revised, metadata_change, path_proposed, review_due, manual_audit, ai"/>
+        <FIELD NAME="source" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="system" COMMENT="system, ai or human"/>
+        <FIELD NAME="changesetid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Change set the acceptance drafted into (0 = none)"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="reviewedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="reviewnote" TYPE="text" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pathid" TYPE="foreign" FIELDS="pathid" REFTABLE="local_handbook_path" REFFIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="statuspath" UNIQUE="false" FIELDS="status, pathid"/>
+        <INDEX NAME="pagestatus" UNIQUE="false" FIELDS="pageid, status"/>
       </INDEXES>
     </TABLE>
 

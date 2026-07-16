@@ -247,6 +247,51 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
     handler(({ pathid }) => ws("local_handbook_get_reading_path", { pathid }))
   );
 
+  server.tool(
+    "handbook_get_reading_path_coverage",
+    "Aggregate reading-path coverage: how many published pages sit in at least one active path, how many are orphaned, required-reading coverage, overlap, and per-path item counts. No individual staff completion data. Use it to spot gaps before recommending paths.",
+    {},
+    handler(() => ws("local_handbook_get_reading_path_coverage", {}))
+  );
+
+  server.tool(
+    "handbook_audit_reading_paths",
+    "Handbook-wide reading-path audit: deterministic advisory findings — required pages in no active path, paths past their review date, paths with no required item, oversized paths. Read-only; changes nothing.",
+    {},
+    handler(() => ws("local_handbook_audit_reading_paths", {}))
+  );
+
+  server.tool(
+    "handbook_recommend_paths_for_page",
+    "Which active reading paths a page is a good candidate for, from typed relations (a quickguidefor/templatefor/implements target already in a path is a strong signal) and shared category. Read-only — nothing is recorded. To record one for human triage, use handbook_create_path_recommendation.",
+    { identifier: z.string().describe("Page slug or numeric id") },
+    handler(({ identifier }) => ws("local_handbook_recommend_paths_for_page", { identifier }))
+  );
+
+  server.tool(
+    "handbook_list_path_recommendations",
+    "List advisory reading-path recommendations (default: open). Advisory records only; no completion data.",
+    {
+      status: z.string().optional().describe("open, accepted, dismissed, deferred, already_covered, intentional_omission, resolved (empty = all)"),
+      pathid: z.number().int().optional(),
+      pageid: z.number().int().optional(),
+    },
+    handler((args) =>
+      ws("local_handbook_list_path_recommendations", {
+        status: args.status ?? "open",
+        pathid: args.pathid ?? 0,
+        pageid: args.pageid ?? 0,
+      }))
+  );
+
+  server.tool(
+    "handbook_get_path_recommendation",
+    "Get one advisory reading-path recommendation by id.",
+    { recommendationid: z.number().int() },
+    handler(({ recommendationid }) =>
+      ws("local_handbook_get_path_recommendation", { recommendationid }))
+  );
+
   if (!writable) {
     return; // Read-only mode: no draft or change-set write tools.
   }
@@ -622,6 +667,43 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
           })),
         })),
       }))
+  );
+
+  server.tool(
+    "handbook_create_path_recommendation",
+    "Record an ADVISORY recommendation to change a reading path (e.g. add a new quick guide beside the canonical procedure already in the path). It never edits the active path — it creates a pending record a human triages. Prefer this over editing a path directly when you spot a relevant page.",
+    {
+      pathid: z.number().int().describe("Target path id"),
+      identifier: z.string().optional().describe("Article slug or id (omit for a path-level recommendation)"),
+      rectype: z.enum(["add", "remove", "reorder", "replace", "split_path", "merge_paths", "update_required_status"]).optional(),
+      confidence: z.enum(["low", "medium", "high"]).optional(),
+      rationale: z.string().optional().describe("Why this is recommended"),
+      suggestedsection: z.string().optional(),
+      suggestedrequired: z.boolean().optional(),
+      suggestedafterpageid: z.number().int().optional().describe("Place after this page (0 = end)"),
+    },
+    handler((args) =>
+      ws("local_handbook_create_path_recommendation", {
+        pathid: args.pathid,
+        identifier: args.identifier ?? "",
+        rectype: args.rectype ?? "add",
+        confidence: args.confidence ?? "medium",
+        rationale: args.rationale ?? "",
+        suggestedsection: args.suggestedsection ?? "",
+        suggestedrequired: args.suggestedrequired ?? true,
+        suggestedafterpageid: args.suggestedafterpageid ?? 0,
+      }))
+  );
+
+  server.tool(
+    "handbook_accept_path_recommendation",
+    "Accept a recommendation into a change set as a DRAFT reading-path revision. The active path is not touched: the recommendation is applied to a copy and staged as a path proposal for a human to review, approve and publish. Do this only when the user asks to act on a recommendation.",
+    {
+      recommendationid: z.number().int(),
+      changesetid: z.number().int().describe("Change set to draft the revision into"),
+    },
+    handler(({ recommendationid, changesetid }) =>
+      ws("local_handbook_accept_path_recommendation", { recommendationid, changesetid }))
   );
 
   server.tool(

@@ -423,6 +423,70 @@ class helper {
     }
 
     /**
+     * Structure of a reading-path recommendation record (spec 10.3).
+     *
+     * @return external_single_structure
+     */
+    public static function recommendation_structure(): external_single_structure {
+        return new external_single_structure([
+            'id' => new external_value(PARAM_INT, 'Recommendation id'),
+            'pathid' => new external_value(PARAM_INT, 'Target path id (0 = path-level)'),
+            'pathname' => new external_value(PARAM_TEXT, 'Target path name'),
+            'pageid' => new external_value(PARAM_INT, 'Article id (0 = none)'),
+            'pagetitle' => new external_value(PARAM_TEXT, 'Article title'),
+            'rectype' => new external_value(PARAM_ALPHANUMEXT,
+                'add, remove, reorder, replace, split_path, merge_paths, update_required_status'),
+            'confidence' => new external_value(PARAM_ALPHANUMEXT, 'low, medium or high'),
+            'rationale' => new external_value(PARAM_RAW, 'Why this is recommended'),
+            'suggestedsection' => new external_value(PARAM_TEXT, 'Suggested section (empty = default)'),
+            'suggestedrequired' => new external_value(PARAM_BOOL, 'Suggested required flag'),
+            'suggestedafterpageid' => new external_value(PARAM_INT, 'Place after this page (0 = end)'),
+            'status' => new external_value(PARAM_ALPHANUMEXT,
+                'open, accepted, dismissed, deferred, already_covered, intentional_omission, resolved'),
+            'triggerkind' => new external_value(PARAM_ALPHANUMEXT, 'What prompted it'),
+            'source' => new external_value(PARAM_ALPHANUMEXT, 'system, ai or human'),
+            'changesetid' => new external_value(PARAM_INT, 'Change set an acceptance drafted into (0 = none)'),
+            'timecreated' => new external_value(PARAM_INT, 'Creation time'),
+            'timemodified' => new external_value(PARAM_INT, 'Last modification time'),
+        ]);
+    }
+
+    /**
+     * Export a recommendation record (joins path and page names).
+     *
+     * @param stdClass $rec Recommendation record.
+     * @return array
+     */
+    public static function export_recommendation(stdClass $rec): array {
+        global $DB;
+
+        $pathname = (int)$rec->pathid
+            ? (string)$DB->get_field('local_handbook_path', 'name', ['id' => $rec->pathid]) : '';
+        $pagetitle = (int)$rec->pageid
+            ? (string)$DB->get_field('local_handbook_page', 'title', ['id' => $rec->pageid]) : '';
+
+        return [
+            'id' => (int)$rec->id,
+            'pathid' => (int)$rec->pathid,
+            'pathname' => $pathname,
+            'pageid' => (int)$rec->pageid,
+            'pagetitle' => $pagetitle,
+            'rectype' => (string)$rec->rectype,
+            'confidence' => (string)$rec->confidence,
+            'rationale' => (string)$rec->rationale,
+            'suggestedsection' => (string)$rec->suggestedsection,
+            'suggestedrequired' => (bool)$rec->suggestedrequired,
+            'suggestedafterpageid' => (int)$rec->suggestedafterpageid,
+            'status' => (string)$rec->status,
+            'triggerkind' => (string)$rec->triggerkind,
+            'source' => (string)$rec->source,
+            'changesetid' => (int)$rec->changesetid,
+            'timecreated' => (int)$rec->timecreated,
+            'timemodified' => (int)$rec->timemodified,
+        ];
+    }
+
+    /**
      * Structure of a per-page upsert/submit result (matches
      * changeset_service::upsert_draft()).
      *

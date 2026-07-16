@@ -704,6 +704,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/paths.php'),
             'visible' => has_capability('local/handbook:managepaths', $context),
         ],
+        'recommendations' => [
+            'label' => get_string('recommendations', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/recommendations.php'),
+            'visible' => has_capability('local/handbook:managepaths', $context),
+        ],
         'findings' => [
             'label' => get_string('managefindings', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/manage/findings.php'),

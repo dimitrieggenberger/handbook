@@ -439,5 +439,39 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071518, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071526) {
+        // Advisory reading-path recommendations (spec 10).
+        $table = new xmldb_table('local_handbook_pathrec');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('pathid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('revisionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('rectype', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('confidence', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'medium');
+            $table->add_field('rationale', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('suggestedsection', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, '');
+            $table->add_field('suggestedrequired', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1');
+            $table->add_field('suggestedafterpageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('status', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, 'open');
+            $table->add_field('triggerkind', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, 'manual');
+            $table->add_field('source', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'system');
+            $table->add_field('changesetid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('reviewedby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('reviewnote', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('pathid', XMLDB_KEY_FOREIGN, ['pathid'], 'local_handbook_path', ['id']);
+            $table->add_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'], 'local_handbook_page', ['id']);
+            $table->add_index('statuspath', XMLDB_INDEX_NOTUNIQUE, ['status', 'pathid']);
+            $table->add_index('pagestatus', XMLDB_INDEX_NOTUNIQUE, ['pageid', 'status']);
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071526, 'local', 'handbook');
+    }
+
     return true;
 }
