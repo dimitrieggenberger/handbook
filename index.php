@@ -142,7 +142,8 @@ if ($visiblepaths) {
         ])), 'small text-muted mb-2');
     $body .= html_writer::link(
         $progress->nextitem
-            ? new moodle_url('/local/handbook/view.php', ['page' => $progress->nextitem->slug])
+            ? new moodle_url('/local/handbook/view.php',
+                ['page' => $progress->nextitem->slug, 'path' => $path->id])
             : new moodle_url('/local/handbook/path.php', ['id' => $path->id]),
         html_writer::tag('i', '', ['class' => 'fa-solid fa-arrow-right me-2', 'aria-hidden' => 'true'])
             . s(get_string('continuepath', 'local_handbook')),

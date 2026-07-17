@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 
 use local_handbook\local\service\ack_service;
+use local_handbook\local\service\completion_service;
 use local_handbook\local\service\page_service;
 use local_handbook\local\service\path_service;
 
@@ -1035,6 +1036,158 @@ function local_handbook_contenttype_icon(string $contenttype): string {
 }
 
 /**
+ * Reading-path context for an article view (spec 8.6, 15).
+ *
+ * Chooses the path: the ?path=N the reader arrived with when the page belongs
+ * to it, else the first visible active path containing the page. Returns the
+ * path, its ordered items with the reader's completion state, the current
+ * item's position, and the sequential next item — or null when the page is in
+ * no (visible) active path.
+ *
+ * @param stdClass $page Page record.
+ * @param int $requestedpathid Path id from the URL (0 = none).
+ * @param int $userid Reader.
+ * @param bool $manager Managers see every path.
+ * @return stdClass|null {path, items[], currentindex, next, confirmed, total}
+ */
+function local_handbook_path_context(stdClass $page, int $requestedpathid, int $userid,
+        bool $manager): ?stdClass {
+    global $DB;
+
+    $memberships = $DB->get_records_sql(
+        "SELECT p.*
+           FROM {local_handbook_path} p
+           JOIN {local_handbook_pathitem} i ON i.pathid = p.id
+          WHERE i.pageid = :pageid AND p.active = 1
+       ORDER BY p.schoolyear DESC, p.name ASC", ['pageid' => (int)$page->id]);
+    if (!$memberships) {
+        return null;
+    }
+
+    $chosen = null;
+    if ($requestedpathid && isset($memberships[$requestedpathid])
+            && ($manager || path_service::is_visible($memberships[$requestedpathid], $userid))) {
+        $chosen = $memberships[$requestedpathid];
+    }
+    if (!$chosen) {
+        foreach ($memberships as $candidate) {
+            if ($manager || path_service::is_visible($candidate, $userid)) {
+                $chosen = $candidate;
+                break;
+            }
+        }
+    }
+    if (!$chosen) {
+        return null;
+    }
+
+    $rows = $DB->get_records_sql(
+        "SELECT i.id, i.pageid, i.sectionname, i.required, i.sortorder,
+                p.slug, p.title, p.publishedrevisionid
+           FROM {local_handbook_pathitem} i
+           JOIN {local_handbook_page} p ON p.id = i.pageid
+          WHERE i.pathid = :pathid AND p.archived = 0
+       ORDER BY i.sortorder ASC, i.id ASC", ['pathid' => (int)$chosen->id]);
+
+    $items = [];
+    $currentindex = -1;
+    $confirmed = 0;
+    $total = 0;
+    $index = 0;
+    foreach ($rows as $row) {
+        $status = completion_service::completion_status($userid, (object)[
+            'id' => (int)$row->pageid,
+            'publishedrevisionid' => (int)$row->publishedrevisionid,
+        ]);
+        $done = $status->status === completion_service::STATUS_COMPLETED;
+        if ((int)$row->required) {
+            $total++;
+            if ($done) {
+                $confirmed++;
+            }
+        }
+        if ((int)$row->pageid === (int)$page->id) {
+            $currentindex = $index;
+        }
+        $items[] = (object)[
+            'pageid' => (int)$row->pageid,
+            'slug' => (string)$row->slug,
+            'title' => (string)$row->title,
+            'sectionname' => (string)$row->sectionname,
+            'required' => (int)$row->required,
+            'done' => $done,
+            'iscurrent' => (int)$row->pageid === (int)$page->id,
+        ];
+        $index++;
+    }
+
+    return (object)[
+        'path' => $chosen,
+        'items' => $items,
+        'currentindex' => $currentindex,
+        'next' => ($currentindex >= 0 && isset($items[$currentindex + 1]))
+            ? $items[$currentindex + 1] : null,
+        'confirmed' => $confirmed,
+        'total' => $total,
+    ];
+}
+
+/**
+ * Render the "you are on a path" rail panel: ordered items with completion
+ * ticks, the current article highlighted, and a link to the full path.
+ *
+ * @param stdClass $ctx Context from local_handbook_path_context().
+ * @return string HTML.
+ */
+function local_handbook_render_path_panel(stdClass $ctx): string {
+    $percent = $ctx->total > 0 ? (int)round($ctx->confirmed / $ctx->total * 100) : 0;
+
+    $body = html_writer::tag('h3',
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-route me-2 text-primary', 'aria-hidden' => 'true'])
+        . s(get_string('myreadingpath', 'local_handbook')),
+        ['class' => 'h6 text-uppercase text-muted mb-1']);
+    $body .= html_writer::tag('p', html_writer::link(
+        new moodle_url('/local/handbook/path.php', ['id' => $ctx->path->id]),
+        html_writer::tag('strong', s(format_string($ctx->path->name)))), ['class' => 'mb-2']);
+    $body .= html_writer::div(
+        html_writer::div('', 'progress-bar', [
+            'role' => 'progressbar',
+            'style' => 'width: ' . $percent . '%',
+            'aria-valuenow' => $ctx->confirmed,
+            'aria-valuemin' => 0,
+            'aria-valuemax' => max(1, $ctx->total),
+        ]),
+        'progress mb-1', ['style' => 'height: 0.4rem;']);
+    $body .= html_writer::div(s(get_string('pathprogress', 'local_handbook', (object)[
+        'confirmed' => $ctx->confirmed, 'total' => $ctx->total,
+    ])), 'small text-muted mb-2');
+
+    $rows = '';
+    foreach ($ctx->items as $item) {
+        $classes = 'pathpanel-item';
+        $classes .= $item->done ? ' is-done' : ' is-pending';
+        if ($item->iscurrent) {
+            $classes .= ' is-current';
+        }
+        $label = s($item->title)
+            . (!$item->required
+                ? ' ' . html_writer::span(s(get_string('optionalitem', 'local_handbook')),
+                    'pathpanel-optional')
+                : '');
+        $rows .= html_writer::tag('li',
+            $item->iscurrent
+                ? html_writer::span($label)
+                : html_writer::link(new moodle_url('/local/handbook/view.php',
+                    ['page' => $item->slug, 'path' => $ctx->path->id]), $label),
+            ['class' => $classes]);
+    }
+    $body .= html_writer::tag('ol', $rows, ['class' => 'local-handbook-pathpanel-list']);
+
+    return html_writer::div(html_writer::div($body, 'card-body'),
+        'card mb-3 local-handbook-pathpanel');
+}
+
+/**
  * Render one page as a banner card (category view, home accordion, live
  * search results all share this markup). Whole card is clickable.
  *
@@ -1364,6 +1517,29 @@ y las faltas de presentación se tratan como faltas leves.</p>
     </ul>
   </div>
 </div>
+HTML);
+
+    $add('next', <<<'HTML'
+<a class="hb-next" href="/local/handbook/view.php?page=reglamento-personal-capitulo-12">
+  <span class="eyebrow">Siguiente capítulo</span>
+  <span class="title">Capítulo 12 — Terminación de la relación laboral</span>
+</a>
+
+<div class="hb-next-group">
+  <a class="hb-next" href="/local/handbook/view.php?page=evaluacion-docente">
+    <span class="eyebrow">Si eres docente</span>
+    <span class="title">Evaluación docente anual</span>
+  </a>
+  <a class="hb-next" href="/local/handbook/view.php?page=evaluacion-administrativa">
+    <span class="eyebrow">Si eres personal administrativo</span>
+    <span class="title">Evaluación administrativa</span>
+  </a>
+</div>
+
+<a class="hb-next is-prev" href="/local/handbook/view.php?page=reglamento-personal-capitulo-10">
+  <span class="eyebrow">Anterior</span>
+  <span class="title">Capítulo 10 — Jornada de trabajo</span>
+</a>
 HTML);
 
     $add('legal', <<<'HTML'
