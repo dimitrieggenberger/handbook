@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 
 use local_handbook\local\service\ack_service;
+use local_handbook\local\service\completion_service;
 use local_handbook\local\service\page_service;
 use local_handbook\local\service\path_service;
 
@@ -1035,6 +1036,232 @@ function local_handbook_contenttype_icon(string $contenttype): string {
 }
 
 /**
+ * Reading-path context for an article view (spec 8.6, 15).
+ *
+ * Chooses the path: the ?path=N the reader arrived with when the page belongs
+ * to it, else the first visible active path containing the page. Returns the
+ * path, its ordered items with the reader's completion state, the current
+ * item's position, and the sequential next item — or null when the page is in
+ * no (visible) active path.
+ *
+ * @param stdClass $page Page record.
+ * @param int $requestedpathid Path id from the URL (0 = none).
+ * @param int $userid Reader.
+ * @param bool $manager Managers see every path.
+ * @return stdClass|null {path, items[], currentindex, next, confirmed, total}
+ */
+function local_handbook_path_context(stdClass $page, int $requestedpathid, int $userid,
+        bool $manager): ?stdClass {
+    global $DB;
+
+    $memberships = $DB->get_records_sql(
+        "SELECT p.*
+           FROM {local_handbook_path} p
+           JOIN {local_handbook_pathitem} i ON i.pathid = p.id
+          WHERE i.pageid = :pageid AND p.active = 1
+       ORDER BY p.schoolyear DESC, p.name ASC", ['pageid' => (int)$page->id]);
+    if (!$memberships) {
+        return null;
+    }
+
+    $chosen = null;
+    if ($requestedpathid && isset($memberships[$requestedpathid])
+            && ($manager || path_service::is_visible($memberships[$requestedpathid], $userid))) {
+        $chosen = $memberships[$requestedpathid];
+    }
+    if (!$chosen) {
+        foreach ($memberships as $candidate) {
+            if ($manager || path_service::is_visible($candidate, $userid)) {
+                $chosen = $candidate;
+                break;
+            }
+        }
+    }
+    if (!$chosen) {
+        return null;
+    }
+
+    $rows = $DB->get_records_sql(
+        "SELECT i.id, i.pageid, i.sectionname, i.required, i.sortorder,
+                p.slug, p.title, p.publishedrevisionid
+           FROM {local_handbook_pathitem} i
+           JOIN {local_handbook_page} p ON p.id = i.pageid
+          WHERE i.pathid = :pathid AND p.archived = 0
+       ORDER BY i.sortorder ASC, i.id ASC", ['pathid' => (int)$chosen->id]);
+
+    $items = [];
+    $currentindex = -1;
+    $confirmed = 0;
+    $total = 0;
+    $index = 0;
+    foreach ($rows as $row) {
+        $status = completion_service::completion_status($userid, (object)[
+            'id' => (int)$row->pageid,
+            'publishedrevisionid' => (int)$row->publishedrevisionid,
+        ]);
+        $done = $status->status === completion_service::STATUS_COMPLETED;
+        if ((int)$row->required) {
+            $total++;
+            if ($done) {
+                $confirmed++;
+            }
+        }
+        if ((int)$row->pageid === (int)$page->id) {
+            $currentindex = $index;
+        }
+        $items[] = (object)[
+            'pageid' => (int)$row->pageid,
+            'slug' => (string)$row->slug,
+            'title' => (string)$row->title,
+            'sectionname' => (string)$row->sectionname,
+            'required' => (int)$row->required,
+            'done' => $done,
+            'iscurrent' => (int)$row->pageid === (int)$page->id,
+        ];
+        $index++;
+    }
+
+    return (object)[
+        'path' => $chosen,
+        'items' => $items,
+        'currentindex' => $currentindex,
+        'next' => ($currentindex >= 0 && isset($items[$currentindex + 1]))
+            ? $items[$currentindex + 1] : null,
+        'confirmed' => $confirmed,
+        'total' => $total,
+    ];
+}
+
+/**
+ * Render the "you are on a path" rail panel: ordered items with completion
+ * ticks, the current article highlighted, and a link to the full path.
+ *
+ * @param stdClass $ctx Context from local_handbook_path_context().
+ * @return string HTML.
+ */
+function local_handbook_render_path_panel(stdClass $ctx): string {
+    $percent = $ctx->total > 0 ? (int)round($ctx->confirmed / $ctx->total * 100) : 0;
+
+    $body = html_writer::tag('h3',
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-route me-2 text-primary', 'aria-hidden' => 'true'])
+        . s(get_string('myreadingpath', 'local_handbook')),
+        ['class' => 'h6 text-uppercase text-muted mb-1']);
+    $body .= html_writer::tag('p', html_writer::link(
+        new moodle_url('/local/handbook/path.php', ['id' => $ctx->path->id]),
+        html_writer::tag('strong', s(format_string($ctx->path->name)))), ['class' => 'mb-2']);
+    $body .= html_writer::div(
+        html_writer::div('', 'progress-bar', [
+            'role' => 'progressbar',
+            'style' => 'width: ' . $percent . '%',
+            'aria-valuenow' => $ctx->confirmed,
+            'aria-valuemin' => 0,
+            'aria-valuemax' => max(1, $ctx->total),
+        ]),
+        'progress mb-1', ['style' => 'height: 0.4rem;']);
+    $body .= html_writer::div(s(get_string('pathprogress', 'local_handbook', (object)[
+        'confirmed' => $ctx->confirmed, 'total' => $ctx->total,
+    ])), 'small text-muted mb-2');
+
+    $rows = '';
+    foreach ($ctx->items as $item) {
+        $classes = 'pathpanel-item';
+        $classes .= $item->done ? ' is-done' : ' is-pending';
+        if ($item->iscurrent) {
+            $classes .= ' is-current';
+        }
+        $label = s($item->title)
+            . (!$item->required
+                ? ' ' . html_writer::span(s(get_string('optionalitem', 'local_handbook')),
+                    'pathpanel-optional')
+                : '');
+        $rows .= html_writer::tag('li',
+            $item->iscurrent
+                ? html_writer::span($label)
+                : html_writer::link(new moodle_url('/local/handbook/view.php',
+                    ['page' => $item->slug, 'path' => $ctx->path->id]), $label),
+            ['class' => $classes]);
+    }
+    $body .= html_writer::tag('ol', $rows, ['class' => 'local-handbook-pathpanel-list']);
+
+    return html_writer::div(html_writer::div($body, 'card-body'),
+        'card mb-3 local-handbook-pathpanel');
+}
+
+/**
+ * Render one page as a banner card (category view, home accordion, live
+ * search results all share this markup). Whole card is clickable.
+ *
+ * @param stdClass $page Page record.
+ * @param int $version Published version number (0 = omit).
+ * @return string HTML.
+ */
+function local_handbook_render_page_card(stdClass $page, int $version = 0): string {
+    $bannerurl = local_handbook_banner_url((int)$page->id);
+    if ($bannerurl) {
+        $media = html_writer::div(
+            html_writer::empty_tag('img', [
+                'src' => $bannerurl->out(false), 'alt' => '', 'loading' => 'lazy',
+            ]),
+            'local-handbook-card-media');
+    } else {
+        $media = html_writer::div(
+            html_writer::tag('i', '', [
+                'class' => 'fa-solid ' . local_handbook_contenttype_icon((string)$page->contenttype),
+                'aria-hidden' => 'true',
+            ]),
+            'local-handbook-card-media is-fallback');
+    }
+
+    $pills = html_writer::span(
+        s(get_string('contenttype_' . $page->contenttype, 'local_handbook')),
+        'local-handbook-card-pill');
+    if ((int)$page->requiredreading) {
+        $pills .= html_writer::span(s(get_string('requiredreading', 'local_handbook')),
+            'local-handbook-card-pill is-required');
+    }
+
+    $body = html_writer::div($pills, 'local-handbook-card-pills')
+        . html_writer::tag('h4', s($page->title), ['class' => 'local-handbook-card-title'])
+        . (trim((string)$page->summary) !== ''
+            ? html_writer::tag('p', s($page->summary), ['class' => 'local-handbook-card-summary'])
+            : '');
+
+    $foot = html_writer::span(
+            s(get_string('lastupdated', 'local_handbook') . ': '
+                . local_handbook_format_date((int)$page->timemodified)))
+        . ($version ? html_writer::span(s(get_string('versionnumber', 'local_handbook', $version))) : '');
+
+    // The card IS the link (no overlay tricks a theme can break); it contains
+    // no other interactive elements, so the whole surface navigates.
+    return html_writer::link(local_handbook_page_url($page),
+        $media
+        . html_writer::div($body, 'local-handbook-card-body')
+        . html_writer::div($foot, 'local-handbook-card-foot'),
+        ['class' => 'local-handbook-card']);
+}
+
+/**
+ * Published version numbers for a set of pages, in one query.
+ *
+ * @param stdClass[] $pages Page records (need publishedrevisionid).
+ * @return int[] versionnumber keyed by revision id.
+ */
+function local_handbook_published_versions(array $pages): array {
+    global $DB;
+
+    $versions = [];
+    $revisionids = array_filter(array_map(
+        static fn(stdClass $p): int => (int)$p->publishedrevisionid, $pages));
+    if ($revisionids) {
+        foreach ($DB->get_records_list('local_handbook_revision', 'id', $revisionids,
+                '', 'id, versionnumber') as $rev) {
+            $versions[(int)$rev->id] = (int)$rev->versionnumber;
+        }
+    }
+    return $versions;
+}
+
+/**
  * The handbook content-pattern catalogue (the "hb-*" house style).
  *
  * Single source of truth shared by the editor style guide (manage/styleguide.php)
@@ -1247,6 +1474,335 @@ HTML);
   <li>Nómina impresa y en el teléfono</li>
   <li>Botiquín y contactos de emergencia</li>
 </ul>
+HTML);
+
+    $add('email', <<<'HTML'
+<div class="hb-email is-good">
+  <div class="e-chrome"><i></i><i></i><i></i><span class="e-badge">Así sí</span></div>
+  <div class="e-head">
+    <div class="e-row"><span class="e-label">De</span>
+      <span class="e-value">Secretaría Académica &lt;secretaria@europaschule.eu&gt;</span></div>
+    <div class="e-row"><span class="e-label">Para</span>
+      <span class="e-value"><span class="pill">Familias 4.º B</span></span></div>
+    <div class="e-row"><span class="e-label">Asunto</span>
+      <span class="e-value e-subject">Salida pedagógica — 24 de julio (autorización adjunta)</span></div>
+  </div>
+  <div class="e-body">
+    <p>Estimadas familias de 4.º B:</p>
+    <p>El <strong>jueves 24 de julio</strong> el grado realizará una salida pedagógica al
+    Museo para la Identidad Nacional.</p>
+    <ul>
+      <li><strong>Salida:</strong> 8:00, desde el campus.</li>
+      <li><strong>Regreso:</strong> 12:30, almuerzo normal en el comedor.</li>
+    </ul>
+    <p>Adjuntamos el talón de autorización; devuélvanlo firmado <strong>a más tardar el
+    lunes 21 de julio</strong>.</p>
+  </div>
+  <div class="e-attach"><span>Autorizacion_salida_4B.pdf</span></div>
+  <div class="e-sign">
+    <span class="name">Ana Martínez</span><br>
+    Secretaría Académica &middot; EuropaSchule San Pedro Sula<br>
+    Ext. 101 &middot; secretaria@europaschule.eu
+  </div>
+</div>
+
+<div class="hb-email is-bad">
+  <div class="e-chrome"><i></i><i></i><i></i><span class="e-badge">Así no</span></div>
+  <div class="e-head">
+    <div class="e-row"><span class="e-label">Asunto</span>
+      <span class="e-value e-subject">IMPORTANTE!!!</span></div>
+  </div>
+  <div class="e-body">
+    <p>se les recuerda que hay salida el jueves mandar el dinero y el papel firmado. gracias</p>
+  </div>
+</div>
+HTML);
+
+    $add('chat', <<<'HTML'
+<div class="hb-chat">
+  <div class="chat-title">Familias 4.º B — EuropaSchule
+    <span class="sub">54 participantes</span></div>
+  <div class="chat-day">Lunes 21 de julio</div>
+  <div class="hb-msg is-out">
+    <span class="who">Coordinación Académica</span>
+    <p>Buenos días, familias. Hoy es el último día para entregar la autorización firmada
+    de la salida del jueves.</p>
+    <span class="when">9:02</span>
+  </div>
+  <div class="hb-msg is-in">
+    <span class="who">Madre de Sofía R.</span>
+    <p>Buenos días, ¿sirve mandarla escaneada por correo?</p>
+    <span class="when">9:14</span>
+  </div>
+  <div class="hb-msg is-out">
+    <span class="who">Coordinación Académica</span>
+    <p>Sí, con gusto: secretaria@europaschule.eu. El original lo puede traer el estudiante
+    el mismo jueves.</p>
+    <span class="when">9:16</span>
+  </div>
+</div>
+
+<div class="hb-chat">
+  <div class="chat-day">Ejemplos</div>
+  <span class="chat-verdict is-bad">Así no</span>
+  <div class="hb-msg is-out is-bad">
+    <p>señora la nota de mateo estuvo pesima hay que hablar URGENTE</p>
+    <span class="when">21:47</span>
+  </div>
+  <span class="chat-verdict is-good">Así sí</span>
+  <div class="hb-msg is-out is-good">
+    <p>Buenas tardes. Quisiera coordinar una breve reunión para conversar sobre el avance
+    de Mateo. ¿Le queda bien el miércoles a las 14:30, presencial o por llamada?</p>
+    <span class="when">14:10</span>
+  </div>
+</div>
+HTML);
+
+    $add('dialogue', <<<'HTML'
+<div class="hb-dialogue">
+  <div class="dlg-context">Llamada: madre molesta por una calificación &middot; Recepción &rarr; Coordinación</div>
+  <div class="dlg-turn is-staff">
+    <span class="dlg-who">Recepción</span>
+    <span class="dlg-text">EuropaSchule, buenos días. Le atiende Carmen, ¿en qué puedo servirle?</span>
+  </div>
+  <div class="dlg-turn">
+    <span class="dlg-who">Madre</span>
+    <span class="dlg-text">¡Es la tercera vez que llamo! La nota de mi hija está mal y nadie me resuelve.</span>
+  </div>
+  <p class="dlg-note">— pausa; dejar que termine, no interrumpir —</p>
+  <div class="dlg-turn is-staff is-good">
+    <span class="dlg-who">Recepción</span>
+    <span class="dlg-text">Entiendo su molestia, señora, y lamento que haya tenido que llamar
+    varias veces.<span class="dlg-verdict is-good">Así sí</span> La comunico con la Coordinación
+    Académica, que es quien revisa calificaciones. ¿Me permite un momento en línea?</span>
+  </div>
+  <div class="dlg-turn is-staff is-bad">
+    <span class="dlg-who">(Evitar)</span>
+    <span class="dlg-text">Eso no es conmigo, llame mañana.<span class="dlg-verdict is-bad">Así no</span></span>
+  </div>
+</div>
+HTML);
+
+    $add('acta', <<<'HTML'
+<div class="hb-agenda">
+  <div class="ag-title">Agenda <span class="meta">ELP &middot; miércoles 23 de julio &middot; Sala de juntas</span></div>
+  <ol>
+    <li><span class="ag-time">14:00–14:10</span><span class="ag-topic">Seguimiento de acuerdos anteriores</span><span class="ag-who">Dirección</span></li>
+    <li><span class="ag-time">14:10–14:35</span><span class="ag-topic">Resultados del diagnóstico de lectura 3.º–6.º</span><span class="ag-who">Coordinación</span></li>
+    <li><span class="ag-time">14:35–14:55</span><span class="ag-topic">Plan de acompañamiento del segundo semestre</span><span class="ag-who">Consejería</span></li>
+    <li><span class="ag-time">14:55–15:00</span><span class="ag-topic">Acuerdos y cierre</span><span class="ag-who">Dirección</span></li>
+  </ol>
+</div>
+
+<div class="hb-acta">
+  <div class="ac-title">Acta 14-2026 <span class="meta">ELP &middot; 23 de julio de 2026</span></div>
+  <dl class="ac-head">
+    <dt>Participantes</dt><dd>Dirección, Coordinación, Convivencia, Consejería</dd>
+    <dt>Preside</dt><dd>Dirección</dd>
+    <dt>Ausencias</dt><dd>Ninguna</dd>
+  </dl>
+  <div class="ac-section">Acuerdos</div>
+  <table>
+    <thead><tr><th></th><th>Acuerdo</th><th>Responsable</th><th>Fecha límite</th></tr></thead>
+    <tbody>
+      <tr><td class="ac-num">14.1</td>
+          <td>Aplicar el plan de refuerzo de lectura en 3.º y 4.º, dos sesiones semanales.</td>
+          <td class="ac-who">Coordinación</td><td class="ac-when">4 ago</td></tr>
+      <tr><td class="ac-num">14.2</td>
+          <td>Presentar propuesta de horario de acompañamiento individual.</td>
+          <td class="ac-who">Consejería</td><td class="ac-when">30 jul</td></tr>
+      <tr><td class="ac-num">13.4</td>
+          <td>Circular a familias sobre el nuevo protocolo de retiro. <span class="ac-done">Cumplido</span></td>
+          <td class="ac-who">Secretaría</td><td class="ac-when">18 jul</td></tr>
+    </tbody>
+  </table>
+</div>
+HTML);
+
+    $add('letter', <<<'HTML'
+<div class="hb-letter">
+  <div class="lt-head">
+    <div class="lt-school">EuropaSchule San Pedro Sula</div>
+    <div class="lt-sub">Educación Helvética S.A. &middot; San Pedro Sula, Honduras</div>
+  </div>
+  <p class="lt-place">San Pedro Sula, 21 de julio de 2026</p>
+  <p class="lt-ref">Ref.: Circular 08-2026 — Salida pedagógica 4.º B</p>
+  <p>Estimadas familias:</p>
+  <p>Por este medio les informamos que el jueves 24 de julio el grado 4.º B realizará una
+  salida pedagógica al Museo para la Identidad Nacional, en el marco de la unidad de
+  Estudios Sociales.</p>
+  <p>La salida se realizará de 8:00 a 12:30. Se requiere la autorización firmada por el
+  responsable legal, a más tardar el lunes 21 de julio.</p>
+  <p>Agradecemos su apoyo para el buen desarrollo de esta actividad.</p>
+  <p>Atentamente,</p>
+  <div class="lt-sign">
+    <span class="line"></span>
+    <span class="name">Nombre Apellido</span><br>
+    <span class="role">Rectorado &middot; EuropaSchule San Pedro Sula</span>
+  </div>
+</div>
+HTML);
+
+    $add('feedback', <<<'HTML'
+<div class="hb-feedback is-bad">
+  <div class="fb-head">
+    <span class="fb-type">Tarea</span>
+    <span class="fb-what">Ensayo — Los recursos naturales</span>
+    <span class="fb-meta">Docente &rarr; Estudiante</span>
+    <span class="fb-badge">Así no</span>
+  </div>
+  <div class="fb-field"><p>Mal hecho. Repetir para el viernes.</p></div>
+  <span class="fb-grade">4/10</span>
+</div>
+
+<div class="hb-feedback is-good">
+  <div class="fb-head">
+    <span class="fb-type">Tarea</span>
+    <span class="fb-what">Ensayo — Los recursos naturales</span>
+    <span class="fb-meta">Docente &rarr; Estudiante</span>
+    <span class="fb-badge">Así sí</span>
+  </div>
+  <div class="fb-field">
+    <p>Tu introducción plantea bien el problema y usas dos fuentes correctamente citadas —
+    buen avance frente al ensayo anterior.</p>
+    <p>Para la versión del viernes: (1) cada párrafo debe defender UNA idea — el segundo
+    mezcla tres; (2) la conclusión repite la introducción, intenta cerrarla con tu propia
+    postura. Si quieres revisarlo juntos antes de entregar, búscame el jueves en el recreo.</p>
+  </div>
+  <span class="fb-grade">6/10 &middot; puede reentregar</span>
+</div>
+
+<div class="hb-feedback">
+  <div class="fb-head">
+    <span class="fb-type">Evaluación docente</span>
+    <span class="fb-what">Observación de clase — Matemáticas 5.º</span>
+    <span class="fb-meta">Coordinación &rarr; Docente</span>
+  </div>
+  <div class="fb-field">
+    <p><strong>Fortalezas:</strong> arranque puntual con objetivo visible en pizarra; buen
+    uso de mini-pizarras para verificar comprensión de todos.</p>
+    <p><strong>Área de mejora:</strong> el cierre quedó en 2 minutos y sin verificación del
+    objetivo. Sugerencia concreta: reservar 7 minutos y usar la misma rutina de
+    mini-pizarras como ticket de salida.</p>
+  </div>
+</div>
+HTML);
+
+    $add('refs', <<<'HTML'
+<p>Durante actos oficiales se aplica el uniforme institucional
+<a class="hb-ref" href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112"><span>Art. 112 b)</span> <span class="doc">&middot; Regl. Interno</span></a>,
+y las faltas de presentación se tratan como faltas leves.</p>
+
+<div class="hb-seealso">
+  <span class="lbl">Ver normativa</span>
+  <a href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112">Art. 112 b) &middot; Reglamento Interno</a>
+  <span class="sep">&middot;</span>
+  <a href="/local/handbook/view.php?page=reglamento-personal-capitulo-11#art-84">Art. 84 4) &middot; Reglamento del Personal</a>
+</div>
+
+<div class="hb-refbox">
+  <div class="rb-title">Normativa relacionada</div>
+  <ul>
+    <li><span class="hb-doc is-ri">Regl. Interno</span>
+        <a href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112">Artículo 112 b)</a>
+        <span class="what">&mdash; uso correcto y oportuno de la vestimenta.</span></li>
+    <li><span class="hb-doc is-rp">Regl. Personal</span>
+        <a href="/local/handbook/view.php?page=reglamento-personal-capitulo-11#art-84">Artículo 84 4)</a>
+        <span class="what">&mdash; presentación personal e higiene como falta leve.</span></li>
+  </ul>
+</div>
+
+<div class="hb-refs">
+  <p class="refs-title">Normativa relacionada</p>
+  <div class="refs-group">
+    <p class="refs-doc"><span class="hb-doc is-ri">Regl. Interno</span> Reglamento Interno &mdash; Título Quinto</p>
+    <ul>
+      <li><a href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112">Artículo 112 b)</a>
+          <span class="what">&mdash; uso correcto y oportuno de la vestimenta.</span></li>
+    </ul>
+  </div>
+  <div class="refs-group">
+    <p class="refs-doc"><span class="hb-doc is-ed">Estatuto Docente</span> Reglamento del Estatuto del Docente</p>
+    <ul>
+      <li><a href="/local/handbook/view.php?page=estatuto-docente#art-134">Artículo 134</a>
+          <span class="what">&mdash; clasificación de faltas del personal docente.</span></li>
+    </ul>
+  </div>
+</div>
+HTML);
+
+    $add('next', <<<'HTML'
+<a class="hb-next" href="/local/handbook/view.php?page=reglamento-personal-capitulo-12">
+  <span class="eyebrow">Siguiente capítulo</span>
+  <span class="title">Capítulo 12 — Terminación de la relación laboral</span>
+</a>
+
+<div class="hb-next-group">
+  <a class="hb-next" href="/local/handbook/view.php?page=evaluacion-docente">
+    <span class="eyebrow">Si eres docente</span>
+    <span class="title">Evaluación docente anual</span>
+  </a>
+  <a class="hb-next" href="/local/handbook/view.php?page=evaluacion-administrativa">
+    <span class="eyebrow">Si eres personal administrativo</span>
+    <span class="title">Evaluación administrativa</span>
+  </a>
+</div>
+
+<a class="hb-next is-prev" href="/local/handbook/view.php?page=reglamento-personal-capitulo-10">
+  <span class="eyebrow">Anterior</span>
+  <span class="title">Capítulo 10 — Jornada de trabajo</span>
+</a>
+HTML);
+
+    $add('legal', <<<'HTML'
+<div class="hb-legal">
+
+  <h2 class="hb-titulo"><span class="no">5</span>
+    <span class="name">Título Quinto</span></h2>
+
+  <h3 class="hb-seccion"><span class="no">5.1</span>
+    <span>Disposiciones de Orden y Disciplina</span></h3>
+
+  <h4 class="hb-subseccion"><span class="no">5.1.1</span>
+    <span>Consideraciones Preliminares</span></h4>
+
+  <p class="hb-art" id="art-106"><span class="hb-art-no">Artículo 106.</span>
+  En EuropaSchule se entiende como disciplina un conjunto de normas formativas
+  que deben acatarse para promover la buena convivencia escolar.</p>
+
+  <p class="hb-art" id="art-110"><span class="hb-art-no">Artículo 110.</span>
+  La aplicación de cualquier medida debe considerar:</p>
+  <ol class="hb-literals">
+    <li>Cuidado y protección a la integridad física y a la dignidad personal del alumno(a).</li>
+    <li>Las medidas deberán propender a la toma de conciencia y reflexión.</li>
+    <li>Las correcciones serán proporcionales a la falta.</li>
+  </ol>
+
+  <p class="hb-art" id="art-82"><span class="hb-art-no">Artículo 82.</span>
+  Las medidas disciplinarias serán de 4 tipos:</p>
+  <ol>
+    <li value="1">Amonestación privada, verbal.</li>
+    <li value="2">Amonestación por escrito.</li>
+    <li value="3">Suspensión del trabajo sin goce de sueldo de uno a ocho días laborables.</li>
+    <li value="4">Despido como último recurso.</li>
+  </ol>
+
+  <!-- Cuerpo que comienza directamente con la enumeración (sin frase
+       introductoria): agregue is-solo al párrafo para que la lista arranque
+       en la misma línea que el número, sin línea en blanco. -->
+  <p class="hb-art is-solo" id="art-85"><span class="hb-art-no">Artículo 85.</span></p>
+  <ol>
+    <li value="1">Son faltas menos graves las reincidencias de faltas leves.</li>
+    <li value="2">El abandono del puesto de trabajo sin autorización.</li>
+  </ol>
+
+  <div class="hb-note"><p><strong>Nota de vigencia:</strong> literales b) y c)
+  modificados por acuerdo del ELP, acta 12-2026.</p></div>
+
+  <p class="hb-art is-derogado" id="art-108"><span class="hb-art-no">Artículo 108.</span>
+  <span class="der">(Derogado — acuerdo ELP, acta 09-2026.)</span></p>
+
+</div>
 HTML);
 
     return $patterns;

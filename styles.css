@@ -133,23 +133,47 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* Typed related-pages list. */
+/* Typed related-pages list, in the cross-reference (hb-refs) visual
+   language: relation type as a small badge, arrow bullet before the link. */
 #page-local-handbook-area .local-handbook-relations {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    font-size: 0.875rem;
+    gap: 0.55rem;
+    font-size: 0.8125rem;
+}
+#page-local-handbook-area .local-handbook-relations li {
+    position: relative;
+    padding-left: 1.25rem;
+}
+#page-local-handbook-area .local-handbook-relations li::before {
+    content: "\2192";
+    position: absolute;
+    left: 0.1rem;
+    top: 0.05rem;
+    color: var(--primary, #0078c3);
+    font-size: 0.75rem;
 }
 #page-local-handbook-area .local-handbook-relations .relation-type {
-    display: block;
-    font-size: 0.6875rem;
-    text-transform: uppercase;
+    display: inline-block;
+    font-size: 0.625rem;
+    font-weight: 700;
     letter-spacing: 0.05em;
-    color: var(--bs-secondary-color, #6c757d);
+    text-transform: uppercase;
+    padding: 0.1rem 0.5rem;
+    border-radius: 0.3rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+    color: var(--primary, #0078c3);
+    margin-right: 0.4rem;
+    vertical-align: 0.08em;
 }
+#page-local-handbook-area .local-handbook-relations a {
+    font-weight: 600;
+    text-decoration: none;
+}
+#page-local-handbook-area .local-handbook-relations a:hover { text-decoration: underline; }
 
 /* Category navigation cards (home). */
 #page-local-handbook-area .local-handbook-category-card .card-body {
@@ -401,7 +425,15 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
 }
+/* The card is an <a>: the entire surface is the link to the article. */
+#page-local-handbook-area a.local-handbook-card,
+#page-local-handbook-area a.local-handbook-card:hover,
+#page-local-handbook-area a.local-handbook-card:focus {
+    color: inherit;
+    text-decoration: none;
+}
 #page-local-handbook-area .local-handbook-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     background: var(--bs-body-bg, #fff);
@@ -410,16 +442,17 @@
     overflow: hidden;
     box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
     transition: transform 0.16s ease, box-shadow 0.16s ease;
+    cursor: pointer;
+}
+#page-local-handbook-area .local-handbook-card:focus-visible {
+    outline: 2px solid var(--primary, #0078c3);
+    outline-offset: 2px;
 }
 @media (prefers-reduced-motion: no-preference) {
     #page-local-handbook-area .local-handbook-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 24px -12px rgba(23, 32, 51, 0.25);
     }
-}
-#page-local-handbook-area .local-handbook-card:focus-within {
-    outline: 2px solid var(--primary, #0078c3);
-    outline-offset: 2px;
 }
 #page-local-handbook-area .local-handbook-card-media {
     aspect-ratio: 16 / 9;
@@ -487,11 +520,7 @@
     line-height: 1.35;
     margin: 0;
 }
-#page-local-handbook-area .local-handbook-card-title a {
-    color: inherit;
-    text-decoration: none;
-}
-#page-local-handbook-area .local-handbook-card:hover .local-handbook-card-title a {
+#page-local-handbook-area .local-handbook-card:hover .local-handbook-card-title {
     color: var(--primary, #0078c3);
 }
 #page-local-handbook-area .local-handbook-card-summary {
@@ -637,7 +666,7 @@
 #page-local-handbook-area .hb-branch ul { margin: 0.25rem 0 0; padding-left: 1.1rem; }
 
 /* ---- organigrama ---- */
-#page-local-handbook-area .hb-org { overflow-x: auto; padding: 0.4rem 0 0.6rem; }
+#page-local-handbook-area .hb-org { overflow-x: auto; padding: 0.4rem 0 0.6rem; margin: 0.5rem 0 2rem; }
 #page-local-handbook-area .hb-org ul { display: flex; justify-content: center; list-style: none; margin: 0; padding: 1.35rem 0 0; position: relative; }
 #page-local-handbook-area .hb-org li { list-style: none; text-align: center; position: relative; padding: 1.35rem 0.6rem 0; }
 #page-local-handbook-area .hb-org li::before,
@@ -768,4 +797,1114 @@
     border-radius: 0.5rem; padding: 0.85rem 1rem; margin: 0;
     overflow-x: auto; white-space: pre; tab-size: 2;
     font-size: 0.82rem; line-height: 1.6;
+}
+
+
+/* Content patterns share the article's text measure (70ch), so a callout or
+   a do/don't block never grows wider than the paragraphs around it. Wide
+   internals (org chart, RACI table) scroll inside their own container. */
+#page-local-handbook-area .local-handbook-page-body .hb-steps,
+#page-local-handbook-area .local-handbook-page-body .hb-note,
+#page-local-handbook-area .local-handbook-page-body .hb-tip,
+#page-local-handbook-area .local-handbook-page-body .hb-warning,
+#page-local-handbook-area .local-handbook-page-body .hb-important,
+#page-local-handbook-area .local-handbook-page-body .hb-result,
+#page-local-handbook-area .local-handbook-page-body .hb-branches,
+#page-local-handbook-area .local-handbook-page-body .hb-org,
+#page-local-handbook-area .local-handbook-page-body .hb-org-team.is-standalone,
+#page-local-handbook-area .local-handbook-page-body .hb-roles,
+#page-local-handbook-area .local-handbook-page-body .hb-escalation,
+#page-local-handbook-area .local-handbook-page-body .hb-dodont,
+#page-local-handbook-area .local-handbook-page-body .hb-timeline,
+#page-local-handbook-area .local-handbook-page-body .hb-contacts,
+#page-local-handbook-area .local-handbook-page-body .hb-define,
+#page-local-handbook-area .local-handbook-page-body .hb-matrix-wrap,
+#page-local-handbook-area .local-handbook-page-body .hb-figure,
+#page-local-handbook-area .local-handbook-page-body .hb-keyvalue,
+#page-local-handbook-area .local-handbook-page-body .hb-checklist {
+    max-width: 70ch;
+}
+
+/* Home: full-width two-column category accordion. Each category is a native
+   <details> drawer that opens to reveal its page cards. */
+#page-local-handbook-area .local-handbook-cat-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+    align-items: start;
+}
+#page-local-handbook-area .local-handbook-cat-acc {
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    overflow: hidden;
+}
+#page-local-handbook-area .local-handbook-cat-acc > summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    font-weight: 600;
+}
+#page-local-handbook-area .local-handbook-cat-acc > summary::-webkit-details-marker { display: none; }
+#page-local-handbook-area .local-handbook-cat-acc > summary:hover { background: var(--gray-100, #f8f9fa); }
+#page-local-handbook-area .local-handbook-cat-acc > summary:focus-visible {
+    outline: 2px solid var(--primary, #0078c3);
+    outline-offset: -2px;
+}
+#page-local-handbook-area .local-handbook-cat-acc .cat-acc-name { flex: 1 1 auto; min-width: 0; }
+#page-local-handbook-area .local-handbook-cat-acc .category-count { white-space: nowrap; }
+#page-local-handbook-area .local-handbook-cat-acc .cat-acc-chevron {
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+#page-local-handbook-area .local-handbook-cat-acc[open] > summary { border-bottom: 1px solid var(--bs-border-color, #dee2e6); }
+#page-local-handbook-area .local-handbook-cat-acc[open] .cat-acc-chevron { transform: rotate(180deg); }
+#page-local-handbook-area .local-handbook-cat-acc .cat-acc-body { padding: 1rem 1.1rem 1.2rem; }
+/* Cards inside a half-width drawer: smaller minimum so two fit. */
+#page-local-handbook-area .cat-acc-cards {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.9rem;
+}
+#page-local-handbook-area .cat-acc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.9rem;
+}
+#page-local-handbook-area .cat-acc-chip {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--bs-body-color, #1c2430);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    text-decoration: none;
+}
+#page-local-handbook-area .cat-acc-chip:hover {
+    border-color: var(--primary, #0078c3);
+    color: var(--primary, #0078c3);
+    text-decoration: none;
+}
+#page-local-handbook-area .cat-acc-chip .chip-count { color: var(--bs-secondary-color, #6c757d); margin-left: 0.25rem; }
+#page-local-handbook-area .cat-acc-chip.is-open-link { color: var(--primary, #0078c3); border-style: dashed; }
+#page-local-handbook-area .cat-acc-openlink { font-size: 0.85rem; }
+
+/* Live search results panel (populated by js/livesearch.js). */
+#page-local-handbook-area .local-handbook-livesearch { display: none; }
+#page-local-handbook-area .local-handbook-livesearch.is-active {
+    display: block;
+    margin: -0.5rem 0 1.5rem;
+}
+#page-local-handbook-area .local-handbook-livesearch.is-loading { opacity: 0.55; }
+
+/* ---- Rulebook / legal articles (hb-legal): reglamentos and other normative
+   documents. Títulos and numbered sections are real headings (they land in
+   the on-page TOC after demotion); article numbers are AUTHOR-WRITTEN (they
+   are canonical), never CSS counters; literals letter automatically. ---- */
+#page-local-handbook-area .local-handbook-page-body .hb-titulo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    border-bottom: 2px solid var(--bs-body-color, #1c2430);
+    padding-bottom: 0.5rem;
+    margin: 2.1rem 0 0.4rem;
+    max-width: 70ch;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-titulo .no {
+    color: var(--primary, #0078c3);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-seccion,
+#page-local-handbook-area .local-handbook-page-body .hb-subseccion {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    margin: 1.6rem 0 0.2rem;
+    max-width: 70ch;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-seccion .no {
+    color: var(--primary, #0078c3);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-subseccion .no {
+    color: var(--bs-secondary-color, #6c757d);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Article: run-in canonical number in a hanging column, deep-linkable. */
+#page-local-handbook-area .local-handbook-page-body .hb-art {
+    position: relative;
+    padding-left: 6.5rem;
+    margin: 0.9rem 0;
+    scroll-margin-top: 90px;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-art .hb-art-no {
+    position: absolute;
+    left: 0;
+    top: 0.15rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    color: var(--primary, #0078c3);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-art:hover .hb-art-no::after {
+    content: " \00b6";
+    color: var(--bs-secondary-color, #6c757d);
+    font-weight: 400;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-derogado {
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-derogado .hb-art-no {
+    color: var(--bs-secondary-color, #6c757d);
+    text-decoration: line-through;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-derogado .der { font-style: italic; }
+
+/* Literals a) b) c) attached to the article above. */
+#page-local-handbook-area .local-handbook-page-body .hb-literals {
+    list-style: none;
+    counter-reset: hblit;
+    margin: 0.4rem 0 0.3rem;
+    padding: 0 0 0 6.5rem;
+    max-width: 70ch;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-art + .hb-literals { margin-top: -0.4rem; }
+#page-local-handbook-area .local-handbook-page-body .hb-literals > li {
+    counter-increment: hblit;
+    position: relative;
+    padding: 0 0 0.45rem 1.9rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-literals > li::before {
+    content: counter(hblit, lower-alpha) ")";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--primary, #0078c3);
+    font-weight: 600;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-literals > li:last-child { padding-bottom: 0; }
+
+@media (max-width: 560px) {
+    #page-local-handbook-area .local-handbook-page-body .hb-art { padding-left: 0; padding-top: 1.1rem; }
+    #page-local-handbook-area .local-handbook-page-body .hb-art .hb-art-no {
+        position: static;
+        display: block;
+        margin-bottom: 0.15rem;
+    }
+    #page-local-handbook-area .local-handbook-page-body .hb-literals { padding-left: 0.4rem; }
+}
+
+/* ---- hb-legal refinements (from the Reglamento import) ---- */
+
+/* An article whose body is only the number (the text continues in a list
+   below) must still occupy its line: the number is absolutely positioned,
+   so an otherwise-empty paragraph would collapse to zero height and the
+   following list would render on top of it. */
+#page-local-handbook-area .local-handbook-page-body .hb-art { min-height: 1.4em; }
+
+/* Plain numbered/bulleted lists inside a legal block (numerales): align with
+   the article text column and keep NATIVE numbering so <li value="N">
+   preserves the canonical numbers. Markers match the hb-literals styling. */
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]),
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) {
+    margin: 0.4rem 0 0.9rem;
+    padding-left: 8.2rem;
+    max-width: 70ch;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-art + ol:not([class]),
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-art + ul:not([class]) {
+    margin-top: -0.3rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]) > li,
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) > li {
+    padding: 0.12rem 0;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]) > li::marker {
+    color: var(--primary, #0078c3);
+    font-weight: 600;
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) > li::marker {
+    color: var(--primary, #0078c3);
+}
+/* Nested sublists indent normally, not with the full column offset. */
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]) ol,
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]) ul,
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) ol,
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) ul {
+    padding-left: 1.6rem;
+    margin: 0.2rem 0;
+}
+
+/* Callouts and fichas inside a legal block align to the text column too. */
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-note,
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-tip,
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-warning,
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-important,
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-keyvalue {
+    margin-left: 6.5rem;
+}
+
+@media (max-width: 560px) {
+    #page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]),
+    #page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) {
+        padding-left: 1.6rem;
+    }
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-note,
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-tip,
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-warning,
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-important,
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-keyvalue {
+        margin-left: 0;
+    }
+}
+
+/* Article whose body starts directly with a list (no intro sentence): add
+   is-solo to the hb-art paragraph. The empty paragraph collapses (the number
+   is absolutely positioned, so it still shows) and the list's first item
+   starts on the SAME line as the number — no blank line between them. */
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-solo {
+    min-height: 0;
+    margin-bottom: 0;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-art.is-solo + ol:not([class]),
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-art.is-solo + ul:not([class]),
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-solo + .hb-literals,
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-solo + .hb-keyvalue {
+    margin-top: 0;
+}
+@media (max-width: 560px) {
+    /* Mobile stacks the number above the text, so the paragraph has real
+       height again; normal flow applies. */
+    #page-local-handbook-area .local-handbook-page-body .hb-art.is-solo {
+        min-height: 1.4em;
+        margin-bottom: 0.15rem;
+    }
+}
+
+/* ---- Body images: rounded corners + breathing room between paragraphs.
+   hb-figure keeps its own frame styling (excluded via the direct-child check). */
+#page-local-handbook-area .local-handbook-page-body img {
+    max-width: 100%;
+    height: auto;
+}
+#page-local-handbook-area .local-handbook-page-body :not(.hb-figure) > img,
+#page-local-handbook-area .local-handbook-page-body > img {
+    border-radius: 5px;
+}
+#page-local-handbook-area .local-handbook-page-body > img,
+#page-local-handbook-area .local-handbook-page-body p > img:only-child {
+    display: block;
+    margin: 1rem 0;
+}
+
+/* ---- Normative cross-references (hb-ref / hb-seealso / hb-refbox / hb-refs).
+   Links are plain anchors to a page slug + #art-N (the hb-legal ids), so a
+   click lands on the exact articulo. Shared document badges: hb-doc with
+   is-ri (Regl. Interno), is-rp (Regl. Personal), is-ed (Estatuto Docente);
+   no modifier = neutral for any other source. ---- */
+
+/* 01: inline chip inside a sentence. */
+#page-local-handbook-area .local-handbook-page-body a.hb-ref {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    padding: 0 0.5rem 0.1rem;
+    border: 1px solid color-mix(in srgb, var(--primary, #0078c3) 30%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary, #0078c3) 8%, transparent);
+    font-size: 0.86em;
+    font-weight: 500;
+    color: var(--primary, #0078c3);
+    text-decoration: none;
+    white-space: nowrap;
+}
+#page-local-handbook-area .local-handbook-page-body a.hb-ref::before {
+    content: "\00a7";
+    font-weight: 700;
+    font-size: 0.9em;
+}
+#page-local-handbook-area .local-handbook-page-body a.hb-ref:hover {
+    border-color: var(--primary, #0078c3);
+    background: color-mix(in srgb, var(--primary, #0078c3) 14%, transparent);
+    text-decoration: none;
+}
+#page-local-handbook-area .local-handbook-page-body a.hb-ref .doc {
+    color: var(--bs-secondary-color, #6c757d);
+    font-weight: 400;
+}
+
+/* 02: one-line "Ver normativa" after a paragraph or section. */
+#page-local-handbook-area .local-handbook-page-body .hb-seealso {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 0.6rem;
+    border-left: 3px solid color-mix(in srgb, var(--primary, #0078c3) 45%, transparent);
+    background: color-mix(in srgb, var(--primary, #0078c3) 6%, transparent);
+    border-radius: 0 0.5rem 0.5rem 0;
+    padding: 0.5rem 0.9rem;
+    margin: 0.75rem 0;
+    font-size: 0.8125rem;
+    max-width: 70ch;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-seealso .lbl {
+    font-weight: 700;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary, #0078c3);
+}
+#page-local-handbook-area .local-handbook-page-body .hb-seealso a { font-weight: 500; text-decoration: none; }
+#page-local-handbook-area .local-handbook-page-body .hb-seealso a:hover { text-decoration: underline; }
+#page-local-handbook-area .local-handbook-page-body .hb-seealso .sep { color: var(--bs-secondary-color, #6c757d); }
+
+/* Shared document badge. */
+#page-local-handbook-area .local-handbook-page-body .hb-doc {
+    flex: none;
+    display: inline-block;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.5rem;
+    border-radius: 0.3rem;
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+    white-space: nowrap;
+    vertical-align: 0.08em;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-doc.is-ri {
+    background: color-mix(in srgb, var(--primary, #0078c3) 14%, transparent);
+    color: var(--primary, #0078c3);
+}
+#page-local-handbook-area .local-handbook-page-body .hb-doc.is-rp {
+    background: color-mix(in srgb, #7c5cd6 16%, transparent);
+    color: color-mix(in srgb, #7c5cd6 80%, var(--bs-body-color, #1c2430));
+}
+#page-local-handbook-area .local-handbook-page-body .hb-doc.is-ed {
+    background: color-mix(in srgb, var(--warning, #9a6700) 16%, transparent);
+    color: var(--warning, #9a6700);
+}
+
+/* 03: inset "Normativa relacionada" card. */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.6rem;
+    margin: 0.9rem 0;
+    max-width: 70ch;
+    overflow: hidden;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox .rb-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 8%, transparent);
+    padding: 0.45rem 0.9rem;
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox .rb-title::before {
+    content: "\00a7";
+    color: var(--primary, #0078c3);
+    font-size: 0.85rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox ul { list-style: none; margin: 0; padding: 0.35rem 0; }
+#page-local-handbook-area .local-handbook-page-body .hb-refbox li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.8125rem;
+    max-width: none;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox li + li {
+    border-top: 1px dashed color-mix(in srgb, var(--bs-border-color, #dee2e6) 70%, transparent);
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox a { font-weight: 600; text-decoration: none; white-space: nowrap; }
+#page-local-handbook-area .local-handbook-page-body .hb-refbox a:hover { text-decoration: underline; }
+#page-local-handbook-area .local-handbook-page-body .hb-refbox .what { color: var(--bs-secondary-color, #6c757d); }
+
+/* 04: end-of-article block, grouped by source document. */
+#page-local-handbook-area .local-handbook-page-body .hb-refs {
+    border-top: 2px solid var(--bs-border-color, #dee2e6);
+    margin: 1.75rem 0 0.25rem;
+    padding-top: 0.9rem;
+    max-width: 70ch;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refs .refs-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.69rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    margin: 0 0 0.6rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refs .refs-title::before {
+    content: "\00a7";
+    color: var(--primary, #0078c3);
+    font-size: 0.9rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refs .refs-group { margin: 0 0 0.75rem; }
+#page-local-handbook-area .local-handbook-page-body .hb-refs .refs-doc {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refs ul { list-style: none; margin: 0; padding: 0; }
+#page-local-handbook-area .local-handbook-page-body .hb-refs li {
+    position: relative;
+    padding: 0.18rem 0 0.18rem 1.25rem;
+    font-size: 0.8125rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refs li::before {
+    content: "\2192";
+    position: absolute;
+    left: 0.1rem;
+    color: var(--primary, #0078c3);
+    font-size: 0.75rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refs a { font-weight: 600; text-decoration: none; }
+#page-local-handbook-area .local-handbook-page-body .hb-refs a:hover { text-decoration: underline; }
+#page-local-handbook-area .local-handbook-page-body .hb-refs .what { color: var(--bs-secondary-color, #6c757d); }
+
+/* ---- Reading-path rail panel: the "you are on the path" list. ---- */
+#page-local-handbook-area .local-handbook-pathpanel-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 22rem;
+    overflow-y: auto;
+    font-size: 0.8125rem;
+}
+#page-local-handbook-area .pathpanel-item {
+    position: relative;
+    padding: 0.28rem 0 0.28rem 1.5rem;
+    line-height: 1.35;
+}
+#page-local-handbook-area .pathpanel-item a { color: inherit; text-decoration: none; }
+#page-local-handbook-area .pathpanel-item a:hover { color: var(--primary, #0078c3); }
+#page-local-handbook-area .pathpanel-item::before {
+    position: absolute;
+    left: 0.1rem;
+    top: 0.3rem;
+    width: 1rem;
+    text-align: center;
+}
+#page-local-handbook-area .pathpanel-item.is-pending { color: var(--bs-secondary-color, #6c757d); }
+#page-local-handbook-area .pathpanel-item.is-pending::before {
+    content: "\25CB";
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.6rem;
+    top: 0.42rem;
+}
+#page-local-handbook-area .pathpanel-item.is-done::before {
+    content: "\2713";
+    color: var(--success, #1e7d43);
+    font-weight: 700;
+}
+#page-local-handbook-area .pathpanel-item.is-current {
+    font-weight: 600;
+    color: var(--bs-body-color, #1c2430);
+    border-left: 3px solid var(--primary, #0078c3);
+    padding-left: 1.25rem;
+    margin-left: -0.35rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 6%, transparent);
+    border-radius: 0 0.3rem 0.3rem 0;
+}
+#page-local-handbook-area .pathpanel-item.is-current::before { left: 0.35rem; }
+#page-local-handbook-area .pathpanel-item.is-current.is-pending::before { content: "\25B8"; color: var(--primary, #0078c3); font-size: 0.8rem; top: 0.3rem; }
+#page-local-handbook-area .pathpanel-optional {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 999px;
+    padding: 0 0.4rem;
+    margin-left: 0.3rem;
+    vertical-align: 0.1em;
+}
+
+/* ---- Bottom "next in path" card (plugin-rendered). ---- */
+#page-local-handbook-area .local-handbook-pathnext .eyebrow {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary, #0078c3);
+    margin-bottom: 0.15rem;
+}
+#page-local-handbook-area .local-handbook-pathnext .title {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* ---- hb-next: hand-authored next/previous links inside content (rulebook
+   chapters, branching "choose your role" continuations). One card, or a
+   hb-next-group with several options side by side. ---- */
+#page-local-handbook-area .hb-next {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.65rem;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0;
+    max-width: 70ch;
+    background: var(--bs-body-bg, #fff);
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+#page-local-handbook-area .hb-next:hover {
+    text-decoration: none;
+    color: inherit;
+    border-color: color-mix(in srgb, var(--primary, #0078c3) 55%, var(--bs-border-color, #dee2e6));
+    box-shadow: 0 8px 18px -10px rgba(23, 32, 51, 0.25);
+    transform: translateY(-2px);
+}
+#page-local-handbook-area .hb-next .eyebrow {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .hb-next .title {
+    font-weight: 600;
+    color: var(--bs-body-color, #1c2430);
+}
+#page-local-handbook-area .hb-next .title::after {
+    content: "\2192";
+    margin-left: 0.45rem;
+    color: var(--primary, #0078c3);
+}
+#page-local-handbook-area .hb-next:hover .title { color: var(--primary, #0078c3); }
+#page-local-handbook-area .hb-next.is-prev .title::after { content: none; }
+#page-local-handbook-area .hb-next.is-prev .title::before {
+    content: "\2190";
+    margin-right: 0.45rem;
+    color: var(--primary, #0078c3);
+}
+#page-local-handbook-area .hb-next-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.9rem;
+    margin: 1rem 0;
+    max-width: 70ch;
+}
+#page-local-handbook-area .hb-next-group .hb-next { margin: 0; }
+
+/* =====================================================================
+ * Communication patterns (hb-email, hb-chat, hb-dialogue, hb-agenda,
+ * hb-acta, hb-letter, hb-feedback): render example communications the
+ * way staff actually see them — a mail client on screen, a chat thread
+ * on a phone, a screenplay-style call script, meeting minutes, a
+ * letterhead circular, a filled feedback field. All examples must use
+ * invented names; the style-guide entries carry that reminder.
+ * ===================================================================== */
+
+/* ---- hb-email: mail-client card ---- */
+#page-local-handbook-area .hb-email {
+    border: 1px solid var(--hb-line);
+    border-radius: 0.65rem;
+    overflow: hidden;
+    margin: 1rem 0;
+    max-width: 40rem;
+    background: var(--hb-surface);
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    font-size: 0.85rem;
+}
+#page-local-handbook-area .hb-email .e-chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: color-mix(in srgb, var(--hb-ink) 4%, var(--hb-surface));
+    border-bottom: 1px solid var(--hb-line);
+    padding: 0.5rem 0.75rem;
+}
+#page-local-handbook-area .hb-email .e-chrome i {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--hb-line);
+    display: inline-block;
+}
+#page-local-handbook-area .hb-email .e-chrome .e-badge {
+    margin-left: auto;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+}
+#page-local-handbook-area .hb-email.is-good { border-color: color-mix(in srgb, var(--hb-ok) 35%, var(--hb-line)); }
+#page-local-handbook-area .hb-email.is-bad { border-color: color-mix(in srgb, var(--hb-danger) 35%, var(--hb-line)); }
+#page-local-handbook-area .hb-email.is-good .e-chrome .e-badge { background: var(--hb-ok-soft); color: var(--hb-ok); }
+#page-local-handbook-area .hb-email.is-bad .e-chrome .e-badge { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-email .e-head {
+    padding: 0.75rem 1rem 0.6rem;
+    border-bottom: 1px solid var(--hb-line);
+}
+#page-local-handbook-area .hb-email .e-row { display: flex; gap: 0.6rem; padding: 0.12rem 0; }
+#page-local-handbook-area .hb-email .e-label {
+    flex: none;
+    width: 3.6rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--hb-muted);
+    padding-top: 0.12rem;
+}
+#page-local-handbook-area .hb-email .e-value { color: var(--hb-ink); }
+#page-local-handbook-area .hb-email .e-value .pill {
+    display: inline-block;
+    background: var(--hb-accent-soft);
+    color: var(--hb-accent);
+    border-radius: 999px;
+    padding: 0.05rem 0.6rem;
+    font-size: 0.78rem;
+    margin: 0.05rem 0.25rem 0.05rem 0;
+}
+#page-local-handbook-area .hb-email .e-subject { font-weight: 600; font-size: 0.9rem; }
+#page-local-handbook-area .hb-email .e-body { padding: 0.85rem 1rem 0.4rem; }
+#page-local-handbook-area .local-handbook-page-body .hb-email .e-body p { margin: 0 0 0.6rem; max-width: none; }
+#page-local-handbook-area .hb-email .e-body ul,
+#page-local-handbook-area .hb-email .e-body ol { margin: 0 0 0.6rem; padding-left: 1.25rem; }
+#page-local-handbook-area .hb-email .e-body li { padding: 0.05rem 0; }
+#page-local-handbook-area .hb-email .e-sign {
+    border-top: 1px solid var(--hb-line);
+    margin: 0.25rem 1rem 0;
+    padding: 0.6rem 0 0.85rem;
+    font-size: 0.78rem;
+    color: var(--hb-muted);
+    line-height: 1.5;
+}
+#page-local-handbook-area .hb-email .e-sign .name { font-weight: 600; color: var(--hb-ink); }
+#page-local-handbook-area .hb-email .e-attach {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0 1rem 0.85rem;
+}
+#page-local-handbook-area .hb-email .e-attach span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid var(--hb-line);
+    border-radius: 0.45rem;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--hb-muted);
+    background: color-mix(in srgb, var(--hb-ink) 4%, var(--hb-surface));
+}
+#page-local-handbook-area .hb-email .e-attach span::before { content: "\1F4CE"; font-size: 0.7rem; }
+
+/* ---- hb-chat: WhatsApp-style thread. Committed to the light phone
+   palette in both themes — it reads as a phone, not as page UI. ---- */
+#page-local-handbook-area .hb-chat {
+    background: #efeae2;
+    background-image: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35) 0, transparent 40%),
+                      radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.25) 0, transparent 45%);
+    border: 1px solid var(--hb-line);
+    border-radius: 0.9rem;
+    margin: 1rem 0;
+    max-width: 24rem;
+    padding: 0.9rem 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+}
+#page-local-handbook-area .hb-chat .chat-title {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: #f0f2f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.55rem;
+    margin: -0.25rem -0.1rem 0.4rem;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #111b21;
+}
+#page-local-handbook-area .hb-chat .chat-title::before {
+    content: "";
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    flex: none;
+    background-image: linear-gradient(135deg, #90a4ae, #607d8b);
+}
+#page-local-handbook-area .hb-chat .chat-title .sub {
+    display: block;
+    font-weight: 400;
+    font-size: 0.66rem;
+    color: #667781;
+    margin-left: auto;
+}
+#page-local-handbook-area .hb-chat .chat-day {
+    align-self: center;
+    background: #ffffff;
+    color: #667781;
+    font-size: 0.66rem;
+    font-weight: 500;
+    border-radius: 0.45rem;
+    padding: 0.18rem 0.65rem;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
+    margin: 0.25rem 0;
+}
+#page-local-handbook-area .hb-msg {
+    position: relative;
+    max-width: 82%;
+    padding: 0.4rem 0.65rem 1rem;
+    border-radius: 0.55rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: #111b21;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+#page-local-handbook-area .hb-msg.is-in { align-self: flex-start; background: #ffffff; border-top-left-radius: 0.12rem; }
+#page-local-handbook-area .hb-msg.is-out { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 0.12rem; }
+#page-local-handbook-area .hb-msg .who {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    margin-bottom: 0.05rem;
+    color: #d67d00;
+}
+#page-local-handbook-area .hb-msg.is-out .who { color: #1f7aec; }
+#page-local-handbook-area .hb-msg .when {
+    position: absolute;
+    right: 0.55rem;
+    bottom: 0.18rem;
+    font-size: 0.6rem;
+    color: #667781;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-msg p { margin: 0 0 0.25rem; max-width: none; }
+#page-local-handbook-area .hb-msg p:last-of-type { margin-bottom: 0; }
+#page-local-handbook-area .hb-msg.is-bad { outline: 2px solid color-mix(in srgb, var(--hb-danger) 55%, transparent); outline-offset: 2px; }
+#page-local-handbook-area .hb-msg.is-good { outline: 2px solid color-mix(in srgb, var(--hb-ok) 50%, transparent); outline-offset: 2px; }
+#page-local-handbook-area .hb-chat .chat-verdict {
+    align-self: center;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.12rem 0.65rem;
+    border-radius: 999px;
+    margin: 0.12rem 0 0.25rem;
+}
+#page-local-handbook-area .hb-chat .chat-verdict.is-bad { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-chat .chat-verdict.is-good { background: var(--hb-ok-soft); color: var(--hb-ok); }
+
+/* ---- hb-dialogue: screenplay-style conversation script ---- */
+#page-local-handbook-area .hb-dialogue {
+    border: 1px solid var(--hb-line);
+    border-radius: 0.65rem;
+    background: var(--hb-surface);
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    padding: 1rem 1.1rem 0.9rem;
+    margin: 1rem 0;
+    max-width: 40rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+}
+#page-local-handbook-area .hb-dialogue .dlg-context {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--hb-muted);
+    border-bottom: 1px solid var(--hb-line);
+    padding-bottom: 0.5rem;
+}
+#page-local-handbook-area .hb-dialogue .dlg-turn { display: flex; gap: 0.75rem; align-items: baseline; }
+#page-local-handbook-area .hb-dialogue .dlg-who {
+    flex: none;
+    width: 6.75rem;
+    text-align: right;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--hb-muted);
+}
+#page-local-handbook-area .hb-dialogue .dlg-turn.is-staff .dlg-who { color: var(--hb-accent); }
+#page-local-handbook-area .hb-dialogue .dlg-text { flex: 1; }
+#page-local-handbook-area .local-handbook-page-body .hb-dialogue .dlg-note {
+    text-align: center;
+    font-style: italic;
+    font-size: 0.75rem;
+    color: var(--hb-muted);
+    margin: 0;
+    max-width: none;
+}
+#page-local-handbook-area .hb-dialogue .dlg-turn.is-good .dlg-text { box-shadow: inset 3px 0 0 var(--hb-ok); padding-left: 0.6rem; }
+#page-local-handbook-area .hb-dialogue .dlg-turn.is-bad .dlg-text { box-shadow: inset 3px 0 0 var(--hb-danger); padding-left: 0.6rem; color: var(--hb-muted); }
+#page-local-handbook-area .hb-dialogue .dlg-verdict {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    margin-left: 0.5rem;
+    vertical-align: 1px;
+    white-space: nowrap;
+}
+#page-local-handbook-area .hb-dialogue .dlg-verdict.is-good { background: var(--hb-ok-soft); color: var(--hb-ok); }
+#page-local-handbook-area .hb-dialogue .dlg-verdict.is-bad { background: var(--hb-danger-soft); color: var(--hb-danger); }
+@media (max-width: 560px) {
+    #page-local-handbook-area .hb-dialogue .dlg-turn { flex-direction: column; gap: 0.12rem; }
+    #page-local-handbook-area .hb-dialogue .dlg-who { width: auto; text-align: left; }
+}
+
+/* ---- hb-agenda + hb-acta: the meeting pair ---- */
+#page-local-handbook-area .hb-agenda,
+#page-local-handbook-area .hb-acta {
+    border: 1px solid var(--hb-line);
+    border-radius: 0.65rem;
+    overflow: hidden;
+    background: var(--hb-surface);
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    margin: 1rem 0;
+    max-width: 40rem;
+    font-size: 0.85rem;
+}
+#page-local-handbook-area .hb-agenda .ag-title,
+#page-local-handbook-area .hb-acta .ac-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    background: color-mix(in srgb, var(--hb-ink) 4%, var(--hb-surface));
+    border-bottom: 1px solid var(--hb-line);
+    padding: 0.55rem 1rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--hb-muted);
+}
+#page-local-handbook-area .hb-agenda .ag-title .meta,
+#page-local-handbook-area .hb-acta .ac-title .meta {
+    margin-left: auto;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+}
+#page-local-handbook-area .hb-agenda ol { list-style: none; margin: 0; padding: 0.4rem 0; }
+#page-local-handbook-area .hb-agenda li { display: flex; gap: 0.75rem; align-items: baseline; padding: 0.45rem 1rem; }
+#page-local-handbook-area .hb-agenda li + li { border-top: 1px dashed color-mix(in srgb, var(--hb-line) 70%, transparent); }
+#page-local-handbook-area .hb-agenda .ag-time {
+    flex: none;
+    width: 5.1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--hb-accent);
+    font-variant-numeric: tabular-nums;
+}
+#page-local-handbook-area .hb-agenda .ag-topic { flex: 1; }
+#page-local-handbook-area .hb-agenda .ag-who { flex: none; font-size: 0.75rem; color: var(--hb-muted); }
+#page-local-handbook-area .hb-acta .ac-head {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--hb-line);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.12rem 0.75rem;
+    font-size: 0.78rem;
+    margin: 0;
+}
+#page-local-handbook-area .hb-acta .ac-head dt { color: var(--hb-muted); margin: 0; font-weight: 400; }
+#page-local-handbook-area .hb-acta .ac-head dd { margin: 0; font-weight: 500; }
+#page-local-handbook-area .hb-acta .ac-section {
+    padding: 0.5rem 1rem 0.12rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--hb-muted);
+}
+#page-local-handbook-area .local-handbook-page-body .hb-acta table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.8rem;
+    margin: 0;
+}
+#page-local-handbook-area .hb-acta th,
+#page-local-handbook-area .hb-acta td {
+    padding: 0.45rem 0.75rem;
+    text-align: left;
+    border: 0;
+    border-top: 1px solid var(--hb-line);
+    vertical-align: top;
+    background: transparent;
+}
+#page-local-handbook-area .hb-acta thead th {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--hb-muted);
+    border-top: 0;
+}
+#page-local-handbook-area .hb-acta .ac-num { color: var(--hb-accent); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#page-local-handbook-area .hb-acta .ac-who { white-space: nowrap; font-weight: 500; }
+#page-local-handbook-area .hb-acta .ac-when { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--hb-muted); }
+#page-local-handbook-area .hb-acta .ac-done {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--hb-ok-soft);
+    color: var(--hb-ok);
+}
+
+/* ---- hb-letter: formal letterhead document (serif on purpose — it
+   reads as the printed page it represents) ---- */
+#page-local-handbook-area .hb-letter {
+    border: 1px solid var(--hb-line);
+    border-radius: 0.4rem;
+    background: var(--hb-surface);
+    box-shadow: 0 6px 18px -10px rgba(23, 32, 51, 0.25);
+    margin: 1rem 0;
+    max-width: 39rem;
+    padding: 2.1rem 2.5rem 1.9rem;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.85rem;
+    line-height: 1.65;
+}
+#page-local-handbook-area .hb-letter .lt-head {
+    text-align: center;
+    border-bottom: 2px solid var(--hb-ink);
+    padding-bottom: 0.6rem;
+    margin-bottom: 1.1rem;
+}
+#page-local-handbook-area .hb-letter .lt-school {
+    font-family: var(--bs-body-font-family, "Poppins", "Segoe UI", system-ui, sans-serif);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+#page-local-handbook-area .hb-letter .lt-sub { font-size: 0.7rem; color: var(--hb-muted); letter-spacing: 0.04em; }
+#page-local-handbook-area .local-handbook-page-body .hb-letter p { margin: 0 0 0.7rem; max-width: none; }
+#page-local-handbook-area .local-handbook-page-body .hb-letter .lt-place { text-align: right; margin: 0 0 0.85rem; }
+#page-local-handbook-area .local-handbook-page-body .hb-letter .lt-ref { font-size: 0.75rem; color: var(--hb-muted); margin: 0 0 0.85rem; }
+#page-local-handbook-area .hb-letter .lt-sign { margin-top: 1.9rem; text-align: center; }
+#page-local-handbook-area .hb-letter .lt-sign .line {
+    display: block;
+    width: 13.75rem;
+    border-top: 1px solid var(--hb-ink);
+    margin: 0 auto 0.25rem;
+}
+#page-local-handbook-area .hb-letter .lt-sign .name { font-weight: 700; }
+#page-local-handbook-area .hb-letter .lt-sign .role { font-size: 0.75rem; color: var(--hb-muted); }
+@media (max-width: 560px) {
+    #page-local-handbook-area .hb-letter { padding: 1.4rem 1.1rem; }
+}
+
+/* ---- hb-feedback: written feedback field (homework comments, report
+   remarks, teacher evaluations, observation notes) ---- */
+#page-local-handbook-area .hb-feedback {
+    border: 1px solid var(--hb-line);
+    border-radius: 0.65rem;
+    overflow: hidden;
+    background: var(--hb-surface);
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    margin: 0.9rem 0;
+    max-width: 40rem;
+    font-size: 0.85rem;
+}
+#page-local-handbook-area .hb-feedback .fb-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    background: color-mix(in srgb, var(--hb-ink) 4%, var(--hb-surface));
+    border-bottom: 1px solid var(--hb-line);
+    padding: 0.5rem 0.85rem;
+}
+#page-local-handbook-area .hb-feedback .fb-type {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: color-mix(in srgb, var(--hb-accent) 14%, transparent);
+    color: var(--hb-accent);
+    border-radius: 0.3rem;
+    padding: 0.12rem 0.5rem;
+}
+#page-local-handbook-area .hb-feedback .fb-what { font-weight: 600; font-size: 0.78rem; }
+#page-local-handbook-area .hb-feedback .fb-meta { margin-left: auto; font-size: 0.72rem; color: var(--hb-muted); }
+#page-local-handbook-area .hb-feedback .fb-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.12rem 0.55rem;
+    border-radius: 999px;
+}
+#page-local-handbook-area .hb-feedback.is-good { border-color: color-mix(in srgb, var(--hb-ok) 35%, var(--hb-line)); }
+#page-local-handbook-area .hb-feedback.is-bad { border-color: color-mix(in srgb, var(--hb-danger) 35%, var(--hb-line)); }
+#page-local-handbook-area .hb-feedback.is-good .fb-badge { background: var(--hb-ok-soft); color: var(--hb-ok); }
+#page-local-handbook-area .hb-feedback.is-bad .fb-badge { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-feedback .fb-field {
+    margin: 0.75rem 0.85rem;
+    border: 1px solid var(--hb-line);
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--hb-ink) 2.5%, var(--hb-surface));
+    padding: 0.6rem 0.8rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-feedback .fb-field p { margin: 0 0 0.5rem; max-width: none; }
+#page-local-handbook-area .hb-feedback .fb-field p:last-child { margin: 0; }
+#page-local-handbook-area .hb-feedback .fb-grade {
+    display: inline-block;
+    margin: 0 0.85rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--hb-navy);
+    color: var(--hb-navy-ink);
+    border-radius: 0.4rem;
+    padding: 0.12rem 0.6rem;
+    font-variant-numeric: tabular-nums;
 }

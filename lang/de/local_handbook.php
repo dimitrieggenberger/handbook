@@ -253,6 +253,29 @@ $string['sgtitle_keyvalue'] = 'Datenblatt (Ficha)';
 $string['sguse_keyvalue'] = 'Ein kompaktes Bezeichnung→Wert-Blatt für ein Gremium, eine Rolle oder ein Objekt.';
 $string['sgtitle_checklist'] = 'Checkliste';
 $string['sguse_checklist'] = 'Eine druckbare Checkliste für ein Verfahren. Die Kästchen sind für Druck/Arbeitsgebrauch; Häkchen werden nicht gespeichert.';
+$string['sgtitle_email'] = 'E-Mail-Beispiel (Mailclient-Ansicht)';
+$string['sguse_email'] = 'Eine Beispiel-E-Mail so zeigen, wie das Personal sie am Bildschirm sieht: Kopffelder (Von/An/CC/Betreff), Text, Anhang-Chips und die institutionelle Signatur. is-good oder is-bad ergänzen das „así sí / así no“-Abzeichen; für neutrale Beispiele beide weglassen. Nur erfundene Namen und Adressen — nie echte Korrespondenz einfügen.';
+$string['sgtitle_chat'] = 'Chat-Beispiel (WhatsApp-Ansicht)';
+$string['sguse_chat'] = 'Ein Chat-Verlauf in Telefonbreite: chat-title und chat-day sind optional; Blasen sind is-in (weiß, links) oder is-out (grün, rechts), mit optionalem Absender (who) und Uhrzeit (when). Einzelne Blasen für Stil-Lektionen mit is-good / is-bad markieren — mit einem chat-verdict-Chip darüber. Nur erfundene Namen — nie echte Unterhaltungen einfügen.';
+$string['sgtitle_dialogue'] = 'Gesprächsleitfaden';
+$string['sguse_dialogue'] = 'Sprecherbeschriftete Repliken wie in einem Drehbuch, für Telefonprotokoll, Deeskalation und schwierige Gespräche. is-staff hebt institutionelle Repliken hervor; dlg-note ist eine kursive Regieanweisung; is-good / is-bad ergänzen eine farbige Leiste und einen Urteils-Chip pro Replik. Nur erfundene Namen.';
+$string['sgtitle_acta'] = 'Agenda & Protokoll (Acta)';
+$string['sguse_acta'] = 'Das Sitzungspaar. hb-agenda: Zeilen mit Uhrzeit (ag-time · ag-topic · ag-who). hb-acta: Kopfblock (Teilnehmende, Vorsitz, Abwesenheiten) und eine Beschlusstabelle, in der jeder Beschluss Was, Wer (Responsable) und Bis wann (Fecha límite) trägt — die Nummerierung schreibt die Autorin/der Autor (14.1 = Acta 14, Punkt 1); ac-done kennzeichnet erledigte Beschlüsse.';
+$string['sgtitle_letter'] = 'Formeller Brief / Rundschreiben';
+$string['sguse_letter'] = 'Ein Briefkopf-Dokument in Serifenschrift, wie es gedruckt wird: Briefkopf (lt-head), Ort und Datum (lt-place), Referenzzeile (lt-ref), formeller Text und Unterschriftsblock (lt-sign). Für Rundschreiben, Bescheinigungen und offizielle Mitteilungen.';
+$string['sgtitle_feedback'] = 'Schriftliches Feedback-Feld';
+$string['sguse_feedback'] = 'Ein Muster für jedes schriftliche Feedback-Feld: Hausaufgabenkommentare, Zeugnisbemerkungen, Lehrkräfte-Evaluationen, Beobachtungsnotizen. Der fb-type-Chip benennt den Kontext (Tarea / Informe / Evaluación docente — Freitext), fb-meta gibt die Richtung an (z. B. Docente → Estudiante), der Kommentar erscheint in einem ausgefüllten Feld (fb-field), fb-grade ist ein optionaler Noten-Chip, und is-good / is-bad ergänzen ein Urteils-Abzeichen für kontrastierende Beispiele. Nur erfundene Namen.';
+$string['pathnext'] = 'Pfad fortsetzen';
+$string['pathnextup'] = 'Weiter: {$a}';
+$string['pathnextconfirm'] = 'Bestätigen Sie oben Ihre Lektüre, um den Pfad fortzusetzen.';
+$string['pathend'] = 'Sie haben das Ende dieses Pfads erreicht.';
+$string['viewfullpath'] = 'Den ganzen Pfad ansehen';
+$string['sgtitle_next'] = 'Weiter- / Zurück-Links';
+$string['sguse_next'] = 'Handgeschriebene Fortsetzung am Artikelende: eine hb-next-Karte (z. B. nächstes Kapitel des Reglements), eine hb-next-group bei mehreren Optionen (z. B. nach Rolle), is-prev für zurück. Für Lesepfade NICHT nötig: das Plugin zeigt den Weiter-im-Pfad-Button automatisch.';
+$string['sgtitle_refs'] = 'Normative Querverweise';
+$string['sguse_refs'] = 'Verknüpft einen Artikel mit den exakten Artikeln, die das Thema in einem anderen Dokument regeln. Vier Stufen: hb-ref (Inline-§-Chip für ein entscheidendes Zitat), hb-seealso (eine \"Ver normativa\"-Zeile nach einem Abschnitt — Standard im Text), hb-refbox (Karte, wenn die Rechtsgrundlage erklärt werden muss), hb-refs (Block am Artikelende, nach Dokument gruppiert — Standard zum Abschluss). Links sind einfache Anker auf slug#art-N. Dokument-Badges: hb-doc mit is-ri / is-rp / is-ed, ohne Modifikator für andere Quellen. Dieselben Muster eignen sich für BELIEBIGE verwandte Seiten (nicht nur Reglemente): neutrales hb-doc-Badge oder eigene Beschriftung, Link zur Seite (mit oder ohne #art-N-Anker).';
+$string['sgtitle_legal'] = 'Reglement / Rechtsartikel';
+$string['sguse_legal'] = 'Für Reglemente und normative Dokumente: Titel und nummerierte Abschnitte als Überschriften (sie speisen das Seiteninhaltsverzeichnis), vom Autor geschriebene Artikelnummern (nie automatisch — sie sind kanonisch), Buchstaben-Literale, Gültigkeitsnotizen und aufgehobene Artikel. Jeder Artikel trägt id=\"art-N\" für Direktlinks. Empfohlen: eine Handbuchseite pro Titel. Nummerierte Klauseln (Numerales) verwenden ein einfaches ol mit li value=\"N\" — die Nummerierung ist nativ, kanonische Nummern bleiben erhalten und richten sich automatisch an der Artikelspalte aus; Buchstaben-Klauseln verwenden hb-literals; Datenblätter und Skalen hb-keyvalue.';
 
 // Lesepfad-Empfehlungen und Audits (Spez. 10).
 $string['recommendations'] = 'Pfad-Empfehlungen';
@@ -347,6 +370,10 @@ $string['alltypes'] = 'Alle Typen';
 $string['allcategories'] = 'Alle Kategorien';
 $string['searchresultcount'] = '{$a} Seiten gefunden';
 $string['noresults'] = 'Keine Seite entspricht deiner Suche.';
+$string['viewallresults'] = 'Alle {$a} Ergebnisse anzeigen';
+$string['opencategorylink'] = 'Kategorie öffnen';
+$string['openall'] = 'Alle öffnen';
+$string['closeall'] = 'Alle schließen';
 
 // Revision history and comparison.
 $string['comparerevisions'] = 'Versionen vergleichen';

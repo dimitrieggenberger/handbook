@@ -119,7 +119,9 @@ if ($action === 'acknowledge') {
     } else {
         throw new moodle_exception('errornotrequiredreading', 'local_handbook');
     }
-    redirect(new moodle_url(local_handbook_page_url($page), [], 'confirmar'),
+    // Stay in path context so the "next in path" button appears on reload.
+    redirect(new moodle_url(local_handbook_page_url($page),
+        $pathid ? ['path' => $pathid] : [], 'confirmar'),
         get_string('ackrecorded', 'local_handbook'));
 }
 
@@ -133,6 +135,15 @@ if ($revision && has_capability('local/handbook:acknowledge', $context)) {
     } else if (path_service::is_required_in_active_path((int)$page->id)) {
         $completionstatus = completion_service::completion_status((int)$USER->id, $page);
     }
+}
+
+// Reading-path context (spec 8.6): the rail panel, per-item ticks and the
+// "next in path" card. Chosen from ?path=N or the first visible active path
+// containing this page.
+$pathctx = null;
+if ($revision) {
+    $pathctx = local_handbook_path_context($page, optional_param('path', 0, PARAM_INT),
+        (int)$USER->id, has_capability('local/handbook:managepaths', $context));
 }
 
 // Rendered content with heading anchors + on-page TOC (spec 10.2, 12.2).
@@ -342,6 +353,10 @@ if ($ackstatus !== null) {
         ]);
         $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action',
             'value' => 'acknowledge']);
+        if ($pathctx) {
+            $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'pathid',
+                'value' => (int)$pathctx->path->id]);
+        }
         $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',
             'value' => sesskey()]);
         $cardbody .= html_writer::div(
@@ -402,6 +417,10 @@ if ($completionstatus !== null) {
             'method' => 'post', 'action' => local_handbook_page_url($page)->out(false)]);
         $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action',
             'value' => 'acknowledge']);
+        if ($pathctx) {
+            $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'pathid',
+                'value' => (int)$pathctx->path->id]);
+        }
         $cardbody .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',
             'value' => sesskey()]);
         $cardbody .= html_writer::div(
@@ -432,11 +451,66 @@ if ($completionstatus !== null) {
         'card mt-4 local-handbook-ack', ['id' => 'confirmar']);
 }
 
+// "Next in the path" card (spec 8.6): primary once this page needs no
+// (further) confirmation; otherwise it points at the confirmation first.
+if ($pathctx) {
+    $needsconfirm = ($ackstatus !== null && $ackstatus->status !== ack_service::STATUS_CONFIRMED)
+        || ($completionstatus !== null
+            && $completionstatus->status !== completion_service::STATUS_COMPLETED);
+
+    $inner = html_writer::span(s(get_string('myreadingpath', 'local_handbook')) . ' · '
+        . format_string($pathctx->path->name), 'eyebrow');
+
+    if ($pathctx->next) {
+        $nexturl = new moodle_url('/local/handbook/view.php',
+            ['page' => $pathctx->next->slug, 'path' => $pathctx->path->id]);
+        if ($needsconfirm) {
+            // The confirmation card sits directly above — no second button.
+            $inner .= html_writer::span(s(get_string('pathnextconfirm', 'local_handbook')), 'title');
+            $inner .= html_writer::div(
+                html_writer::link($nexturl,
+                    s(get_string('pathnextup', 'local_handbook', format_string($pathctx->next->title))) . ' ›',
+                    ['class' => 'btn btn-outline-secondary btn-sm']),
+                'mt-2');
+        } else {
+            $inner .= html_writer::span(s(format_string($pathctx->next->title)), 'title');
+            $inner .= html_writer::div(
+                html_writer::link($nexturl,
+                    s(get_string('pathnext', 'local_handbook'))
+                    . html_writer::tag('i', '', ['class' => 'fa-solid fa-arrow-right ms-2 ml-2',
+                        'aria-hidden' => 'true']),
+                    ['class' => 'btn btn-primary btn-sm'])
+                . html_writer::link(new moodle_url('/local/handbook/path.php',
+                        ['id' => $pathctx->path->id]),
+                    s(get_string('viewfullpath', 'local_handbook')),
+                    ['class' => 'btn btn-link btn-sm']),
+                'mt-2');
+        }
+    } else {
+        $inner .= html_writer::span(s(get_string('pathend', 'local_handbook')), 'title');
+        $inner .= html_writer::div(
+            html_writer::link(new moodle_url('/local/handbook/path.php',
+                    ['id' => $pathctx->path->id]),
+                s(get_string('viewfullpath', 'local_handbook'))
+                . html_writer::tag('i', '', ['class' => 'fa-solid fa-arrow-right ms-2 ml-2',
+                    'aria-hidden' => 'true']),
+                ['class' => 'btn btn-primary btn-sm']),
+            'mt-2');
+    }
+
+    echo html_writer::div(html_writer::div($inner, 'card-body'),
+        'card mt-4 local-handbook-pathnext');
+}
+
 echo html_writer::end_div(); // .col-lg-8.
 
 // Rail: on-page TOC, metadata card and typed relations.
 echo html_writer::start_div('col-lg-4');
 echo html_writer::start_div('local-handbook-rail');
+
+if ($pathctx) {
+    echo local_handbook_render_path_panel($pathctx);
+}
 
 if (count($toc) >= 2) {
     $tocitems = '';

@@ -88,64 +88,11 @@ echo html_writer::tag('h3', s(get_string('pagesincategory', 'local_handbook')), 
 if (!$pages) {
     echo html_writer::div(s(get_string('emptycategory', 'local_handbook')), 'alert alert-info');
 } else {
-    // Published version numbers in one query for the card footers.
-    $versions = [];
-    $revisionids = array_filter(array_map(
-        static fn(stdClass $p): int => (int)$p->publishedrevisionid, $pages));
-    if ($revisionids) {
-        foreach ($DB->get_records_list('local_handbook_revision', 'id', $revisionids,
-                '', 'id, versionnumber') as $rev) {
-            $versions[(int)$rev->id] = (int)$rev->versionnumber;
-        }
-    }
-
+    $versions = local_handbook_published_versions($pages);
     $cards = '';
     foreach ($pages as $page) {
-        $bannerurl = local_handbook_banner_url((int)$page->id);
-        if ($bannerurl) {
-            $media = html_writer::div(
-                html_writer::empty_tag('img', [
-                    'src' => $bannerurl->out(false), 'alt' => '', 'loading' => 'lazy',
-                ]),
-                'local-handbook-card-media');
-        } else {
-            $media = html_writer::div(
-                html_writer::tag('i', '', [
-                    'class' => 'fa-solid ' . local_handbook_contenttype_icon((string)$page->contenttype),
-                    'aria-hidden' => 'true',
-                ]),
-                'local-handbook-card-media is-fallback');
-        }
-
-        $pills = html_writer::span(
-            s(get_string('contenttype_' . $page->contenttype, 'local_handbook')),
-            'local-handbook-card-pill');
-        if ((int)$page->requiredreading) {
-            $pills .= html_writer::span(s(get_string('requiredreading', 'local_handbook')),
-                'local-handbook-card-pill is-required');
-        }
-
-        $body = html_writer::div($pills, 'local-handbook-card-pills')
-            . html_writer::tag('h4',
-                html_writer::link(local_handbook_page_url($page), s($page->title),
-                    ['class' => 'stretched-link']),
-                ['class' => 'local-handbook-card-title'])
-            . (trim((string)$page->summary) !== ''
-                ? html_writer::tag('p', s($page->summary), ['class' => 'local-handbook-card-summary'])
-                : '');
-
-        $version = $versions[(int)$page->publishedrevisionid] ?? 0;
-        $foot = html_writer::span(
-                s(get_string('lastupdated', 'local_handbook') . ': '
-                    . local_handbook_format_date((int)$page->timemodified)))
-            . ($version ? html_writer::span(s(get_string('versionnumber', 'local_handbook', $version)))
-                : '');
-
-        $cards .= html_writer::tag('article',
-            $media
-            . html_writer::div($body, 'local-handbook-card-body')
-            . html_writer::div($foot, 'local-handbook-card-foot'),
-            ['class' => 'local-handbook-card position-relative']);
+        $cards .= local_handbook_render_page_card($page,
+            $versions[(int)$page->publishedrevisionid] ?? 0);
     }
     echo html_writer::div($cards, 'local-handbook-cards mb-3');
 }

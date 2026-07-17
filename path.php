@@ -185,13 +185,15 @@ if ($nextitem !== null) {
                 . s(get_string('continuepath', 'local_handbook')),
                 ['class' => 'h6 text-uppercase text-muted mb-2'])
             . html_writer::tag('p',
-                html_writer::link(new moodle_url('/local/handbook/view.php', ['page' => $nextitem->slug]),
+                html_writer::link(new moodle_url('/local/handbook/view.php',
+                        ['page' => $nextitem->slug, 'path' => $path->id]),
                     html_writer::tag('strong', s($nextitem->title)))
                 . html_writer::span(' · ' . s($nextitem->sectionname) . ' · ' . s($continuestate),
                     'small text-muted'),
                 ['class' => 'mb-2'])
             . html_writer::link(
-                new moodle_url('/local/handbook/view.php', ['page' => $nextitem->slug]),
+                new moodle_url('/local/handbook/view.php',
+                    ['page' => $nextitem->slug, 'path' => $path->id]),
                 html_writer::tag('i', '', ['class' => 'fa-solid fa-arrow-right me-2', 'aria-hidden' => 'true'])
                     . s(get_string('continuereading', 'local_handbook')),
                 ['class' => 'btn btn-primary btn-sm']),
@@ -238,7 +240,8 @@ foreach ($sections as $sectionname => $sectionitems) {
     $rows = '';
     foreach ($sectionitems as $item) {
         $status = $statusbyitem[$item->id];
-        $pageurl = new moodle_url('/local/handbook/view.php', ['page' => $item->slug]);
+        $pageurl = new moodle_url('/local/handbook/view.php',
+        ['page' => $item->slug, 'path' => $path->id]);
 
         $completed = $status->status === completion_service::STATUS_COMPLETED;
         if (!(int)$item->required) {

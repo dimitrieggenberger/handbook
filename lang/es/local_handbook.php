@@ -253,6 +253,29 @@ $string['sgtitle_keyvalue'] = 'Ficha';
 $string['sguse_keyvalue'] = 'Una ficha compacta de etiqueta→valor para un comité, rol o elemento.';
 $string['sgtitle_checklist'] = 'Lista de verificación';
 $string['sguse_checklist'] = 'Una lista de verificación imprimible para un procedimiento. Las casillas son de uso impreso/de trabajo; las marcas no se guardan.';
+$string['sgtitle_email'] = 'Ejemplo de correo (vista de cliente de correo)';
+$string['sguse_email'] = 'Muestre un correo de ejemplo tal como el personal lo ve en pantalla: campos de encabezado (De/Para/CC/Asunto), cuerpo, adjuntos y la firma institucional. Agregue is-good o is-bad para la insignia «así sí / así no»; omita ambas en ejemplos neutros. Solo nombres y direcciones inventados — nunca pegue correspondencia real.';
+$string['sgtitle_chat'] = 'Ejemplo de chat (vista de WhatsApp)';
+$string['sguse_chat'] = 'Un hilo de chat en ancho de teléfono: chat-title y chat-day son opcionales; las burbujas son is-in (blanca, izquierda) o is-out (verde, derecha), con remitente (who) y hora (when) opcionales. Marque burbujas individuales con is-good / is-bad — con un chip chat-verdict encima — para lecciones de estilo. Solo nombres inventados — nunca pegue conversaciones reales.';
+$string['sgtitle_dialogue'] = 'Guion de conversación';
+$string['sguse_dialogue'] = 'Turnos con etiqueta de hablante, como un guion, para protocolo telefónico, desescalada y conversaciones difíciles. is-staff resalta los turnos institucionales; dlg-note es una acotación en cursiva; is-good / is-bad agregan una barra de color y un chip de veredicto por turno. Solo nombres inventados.';
+$string['sgtitle_acta'] = 'Agenda y acta';
+$string['sguse_acta'] = 'El par de toda reunión. hb-agenda: filas con horario (ag-time · ag-topic · ag-who). hb-acta: bloque de encabezado (participantes, preside, ausencias) y una tabla de acuerdos donde cada acuerdo lleva qué, quién (Responsable) y cuándo (Fecha límite) — la numeración la escribe el autor (14.1 = acta 14, punto 1); ac-done marca los acuerdos cumplidos.';
+$string['sgtitle_letter'] = 'Carta formal / circular';
+$string['sguse_letter'] = 'Un documento con membrete en tipografía serif, como se imprime: membrete (lt-head), lugar y fecha (lt-place), línea de referencia (lt-ref), cuerpo formal y bloque de firma (lt-sign). Para circulares, constancias y notas oficiales.';
+$string['sgtitle_feedback'] = 'Campo de retroalimentación escrita';
+$string['sguse_feedback'] = 'Un solo patrón para todo campo de retroalimentación escrita: comentarios de tareas, observaciones de informes, evaluaciones docentes, notas de observación. El chip fb-type nombra el contexto (Tarea / Informe / Evaluación docente — texto libre), fb-meta indica la dirección (p. ej. Docente → Estudiante), el comentario se muestra dentro de un campo relleno (fb-field), fb-grade es un chip de calificación opcional, e is-good / is-bad agregan una insignia de veredicto para ejemplos contrastados. Solo nombres inventados.';
+$string['pathnext'] = 'Continuar la ruta';
+$string['pathnextup'] = 'Siguiente: {$a}';
+$string['pathnextconfirm'] = 'Confirma tu lectura arriba para continuar la ruta.';
+$string['pathend'] = 'Has llegado al final de esta ruta.';
+$string['viewfullpath'] = 'Ver la ruta completa';
+$string['sgtitle_next'] = 'Enlaces siguiente / anterior';
+$string['sguse_next'] = 'Continuación escrita a mano al final de un artículo: una tarjeta hb-next (p. ej. el siguiente capítulo del reglamento), un hb-next-group cuando hay varias opciones (p. ej. según el rol), e is-prev para volver. Para rutas de lectura NO se escriben: el plugin muestra automáticamente el botón de siguiente en la ruta.';
+$string['sgtitle_refs'] = 'Referencias normativas cruzadas';
+$string['sguse_refs'] = 'Enlaza un artículo con los artículos exactos que regulan el tema en otro documento. Cuatro niveles: hb-ref (chip § en línea para una cita decisiva), hb-seealso (una línea \"Ver normativa\" tras una sección: el estándar dentro del cuerpo), hb-refbox (tarjeta cuando hay que explicar la base legal), hb-refs (bloque al final del artículo agrupado por documento: el estándar de cierre). Los enlaces son anclas simples a slug#art-N. Insignias de documento: hb-doc con is-ri / is-rp / is-ed, o sin modificador para otras fuentes. Los mismos patrones sirven para CUALQUIER página relacionada (no solo reglamentos): use una insignia hb-doc neutra o su propia etiqueta, y enlace a la página (con o sin ancla #art-N).';
+$string['sgtitle_legal'] = 'Reglamento / artículos legales';
+$string['sguse_legal'] = 'Para reglamentos y documentos normativos: títulos y secciones numeradas como encabezados (alimentan el índice de la página), números de artículo escritos por el autor (nunca automáticos: son canónicos), literales con letra, notas de vigencia y artículos derogados. Cada artículo lleva id=\"art-N\" para enlaces directos. Recomendado: una página del manual por título. Los numerales usan un ol simple con li value=\"N\": la numeración es nativa, conserva los números canónicos y se alinea sola con la columna del artículo; los literales con letra usan hb-literals; fichas y escalas usan hb-keyvalue.';
 
 // Recomendaciones y auditorías de rutas de lectura (spec 10).
 $string['recommendations'] = 'Recomendaciones de rutas';
@@ -347,6 +370,10 @@ $string['alltypes'] = 'Todos los tipos';
 $string['allcategories'] = 'Todas las categorías';
 $string['searchresultcount'] = '{$a} páginas encontradas';
 $string['noresults'] = 'Ninguna página coincide con tu búsqueda.';
+$string['viewallresults'] = 'Ver los {$a} resultados';
+$string['opencategorylink'] = 'Abrir categoría';
+$string['openall'] = 'Abrir todas';
+$string['closeall'] = 'Cerrar todas';
 
 // Revision history and comparison.
 $string['comparerevisions'] = 'Comparar revisiones';

@@ -253,6 +253,29 @@ $string['sgtitle_keyvalue'] = 'Fact sheet (ficha)';
 $string['sguse_keyvalue'] = 'A compact label→value sheet for a committee, role or item.';
 $string['sgtitle_checklist'] = 'Checklist';
 $string['sguse_checklist'] = 'A printable checklist for a procedure. The boxes are for print/working use; ticks are not saved.';
+$string['sgtitle_email'] = 'Email example (mail-client look)';
+$string['sguse_email'] = 'Show an example email the way staff see it on screen: header fields (De/Para/CC/Asunto), body, attachment chips and the institutional signature. Add is-good or is-bad for an "así sí / así no" verdict badge; omit both for neutral examples. Invented names and addresses only — never paste real correspondence.';
+$string['sgtitle_chat'] = 'Chat example (WhatsApp look)';
+$string['sguse_chat'] = 'A phone-width chat thread: chat-title and chat-day are optional; bubbles are is-in (white, left) or is-out (green, right) with optional sender (who) and time (when). Mark individual bubbles is-good / is-bad — with a chat-verdict chip above — for style lessons. Invented names only — never paste real conversations.';
+$string['sgtitle_dialogue'] = 'Conversation script';
+$string['sguse_dialogue'] = 'Speaker-labelled turns like a screenplay, for phone protocol, de-escalation and difficult conversations. is-staff highlights institutional turns; dlg-note is an italic stage direction; is-good / is-bad add a coloured rail and a verdict chip per turn. Invented names only.';
+$string['sgtitle_acta'] = 'Agenda & minutes (acta)';
+$string['sguse_acta'] = 'The meeting pair. hb-agenda: timed rows (ag-time · ag-topic · ag-who). hb-acta: header block (participantes, preside, ausencias) plus an acuerdos table where every acuerdo carries what, who (Responsable) and when (Fecha límite) — numbering is author-written (14.1 = acta 14, item 1); ac-done marks fulfilled carry-overs.';
+$string['sgtitle_letter'] = 'Formal letter / circular';
+$string['sguse_letter'] = 'A letterhead document in serif type, as it prints: membrete (lt-head), place and date (lt-place), reference line (lt-ref), formal body and signature block (lt-sign). For circulares, constancias and official notes.';
+$string['sgtitle_feedback'] = 'Written feedback field';
+$string['sguse_feedback'] = 'One pattern for every written feedback field: homework comments, report-card remarks, teacher evaluations, observation notes. The fb-type chip names the context (Tarea / Informe / Evaluación docente — free text), fb-meta gives the direction (e.g. Docente → Estudiante), the comment renders inside a filled field (fb-field), fb-grade is an optional grade chip, and is-good / is-bad add a verdict badge for contrasting examples. Invented names only.';
+$string['pathnext'] = 'Continue the path';
+$string['pathnextup'] = 'Next: {$a}';
+$string['pathnextconfirm'] = 'Confirm your reading above to continue the path.';
+$string['pathend'] = 'You have reached the end of this path.';
+$string['viewfullpath'] = 'View the full path';
+$string['sgtitle_next'] = 'Next / previous links';
+$string['sguse_next'] = 'Hand-authored continuation at the end of an article: one hb-next card (e.g. the rulebook\'s next chapter), an hb-next-group when there are several options (e.g. by role), and is-prev for a back link. For reading paths you do NOT write these: the plugin shows the next-in-path button automatically.';
+$string['sgtitle_refs'] = 'Normative cross-references';
+$string['sguse_refs'] = 'Link an article to the exact artículos that govern the topic in another document. Four levels: hb-ref (inline § chip for one decisive citation), hb-seealso (one \"Ver normativa\" line after a section — the in-body standard), hb-refbox (inset card when the legal basis needs explaining), hb-refs (end-of-article block grouped by source — the closing standard). Links are plain anchors to page-slug#art-N. Document badges: hb-doc with is-ri / is-rp / is-ed, or no modifier for other sources. The same patterns work for ANY related pages (not only reglamentos): use a neutral hb-doc badge or your own label, and link to the page (with or without an #art-N anchor).';
+$string['sgtitle_legal'] = 'Rulebook / legal articles';
+$string['sguse_legal'] = 'For reglamentos and normative documents: títulos and numbered sections as headings (they feed the on-page TOC), author-written article numbers (never auto-numbered — they are canonical), lettered literals, vigency notes and derogated articles. Each article carries id=\"art-N\" for deep links. Recommended: one handbook page per título. Numbered clauses (numerales) use a plain ol with li value=\"N\" — numbering is native, so the canonical numbers are preserved and align with the article column automatically; lettered clauses use hb-literals; fichas and scales use hb-keyvalue.';
 
 // Reading-path recommendations & audits (spec 10).
 $string['recommendations'] = 'Path recommendations';
@@ -347,6 +370,10 @@ $string['alltypes'] = 'All types';
 $string['allcategories'] = 'All categories';
 $string['searchresultcount'] = '{$a} pages found';
 $string['noresults'] = 'No pages match your search.';
+$string['viewallresults'] = 'View all {$a} results';
+$string['opencategorylink'] = 'Open category';
+$string['openall'] = 'Open all';
+$string['closeall'] = 'Close all';
 
 // Revision history and comparison.
 $string['comparerevisions'] = 'Compare revisions';
