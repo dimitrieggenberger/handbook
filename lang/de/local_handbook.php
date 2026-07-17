@@ -219,6 +219,10 @@ $string['bannerimage'] = 'Bannerbild';
 $string['bannerimage_help'] = 'Optional. Ein Querformat-Bild, das auf der Kategoriekarte (16:9) und im Artikelkopf (3:1) angezeigt wird. Das Bild wird automatisch zugeschnitten und zentriert — kein manueller Zuschnitt nötig. Ohne Bild zeigt die Karte einen dezenten Platzhalter je nach Inhaltstyp.';
 
 // Inhalts-Stilrichtlinie (hb-*-Muster).
+// Automatische Querverweise.
+$string['autolink'] = 'Seitentitel automatisch verlinken';
+$string['autolink_desc'] = 'Querverweise im Wikipedia-Stil: Erwähnt ein Artikel den exakten Titel einer anderen veröffentlichten Handbuchseite, wird die erste Erwähnung zu einem Link auf diese Seite. Nur bei der Anzeige angewendet — der gespeicherte Inhalt wird nie verändert, Links folgen Umbenennungen und Archivierungen automatisch, und beim Deaktivieren verschwinden sie sofort überall. Es zählt der vollständige Titel, ohne Groß-/Kleinschreibung; in Überschriften, bestehenden Links und den Normverweis-Mustern werden keine Links ergänzt.';
+
 // Bildoptimierung.
 $string['imageoptimize'] = 'Bilder beim Speichern optimieren';
 $string['imageoptimize_desc'] = 'Beim Speichern einer Seite werden übergroße Bilder (Banner und Artikelbilder, einschließlich eingefügter Screenshots) auf die Maximalbreite verkleinert, gemäß EXIF gedreht, von Metadaten befreit und neu kodiert. Bilder werden nie vergrößert, Dateinamen ändern sich nie, und ein Ersatz wird nur behalten, wenn er kleiner als das Original ist. Screenshots mit Transparenz bleiben PNG; Fotos werden als JPEG (neu) kodiert.';

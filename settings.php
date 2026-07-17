@@ -52,4 +52,11 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext('local_handbook/imagejpegquality',
         get_string('imagejpegquality', 'local_handbook'),
         get_string('imagejpegquality_desc', 'local_handbook'), 85, PARAM_INT));
+
+    // Wikipedia-style cross-links: at render time, the first mention of
+    // another published page's exact title becomes a link to that page.
+    // Stored content is never modified.
+    $settings->add(new admin_setting_configcheckbox('local_handbook/autolink',
+        get_string('autolink', 'local_handbook'),
+        get_string('autolink_desc', 'local_handbook'), 1));
 }

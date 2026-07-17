@@ -219,6 +219,10 @@ $string['bannerimage'] = 'Imagen de cabecera';
 $string['bannerimage_help'] = 'Opcional. Una imagen horizontal que se muestra en la tarjeta de la categoría (16:9) y en la cabecera del artículo (3:1). La imagen se recorta y centra automáticamente, sin recorte manual. Sin imagen, la tarjeta muestra un marcador discreto según el tipo de contenido.';
 
 // Guía de estilo de contenido (patrones hb-*).
+// Enlaces cruzados automáticos.
+$string['autolink'] = 'Enlazar títulos de páginas automáticamente';
+$string['autolink_desc'] = 'Enlaces cruzados al estilo Wikipedia: cuando un artículo menciona el título exacto de otra página publicada del manual, la primera mención se convierte en un enlace a esa página. Se aplica solo al mostrar — el contenido guardado nunca se modifica, los enlaces siguen automáticamente los cambios de nombre y archivado, y al desactivar esta opción desaparecen de inmediato en todas partes. Las coincidencias son por título completo, sin distinguir mayúsculas; no se agregan enlaces dentro de encabezados, enlaces existentes ni los patrones de referencias normativas.';
+
 // Optimización de imágenes.
 $string['imageoptimize'] = 'Optimizar imágenes al guardar';
 $string['imageoptimize_desc'] = 'Al guardar una página, reduce las imágenes demasiado grandes (banner e imágenes del artículo, incluidas capturas de pantalla pegadas) al ancho máximo, aplica la rotación EXIF, elimina los metadatos y las recodifica. Las imágenes nunca se agrandan, los nombres de archivo nunca cambian y el reemplazo solo se conserva si es más pequeño que el original. Las capturas con transparencia se mantienen en PNG; las fotos se (re)codifican como JPEG.';

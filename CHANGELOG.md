@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.25.0 (2026-07-17)
+
+Wikipedia-style automatic cross-links.
+
+- New `autolink_service`: when an article mentions the exact title of
+  another published handbook page, the first mention becomes a link to that
+  page. Applied at render time only (reader and print view) — stored content
+  is never modified, links follow renames/archiving automatically, and the
+  plugin setting switches the feature off everywhere instantly.
+- Rules: whole-title matches at word boundaries, case-insensitive, first
+  occurrence per page only, longest title wins on overlaps, never
+  self-links, titles under 4 characters never link. No links are added
+  inside headings, existing links, code/pre, or the hb-* patterns that
+  carry their own navigation (cross-references, next cards, org charts).
+- PHPUnit coverage for the transform; EN/ES/DE strings.
+
 ## 0.24.0 (2026-07-17)
 
 Automatic image optimisation.

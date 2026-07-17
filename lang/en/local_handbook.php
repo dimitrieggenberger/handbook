@@ -219,6 +219,10 @@ $string['bannerimage'] = 'Banner image';
 $string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
 
 // Content style guide (hb-* patterns).
+// Automatic cross-links.
+$string['autolink'] = 'Auto-link page titles';
+$string['autolink_desc'] = 'Wikipedia-style cross-links: when an article mentions the exact title of another published handbook page, the first mention becomes a link to that page. Applied at display time only — stored content is never modified, links follow renames and archiving automatically, and switching this off removes them everywhere instantly. Matches are whole-title and case-insensitive; no links are added inside headings, existing links or the cross-reference patterns.';
+
 // Image optimisation.
 $string['imageoptimize'] = 'Optimise images on save';
 $string['imageoptimize_desc'] = 'When a page is saved, downscale oversized images (banner and article images, including pasted screenshots) to the maximum width, apply the EXIF rotation, strip metadata and re-encode them. Images are never upscaled, filenames never change, and a replacement is only kept when it is smaller than the original. Screenshots with transparency stay PNG; photos are (re-)encoded as JPEG.';

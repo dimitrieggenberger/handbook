@@ -909,7 +909,15 @@ function local_handbook_render_revision_content(stdClass $revision, context_syst
         'noclean' => false,
     ]);
 
-    return html_writer::div(local_handbook_demote_headings($content), 'local-handbook-page-body');
+    $content = local_handbook_demote_headings($content);
+
+    // Wikipedia-style cross-links: the first mention of another published
+    // page's title becomes a link to it (render time only; stored content
+    // is never modified).
+    $content = \local_handbook\local\service\autolink_service::apply(
+        $content, (int)$revision->pageid);
+
+    return html_writer::div($content, 'local-handbook-page-body');
 }
 
 /**
