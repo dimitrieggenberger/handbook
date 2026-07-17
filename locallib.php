@@ -1323,6 +1323,49 @@ HTML);
 </ul>
 HTML);
 
+    $add('refs', <<<'HTML'
+<p>Durante actos oficiales se aplica el uniforme institucional
+<a class="hb-ref" href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112"><span>Art. 112 b)</span> <span class="doc">&middot; Regl. Interno</span></a>,
+y las faltas de presentación se tratan como faltas leves.</p>
+
+<div class="hb-seealso">
+  <span class="lbl">Ver normativa</span>
+  <a href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112">Art. 112 b) &middot; Reglamento Interno</a>
+  <span class="sep">&middot;</span>
+  <a href="/local/handbook/view.php?page=reglamento-personal-capitulo-11#art-84">Art. 84 4) &middot; Reglamento del Personal</a>
+</div>
+
+<div class="hb-refbox">
+  <div class="rb-title">Normativa relacionada</div>
+  <ul>
+    <li><span class="hb-doc is-ri">Regl. Interno</span>
+        <a href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112">Artículo 112 b)</a>
+        <span class="what">&mdash; uso correcto y oportuno de la vestimenta.</span></li>
+    <li><span class="hb-doc is-rp">Regl. Personal</span>
+        <a href="/local/handbook/view.php?page=reglamento-personal-capitulo-11#art-84">Artículo 84 4)</a>
+        <span class="what">&mdash; presentación personal e higiene como falta leve.</span></li>
+  </ul>
+</div>
+
+<div class="hb-refs">
+  <p class="refs-title">Normativa relacionada</p>
+  <div class="refs-group">
+    <p class="refs-doc"><span class="hb-doc is-ri">Regl. Interno</span> Reglamento Interno &mdash; Título Quinto</p>
+    <ul>
+      <li><a href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112">Artículo 112 b)</a>
+          <span class="what">&mdash; uso correcto y oportuno de la vestimenta.</span></li>
+    </ul>
+  </div>
+  <div class="refs-group">
+    <p class="refs-doc"><span class="hb-doc is-ed">Estatuto Docente</span> Reglamento del Estatuto del Docente</p>
+    <ul>
+      <li><a href="/local/handbook/view.php?page=estatuto-docente#art-134">Artículo 134</a>
+          <span class="what">&mdash; clasificación de faltas del personal docente.</span></li>
+    </ul>
+  </div>
+</div>
+HTML);
+
     $add('legal', <<<'HTML'
 <div class="hb-legal">
 

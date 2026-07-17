@@ -253,6 +253,8 @@ $string['sgtitle_keyvalue'] = 'Fact sheet (ficha)';
 $string['sguse_keyvalue'] = 'A compact label→value sheet for a committee, role or item.';
 $string['sgtitle_checklist'] = 'Checklist';
 $string['sguse_checklist'] = 'A printable checklist for a procedure. The boxes are for print/working use; ticks are not saved.';
+$string['sgtitle_refs'] = 'Normative cross-references';
+$string['sguse_refs'] = 'Link an article to the exact artículos that govern the topic in another document. Four levels: hb-ref (inline § chip for one decisive citation), hb-seealso (one \"Ver normativa\" line after a section — the in-body standard), hb-refbox (inset card when the legal basis needs explaining), hb-refs (end-of-article block grouped by source — the closing standard). Links are plain anchors to page-slug#art-N. Document badges: hb-doc with is-ri / is-rp / is-ed, or no modifier for other sources.';
 $string['sgtitle_legal'] = 'Rulebook / legal articles';
 $string['sguse_legal'] = 'For reglamentos and normative documents: títulos and numbered sections as headings (they feed the on-page TOC), author-written article numbers (never auto-numbered — they are canonical), lettered literals, vigency notes and derogated articles. Each article carries id=\"art-N\" for deep links. Recommended: one handbook page per título. Numbered clauses (numerales) use a plain ol with li value=\"N\" — numbering is native, so the canonical numbers are preserved and align with the article column automatically; lettered clauses use hb-literals; fichas and scales use hb-keyvalue.';
 

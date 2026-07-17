@@ -253,6 +253,8 @@ $string['sgtitle_keyvalue'] = 'Ficha';
 $string['sguse_keyvalue'] = 'Una ficha compacta de etiqueta→valor para un comité, rol o elemento.';
 $string['sgtitle_checklist'] = 'Lista de verificación';
 $string['sguse_checklist'] = 'Una lista de verificación imprimible para un procedimiento. Las casillas son de uso impreso/de trabajo; las marcas no se guardan.';
+$string['sgtitle_refs'] = 'Referencias normativas cruzadas';
+$string['sguse_refs'] = 'Enlaza un artículo con los artículos exactos que regulan el tema en otro documento. Cuatro niveles: hb-ref (chip § en línea para una cita decisiva), hb-seealso (una línea \"Ver normativa\" tras una sección: el estándar dentro del cuerpo), hb-refbox (tarjeta cuando hay que explicar la base legal), hb-refs (bloque al final del artículo agrupado por documento: el estándar de cierre). Los enlaces son anclas simples a slug#art-N. Insignias de documento: hb-doc con is-ri / is-rp / is-ed, o sin modificador para otras fuentes.';
 $string['sgtitle_legal'] = 'Reglamento / artículos legales';
 $string['sguse_legal'] = 'Para reglamentos y documentos normativos: títulos y secciones numeradas como encabezados (alimentan el índice de la página), números de artículo escritos por el autor (nunca automáticos: son canónicos), literales con letra, notas de vigencia y artículos derogados. Cada artículo lleva id=\"art-N\" para enlaces directos. Recomendado: una página del manual por título. Los numerales usan un ol simple con li value=\"N\": la numeración es nativa, conserva los números canónicos y se alinea sola con la columna del artículo; los literales con letra usan hb-literals; fichas y escalas usan hb-keyvalue.';
 
