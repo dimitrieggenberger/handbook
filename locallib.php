@@ -1701,6 +1701,111 @@ HTML);
 </div>
 HTML);
 
+    $add('course', <<<'HTML'
+<div class="hb-course">
+  <div class="crs-sec is-collapsed">
+    <div class="sec-title">Recursos generales</div>
+  </div>
+
+  <div class="crs-sec">
+    <div class="sec-title">Parcial I — El conocimiento y el conocedor</div>
+
+    <div class="crs-week">
+      <div class="week-title">Semana del 18 al 22 de agosto</div>
+
+      <div class="crs-act is-page">
+        <span class="act-ic"></span>
+        <span class="act-name">Planificación semanal — Semana 1</span>
+      </div>
+
+      <div class="crs-act is-pdf">
+        <span class="act-ic"></span>
+        <span class="act-name">Ppt: Conocimiento personal y compartido</span>
+        <span class="act-chip">PDF</span>
+      </div>
+
+      <div class="crs-meta is-dates">
+        <span><b>Apertura:</b> lunes 18 de agosto, 7:00</span>
+        <span><b>Cierre:</b> jueves 28 de agosto, 23:59</span>
+      </div>
+      <div class="crs-act is-assign">
+        <span class="act-ic"></span>
+        <span class="act-name">Tarea: Reflexión sobre el mapa del conocimiento</span>
+      </div>
+      <div class="crs-meta is-lock">No disponible hasta que: la actividad
+        <b>Ppt: Conocimiento personal y compartido</b> se marque como completada</div>
+
+      <div class="crs-act is-url">
+        <span class="act-ic"></span>
+        <span class="act-name">La isla de California (enlace externo)</span>
+      </div>
+
+      <div class="crs-act is-pptx is-hidden">
+        <span class="act-ic"></span>
+        <span class="act-name">Conocimiento personal y compartido (editable)</span>
+        <span class="act-chip">PPTX</span>
+      </div>
+      <div class="crs-badge">Oculto para estudiantes</div>
+    </div>
+
+    <div class="crs-week is-collapsed">
+      <div class="week-title">Semana del 25 al 29 de agosto</div>
+    </div>
+
+    <div class="crs-week">
+      <div class="week-title">Exámenes: 20–24 de octubre</div>
+      <div class="crs-meta is-dates"><span><b>Apertura:</b> viernes 24 de octubre, 7:00</span></div>
+      <div class="crs-act is-quiz">
+        <span class="act-ic"></span>
+        <span class="act-name">Examen Parcial I — Teoría del Conocimiento</span>
+      </div>
+      <div class="crs-desc">
+        <p class="desc-title">Examen Parcial I — Instrucciones</p>
+        <p><strong>Materiales permitidos:</strong> solo el cuaderno de la clase.
+        <strong>Tiempo:</strong> 90 minutos.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Estado "curso nuevo": secciones vacías en color apagado (is-empty),
+     con matiz opcional (is-green / is-red / is-blue). -->
+<div class="hb-course">
+  <div class="crs-sec is-collapsed">
+    <div class="sec-title">Recursos generales</div>
+  </div>
+  <div class="crs-sec is-collapsed is-green is-empty">
+    <div class="sec-title">Evaluación diagnóstica</div>
+  </div>
+  <div class="crs-sec is-collapsed is-empty">
+    <div class="sec-title">Parcial I</div>
+  </div>
+  <div class="crs-sec is-collapsed is-red is-empty">
+    <div class="sec-title">Recuperaciones anuales</div>
+  </div>
+</div>
+
+<!-- Filas anotadas para lecciones de estructura ("así sí / así no"). -->
+<div class="hb-course">
+  <div class="crs-sec">
+    <div class="sec-title">Ejemplo — nombres de actividades</div>
+    <div class="crs-week">
+      <div class="week-title">Semana del 18 al 22 de agosto</div>
+      <div class="crs-act is-assign is-good">
+        <span class="act-ic"></span>
+        <span class="act-name">Tarea: Reflexión sobre el mapa del conocimiento</span>
+      </div>
+      <div class="crs-note"><b>Así sí:</b> tipo + tema; el estudiante sabe qué es antes de abrirla.</div>
+      <div class="crs-act is-assign is-bad">
+        <span class="act-ic"></span>
+        <span class="act-name">tarea1_FINAL(2)</span>
+      </div>
+      <div class="crs-note"><b>Así no:</b> sin tipo, sin tema, con numeración interna.</div>
+    </div>
+  </div>
+</div>
+HTML);
+
     $add('refs', <<<'HTML'
 <p>Durante actos oficiales se aplica el uniforme institucional
 <a class="hb-ref" href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112"><span>Art. 112 b)</span> <span class="doc">&middot; Regl. Interno</span></a>,

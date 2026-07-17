@@ -1908,3 +1908,211 @@
     padding: 0.12rem 0.6rem;
     font-variant-numeric: tabular-nums;
 }
+
+/* ---- hb-course: simulated course section. A stylized replica of the
+   platform's course page (sections, weekly subsections, activity rows,
+   dates, availability locks, hidden items, inline activity descriptions)
+   for articles that document how courses must be structured. The look
+   lives here only: restyle once, every article updates. Examples are
+   illustrative; use hb-figure for literal course screenshots. ---- */
+#page-local-handbook-area .hb-course {
+    margin: 1rem 0;
+    max-width: 70ch;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+#page-local-handbook-area .hb-course .crs-sec {
+    border: 1px solid var(--hb-line);
+    border-left: 3px solid var(--hb-accent);
+    border-radius: 0.65rem;
+    background: var(--hb-surface);
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    overflow: hidden;
+}
+#page-local-handbook-area .hb-course .crs-sec.is-collapsed { border-left-color: var(--hb-line); }
+#page-local-handbook-area .hb-course .sec-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--hb-ink);
+}
+#page-local-handbook-area .hb-course .sec-title::before {
+    content: "\2304";
+    font-size: 0.9rem;
+    line-height: 0.5;
+    color: var(--hb-muted);
+    transform: translateY(-2px);
+}
+#page-local-handbook-area .hb-course .crs-sec.is-collapsed .sec-title::before { content: "\203A"; transform: none; }
+/* Section hues + the muted "no content yet" state of a new course. */
+#page-local-handbook-area .hb-course .crs-sec.is-green .sec-title { color: var(--hb-ok); }
+#page-local-handbook-area .hb-course .crs-sec.is-red .sec-title { color: color-mix(in srgb, var(--hb-danger) 75%, var(--hb-ink)); }
+#page-local-handbook-area .hb-course .crs-sec.is-blue .sec-title { color: var(--hb-accent); }
+#page-local-handbook-area .hb-course .crs-sec.is-empty { border-left-color: var(--hb-line); box-shadow: none; }
+#page-local-handbook-area .hb-course .crs-sec.is-empty .sec-title { opacity: 0.45; }
+
+#page-local-handbook-area .hb-course .crs-week {
+    margin: 0 0.875rem 0.875rem;
+    border: 1px solid var(--hb-line);
+    border-left: 3px solid color-mix(in srgb, var(--hb-accent) 55%, var(--hb-line));
+    border-radius: 0.55rem;
+    overflow: hidden;
+}
+#page-local-handbook-area .hb-course .week-title {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 0.875rem;
+    background: color-mix(in srgb, var(--hb-ink) 3%, var(--hb-surface));
+    border-bottom: 1px solid var(--hb-line);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hb-accent);
+}
+#page-local-handbook-area .hb-course .week-title::before {
+    content: "\2304";
+    font-size: 0.85rem;
+    line-height: 0.5;
+    color: var(--hb-muted);
+    transform: translateY(-2px);
+}
+#page-local-handbook-area .hb-course .crs-week.is-collapsed { background: color-mix(in srgb, var(--hb-ink) 2%, var(--hb-surface)); }
+#page-local-handbook-area .hb-course .crs-week.is-collapsed .week-title { border-bottom: 0; background: transparent; }
+#page-local-handbook-area .hb-course .crs-week.is-collapsed .week-title::before { content: "\203A"; transform: none; }
+
+/* Activity rows. */
+#page-local-handbook-area .hb-course .crs-act {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.875rem;
+}
+#page-local-handbook-area .hb-course .crs-act + .crs-act,
+#page-local-handbook-area .hb-course .crs-act + .crs-meta,
+#page-local-handbook-area .hb-course .crs-meta + .crs-act {
+    border-top: 1px solid color-mix(in srgb, var(--hb-line) 75%, transparent);
+}
+#page-local-handbook-area .hb-course .act-ic {
+    flex: none;
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: color-mix(in srgb, var(--hb-ink) 5%, var(--hb-surface));
+    color: var(--hb-muted);
+}
+#page-local-handbook-area .hb-course .act-name { font-size: 0.875rem; }
+#page-local-handbook-area .hb-course .act-chip {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--hb-line);
+    border-radius: 999px;
+    padding: 0.05rem 0.5rem;
+    color: var(--hb-muted);
+}
+/* Activity type icons. */
+#page-local-handbook-area .hb-course .is-page .act-ic::before { content: "\2261"; }
+#page-local-handbook-area .hb-course .is-pdf .act-ic { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-course .is-pdf .act-ic::before { content: "\25AD"; font-size: 0.7rem; }
+#page-local-handbook-area .hb-course .is-assign .act-ic { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-course .is-assign .act-ic::before { content: "\2191"; }
+#page-local-handbook-area .hb-course .is-url .act-ic { background: var(--hb-accent-soft); color: var(--hb-accent); }
+#page-local-handbook-area .hb-course .is-url .act-ic::before { content: "\2197"; }
+#page-local-handbook-area .hb-course .is-pptx .act-ic { background: color-mix(in srgb, #d04a2a 14%, var(--hb-surface)); color: #d04a2a; }
+#page-local-handbook-area .hb-course .is-pptx .act-ic::before { content: "P"; }
+#page-local-handbook-area .hb-course .is-quiz .act-ic { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-course .is-quiz .act-ic::before { content: "\25F7"; font-size: 1.05rem; }
+#page-local-handbook-area .hb-course .is-forum .act-ic { background: var(--hb-ok-soft); color: var(--hb-ok); }
+#page-local-handbook-area .hb-course .is-forum .act-ic::before { content: "\1F5E8"; font-size: 0.8rem; }
+#page-local-handbook-area .hb-course .is-video .act-ic::before { content: "\25B6"; font-size: 0.7rem; }
+
+/* Meta rows: dates, availability lock, hidden badge. */
+#page-local-handbook-area .hb-course .crs-meta {
+    padding: 0.45rem 0.875rem;
+    font-size: 0.75rem;
+    color: var(--hb-muted);
+}
+#page-local-handbook-area .hb-course .crs-meta.is-dates {
+    display: flex;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+}
+#page-local-handbook-area .hb-course .crs-meta.is-lock {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0.875rem 0.6rem 3.75rem;
+    padding: 0.4rem 0.75rem;
+    background: color-mix(in srgb, var(--hb-ink) 4%, var(--hb-surface));
+    border-radius: 0.45rem;
+}
+#page-local-handbook-area .hb-course .crs-meta.is-lock::before { content: "\1F512"; font-size: 0.7rem; }
+#page-local-handbook-area .hb-course .crs-meta.is-lock b,
+#page-local-handbook-area .hb-course .crs-meta.is-lock strong { color: var(--hb-warn); font-weight: 600; }
+#page-local-handbook-area .hb-course .crs-act.is-hidden .act-ic {
+    background: transparent;
+    border: 1.5px dashed var(--hb-line);
+}
+#page-local-handbook-area .hb-course .crs-act.is-hidden .act-name { color: var(--hb-muted); }
+#page-local-handbook-area .hb-course .crs-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    align-self: flex-start;
+    margin: -0.1rem 0.875rem 0.6rem 3.75rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--hb-warn-soft);
+    color: var(--hb-warn);
+    border-radius: 999px;
+    padding: 0.18rem 0.7rem;
+}
+#page-local-handbook-area .hb-course .crs-badge::before { content: "\29B8"; font-size: 0.7rem; }
+
+/* Inline activity description (e.g. exam instructions on the course page). */
+#page-local-handbook-area .hb-course .crs-desc {
+    padding: 0.25rem 1.1rem 0.875rem;
+    font-size: 0.8rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-course .crs-desc p { margin: 0 0 0.5rem; max-width: none; }
+#page-local-handbook-area .local-handbook-page-body .hb-course .crs-desc .desc-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0.25rem 0 0.5rem;
+}
+#page-local-handbook-area .hb-course .crs-desc ul,
+#page-local-handbook-area .hb-course .crs-desc ol { margin: 0 0 0.5rem; padding-left: 1.25rem; }
+#page-local-handbook-area .hb-course .crs-desc li { padding: 0.05rem 0; }
+
+/* Teaching annotations: asi si / asi no rails + note lines under rows. */
+#page-local-handbook-area .hb-course .crs-act.is-good { box-shadow: inset 3px 0 0 var(--hb-ok); }
+#page-local-handbook-area .hb-course .crs-act.is-bad { box-shadow: inset 3px 0 0 var(--hb-danger); }
+#page-local-handbook-area .hb-course .crs-note {
+    margin: -0.25rem 0.875rem 0.6rem 3.75rem;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--hb-muted);
+}
+#page-local-handbook-area .hb-course .crs-note b,
+#page-local-handbook-area .hb-course .crs-note strong {
+    color: var(--hb-ink);
+    font-weight: 600;
+    font-style: normal;
+}

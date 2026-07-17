@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.26.0 (2026-07-17)
+
+Simulated course sections (`hb-course`).
+
+- New content pattern replicating the platform's course page for articles
+  that document course structure: sections (open / collapsed / muted
+  "new-course" empty state / hue modifiers), weekly subsections (open /
+  collapsed), eight activity-row types (page, pdf, pptx, assign, url, quiz,
+  forum, video) with file-type chips, dates rows (one or both dates),
+  availability-lock bars, hidden-from-students state with badge, inline
+  activity descriptions (crs-desc, e.g. exam instructions), and teaching
+  annotations (is-good / is-bad rails, crs-note lines).
+- Catalogue entry in the style guide and the AI get_style_guide endpoint
+  with EN/ES/DE strings. Pattern CSS is central: restyling it once updates
+  every article that uses it.
+
 ## 0.25.0 (2026-07-17)
 
 Wikipedia-style automatic cross-links.
