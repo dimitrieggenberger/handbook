@@ -1476,6 +1476,218 @@ HTML);
 </ul>
 HTML);
 
+    $add('email', <<<'HTML'
+<div class="hb-email is-good">
+  <div class="e-chrome"><i></i><i></i><i></i><span class="e-badge">Así sí</span></div>
+  <div class="e-head">
+    <div class="e-row"><span class="e-label">De</span>
+      <span class="e-value">Secretaría Académica &lt;secretaria@europaschule.eu&gt;</span></div>
+    <div class="e-row"><span class="e-label">Para</span>
+      <span class="e-value"><span class="pill">Familias 4.º B</span></span></div>
+    <div class="e-row"><span class="e-label">Asunto</span>
+      <span class="e-value e-subject">Salida pedagógica — 24 de julio (autorización adjunta)</span></div>
+  </div>
+  <div class="e-body">
+    <p>Estimadas familias de 4.º B:</p>
+    <p>El <strong>jueves 24 de julio</strong> el grado realizará una salida pedagógica al
+    Museo para la Identidad Nacional.</p>
+    <ul>
+      <li><strong>Salida:</strong> 8:00, desde el campus.</li>
+      <li><strong>Regreso:</strong> 12:30, almuerzo normal en el comedor.</li>
+    </ul>
+    <p>Adjuntamos el talón de autorización; devuélvanlo firmado <strong>a más tardar el
+    lunes 21 de julio</strong>.</p>
+  </div>
+  <div class="e-attach"><span>Autorizacion_salida_4B.pdf</span></div>
+  <div class="e-sign">
+    <span class="name">Ana Martínez</span><br>
+    Secretaría Académica &middot; EuropaSchule San Pedro Sula<br>
+    Ext. 101 &middot; secretaria@europaschule.eu
+  </div>
+</div>
+
+<div class="hb-email is-bad">
+  <div class="e-chrome"><i></i><i></i><i></i><span class="e-badge">Así no</span></div>
+  <div class="e-head">
+    <div class="e-row"><span class="e-label">Asunto</span>
+      <span class="e-value e-subject">IMPORTANTE!!!</span></div>
+  </div>
+  <div class="e-body">
+    <p>se les recuerda que hay salida el jueves mandar el dinero y el papel firmado. gracias</p>
+  </div>
+</div>
+HTML);
+
+    $add('chat', <<<'HTML'
+<div class="hb-chat">
+  <div class="chat-title">Familias 4.º B — EuropaSchule
+    <span class="sub">54 participantes</span></div>
+  <div class="chat-day">Lunes 21 de julio</div>
+  <div class="hb-msg is-out">
+    <span class="who">Coordinación Académica</span>
+    <p>Buenos días, familias. Hoy es el último día para entregar la autorización firmada
+    de la salida del jueves.</p>
+    <span class="when">9:02</span>
+  </div>
+  <div class="hb-msg is-in">
+    <span class="who">Madre de Sofía R.</span>
+    <p>Buenos días, ¿sirve mandarla escaneada por correo?</p>
+    <span class="when">9:14</span>
+  </div>
+  <div class="hb-msg is-out">
+    <span class="who">Coordinación Académica</span>
+    <p>Sí, con gusto: secretaria@europaschule.eu. El original lo puede traer el estudiante
+    el mismo jueves.</p>
+    <span class="when">9:16</span>
+  </div>
+</div>
+
+<div class="hb-chat">
+  <div class="chat-day">Ejemplos</div>
+  <span class="chat-verdict is-bad">Así no</span>
+  <div class="hb-msg is-out is-bad">
+    <p>señora la nota de mateo estuvo pesima hay que hablar URGENTE</p>
+    <span class="when">21:47</span>
+  </div>
+  <span class="chat-verdict is-good">Así sí</span>
+  <div class="hb-msg is-out is-good">
+    <p>Buenas tardes. Quisiera coordinar una breve reunión para conversar sobre el avance
+    de Mateo. ¿Le queda bien el miércoles a las 14:30, presencial o por llamada?</p>
+    <span class="when">14:10</span>
+  </div>
+</div>
+HTML);
+
+    $add('dialogue', <<<'HTML'
+<div class="hb-dialogue">
+  <div class="dlg-context">Llamada: madre molesta por una calificación &middot; Recepción &rarr; Coordinación</div>
+  <div class="dlg-turn is-staff">
+    <span class="dlg-who">Recepción</span>
+    <span class="dlg-text">EuropaSchule, buenos días. Le atiende Carmen, ¿en qué puedo servirle?</span>
+  </div>
+  <div class="dlg-turn">
+    <span class="dlg-who">Madre</span>
+    <span class="dlg-text">¡Es la tercera vez que llamo! La nota de mi hija está mal y nadie me resuelve.</span>
+  </div>
+  <p class="dlg-note">— pausa; dejar que termine, no interrumpir —</p>
+  <div class="dlg-turn is-staff is-good">
+    <span class="dlg-who">Recepción</span>
+    <span class="dlg-text">Entiendo su molestia, señora, y lamento que haya tenido que llamar
+    varias veces.<span class="dlg-verdict is-good">Así sí</span> La comunico con la Coordinación
+    Académica, que es quien revisa calificaciones. ¿Me permite un momento en línea?</span>
+  </div>
+  <div class="dlg-turn is-staff is-bad">
+    <span class="dlg-who">(Evitar)</span>
+    <span class="dlg-text">Eso no es conmigo, llame mañana.<span class="dlg-verdict is-bad">Así no</span></span>
+  </div>
+</div>
+HTML);
+
+    $add('acta', <<<'HTML'
+<div class="hb-agenda">
+  <div class="ag-title">Agenda <span class="meta">ELP &middot; miércoles 23 de julio &middot; Sala de juntas</span></div>
+  <ol>
+    <li><span class="ag-time">14:00–14:10</span><span class="ag-topic">Seguimiento de acuerdos anteriores</span><span class="ag-who">Dirección</span></li>
+    <li><span class="ag-time">14:10–14:35</span><span class="ag-topic">Resultados del diagnóstico de lectura 3.º–6.º</span><span class="ag-who">Coordinación</span></li>
+    <li><span class="ag-time">14:35–14:55</span><span class="ag-topic">Plan de acompañamiento del segundo semestre</span><span class="ag-who">Consejería</span></li>
+    <li><span class="ag-time">14:55–15:00</span><span class="ag-topic">Acuerdos y cierre</span><span class="ag-who">Dirección</span></li>
+  </ol>
+</div>
+
+<div class="hb-acta">
+  <div class="ac-title">Acta 14-2026 <span class="meta">ELP &middot; 23 de julio de 2026</span></div>
+  <dl class="ac-head">
+    <dt>Participantes</dt><dd>Dirección, Coordinación, Convivencia, Consejería</dd>
+    <dt>Preside</dt><dd>Dirección</dd>
+    <dt>Ausencias</dt><dd>Ninguna</dd>
+  </dl>
+  <div class="ac-section">Acuerdos</div>
+  <table>
+    <thead><tr><th></th><th>Acuerdo</th><th>Responsable</th><th>Fecha límite</th></tr></thead>
+    <tbody>
+      <tr><td class="ac-num">14.1</td>
+          <td>Aplicar el plan de refuerzo de lectura en 3.º y 4.º, dos sesiones semanales.</td>
+          <td class="ac-who">Coordinación</td><td class="ac-when">4 ago</td></tr>
+      <tr><td class="ac-num">14.2</td>
+          <td>Presentar propuesta de horario de acompañamiento individual.</td>
+          <td class="ac-who">Consejería</td><td class="ac-when">30 jul</td></tr>
+      <tr><td class="ac-num">13.4</td>
+          <td>Circular a familias sobre el nuevo protocolo de retiro. <span class="ac-done">Cumplido</span></td>
+          <td class="ac-who">Secretaría</td><td class="ac-when">18 jul</td></tr>
+    </tbody>
+  </table>
+</div>
+HTML);
+
+    $add('letter', <<<'HTML'
+<div class="hb-letter">
+  <div class="lt-head">
+    <div class="lt-school">EuropaSchule San Pedro Sula</div>
+    <div class="lt-sub">Educación Helvética S.A. &middot; San Pedro Sula, Honduras</div>
+  </div>
+  <p class="lt-place">San Pedro Sula, 21 de julio de 2026</p>
+  <p class="lt-ref">Ref.: Circular 08-2026 — Salida pedagógica 4.º B</p>
+  <p>Estimadas familias:</p>
+  <p>Por este medio les informamos que el jueves 24 de julio el grado 4.º B realizará una
+  salida pedagógica al Museo para la Identidad Nacional, en el marco de la unidad de
+  Estudios Sociales.</p>
+  <p>La salida se realizará de 8:00 a 12:30. Se requiere la autorización firmada por el
+  responsable legal, a más tardar el lunes 21 de julio.</p>
+  <p>Agradecemos su apoyo para el buen desarrollo de esta actividad.</p>
+  <p>Atentamente,</p>
+  <div class="lt-sign">
+    <span class="line"></span>
+    <span class="name">Nombre Apellido</span><br>
+    <span class="role">Rectorado &middot; EuropaSchule San Pedro Sula</span>
+  </div>
+</div>
+HTML);
+
+    $add('feedback', <<<'HTML'
+<div class="hb-feedback is-bad">
+  <div class="fb-head">
+    <span class="fb-type">Tarea</span>
+    <span class="fb-what">Ensayo — Los recursos naturales</span>
+    <span class="fb-meta">Docente &rarr; Estudiante</span>
+    <span class="fb-badge">Así no</span>
+  </div>
+  <div class="fb-field"><p>Mal hecho. Repetir para el viernes.</p></div>
+  <span class="fb-grade">4/10</span>
+</div>
+
+<div class="hb-feedback is-good">
+  <div class="fb-head">
+    <span class="fb-type">Tarea</span>
+    <span class="fb-what">Ensayo — Los recursos naturales</span>
+    <span class="fb-meta">Docente &rarr; Estudiante</span>
+    <span class="fb-badge">Así sí</span>
+  </div>
+  <div class="fb-field">
+    <p>Tu introducción plantea bien el problema y usas dos fuentes correctamente citadas —
+    buen avance frente al ensayo anterior.</p>
+    <p>Para la versión del viernes: (1) cada párrafo debe defender UNA idea — el segundo
+    mezcla tres; (2) la conclusión repite la introducción, intenta cerrarla con tu propia
+    postura. Si quieres revisarlo juntos antes de entregar, búscame el jueves en el recreo.</p>
+  </div>
+  <span class="fb-grade">6/10 &middot; puede reentregar</span>
+</div>
+
+<div class="hb-feedback">
+  <div class="fb-head">
+    <span class="fb-type">Evaluación docente</span>
+    <span class="fb-what">Observación de clase — Matemáticas 5.º</span>
+    <span class="fb-meta">Coordinación &rarr; Docente</span>
+  </div>
+  <div class="fb-field">
+    <p><strong>Fortalezas:</strong> arranque puntual con objetivo visible en pizarra; buen
+    uso de mini-pizarras para verificar comprensión de todos.</p>
+    <p><strong>Área de mejora:</strong> el cierre quedó en 2 minutos y sin verificación del
+    objetivo. Sugerencia concreta: reservar 7 minutos y usar la misma rutina de
+    mini-pizarras como ticket de salida.</p>
+  </div>
+</div>
+HTML);
+
     $add('refs', <<<'HTML'
 <p>Durante actos oficiales se aplica el uniforme institucional
 <a class="hb-ref" href="/local/handbook/view.php?page=reglamento-interno-titulo-quinto#art-112"><span>Art. 112 b)</span> <span class="doc">&middot; Regl. Interno</span></a>,

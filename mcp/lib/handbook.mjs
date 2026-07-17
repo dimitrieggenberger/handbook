@@ -213,7 +213,7 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
 
   server.tool(
     "handbook_get_style_guide",
-    "The handbook's content style guide: the house 'hb-*' formatting patterns (multi-step procedures, callouts, org charts with teams, roles, escalation ladders, do/don't, RACI matrices, timelines, contacts, definitions, figures, fact sheets, checklists) with example HTML to adapt. Call this ONCE before writing or updating page content, then reuse the patterns so every article looks uniform. Formatting guidance only — it changes nothing.",
+    "The handbook's content style guide: the house 'hb-*' formatting patterns (multi-step procedures, callouts, org charts with teams, roles, escalation ladders, do/don't, RACI matrices, timelines, contacts, definitions, figures, fact sheets, checklists, plus communication examples: emails, WhatsApp-style chats, conversation scripts, agendas/actas, formal letters and written-feedback fields — communication examples must use invented names only) with example HTML to adapt. Call this ONCE before writing or updating page content, then reuse the patterns so every article looks uniform. Formatting guidance only — it changes nothing.",
     {},
     handler(() => ws("local_handbook_get_style_guide", {}))
   );
