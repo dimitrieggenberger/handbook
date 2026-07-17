@@ -1347,6 +1347,15 @@ HTML);
     <li>Las correcciones serán proporcionales a la falta.</li>
   </ol>
 
+  <p class="hb-art" id="art-82"><span class="hb-art-no">Artículo 82.</span>
+  Las medidas disciplinarias serán de 4 tipos:</p>
+  <ol>
+    <li value="1">Amonestación privada, verbal.</li>
+    <li value="2">Amonestación por escrito.</li>
+    <li value="3">Suspensión del trabajo sin goce de sueldo de uno a ocho días laborables.</li>
+    <li value="4">Despido como último recurso.</li>
+  </ol>
+
   <div class="hb-note"><p><strong>Nota de vigencia:</strong> literales b) y c)
   modificados por acuerdo del ELP, acta 12-2026.</p></div>
 

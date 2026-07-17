@@ -983,3 +983,69 @@
     }
     #page-local-handbook-area .local-handbook-page-body .hb-literals { padding-left: 0.4rem; }
 }
+
+/* ---- hb-legal refinements (from the Reglamento import) ---- */
+
+/* An article whose body is only the number (the text continues in a list
+   below) must still occupy its line: the number is absolutely positioned,
+   so an otherwise-empty paragraph would collapse to zero height and the
+   following list would render on top of it. */
+#page-local-handbook-area .local-handbook-page-body .hb-art { min-height: 1.4em; }
+
+/* Plain numbered/bulleted lists inside a legal block (numerales): align with
+   the article text column and keep NATIVE numbering so <li value="N">
+   preserves the canonical numbers. Markers match the hb-literals styling. */
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]),
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) {
+    margin: 0.4rem 0 0.9rem;
+    padding-left: 8.2rem;
+    max-width: 70ch;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-art + ol:not([class]),
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-art + ul:not([class]) {
+    margin-top: -0.3rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]) > li,
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) > li {
+    padding: 0.12rem 0;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]) > li::marker {
+    color: var(--primary, #0078c3);
+    font-weight: 600;
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) > li::marker {
+    color: var(--primary, #0078c3);
+}
+/* Nested sublists indent normally, not with the full column offset. */
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]) ol,
+#page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]) ul,
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) ol,
+#page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) ul {
+    padding-left: 1.6rem;
+    margin: 0.2rem 0;
+}
+
+/* Callouts and fichas inside a legal block align to the text column too. */
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-note,
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-tip,
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-warning,
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-important,
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-keyvalue {
+    margin-left: 6.5rem;
+}
+
+@media (max-width: 560px) {
+    #page-local-handbook-area .local-handbook-page-body .hb-legal ol:not([class]),
+    #page-local-handbook-area .local-handbook-page-body .hb-legal ul:not([class]) {
+        padding-left: 1.6rem;
+    }
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-note,
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-tip,
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-warning,
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-important,
+    #page-local-handbook-area .local-handbook-page-body .hb-legal .hb-keyvalue {
+        margin-left: 0;
+    }
+}

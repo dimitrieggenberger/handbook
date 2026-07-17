@@ -254,7 +254,7 @@ $string['sguse_keyvalue'] = 'Ein kompaktes Bezeichnung→Wert-Blatt für ein Gre
 $string['sgtitle_checklist'] = 'Checkliste';
 $string['sguse_checklist'] = 'Eine druckbare Checkliste für ein Verfahren. Die Kästchen sind für Druck/Arbeitsgebrauch; Häkchen werden nicht gespeichert.';
 $string['sgtitle_legal'] = 'Reglement / Rechtsartikel';
-$string['sguse_legal'] = 'Für Reglemente und normative Dokumente: Titel und nummerierte Abschnitte als Überschriften (sie speisen das Seiteninhaltsverzeichnis), vom Autor geschriebene Artikelnummern (nie automatisch — sie sind kanonisch), Buchstaben-Literale, Gültigkeitsnotizen und aufgehobene Artikel. Jeder Artikel trägt id=\"art-N\" für Direktlinks. Empfohlen: eine Handbuchseite pro Titel.';
+$string['sguse_legal'] = 'Für Reglemente und normative Dokumente: Titel und nummerierte Abschnitte als Überschriften (sie speisen das Seiteninhaltsverzeichnis), vom Autor geschriebene Artikelnummern (nie automatisch — sie sind kanonisch), Buchstaben-Literale, Gültigkeitsnotizen und aufgehobene Artikel. Jeder Artikel trägt id=\"art-N\" für Direktlinks. Empfohlen: eine Handbuchseite pro Titel. Nummerierte Klauseln (Numerales) verwenden ein einfaches ol mit li value=\"N\" — die Nummerierung ist nativ, kanonische Nummern bleiben erhalten und richten sich automatisch an der Artikelspalte aus; Buchstaben-Klauseln verwenden hb-literals; Datenblätter und Skalen hb-keyvalue.';
 
 // Lesepfad-Empfehlungen und Audits (Spez. 10).
 $string['recommendations'] = 'Pfad-Empfehlungen';
