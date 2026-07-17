@@ -219,6 +219,25 @@ $string['bannerimage'] = 'Bannerbild';
 $string['bannerimage_help'] = 'Optional. Ein Querformat-Bild, das auf der Kategoriekarte (16:9) und im Artikelkopf (3:1) angezeigt wird. Das Bild wird automatisch zugeschnitten und zentriert — kein manueller Zuschnitt nötig. Ohne Bild zeigt die Karte einen dezenten Platzhalter je nach Inhaltstyp.';
 
 // Inhalts-Stilrichtlinie (hb-*-Muster).
+// Bildoptimierung.
+$string['imageoptimize'] = 'Bilder beim Speichern optimieren';
+$string['imageoptimize_desc'] = 'Beim Speichern einer Seite werden übergroße Bilder (Banner und Artikelbilder, einschließlich eingefügter Screenshots) auf die Maximalbreite verkleinert, gemäß EXIF gedreht, von Metadaten befreit und neu kodiert. Bilder werden nie vergrößert, Dateinamen ändern sich nie, und ein Ersatz wird nur behalten, wenn er kleiner als das Original ist. Screenshots mit Transparenz bleiben PNG; Fotos werden als JPEG (neu) kodiert.';
+$string['imagemaxwidth'] = 'Maximale Bildbreite (px)';
+$string['imagemaxwidth_desc'] = 'Breitere Bilder werden beim Speichern auf diese Breite verkleinert. 1500 deckt das breiteste Handbuch-Layout ab.';
+$string['imagejpegquality'] = 'JPEG-Qualität';
+$string['imagejpegquality_desc'] = 'Qualität (50–100) für die JPEG-Neukodierung. 85 ist am Bildschirm visuell nicht von höheren Werten zu unterscheiden und deutlich kleiner.';
+$string['manageimages'] = 'Bilder optimieren';
+$string['imagesintro'] = 'Neue Bilder werden beim Speichern einer Seite automatisch optimiert (Maximalbreite {$a->width}px, JPEG-Qualität {$a->quality}). Diese Seite wendet dieselbe Behandlung auf Bilder an, die vor dem Optimierer hochgeladen wurden: Banner und Artikelbilder werden verkleinert, gemäß EXIF gedreht, von Metadaten befreit und neu kodiert — Dateinamen ändern sich nie, die Seiten funktionieren also weiter.';
+$string['imageoptimizeoff'] = 'Die automatische Optimierung beim Speichern ist in den Plugin-Einstellungen derzeit deaktiviert; die Schaltfläche unten funktioniert dennoch als einmaliger Lauf.';
+$string['imagesreport'] = '{$a->scanned} Bilder geprüft, {$a->optimized} optimiert. Gesamtgröße {$a->before} → {$a->after}, Ersparnis {$a->saved}.';
+$string['imagesarea'] = 'Dateibereich';
+$string['imagescount'] = 'Bilder';
+$string['imagessize'] = 'Größe';
+$string['imagesareabanners'] = 'Bannerbilder';
+$string['imagesareacontent'] = 'Artikelbilder (alle Revisionen)';
+$string['imagesoptimizenow'] = 'Alle Bilder jetzt optimieren';
+$string['imagesnote'] = 'GIF- (möglicherweise animiert) und SVG-Dateien werden nie angetastet. Bilder, die bereits auf oder unter der Maximalbreite liegen, werden nur neu kodiert, wenn das mindestens 10 % spart — kleine, effiziente Dateien bleiben unverändert. Historische Revisionen sind eingeschlossen; der Lauf kann bei einem großen Handbuch einen Moment dauern.';
+
 $string['styleguide'] = 'Inhalts-Stilrichtlinie';
 $string['styleguideintro'] = 'Wiederverwendbare Formatmuster für Artikel. Öffnen Sie eine Seite im Bearbeitungsmodus, wechseln Sie im Editor zur HTML-Quelltextansicht und fügen Sie ein Muster von unten ein — den Text anpassen. Derselbe Katalog steht der Handbuch-KI zur Verfügung, sodass auch generierte Entwürfe diese Muster verwenden.';
 $string['styleguidepatterns'] = 'Muster';

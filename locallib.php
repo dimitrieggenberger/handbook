@@ -735,6 +735,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/import.php'),
             'visible' => has_capability('local/handbook:manage', $context),
         ],
+        'images' => [
+            'label' => get_string('manageimages', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/images.php'),
+            'visible' => has_capability('local/handbook:manage', $context),
+        ],
     ];
 
     $tabs = '';

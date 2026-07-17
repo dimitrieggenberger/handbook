@@ -219,6 +219,25 @@ $string['bannerimage'] = 'Imagen de cabecera';
 $string['bannerimage_help'] = 'Opcional. Una imagen horizontal que se muestra en la tarjeta de la categoría (16:9) y en la cabecera del artículo (3:1). La imagen se recorta y centra automáticamente, sin recorte manual. Sin imagen, la tarjeta muestra un marcador discreto según el tipo de contenido.';
 
 // Guía de estilo de contenido (patrones hb-*).
+// Optimización de imágenes.
+$string['imageoptimize'] = 'Optimizar imágenes al guardar';
+$string['imageoptimize_desc'] = 'Al guardar una página, reduce las imágenes demasiado grandes (banner e imágenes del artículo, incluidas capturas de pantalla pegadas) al ancho máximo, aplica la rotación EXIF, elimina los metadatos y las recodifica. Las imágenes nunca se agrandan, los nombres de archivo nunca cambian y el reemplazo solo se conserva si es más pequeño que el original. Las capturas con transparencia se mantienen en PNG; las fotos se (re)codifican como JPEG.';
+$string['imagemaxwidth'] = 'Ancho máximo de imagen (px)';
+$string['imagemaxwidth_desc'] = 'Las imágenes más anchas se reducen a este ancho al guardar. 1500 cubre el diseño más ancho del manual.';
+$string['imagejpegquality'] = 'Calidad JPEG';
+$string['imagejpegquality_desc'] = 'Calidad (50–100) para la recodificación JPEG. 85 es visualmente indistinguible de valores mayores en pantalla y considerablemente más liviano.';
+$string['manageimages'] = 'Optimizar imágenes';
+$string['imagesintro'] = 'Las imágenes nuevas se optimizan automáticamente al guardar una página (ancho máximo {$a->width}px, calidad JPEG {$a->quality}). Esta página aplica el mismo tratamiento a las imágenes subidas antes de que existiera el optimizador: banners e imágenes de artículos se reducen, se rotan según EXIF, se les eliminan los metadatos y se recodifican — los nombres de archivo nunca cambian, así que las páginas siguen funcionando.';
+$string['imageoptimizeoff'] = 'La optimización automática al guardar está desactivada en la configuración del plugin; el botón de abajo funciona igualmente como ejecución puntual.';
+$string['imagesreport'] = 'Se revisaron {$a->scanned} imágenes, se optimizaron {$a->optimized}. Tamaño total {$a->before} → {$a->after}, ahorro de {$a->saved}.';
+$string['imagesarea'] = 'Área de archivos';
+$string['imagescount'] = 'Imágenes';
+$string['imagessize'] = 'Tamaño';
+$string['imagesareabanners'] = 'Imágenes de banner';
+$string['imagesareacontent'] = 'Imágenes de artículos (todas las revisiones)';
+$string['imagesoptimizenow'] = 'Optimizar todas las imágenes ahora';
+$string['imagesnote'] = 'Los archivos GIF (posiblemente animados) y SVG nunca se tocan. Las imágenes que ya están en el ancho máximo o por debajo solo se recodifican si eso ahorra al menos un 10 % — los archivos pequeños y eficientes pasan intactos. Se incluyen las revisiones históricas, así que la ejecución puede tardar un momento en un manual grande.';
+
 $string['styleguide'] = 'Guía de estilo de contenido';
 $string['styleguideintro'] = 'Patrones de formato reutilizables para los artículos. Abra una página en Editar, cambie el editor a vista de código HTML y pegue uno de los patrones de abajo, adaptando el texto. El mismo catálogo está disponible para la IA del manual, así que los borradores generados también los usan.';
 $string['styleguidepatterns'] = 'Patrones';

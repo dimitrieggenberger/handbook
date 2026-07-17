@@ -34,6 +34,7 @@ require_once(__DIR__ . '/locallib.php');
 require_once($CFG->libdir . '/formslib.php');
 
 use local_handbook\form\page_form;
+use local_handbook\local\service\image_service;
 use local_handbook\local\service\page_service;
 
 $pageid = optional_param('id', 0, PARAM_INT);
@@ -167,6 +168,14 @@ if ($data = $form->get_data()) {
     // Move editor draft files into the revision's file area, then save.
     $data = file_postupdate_standard_editor($data, 'content', $editoroptions, $context,
         'local_handbook', 'revision', (int)$revision->id);
+
+    // Downscale/re-encode oversized images (camera photos, pasted
+    // screenshots) now that they sit in their final areas. Filenames are
+    // preserved, so the content HTML needs no rewriting.
+    if (image_service::enabled()) {
+        image_service::optimize_area($context, 'bannerimage', (int)$page->id);
+        image_service::optimize_area($context, 'revision', (int)$revision->id);
+    }
 
     page_service::update_draft($revision, $data->content, (int)$data->contentformat,
         trim((string)$data->changesummary), 0, (bool)($data->requiresreack ?? false));

@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.24.0 (2026-07-17)
+
+Automatic image optimisation.
+
+- New `image_service`: on page save, images in the banner and article file
+  areas (including screenshots pasted into the editor) are downscaled to a
+  configurable maximum width (default 1500px), rotated per their EXIF
+  orientation flag, stripped of metadata (including phone GPS positions) and
+  re-encoded — JPEG at configurable quality (default 85). Opaque PNGs are
+  converted to JPEG only when that is dramatically smaller (photos exported
+  as PNG); PNGs with transparency stay PNG so screenshots keep crisp text.
+  GIF and SVG are never touched. Images are never upscaled; a replacement is
+  only kept when it is smaller than the original; filenames never change, so
+  content HTML keeps working.
+- Plugin settings: enable/disable on-save optimisation, maximum width, JPEG
+  quality.
+- New manage page "Optimise images" (`manage/images.php`): per-area stock
+  (count and size), one-off run over all existing images including
+  historical revisions, and a savings report.
+
+## 0.23.0 (2026-07-17)
+
+Communication patterns for the style system: `hb-email` (mail-client card),
+`hb-chat` (WhatsApp-style thread), `hb-dialogue` (conversation script),
+`hb-agenda`/`hb-acta` (meeting pair), `hb-letter` (letterhead circular) and
+`hb-feedback` (written-feedback field for homework, reports and teacher
+evaluations), all with `is-good`/`is-bad` teaching variants where relevant.
+Catalogue entries (with the invented-names-only rule) in the editor style
+guide and the AI `get_style_guide` endpoint; EN/ES/DE strings.
+
 ## 0.14.0 (2026-07-14)
 
 Handbook AI change sets — Phase 3 (half A): external API surface and the

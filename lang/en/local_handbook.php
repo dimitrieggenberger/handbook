@@ -219,6 +219,25 @@ $string['bannerimage'] = 'Banner image';
 $string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
 
 // Content style guide (hb-* patterns).
+// Image optimisation.
+$string['imageoptimize'] = 'Optimise images on save';
+$string['imageoptimize_desc'] = 'When a page is saved, downscale oversized images (banner and article images, including pasted screenshots) to the maximum width, apply the EXIF rotation, strip metadata and re-encode them. Images are never upscaled, filenames never change, and a replacement is only kept when it is smaller than the original. Screenshots with transparency stay PNG; photos are (re-)encoded as JPEG.';
+$string['imagemaxwidth'] = 'Maximum image width (px)';
+$string['imagemaxwidth_desc'] = 'Images wider than this are downscaled to this width on save. 1500 covers the widest handbook layout.';
+$string['imagejpegquality'] = 'JPEG quality';
+$string['imagejpegquality_desc'] = 'Quality (50–100) for JPEG re-encoding. 85 is visually indistinguishable from higher values at screen size and considerably smaller.';
+$string['manageimages'] = 'Optimise images';
+$string['imagesintro'] = 'New images are optimised automatically when a page is saved (maximum width {$a->width}px, JPEG quality {$a->quality}). This page applies the same treatment to images uploaded before the optimiser existed: banners and article images are downscaled, EXIF-rotated, stripped of metadata and re-encoded — filenames never change, so pages keep working.';
+$string['imageoptimizeoff'] = 'Automatic optimisation on save is currently disabled in the plugin settings; the button below still works as a one-off run.';
+$string['imagesreport'] = 'Scanned {$a->scanned} images, optimised {$a->optimized}. Total size {$a->before} → {$a->after}, saved {$a->saved}.';
+$string['imagesarea'] = 'File area';
+$string['imagescount'] = 'Images';
+$string['imagessize'] = 'Size';
+$string['imagesareabanners'] = 'Banner images';
+$string['imagesareacontent'] = 'Article images (all revisions)';
+$string['imagesoptimizenow'] = 'Optimise all images now';
+$string['imagesnote'] = 'GIF (possibly animated) and SVG files are never touched. Images already at or below the maximum width are only re-encoded when that saves at least 10% — small, efficient files pass through untouched. Historical revisions are included, so the run can take a moment on a large handbook.';
+
 $string['styleguide'] = 'Content style guide';
 $string['styleguideintro'] = 'Reusable formatting patterns for articles. Open a page in Edit, switch the editor to HTML source view, and paste a pattern below — adapting the text. The same catalogue is available to the Handbook AI, so generated drafts use these patterns too.';
 $string['styleguidepatterns'] = 'Patterns';
