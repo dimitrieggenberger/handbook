@@ -402,6 +402,9 @@
     gap: 1.25rem;
 }
 #page-local-handbook-area .local-handbook-card {
+    /* The card must be the positioned ancestor for the full-card click
+       overlay below — set here, not via a theme utility class. */
+    position: relative;
     display: flex;
     flex-direction: column;
     background: var(--bs-body-bg, #fff);
