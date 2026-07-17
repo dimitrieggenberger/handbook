@@ -133,23 +133,47 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* Typed related-pages list. */
+/* Typed related-pages list, in the cross-reference (hb-refs) visual
+   language: relation type as a small badge, arrow bullet before the link. */
 #page-local-handbook-area .local-handbook-relations {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    font-size: 0.875rem;
+    gap: 0.55rem;
+    font-size: 0.8125rem;
+}
+#page-local-handbook-area .local-handbook-relations li {
+    position: relative;
+    padding-left: 1.25rem;
+}
+#page-local-handbook-area .local-handbook-relations li::before {
+    content: "\2192";
+    position: absolute;
+    left: 0.1rem;
+    top: 0.05rem;
+    color: var(--primary, #0078c3);
+    font-size: 0.75rem;
 }
 #page-local-handbook-area .local-handbook-relations .relation-type {
-    display: block;
-    font-size: 0.6875rem;
-    text-transform: uppercase;
+    display: inline-block;
+    font-size: 0.625rem;
+    font-weight: 700;
     letter-spacing: 0.05em;
-    color: var(--bs-secondary-color, #6c757d);
+    text-transform: uppercase;
+    padding: 0.1rem 0.5rem;
+    border-radius: 0.3rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+    color: var(--primary, #0078c3);
+    margin-right: 0.4rem;
+    vertical-align: 0.08em;
 }
+#page-local-handbook-area .local-handbook-relations a {
+    font-weight: 600;
+    text-decoration: none;
+}
+#page-local-handbook-area .local-handbook-relations a:hover { text-decoration: underline; }
 
 /* Category navigation cards (home). */
 #page-local-handbook-area .local-handbook-category-card .card-body {
