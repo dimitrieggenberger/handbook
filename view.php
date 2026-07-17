@@ -465,15 +465,12 @@ if ($pathctx) {
         $nexturl = new moodle_url('/local/handbook/view.php',
             ['page' => $pathctx->next->slug, 'path' => $pathctx->path->id]);
         if ($needsconfirm) {
+            // The confirmation card sits directly above — no second button.
             $inner .= html_writer::span(s(get_string('pathnextconfirm', 'local_handbook')), 'title');
             $inner .= html_writer::div(
-                html_writer::link('#confirmar',
-                    html_writer::tag('i', '', ['class' => 'fa-solid fa-check me-2', 'aria-hidden' => 'true'])
-                    . s(get_string('confirmreading', 'local_handbook')),
-                    ['class' => 'btn btn-primary btn-sm mr-2'])
-                . html_writer::link($nexturl,
+                html_writer::link($nexturl,
                     s(get_string('pathnextup', 'local_handbook', format_string($pathctx->next->title))) . ' ›',
-                    ['class' => 'btn btn-link btn-sm']),
+                    ['class' => 'btn btn-outline-secondary btn-sm']),
                 'mt-2');
         } else {
             $inner .= html_writer::span(s(format_string($pathctx->next->title)), 'title');
