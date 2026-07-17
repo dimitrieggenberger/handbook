@@ -349,6 +349,8 @@ $string['searchresultcount'] = '{$a} Seiten gefunden';
 $string['noresults'] = 'Keine Seite entspricht deiner Suche.';
 $string['viewallresults'] = 'Alle {$a} Ergebnisse anzeigen';
 $string['opencategorylink'] = 'Kategorie öffnen';
+$string['openall'] = 'Alle öffnen';
+$string['closeall'] = 'Alle schließen';
 
 // Revision history and comparison.
 $string['comparerevisions'] = 'Versionen vergleichen';

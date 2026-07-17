@@ -196,7 +196,17 @@ if ($personalcards) {
 $categories = local_handbook_get_categories(0, has_capability('local/handbook:managecategories', $context));
 $counts = local_handbook_count_published_pages_by_category();
 
-echo html_writer::tag('h3', s(get_string('categories', 'local_handbook')), ['class' => 'h5 mb-3']);
+echo html_writer::div(
+    html_writer::tag('h3', s(get_string('categories', 'local_handbook')), ['class' => 'h5 mb-0'])
+    . html_writer::tag('button', s(get_string('openall', 'local_handbook')), [
+        'type' => 'button',
+        'class' => 'btn btn-outline-secondary btn-sm',
+        'data-action' => 'handbook-toggleall',
+        'data-openlabel' => get_string('openall', 'local_handbook'),
+        'data-closelabel' => get_string('closeall', 'local_handbook'),
+    ]),
+    'd-flex align-items-center justify-content-between mb-3');
+$PAGE->requires->js(new moodle_url('/local/handbook/js/accordion.js'));
 
 if (!$categories) {
     echo html_writer::div(s(get_string('nocategoriesyet', 'local_handbook')), 'alert alert-info');

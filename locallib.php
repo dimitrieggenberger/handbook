@@ -1068,10 +1068,7 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
     }
 
     $body = html_writer::div($pills, 'local-handbook-card-pills')
-        . html_writer::tag('h4',
-            html_writer::link(local_handbook_page_url($page), s($page->title),
-                ['class' => 'stretched-link']),
-            ['class' => 'local-handbook-card-title'])
+        . html_writer::tag('h4', s($page->title), ['class' => 'local-handbook-card-title'])
         . (trim((string)$page->summary) !== ''
             ? html_writer::tag('p', s($page->summary), ['class' => 'local-handbook-card-summary'])
             : '');
@@ -1081,11 +1078,13 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
                 . local_handbook_format_date((int)$page->timemodified)))
         . ($version ? html_writer::span(s(get_string('versionnumber', 'local_handbook', $version))) : '');
 
-    return html_writer::tag('article',
+    // The card IS the link (no overlay tricks a theme can break); it contains
+    // no other interactive elements, so the whole surface navigates.
+    return html_writer::link(local_handbook_page_url($page),
         $media
         . html_writer::div($body, 'local-handbook-card-body')
         . html_writer::div($foot, 'local-handbook-card-foot'),
-        ['class' => 'local-handbook-card position-relative']);
+        ['class' => 'local-handbook-card']);
 }
 
 /**

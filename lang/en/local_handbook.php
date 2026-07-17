@@ -349,6 +349,8 @@ $string['searchresultcount'] = '{$a} pages found';
 $string['noresults'] = 'No pages match your search.';
 $string['viewallresults'] = 'View all {$a} results';
 $string['opencategorylink'] = 'Open category';
+$string['openall'] = 'Open all';
+$string['closeall'] = 'Close all';
 
 // Revision history and comparison.
 $string['comparerevisions'] = 'Compare revisions';
