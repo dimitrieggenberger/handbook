@@ -98,6 +98,8 @@ echo html_writer::empty_tag('input', [
     'class' => 'form-control form-control-lg',
     'placeholder' => get_string('searchplaceholder', 'local_handbook'),
     'aria-label' => get_string('searchhandbook', 'local_handbook'),
+    'autocomplete' => 'off',
+    'data-livesearch' => 1,
 ]);
 echo html_writer::div(
     html_writer::tag('button',
@@ -119,7 +121,18 @@ echo html_writer::tag('select', $categoryoptions,
 echo html_writer::end_div();
 echo html_writer::end_tag('form');
 
+// Live results appear here while typing; the static (submitted) results below
+// are hidden while the live panel is active (js/livesearch.js).
+echo html_writer::div('', 'local-handbook-livesearch', [
+    'data-region' => 'livesearch',
+    'data-ajaxurl' => (new moodle_url('/local/handbook/ajax.php'))->out(false),
+    'aria-live' => 'polite',
+]);
+$PAGE->requires->js(new moodle_url('/local/handbook/js/livesearch.js'));
+
 // ---- Results ------------------------------------------------------------.
+
+echo html_writer::start_div('', ['data-region' => 'static-results']);
 
 if (\core_text::strlen($query) >= 2 || $contenttype !== '' || $categoryid) {
     $like = '%' . $DB->sql_like_escape($query) . '%';
@@ -167,28 +180,16 @@ if (\core_text::strlen($query) >= 2 || $contenttype !== '' || $categoryid) {
     if (!$results) {
         echo html_writer::div(s(get_string('noresults', 'local_handbook')), 'alert alert-info');
     } else {
-        $items = '';
+        $cards = '';
         foreach ($results as $result) {
-            $meta = get_string('contenttype_' . $result->contenttype, 'local_handbook')
-                . ' · ' . get_string('versionnumber', 'local_handbook', (int)$result->versionnumber)
-                . ' · ' . local_handbook_format_date((int)$result->timepublished);
-            $summary = trim((string)$result->summary) !== ''
-                ? html_writer::div(s(shorten_text($result->summary, 220)), 'small')
-                : '';
-            $items .= html_writer::tag('li',
-                html_writer::link(local_handbook_page_url($result), s($result->title))
-                . $summary
-                . html_writer::span($meta, 'page-meta')
-            );
+            $cards .= local_handbook_render_page_card($result, (int)$result->versionnumber);
         }
-        echo html_writer::div(
-            html_writer::div(html_writer::tag('ul', $items, ['class' => 'local-handbook-pagelist']),
-                'card-body'),
-            'card mb-3'
-        );
+        echo html_writer::div($cards, 'local-handbook-cards mb-3');
 
         echo $OUTPUT->paging_bar($total, $pagenumber, $perpage, $url);
     }
 }
+
+echo html_writer::end_div(); // [data-region=static-results].
 
 echo $OUTPUT->footer();

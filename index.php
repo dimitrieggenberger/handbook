@@ -68,6 +68,8 @@ echo html_writer::empty_tag('input', [
     'class' => 'form-control form-control-lg',
     'placeholder' => get_string('searchplaceholder', 'local_handbook'),
     'aria-label' => get_string('searchhandbook', 'local_handbook'),
+    'autocomplete' => 'off',
+    'data-livesearch' => 1,
 ]);
 echo html_writer::div(
     html_writer::tag('button',
@@ -78,6 +80,14 @@ echo html_writer::div(
 );
 echo html_writer::end_div();
 echo html_writer::end_tag('form');
+
+// Live results land here as the user types (js/livesearch.js).
+echo html_writer::div('', 'local-handbook-livesearch', [
+    'data-region' => 'livesearch',
+    'data-ajaxurl' => (new moodle_url('/local/handbook/ajax.php'))->out(false),
+    'aria-live' => 'polite',
+]);
+$PAGE->requires->js(new moodle_url('/local/handbook/js/livesearch.js'));
 
 // ---- Personal row: pending reading, path progress, editorial work --------.
 
@@ -179,10 +189,9 @@ if ($personalcards) {
     echo html_writer::end_div();
 }
 
-// ---- Categories (left) + rail (right) -------------------------------------.
-
-echo html_writer::start_div('row');
-echo html_writer::start_div('col-lg-8');
+// ---- Categories: full-width, two-column accordion -------------------------.
+// Each category is a native <details> drawer; opening it reveals its pages as
+// banner cards (same renderer as the category view) plus subcategory chips.
 
 $categories = local_handbook_get_categories(0, has_capability('local/handbook:managecategories', $context));
 $counts = local_handbook_count_published_pages_by_category();
@@ -192,61 +201,78 @@ echo html_writer::tag('h3', s(get_string('categories', 'local_handbook')), ['cla
 if (!$categories) {
     echo html_writer::div(s(get_string('nocategoriesyet', 'local_handbook')), 'alert alert-info');
 } else {
-    $cards = '';
+    $items = '';
     foreach ($categories as $category) {
         $caturl = new moodle_url('/local/handbook/category.php', ['id' => $category->id]);
+        $children = local_handbook_get_categories((int)$category->id);
 
         $pagecount = $counts[(int)$category->id] ?? 0;
-        $children = local_handbook_get_categories((int)$category->id);
-        $sublinks = [];
         foreach ($children as $child) {
             $pagecount += $counts[(int)$child->id] ?? 0;
-            if (count($sublinks) < 4) {
-                $sublinks[] = html_writer::tag('li', html_writer::link(
-                    new moodle_url('/local/handbook/category.php', ['id' => $child->id]),
-                    s($child->name)
-                ));
-            }
         }
-
         $countlabel = $pagecount === 1
             ? get_string('pagecountone', 'local_handbook')
             : get_string('pagecount', 'local_handbook', $pagecount);
 
-        $header = html_writer::div(
-            html_writer::div(
-                html_writer::span(
-                    html_writer::tag('i', '', ['class' => 'fa-solid '
-                        . local_handbook_category_icon($category), 'aria-hidden' => 'true']),
-                    'category-icon'
-                )
-                . html_writer::tag('h4', html_writer::link($caturl, s($category->name)), ['class' => 'h6 mb-0']),
-                'd-flex align-items-center gap-2'
-            )
-            . html_writer::span(s($countlabel), 'category-count'),
-            'd-flex align-items-center gap-2 justify-content-between'
-        );
+        // Summary row: icon, name, count, chevron.
+        $summary = html_writer::tag('summary',
+            html_writer::span(
+                html_writer::tag('i', '', ['class' => 'fa-solid '
+                    . local_handbook_category_icon($category), 'aria-hidden' => 'true']),
+                'category-icon')
+            . html_writer::span(s($category->name)
+                . (!(int)$category->visible
+                    ? ' ' . html_writer::span(s(get_string('hidden', 'core')), 'badge badge-secondary')
+                    : ''), 'cat-acc-name')
+            . html_writer::span(s($countlabel), 'category-count')
+            . html_writer::tag('i', '', ['class' => 'fa-solid fa-chevron-down cat-acc-chevron',
+                'aria-hidden' => 'true']));
 
-        $body = $header;
-        if ($sublinks) {
-            $body .= html_writer::tag('ul', implode('', $sublinks), ['class' => 'category-sub']);
-        }
-        if (!(int)$category->visible) {
-            $body .= html_writer::div(s(get_string('hidden', 'core')), 'small text-muted mt-1');
+        // Drawer: subcategory chips + page cards + open-category link.
+        $drawer = '';
+        if ($children) {
+            $chips = '';
+            foreach ($children as $child) {
+                $childcount = $counts[(int)$child->id] ?? 0;
+                $chips .= html_writer::link(
+                    new moodle_url('/local/handbook/category.php', ['id' => $child->id]),
+                    s($child->name) . ($childcount
+                        ? ' ' . html_writer::span($childcount, 'chip-count') : ''),
+                    ['class' => 'cat-acc-chip']);
+            }
+            $chips .= html_writer::link($caturl,
+                s(get_string('opencategorylink', 'local_handbook')) . ' ›',
+                ['class' => 'cat-acc-chip is-open-link']);
+            $drawer .= html_writer::div($chips, 'cat-acc-chips');
         }
 
-        $cards .= html_writer::div(
-            html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3 flex-fill local-handbook-category-card'),
-            'col-md-6 d-flex'
-        );
+        $pages = local_handbook_get_published_pages((int)$category->id);
+        if ($pages) {
+            $versions = local_handbook_published_versions($pages);
+            $cards = '';
+            foreach ($pages as $page) {
+                $cards .= local_handbook_render_page_card($page,
+                    $versions[(int)$page->publishedrevisionid] ?? 0);
+            }
+            $drawer .= html_writer::div($cards, 'local-handbook-cards cat-acc-cards');
+        } else if (!$children) {
+            $drawer .= html_writer::div(s(get_string('emptycategory', 'local_handbook')),
+                'small text-muted');
+        }
+        if (!$children) {
+            $drawer .= html_writer::div(html_writer::link($caturl,
+                s(get_string('opencategorylink', 'local_handbook')) . ' ›',
+                ['class' => 'cat-acc-openlink']), 'mt-2');
+        }
+
+        $items .= html_writer::tag('details',
+            $summary . html_writer::div($drawer, 'cat-acc-body'),
+            ['class' => 'local-handbook-cat-acc']);
     }
-    echo html_writer::div($cards, 'row');
+    echo html_writer::div($items, 'local-handbook-cat-grid mb-4');
 }
 
-echo html_writer::end_div(); // .col-lg-8.
-
-// Rail.
-echo html_writer::start_div('col-lg-4');
+// ---- Highlights row (formerly the rail) ------------------------------------.
 
 $railcards = [];
 
@@ -306,11 +332,15 @@ if ($templates) {
 if (!$railcards && !$recent) {
     echo html_writer::div(s(get_string('nopagesyet', 'local_handbook')), 'alert alert-info');
 }
-foreach ($railcards as $card) {
-    echo html_writer::div(html_writer::div($card, 'card-body'), 'card mb-3');
+if ($railcards) {
+    $railcolumn = 'col-md-6 col-xl-' . (count($railcards) >= 4 ? '3' : (int)(12 / max(1, count($railcards))));
+    echo html_writer::start_div('row');
+    foreach ($railcards as $card) {
+        echo html_writer::div(
+            html_writer::div(html_writer::div($card, 'card-body'), 'card mb-3 flex-fill'),
+            $railcolumn . ' d-flex');
+    }
+    echo html_writer::end_div();
 }
-
-echo html_writer::end_div(); // .col-lg-4.
-echo html_writer::end_div(); // .row.
 
 echo $OUTPUT->footer();

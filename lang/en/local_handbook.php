@@ -347,6 +347,8 @@ $string['alltypes'] = 'All types';
 $string['allcategories'] = 'All categories';
 $string['searchresultcount'] = '{$a} pages found';
 $string['noresults'] = 'No pages match your search.';
+$string['viewallresults'] = 'View all {$a} results';
+$string['opencategorylink'] = 'Open category';
 
 // Revision history and comparison.
 $string['comparerevisions'] = 'Compare revisions';

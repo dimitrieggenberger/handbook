@@ -347,6 +347,8 @@ $string['alltypes'] = 'Todos los tipos';
 $string['allcategories'] = 'Todas las categorías';
 $string['searchresultcount'] = '{$a} páginas encontradas';
 $string['noresults'] = 'Ninguna página coincide con tu búsqueda.';
+$string['viewallresults'] = 'Ver los {$a} resultados';
+$string['opencategorylink'] = 'Abrir categoría';
 
 // Revision history and comparison.
 $string['comparerevisions'] = 'Comparar revisiones';

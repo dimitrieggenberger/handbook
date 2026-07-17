@@ -807,3 +807,93 @@
 #page-local-handbook-area .local-handbook-page-body .hb-checklist {
     max-width: 70ch;
 }
+
+/* Home: full-width two-column category accordion. Each category is a native
+   <details> drawer that opens to reveal its page cards. */
+#page-local-handbook-area .local-handbook-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+@media (max-width: 767px) {
+    #page-local-handbook-area .local-handbook-cat-grid { grid-template-columns: 1fr; }
+}
+#page-local-handbook-area .local-handbook-cat-acc {
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    overflow: hidden;
+}
+#page-local-handbook-area .local-handbook-cat-acc > summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    font-weight: 600;
+}
+#page-local-handbook-area .local-handbook-cat-acc > summary::-webkit-details-marker { display: none; }
+#page-local-handbook-area .local-handbook-cat-acc > summary:hover { background: var(--gray-100, #f8f9fa); }
+#page-local-handbook-area .local-handbook-cat-acc > summary:focus-visible {
+    outline: 2px solid var(--primary, #0078c3);
+    outline-offset: -2px;
+}
+#page-local-handbook-area .local-handbook-cat-acc .cat-acc-name { flex: 1 1 auto; min-width: 0; }
+#page-local-handbook-area .local-handbook-cat-acc .category-count { white-space: nowrap; }
+#page-local-handbook-area .local-handbook-cat-acc .cat-acc-chevron {
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+#page-local-handbook-area .local-handbook-cat-acc[open] > summary { border-bottom: 1px solid var(--bs-border-color, #dee2e6); }
+#page-local-handbook-area .local-handbook-cat-acc[open] .cat-acc-chevron { transform: rotate(180deg); }
+#page-local-handbook-area .local-handbook-cat-acc .cat-acc-body { padding: 1rem 1.1rem 1.2rem; }
+@media (prefers-reduced-motion: no-preference) {
+    #page-local-handbook-area .local-handbook-cat-acc[open] .cat-acc-body {
+        animation: local-handbook-drawer 0.22s ease;
+    }
+}
+@keyframes local-handbook-drawer {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Cards inside a half-width drawer: smaller minimum so two fit. */
+#page-local-handbook-area .cat-acc-cards {
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 0.9rem;
+}
+#page-local-handbook-area .cat-acc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.9rem;
+}
+#page-local-handbook-area .cat-acc-chip {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--bs-body-color, #1c2430);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    text-decoration: none;
+}
+#page-local-handbook-area .cat-acc-chip:hover {
+    border-color: var(--primary, #0078c3);
+    color: var(--primary, #0078c3);
+    text-decoration: none;
+}
+#page-local-handbook-area .cat-acc-chip .chip-count { color: var(--bs-secondary-color, #6c757d); margin-left: 0.25rem; }
+#page-local-handbook-area .cat-acc-chip.is-open-link { color: var(--primary, #0078c3); border-style: dashed; }
+#page-local-handbook-area .cat-acc-openlink { font-size: 0.85rem; }
+
+/* Live search results panel (populated by js/livesearch.js). */
+#page-local-handbook-area .local-handbook-livesearch { display: none; }
+#page-local-handbook-area .local-handbook-livesearch.is-active {
+    display: block;
+    margin: -0.5rem 0 1.5rem;
+}
+#page-local-handbook-area .local-handbook-livesearch.is-loading { opacity: 0.55; }

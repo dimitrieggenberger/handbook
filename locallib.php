@@ -1035,6 +1035,81 @@ function local_handbook_contenttype_icon(string $contenttype): string {
 }
 
 /**
+ * Render one page as a banner card (category view, home accordion, live
+ * search results all share this markup). Whole card is clickable.
+ *
+ * @param stdClass $page Page record.
+ * @param int $version Published version number (0 = omit).
+ * @return string HTML.
+ */
+function local_handbook_render_page_card(stdClass $page, int $version = 0): string {
+    $bannerurl = local_handbook_banner_url((int)$page->id);
+    if ($bannerurl) {
+        $media = html_writer::div(
+            html_writer::empty_tag('img', [
+                'src' => $bannerurl->out(false), 'alt' => '', 'loading' => 'lazy',
+            ]),
+            'local-handbook-card-media');
+    } else {
+        $media = html_writer::div(
+            html_writer::tag('i', '', [
+                'class' => 'fa-solid ' . local_handbook_contenttype_icon((string)$page->contenttype),
+                'aria-hidden' => 'true',
+            ]),
+            'local-handbook-card-media is-fallback');
+    }
+
+    $pills = html_writer::span(
+        s(get_string('contenttype_' . $page->contenttype, 'local_handbook')),
+        'local-handbook-card-pill');
+    if ((int)$page->requiredreading) {
+        $pills .= html_writer::span(s(get_string('requiredreading', 'local_handbook')),
+            'local-handbook-card-pill is-required');
+    }
+
+    $body = html_writer::div($pills, 'local-handbook-card-pills')
+        . html_writer::tag('h4',
+            html_writer::link(local_handbook_page_url($page), s($page->title),
+                ['class' => 'stretched-link']),
+            ['class' => 'local-handbook-card-title'])
+        . (trim((string)$page->summary) !== ''
+            ? html_writer::tag('p', s($page->summary), ['class' => 'local-handbook-card-summary'])
+            : '');
+
+    $foot = html_writer::span(
+            s(get_string('lastupdated', 'local_handbook') . ': '
+                . local_handbook_format_date((int)$page->timemodified)))
+        . ($version ? html_writer::span(s(get_string('versionnumber', 'local_handbook', $version))) : '');
+
+    return html_writer::tag('article',
+        $media
+        . html_writer::div($body, 'local-handbook-card-body')
+        . html_writer::div($foot, 'local-handbook-card-foot'),
+        ['class' => 'local-handbook-card position-relative']);
+}
+
+/**
+ * Published version numbers for a set of pages, in one query.
+ *
+ * @param stdClass[] $pages Page records (need publishedrevisionid).
+ * @return int[] versionnumber keyed by revision id.
+ */
+function local_handbook_published_versions(array $pages): array {
+    global $DB;
+
+    $versions = [];
+    $revisionids = array_filter(array_map(
+        static fn(stdClass $p): int => (int)$p->publishedrevisionid, $pages));
+    if ($revisionids) {
+        foreach ($DB->get_records_list('local_handbook_revision', 'id', $revisionids,
+                '', 'id, versionnumber') as $rev) {
+            $versions[(int)$rev->id] = (int)$rev->versionnumber;
+        }
+    }
+    return $versions;
+}
+
+/**
  * The handbook content-pattern catalogue (the "hb-*" house style).
  *
  * Single source of truth shared by the editor style guide (manage/styleguide.php)
