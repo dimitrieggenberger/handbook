@@ -253,6 +253,8 @@ $string['sgtitle_keyvalue'] = 'Datenblatt (Ficha)';
 $string['sguse_keyvalue'] = 'Ein kompaktes Bezeichnung→Wert-Blatt für ein Gremium, eine Rolle oder ein Objekt.';
 $string['sgtitle_checklist'] = 'Checkliste';
 $string['sguse_checklist'] = 'Eine druckbare Checkliste für ein Verfahren. Die Kästchen sind für Druck/Arbeitsgebrauch; Häkchen werden nicht gespeichert.';
+$string['sgtitle_legal'] = 'Reglement / Rechtsartikel';
+$string['sguse_legal'] = 'Für Reglemente und normative Dokumente: Titel und nummerierte Abschnitte als Überschriften (sie speisen das Seiteninhaltsverzeichnis), vom Autor geschriebene Artikelnummern (nie automatisch — sie sind kanonisch), Buchstaben-Literale, Gültigkeitsnotizen und aufgehobene Artikel. Jeder Artikel trägt id=\"art-N\" für Direktlinks. Empfohlen: eine Handbuchseite pro Titel.';
 
 // Lesepfad-Empfehlungen und Audits (Spez. 10).
 $string['recommendations'] = 'Pfad-Empfehlungen';

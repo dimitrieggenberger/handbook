@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_handbook';
-$plugin->version = 2026071532;
+$plugin->version = 2026071534;
 $plugin->requires = 2026042001; // Moodle 5.2.1.
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.19.2';
+$plugin->release = '0.20.0';

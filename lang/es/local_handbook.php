@@ -253,6 +253,8 @@ $string['sgtitle_keyvalue'] = 'Ficha';
 $string['sguse_keyvalue'] = 'Una ficha compacta de etiqueta→valor para un comité, rol o elemento.';
 $string['sgtitle_checklist'] = 'Lista de verificación';
 $string['sguse_checklist'] = 'Una lista de verificación imprimible para un procedimiento. Las casillas son de uso impreso/de trabajo; las marcas no se guardan.';
+$string['sgtitle_legal'] = 'Reglamento / artículos legales';
+$string['sguse_legal'] = 'Para reglamentos y documentos normativos: títulos y secciones numeradas como encabezados (alimentan el índice de la página), números de artículo escritos por el autor (nunca automáticos: son canónicos), literales con letra, notas de vigencia y artículos derogados. Cada artículo lleva id=\"art-N\" para enlaces directos. Recomendado: una página del manual por título.';
 
 // Recomendaciones y auditorías de rutas de lectura (spec 10).
 $string['recommendations'] = 'Recomendaciones de rutas';

@@ -253,6 +253,8 @@ $string['sgtitle_keyvalue'] = 'Fact sheet (ficha)';
 $string['sguse_keyvalue'] = 'A compact label→value sheet for a committee, role or item.';
 $string['sgtitle_checklist'] = 'Checklist';
 $string['sguse_checklist'] = 'A printable checklist for a procedure. The boxes are for print/working use; ticks are not saved.';
+$string['sgtitle_legal'] = 'Rulebook / legal articles';
+$string['sguse_legal'] = 'For reglamentos and normative documents: títulos and numbered sections as headings (they feed the on-page TOC), author-written article numbers (never auto-numbered — they are canonical), lettered literals, vigency notes and derogated articles. Each article carries id=\"art-N\" for deep links. Recommended: one handbook page per título.';
 
 // Reading-path recommendations & audits (spec 10).
 $string['recommendations'] = 'Path recommendations';

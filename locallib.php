@@ -1323,6 +1323,39 @@ HTML);
 </ul>
 HTML);
 
+    $add('legal', <<<'HTML'
+<div class="hb-legal">
+
+  <h2 class="hb-titulo"><span class="no">5</span>
+    <span class="name">Título Quinto</span></h2>
+
+  <h3 class="hb-seccion"><span class="no">5.1</span>
+    <span>Disposiciones de Orden y Disciplina</span></h3>
+
+  <h4 class="hb-subseccion"><span class="no">5.1.1</span>
+    <span>Consideraciones Preliminares</span></h4>
+
+  <p class="hb-art" id="art-106"><span class="hb-art-no">Artículo 106.</span>
+  En EuropaSchule se entiende como disciplina un conjunto de normas formativas
+  que deben acatarse para promover la buena convivencia escolar.</p>
+
+  <p class="hb-art" id="art-110"><span class="hb-art-no">Artículo 110.</span>
+  La aplicación de cualquier medida debe considerar:</p>
+  <ol class="hb-literals">
+    <li>Cuidado y protección a la integridad física y a la dignidad personal del alumno(a).</li>
+    <li>Las medidas deberán propender a la toma de conciencia y reflexión.</li>
+    <li>Las correcciones serán proporcionales a la falta.</li>
+  </ol>
+
+  <div class="hb-note"><p><strong>Nota de vigencia:</strong> literales b) y c)
+  modificados por acuerdo del ELP, acta 12-2026.</p></div>
+
+  <p class="hb-art is-derogado" id="art-108"><span class="hb-art-no">Artículo 108.</span>
+  <span class="der">(Derogado — acuerdo ELP, acta 09-2026.)</span></p>
+
+</div>
+HTML);
+
     return $patterns;
 }
 
