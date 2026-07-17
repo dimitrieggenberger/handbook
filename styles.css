@@ -769,3 +769,41 @@
     overflow-x: auto; white-space: pre; tab-size: 2;
     font-size: 0.82rem; line-height: 1.6;
 }
+
+/* Whole category card clickable: draw the stretched-link overlay ourselves
+   (the theme's Bootstrap predates .stretched-link). */
+#page-local-handbook-area .local-handbook-card .local-handbook-card-title a::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    cursor: pointer;
+}
+
+/* Content patterns share the article's text measure (70ch), so a callout or
+   a do/don't block never grows wider than the paragraphs around it. Wide
+   internals (org chart, RACI table) scroll inside their own container. */
+#page-local-handbook-area .local-handbook-page-body .hb-steps,
+#page-local-handbook-area .local-handbook-page-body .hb-note,
+#page-local-handbook-area .local-handbook-page-body .hb-tip,
+#page-local-handbook-area .local-handbook-page-body .hb-warning,
+#page-local-handbook-area .local-handbook-page-body .hb-important,
+#page-local-handbook-area .local-handbook-page-body .hb-result,
+#page-local-handbook-area .local-handbook-page-body .hb-branches,
+#page-local-handbook-area .local-handbook-page-body .hb-org,
+#page-local-handbook-area .local-handbook-page-body .hb-org-team.is-standalone,
+#page-local-handbook-area .local-handbook-page-body .hb-roles,
+#page-local-handbook-area .local-handbook-page-body .hb-escalation,
+#page-local-handbook-area .local-handbook-page-body .hb-dodont,
+#page-local-handbook-area .local-handbook-page-body .hb-timeline,
+#page-local-handbook-area .local-handbook-page-body .hb-contacts,
+#page-local-handbook-area .local-handbook-page-body .hb-define,
+#page-local-handbook-area .local-handbook-page-body .hb-matrix-wrap,
+#page-local-handbook-area .local-handbook-page-body .hb-figure,
+#page-local-handbook-area .local-handbook-page-body .hb-keyvalue,
+#page-local-handbook-area .local-handbook-page-body .hb-checklist {
+    max-width: 70ch;
+}
