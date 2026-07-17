@@ -1049,3 +1049,26 @@
         margin-left: 0;
     }
 }
+
+/* Article whose body starts directly with a list (no intro sentence): add
+   is-solo to the hb-art paragraph. The empty paragraph collapses (the number
+   is absolutely positioned, so it still shows) and the list's first item
+   starts on the SAME line as the number — no blank line between them. */
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-solo {
+    min-height: 0;
+    margin-bottom: 0;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-art.is-solo + ol:not([class]),
+#page-local-handbook-area .local-handbook-page-body .hb-legal .hb-art.is-solo + ul:not([class]),
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-solo + .hb-literals,
+#page-local-handbook-area .local-handbook-page-body .hb-art.is-solo + .hb-keyvalue {
+    margin-top: 0;
+}
+@media (max-width: 560px) {
+    /* Mobile stacks the number above the text, so the paragraph has real
+       height again; normal flow applies. */
+    #page-local-handbook-area .local-handbook-page-body .hb-art.is-solo {
+        min-height: 1.4em;
+        margin-bottom: 0.15rem;
+    }
+}

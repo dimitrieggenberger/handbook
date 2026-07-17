@@ -1356,6 +1356,15 @@ HTML);
     <li value="4">Despido como último recurso.</li>
   </ol>
 
+  <!-- Cuerpo que comienza directamente con la enumeración (sin frase
+       introductoria): agregue is-solo al párrafo para que la lista arranque
+       en la misma línea que el número, sin línea en blanco. -->
+  <p class="hb-art is-solo" id="art-85"><span class="hb-art-no">Artículo 85.</span></p>
+  <ol>
+    <li value="1">Son faltas menos graves las reincidencias de faltas leves.</li>
+    <li value="2">El abandono del puesto de trabajo sin autorización.</li>
+  </ol>
+
   <div class="hb-note"><p><strong>Nota de vigencia:</strong> literales b) y c)
   modificados por acuerdo del ELP, acta 12-2026.</p></div>
 
