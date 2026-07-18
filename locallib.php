@@ -1101,9 +1101,11 @@ function local_handbook_path_context(stdClass $page, int $requestedpathid, int $
 
     $rows = $DB->get_records_sql(
         "SELECT i.id, i.pageid, i.sectionname, i.required, i.sortorder,
-                p.slug, p.title, p.publishedrevisionid
+                p.slug, p.title, p.publishedrevisionid,
+                COALESCE(r.wordcount, 0) AS wordcount
            FROM {local_handbook_pathitem} i
            JOIN {local_handbook_page} p ON p.id = i.pageid
+      LEFT JOIN {local_handbook_revision} r ON r.id = p.publishedrevisionid
           WHERE i.pathid = :pathid AND p.archived = 0
        ORDER BY i.sortorder ASC, i.id ASC", ['pathid' => (int)$chosen->id]);
 
@@ -1135,8 +1137,17 @@ function local_handbook_path_context(stdClass $page, int $requestedpathid, int $
             'required' => (int)$row->required,
             'done' => $done,
             'iscurrent' => (int)$row->pageid === (int)$page->id,
+            'wordcount' => (int)$row->wordcount,
         ];
         $index++;
+    }
+
+    // Reading-time estimate: what is still unconfirmed, in minutes.
+    $remainingwords = 0;
+    foreach ($items as $item) {
+        if (!$item->done) {
+            $remainingwords += $item->wordcount;
+        }
     }
 
     return (object)[
@@ -1147,6 +1158,7 @@ function local_handbook_path_context(stdClass $page, int $requestedpathid, int $
             ? $items[$currentindex + 1] : null,
         'confirmed' => $confirmed,
         'total' => $total,
+        'remainingminutes' => local_handbook_reading_minutes($remainingwords),
     ];
 }
 
@@ -1183,7 +1195,10 @@ function local_handbook_render_path_panel(stdClass $ctx): string {
         'progress mb-1', ['style' => 'height: 0.4rem;']);
     $body .= html_writer::div(s(get_string('pathprogress', 'local_handbook', (object)[
         'confirmed' => $ctx->confirmed, 'total' => $ctx->total,
-    ])), 'small text-muted mb-2');
+    ]))
+        . (!empty($ctx->remainingminutes)
+            ? ' · ' . s(get_string('readingtimeleft', 'local_handbook', $ctx->remainingminutes))
+            : ''), 'small text-muted mb-2');
 
     $rows = '';
     foreach ($ctx->items as $item) {
@@ -1208,6 +1223,20 @@ function local_handbook_render_path_panel(stdClass $ctx): string {
 
     return html_writer::div(html_writer::div($body, 'card-body'),
         'card mb-3 local-handbook-pathpanel');
+}
+
+/**
+ * Reading minutes for a word count: ~200 words per minute (institutional
+ * Spanish prose reads slower than casual text), minimum one minute.
+ *
+ * @param int $words Word count (image weight already baked in at save).
+ * @return int Estimated minutes, >= 1 when there are any words.
+ */
+function local_handbook_reading_minutes(int $words): int {
+    if ($words <= 0) {
+        return 0;
+    }
+    return max(1, (int)ceil($words / 200));
 }
 
 /**

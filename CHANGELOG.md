@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.31.0 (2026-07-18)
+
+Reading-time estimates for paths.
+
+- Word count stored per revision at save time (new `wordcount` column;
+  the upgrade step backfills every existing revision), counting unicode
+  words in the plaintext plus a small weight per image.
+- Path page header shows a clock with the total: "≈ N min de lectura",
+  at ~200 words per minute over the published items — or the manual
+  override when set (new "Estimated reading minutes" field on the path
+  form, for paths that include videos or activities).
+- The reading-path side panel shows the remaining time ("quedan ≈ N
+  min"), computed from the items the reader has not yet confirmed, so
+  it shrinks as they progress.
+- Estimates are labelled as approximate by design. EN/ES/DE strings.
+
 ## 0.30.0 (2026-07-18)
 
 Reading dashboard: who has read what, person by person.

@@ -89,6 +89,7 @@
         <FIELD NAME="content" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
         <FIELD NAME="plaintext" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="wordcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Word count of the plaintext (plus a small weight per image), for reading-time estimates"/>
         <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" DEFAULT=""/>
         <FIELD NAME="changesummary" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="reviewnote" TYPE="text" NOTNULL="false"/>

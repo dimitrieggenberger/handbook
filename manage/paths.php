@@ -115,6 +115,7 @@ if ($action === 'edit') {
         $record->audiencejson = path_service::encode_audience(
             (array)($data->audiencecohorts ?? []), (array)($data->audienceroles ?? []));
         $record->optionalpath = (int)($data->optionalpath ?? 0);
+        $record->estimatedminutes = max(0, (int)($data->estimatedminutes ?? 0));
         $record->quizcmid = 0;
         $record->timemodified = $now;
         $record->modifiedby = (int)$USER->id;

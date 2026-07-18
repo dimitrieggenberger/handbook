@@ -87,6 +87,25 @@ if ((int)$path->optionalpath) {
         'alert alert-info');
 }
 
+// Reading-time estimate for the whole path: the manual override on the
+// path record wins; otherwise the sum of the published items' word counts
+// (~200 words per minute, image weight baked in at save time).
+$totalwords = (int)$DB->get_field_sql(
+    "SELECT COALESCE(SUM(r.wordcount), 0)
+       FROM {local_handbook_pathitem} i
+       JOIN {local_handbook_page} p ON p.id = i.pageid
+  LEFT JOIN {local_handbook_revision} r ON r.id = p.publishedrevisionid
+      WHERE i.pathid = :pathid AND p.archived = 0", ['pathid' => $path->id]);
+$totalminutes = (int)$path->estimatedminutes > 0
+    ? (int)$path->estimatedminutes
+    : local_handbook_reading_minutes($totalwords);
+if ($totalminutes > 0) {
+    echo html_writer::div(
+        html_writer::tag('i', '', ['class' => 'fa-regular fa-clock me-2', 'aria-hidden' => 'true'])
+        . s(get_string('readingtimetotal', 'local_handbook', $totalminutes)),
+        'text-muted mb-3 local-handbook-path-clock');
+}
+
 // Switcher when several paths are visible to this user.
 if (count($visiblepaths) > 1) {
     $links = '';
@@ -111,9 +130,10 @@ if (trim((string)$path->description) !== '') {
 // Archived pages drop out of active reading paths (spec 23), consistent with
 // the progress calculation in path_service.
 $sql = "SELECT i.*, p.slug, p.title, p.requiredreading, p.publishedrevisionid, p.archived,
-               p.categoryid, p.contenttype
+               p.categoryid, p.contenttype, COALESCE(r.wordcount, 0) AS wordcount
           FROM {local_handbook_pathitem} i
           JOIN {local_handbook_page} p ON p.id = i.pageid
+     LEFT JOIN {local_handbook_revision} r ON r.id = p.publishedrevisionid
          WHERE i.pathid = :pathid AND p.archived = 0
       ORDER BY i.sortorder ASC, i.id ASC";
 $items = $DB->get_records_sql($sql, ['pathid' => $path->id]);

@@ -506,5 +506,30 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071562, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071564) {
+        // Reading-time estimates: word count stored per revision at save
+        // time (recounting on display would load every plaintext).
+        $table = new xmldb_table('local_handbook_revision');
+        $field = new xmldb_field('wordcount', XMLDB_TYPE_INTEGER, '10', null,
+            XMLDB_NOTNULL, null, '0', 'plaintext');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Backfill existing revisions (same formula as page_service::wordcount:
+        // words in the plaintext plus 33 word-equivalents per image ~ 10s each).
+        $recordset = $DB->get_recordset('local_handbook_revision', null, '',
+            'id, plaintext, content');
+        foreach ($recordset as $revision) {
+            $words = preg_match_all('/[\p{L}\p{N}]+/u', (string)$revision->plaintext);
+            $images = preg_match_all('/<img\b/i', (string)$revision->content);
+            $DB->set_field('local_handbook_revision', 'wordcount',
+                (int)$words + (int)$images * 33, ['id' => $revision->id]);
+        }
+        $recordset->close();
+
+        upgrade_plugin_savepoint(true, 2026071564, 'local', 'handbook');
+    }
+
     return true;
 }
