@@ -2061,6 +2061,17 @@ y las faltas de presentación se tratan como faltas leves.</p>
   </ul>
 </div>
 
+<!-- Forma de prosa: citas verificadas de normas superiores, con enlaces a
+     las fuentes oficiales (chips con flecha externa). is-verified agrega el
+     sello verde de verificación editorial. -->
+<div class="hb-refbox is-verified">
+  <p class="rb-title">Fundamentos superiores verificados</p>
+  <p><strong>Constitución, artículo 152:</strong> «Los padres tendrán derecho preferente a
+  escoger el tipo de educación que habrán de darles a sus hijos.»</p>
+  <p><a href="https://www.tsc.gob.hn/web/leyes/Constitucion_de_la_republica.pdf"
+      target="_blank" rel="noreferrer noopener">Constitución</a></p>
+</div>
+
 <div class="hb-refs">
   <p class="refs-title">Normativa relacionada</p>
   <div class="refs-group">

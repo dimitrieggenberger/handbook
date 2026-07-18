@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.31.1 (2026-07-18)
+
+hb-refbox: prose citations healed, verified-source treatment.
+
+- Imported legal pages use hb-refbox with a leading p.hb-doc as title
+  plus quote paragraphs ("Fundamentos superiores verificados") — the
+  badge styling clipped the title (nowrap pill) and plain paragraphs had
+  no padding. CSS-only healing: the leading badge becomes a proper title
+  bar, prose paragraphs get padding, and existing link-list refboxes are
+  untouched. No content edits needed.
+- Links with target=_blank inside a refbox render as source chips with
+  an external arrow, so official sources look official.
+- New is-verified modifier: a green check seal in the title for
+  editorially verified citations of higher law. Style-guide refs entry
+  and EN/ES/DE descriptions updated with the prose + verified forms.
+
 ## 0.31.0 (2026-07-18)
 
 Reading-time estimates for paths.

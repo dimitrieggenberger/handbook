@@ -2509,3 +2509,81 @@
     #page-local-handbook-area .local-handbook-dash-row { grid-template-columns: 1fr; gap: 0.35rem; }
     #page-local-handbook-area .local-handbook-dash-actions { justify-content: flex-start; }
 }
+
+/* ---- hb-refbox: prose citations & verified sources. The box was built
+   for link lists; imported legal pages also use it with a leading
+   p.hb-doc as title plus quote paragraphs and external source links.
+   These rules heal that shape without markup changes: the leading badge
+   becomes a proper title bar, prose gets padding, external links render
+   as source chips, and is-verified swaps the section sign for a check
+   seal on editorially verified citations. ---- */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox > p.hb-doc:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.45rem 0.9rem;
+    max-width: none;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 8%, transparent);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0;
+    white-space: normal;
+    vertical-align: baseline;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox > p.hb-doc:first-child::before {
+    content: "\00a7";
+    color: var(--primary, #0078c3);
+    font-size: 0.85rem;
+}
+/* Verified variant: green check seal in the title bar. */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox.is-verified .rb-title::before,
+#page-local-handbook-area .local-handbook-page-body .hb-refbox.is-verified > p.hb-doc:first-child::before {
+    content: "\2713";
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--success, #1e7d43) 14%, transparent);
+    color: var(--success, #1e7d43);
+    font-size: 0.62rem;
+    font-weight: 800;
+}
+/* Prose inside a refbox breathes; the title rows are excluded. */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox > p:not(.hb-doc):not(.rb-title) {
+    margin: 0.6rem 0.9rem;
+    max-width: none;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox > p:last-child {
+    margin-bottom: 0.85rem;
+}
+/* External source links render as chips with the external arrow. */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox a[target="_blank"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid color-mix(in srgb, var(--primary, #0078c3) 30%, var(--bs-border-color, #dee2e6));
+    border-radius: 999px;
+    padding: 0.1rem 0.7rem;
+    margin: 0.05rem 0.2rem 0.05rem 0;
+    font-size: 0.75rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 5%, transparent);
+    white-space: normal;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox a[target="_blank"]::after {
+    content: "\2197";
+    font-size: 0.7rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox a[target="_blank"]:hover {
+    text-decoration: none;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+}
