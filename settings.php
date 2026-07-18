@@ -37,4 +37,26 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configcheckbox('local_handbook/bootstrapmode',
         get_string('bootstrapmode', 'local_handbook'),
         get_string('bootstrapmode_desc', 'local_handbook'), 0));
+
+    // Automatic image optimisation: on save, images wider than the maximum
+    // are downscaled and re-encoded (EXIF-rotated, metadata stripped).
+    // Images are never upscaled; replacements are only kept when smaller.
+    $settings->add(new admin_setting_configcheckbox('local_handbook/imageoptimize',
+        get_string('imageoptimize', 'local_handbook'),
+        get_string('imageoptimize_desc', 'local_handbook'), 1));
+
+    $settings->add(new admin_setting_configtext('local_handbook/imagemaxwidth',
+        get_string('imagemaxwidth', 'local_handbook'),
+        get_string('imagemaxwidth_desc', 'local_handbook'), 1500, PARAM_INT));
+
+    $settings->add(new admin_setting_configtext('local_handbook/imagejpegquality',
+        get_string('imagejpegquality', 'local_handbook'),
+        get_string('imagejpegquality_desc', 'local_handbook'), 85, PARAM_INT));
+
+    // Wikipedia-style cross-links: at render time, the first mention of
+    // another published page's exact title becomes a link to that page.
+    // Stored content is never modified.
+    $settings->add(new admin_setting_configcheckbox('local_handbook/autolink',
+        get_string('autolink', 'local_handbook'),
+        get_string('autolink_desc', 'local_handbook'), 1));
 }

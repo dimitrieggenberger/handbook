@@ -156,6 +156,15 @@ if ($revision) {
     $toc = $anchored->toc;
 }
 
+// Content accordions (hb-acc): behaviour + expand-all labels. Print never
+// loads this, so drawers render open there.
+$PAGE->requires->js(new moodle_url('/local/handbook/js/contentacc.js'));
+$contenthtml = html_writer::div('', 'd-none', [
+    'data-region' => 'local-handbook-accstrings',
+    'data-expand' => get_string('accexpandall', 'local_handbook'),
+    'data-collapse' => get_string('acccollapseall', 'local_handbook'),
+]) . $contenthtml;
+
 // Typed relations in both directions (spec 9.2).
 $outgoing = $DB->get_records_sql(
     "SELECT rel.id, rel.relationtype, p.slug, p.title, p.publishedrevisionid, p.archived
@@ -279,13 +288,21 @@ if ($iseditorial) {
 echo html_writer::start_div('row');
 echo html_writer::start_div('col-lg-8');
 
-// Banner image (spec: fixed 3:1, masked with object-fit cover, centered both
-// axes). When no banner is set the block is simply not rendered.
+// Banner image: fixed 16:9 (same crop as the category cards), masked with
+// object-fit cover, centered both axes. Without a banner, the same quiet
+// 16:4 content-type tint strip the cards use.
 $bannerurl = local_handbook_banner_url((int)$page->id);
 if ($bannerurl) {
     echo html_writer::div(
         html_writer::empty_tag('img', ['src' => $bannerurl->out(false), 'alt' => '']),
         'local-handbook-page-banner');
+} else {
+    echo html_writer::div(
+        html_writer::tag('i', '', [
+            'class' => 'fa-solid ' . local_handbook_contenttype_icon((string)$page->contenttype),
+            'aria-hidden' => 'true',
+        ]),
+        'local-handbook-page-banner is-fallback');
 }
 
 echo local_handbook_render_page_badges($page);

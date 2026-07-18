@@ -219,6 +219,29 @@ $string['bannerimage'] = 'Banner image';
 $string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
 
 // Content style guide (hb-* patterns).
+// Automatic cross-links.
+$string['autolink'] = 'Auto-link page titles';
+$string['autolink_desc'] = 'Wikipedia-style cross-links: when an article mentions the exact title of another published handbook page, the first mention becomes a link to that page. Applied at display time only — stored content is never modified, links follow renames and archiving automatically, and switching this off removes them everywhere instantly. Matches are whole-title and case-insensitive; no links are added inside headings, existing links or the cross-reference patterns.';
+
+// Image optimisation.
+$string['imageoptimize'] = 'Optimise images on save';
+$string['imageoptimize_desc'] = 'When a page is saved, downscale oversized images (banner and article images, including pasted screenshots) to the maximum width, apply the EXIF rotation, strip metadata and re-encode them. Images are never upscaled, filenames never change, and a replacement is only kept when it is smaller than the original. Screenshots with transparency stay PNG; photos are (re-)encoded as JPEG.';
+$string['imagemaxwidth'] = 'Maximum image width (px)';
+$string['imagemaxwidth_desc'] = 'Images wider than this are downscaled to this width on save. 1500 covers the widest handbook layout.';
+$string['imagejpegquality'] = 'JPEG quality';
+$string['imagejpegquality_desc'] = 'Quality (50–100) for JPEG re-encoding. 85 is visually indistinguishable from higher values at screen size and considerably smaller.';
+$string['manageimages'] = 'Optimise images';
+$string['imagesintro'] = 'New images are optimised automatically when a page is saved (maximum width {$a->width}px, JPEG quality {$a->quality}). This page applies the same treatment to images uploaded before the optimiser existed: banners and article images are downscaled, EXIF-rotated, stripped of metadata and re-encoded — filenames never change, so pages keep working.';
+$string['imageoptimizeoff'] = 'Automatic optimisation on save is currently disabled in the plugin settings; the button below still works as a one-off run.';
+$string['imagesreport'] = 'Scanned {$a->scanned} images, optimised {$a->optimized}. Total size {$a->before} → {$a->after}, saved {$a->saved}.';
+$string['imagesarea'] = 'File area';
+$string['imagescount'] = 'Images';
+$string['imagessize'] = 'Size';
+$string['imagesareabanners'] = 'Banner images';
+$string['imagesareacontent'] = 'Article images (all revisions)';
+$string['imagesoptimizenow'] = 'Optimise all images now';
+$string['imagesnote'] = 'GIF (possibly animated) and SVG files are never touched. Images already at or below the maximum width are only re-encoded when that saves at least 10% — small, efficient files pass through untouched. Historical revisions are included, so the run can take a moment on a large handbook.';
+
 $string['styleguide'] = 'Content style guide';
 $string['styleguideintro'] = 'Reusable formatting patterns for articles. Open a page in Edit, switch the editor to HTML source view, and paste a pattern below — adapting the text. The same catalogue is available to the Handbook AI, so generated drafts use these patterns too.';
 $string['styleguidepatterns'] = 'Patterns';
@@ -258,11 +281,17 @@ $string['sguse_email'] = 'Show an example email the way staff see it on screen: 
 $string['sgtitle_chat'] = 'Chat example (WhatsApp look)';
 $string['sguse_chat'] = 'A phone-width chat thread: chat-title and chat-day are optional; bubbles are is-in (white, left) or is-out (green, right) with optional sender (who) and time (when). Mark individual bubbles is-good / is-bad — with a chat-verdict chip above — for style lessons. Invented names only — never paste real conversations.';
 $string['sgtitle_dialogue'] = 'Conversation script';
-$string['sguse_dialogue'] = 'Speaker-labelled turns like a screenplay, for phone protocol, de-escalation and difficult conversations. is-staff highlights institutional turns; dlg-note is an italic stage direction; is-good / is-bad add a coloured rail and a verdict chip per turn. Invented names only.';
+$string['sguse_dialogue'] = 'Speaker-labelled turns like a screenplay, for phone protocol, de-escalation and difficult conversations. is-staff highlights institutional turns; dlg-note is an italic stage direction; is-good / is-bad add a coloured rail and a verdict chip per turn. For phone-call scripts add is-call to the container: the header gets a phone icon, and turns should alternate both voices (what the family says, what the staff member says). Invented names only.';
 $string['sgtitle_acta'] = 'Agenda & minutes (acta)';
 $string['sguse_acta'] = 'The meeting pair. hb-agenda: timed rows (ag-time · ag-topic · ag-who). hb-acta: header block (participantes, preside, ausencias) plus an acuerdos table where every acuerdo carries what, who (Responsable) and when (Fecha límite) — numbering is author-written (14.1 = acta 14, item 1); ac-done marks fulfilled carry-overs.';
 $string['sgtitle_letter'] = 'Formal letter / circular';
 $string['sguse_letter'] = 'A letterhead document in serif type, as it prints: membrete (lt-head), place and date (lt-place), reference line (lt-ref), formal body and signature block (lt-sign). For circulares, constancias and official notes.';
+$string['sgtitle_acc'] = 'Accordions (template libraries)';
+$string['sguse_acc'] = 'For long list pages — communication template libraries, FAQ-style collections. Each hb-acc is one entry: acc-title (the name, with an optional acc-chip channel hint) plus acc-body (the content). Wrap related entries in hb-acc-group: groups of two or more automatically get an expand-all/collapse-all control. Drawers start collapsed, open with a smooth animation, and work by keyboard; without JavaScript and in the print view everything renders open. An hb-keyvalue placed inside a drawer automatically compacts into a slim ficha rail. Note: browser find-in-page does not search closed drawers — that is what the expand-all control is for.';
+$string['accexpandall'] = 'Expand all';
+$string['acccollapseall'] = 'Collapse all';
+$string['sgtitle_course'] = 'Simulated course section';
+$string['sguse_course'] = 'A stylized replica of the platform\'s course page for articles that document course structure: sections (crs-sec; is-collapsed, is-empty for the muted new-course state, hues is-green/is-red/is-blue), weekly subsections (crs-week; is-collapsed), activity rows (crs-act with is-page / is-pdf / is-pptx / is-assign / is-url / is-quiz / is-forum / is-video, act-chip for the file-type pill, is-hidden + crs-badge for teacher-only items), meta rows (is-dates with one or both dates, is-lock for availability conditions) and crs-desc for an activity\'s inline description (e.g. exam instructions). Annotate rows with is-good / is-bad and crs-note for structure standards. Illustrative only — for the literal pixels of a real course use hb-figure with a screenshot.';
 $string['sgtitle_feedback'] = 'Written feedback field';
 $string['sguse_feedback'] = 'One pattern for every written feedback field: homework comments, report-card remarks, teacher evaluations, observation notes. The fb-type chip names the context (Tarea / Informe / Evaluación docente — free text), fb-meta gives the direction (e.g. Docente → Estudiante), the comment renders inside a filled field (fb-field), fb-grade is an optional grade chip, and is-good / is-bad add a verdict badge for contrasting examples. Invented names only.';
 $string['pathnext'] = 'Continue the path';

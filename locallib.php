@@ -735,6 +735,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/import.php'),
             'visible' => has_capability('local/handbook:manage', $context),
         ],
+        'images' => [
+            'label' => get_string('manageimages', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/images.php'),
+            'visible' => has_capability('local/handbook:manage', $context),
+        ],
     ];
 
     $tabs = '';
@@ -904,7 +909,15 @@ function local_handbook_render_revision_content(stdClass $revision, context_syst
         'noclean' => false,
     ]);
 
-    return html_writer::div(local_handbook_demote_headings($content), 'local-handbook-page-body');
+    $content = local_handbook_demote_headings($content);
+
+    // Wikipedia-style cross-links: the first mention of another published
+    // page's title becomes a link to it (render time only; stored content
+    // is never modified).
+    $content = \local_handbook\local\service\autolink_service::apply(
+        $content, (int)$revision->pageid);
+
+    return html_writer::div($content, 'local-handbook-page-body');
 }
 
 /**
@@ -1581,6 +1594,28 @@ HTML);
     <span class="dlg-text">Eso no es conmigo, llame mañana.<span class="dlg-verdict is-bad">Así no</span></span>
   </div>
 </div>
+
+<!-- Variante de llamada (is-call): icono de teléfono en el encabezado;
+     los turnos alternan lo que dice la familia y lo que dice el personal. -->
+<div class="hb-dialogue is-call">
+  <div class="dlg-context">Llamada a la familia &middot; incidente en revisión</div>
+  <div class="dlg-turn is-staff">
+    <span class="dlg-who">Personal</span>
+    <span class="dlg-text">Buenas tardes. Le llamo de EuropaSchule para informarle que hoy se
+    presentó una situación relacionada con [nombre del estudiante]. Los hechos que podemos
+    confirmar son: [hechos observables].</span>
+  </div>
+  <div class="dlg-turn">
+    <span class="dlg-who">Familia</span>
+    <span class="dlg-text">¿Mi hijo está bien? ¿Qué fue exactamente lo que pasó?</span>
+  </div>
+  <p class="dlg-note">— responder solo con hechos confirmados; no especular —</p>
+  <div class="dlg-turn is-staff">
+    <span class="dlg-who">Personal</span>
+    <span class="dlg-text">Se encuentra [estado observable]. De inmediato realizamos [medidas
+    adoptadas]. Le contactaremos a más tardar el [fecha y hora] con los próximos pasos.</span>
+  </div>
+</div>
 HTML);
 
     $add('acta', <<<'HTML'
@@ -1685,6 +1720,166 @@ HTML);
     objetivo. Sugerencia concreta: reservar 7 minutos y usar la misma rutina de
     mini-pizarras como ticket de salida.</p>
   </div>
+</div>
+HTML);
+
+    $add('course', <<<'HTML'
+<div class="hb-course">
+  <div class="crs-sec is-collapsed">
+    <div class="sec-title">Recursos generales</div>
+  </div>
+
+  <div class="crs-sec">
+    <div class="sec-title">Parcial I — El conocimiento y el conocedor</div>
+
+    <div class="crs-week">
+      <div class="week-title">Semana del 18 al 22 de agosto</div>
+
+      <div class="crs-act is-page">
+        <span class="act-ic"></span>
+        <span class="act-name">Planificación semanal — Semana 1</span>
+      </div>
+
+      <div class="crs-act is-pdf">
+        <span class="act-ic"></span>
+        <span class="act-name">Ppt: Conocimiento personal y compartido</span>
+        <span class="act-chip">PDF</span>
+      </div>
+
+      <div class="crs-meta is-dates">
+        <span><b>Apertura:</b> lunes 18 de agosto, 7:00</span>
+        <span><b>Cierre:</b> jueves 28 de agosto, 23:59</span>
+      </div>
+      <div class="crs-act is-assign">
+        <span class="act-ic"></span>
+        <span class="act-name">Tarea: Reflexión sobre el mapa del conocimiento</span>
+      </div>
+      <div class="crs-meta is-lock">No disponible hasta que: la actividad
+        <b>Ppt: Conocimiento personal y compartido</b> se marque como completada</div>
+
+      <div class="crs-act is-url">
+        <span class="act-ic"></span>
+        <span class="act-name">La isla de California (enlace externo)</span>
+      </div>
+
+      <div class="crs-act is-pptx is-hidden">
+        <span class="act-ic"></span>
+        <span class="act-name">Conocimiento personal y compartido (editable)</span>
+        <span class="act-chip">PPTX</span>
+      </div>
+      <div class="crs-badge">Oculto para estudiantes</div>
+    </div>
+
+    <div class="crs-week is-collapsed">
+      <div class="week-title">Semana del 25 al 29 de agosto</div>
+    </div>
+
+    <div class="crs-week">
+      <div class="week-title">Exámenes: 20–24 de octubre</div>
+      <div class="crs-meta is-dates"><span><b>Apertura:</b> viernes 24 de octubre, 7:00</span></div>
+      <div class="crs-act is-quiz">
+        <span class="act-ic"></span>
+        <span class="act-name">Examen Parcial I — Teoría del Conocimiento</span>
+      </div>
+      <div class="crs-desc">
+        <p class="desc-title">Examen Parcial I — Instrucciones</p>
+        <p><strong>Materiales permitidos:</strong> solo el cuaderno de la clase.
+        <strong>Tiempo:</strong> 90 minutos.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Estado "curso nuevo": secciones vacías en color apagado (is-empty),
+     con matiz opcional (is-green / is-red / is-blue). -->
+<div class="hb-course">
+  <div class="crs-sec is-collapsed">
+    <div class="sec-title">Recursos generales</div>
+  </div>
+  <div class="crs-sec is-collapsed is-green is-empty">
+    <div class="sec-title">Evaluación diagnóstica</div>
+  </div>
+  <div class="crs-sec is-collapsed is-empty">
+    <div class="sec-title">Parcial I</div>
+  </div>
+  <div class="crs-sec is-collapsed is-red is-empty">
+    <div class="sec-title">Recuperaciones anuales</div>
+  </div>
+</div>
+
+<!-- Filas anotadas para lecciones de estructura ("así sí / así no"). -->
+<div class="hb-course">
+  <div class="crs-sec">
+    <div class="sec-title">Ejemplo — nombres de actividades</div>
+    <div class="crs-week">
+      <div class="week-title">Semana del 18 al 22 de agosto</div>
+      <div class="crs-act is-assign is-good">
+        <span class="act-ic"></span>
+        <span class="act-name">Tarea: Reflexión sobre el mapa del conocimiento</span>
+      </div>
+      <div class="crs-note"><b>Así sí:</b> tipo + tema; el estudiante sabe qué es antes de abrirla.</div>
+      <div class="crs-act is-assign is-bad">
+        <span class="act-ic"></span>
+        <span class="act-name">tarea1_FINAL(2)</span>
+      </div>
+      <div class="crs-note"><b>Así no:</b> sin tipo, sin tema, con numeración interna.</div>
+    </div>
+  </div>
+</div>
+HTML);
+
+    $add('acc', <<<'HTML'
+<div class="hb-acc-group">
+
+  <div class="hb-acc">
+    <p class="acc-title">Recordatorio de evaluaciones y temarios
+      <span class="acc-chip">WhatsApp</span></p>
+    <div class="acc-body">
+      <div class="hb-keyvalue">
+        <div class="kv-title">Ficha de uso</div>
+        <dl>
+          <dt>Uso</dt><dd>Recordar fechas de evaluación y disponibilidad de temarios.</dd>
+          <dt>Canal</dt><dd>WhatsApp institucional o grupo informativo.</dd>
+          <dt>Área</dt><dd>Coordinación Académica o docente responsable.</dd>
+        </dl>
+      </div>
+      <div class="hb-chat">
+        <div class="chat-title">Familias de [grado]<span class="sub">Mensaje colectivo</span></div>
+        <div class="hb-msg is-out">
+          <span class="who">Coordinación Académica</span>
+          <p>Estimadas familias: les recordamos que las evaluaciones del parcial se realizarán
+          del [fecha inicial] al [fecha final]. Los temarios ya están publicados en la
+          plataforma.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hb-acc">
+    <p class="acc-title">Cambio de horario o modificación del calendario
+      <span class="acc-chip">Correo</span></p>
+    <div class="acc-body">
+      <div class="hb-keyvalue">
+        <div class="kv-title">Ficha de uso</div>
+        <dl>
+          <dt>Uso</dt><dd>Informar un cambio confirmado que afecta la jornada.</dd>
+          <dt>Área</dt><dd>Dirección Oficial o Gerencia Académica.</dd>
+        </dl>
+      </div>
+      <div class="hb-email">
+        <div class="e-chrome"><i></i><i></i><i></i><span class="e-badge">Modelo</span></div>
+        <div class="e-head">
+          <div class="e-row"><span class="e-label">Asunto</span>
+            <span class="e-value e-subject">Cambio de horario del [fecha]</span></div>
+        </div>
+        <div class="e-body">
+          <p>Estimadas familias: les informamos que el [fecha] la jornada escolar se
+          desarrollará de [hora inicial] a [hora final] debido a [motivo confirmado].</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 HTML);
 

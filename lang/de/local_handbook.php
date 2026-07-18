@@ -219,6 +219,29 @@ $string['bannerimage'] = 'Bannerbild';
 $string['bannerimage_help'] = 'Optional. Ein Querformat-Bild, das auf der Kategoriekarte (16:9) und im Artikelkopf (3:1) angezeigt wird. Das Bild wird automatisch zugeschnitten und zentriert — kein manueller Zuschnitt nötig. Ohne Bild zeigt die Karte einen dezenten Platzhalter je nach Inhaltstyp.';
 
 // Inhalts-Stilrichtlinie (hb-*-Muster).
+// Automatische Querverweise.
+$string['autolink'] = 'Seitentitel automatisch verlinken';
+$string['autolink_desc'] = 'Querverweise im Wikipedia-Stil: Erwähnt ein Artikel den exakten Titel einer anderen veröffentlichten Handbuchseite, wird die erste Erwähnung zu einem Link auf diese Seite. Nur bei der Anzeige angewendet — der gespeicherte Inhalt wird nie verändert, Links folgen Umbenennungen und Archivierungen automatisch, und beim Deaktivieren verschwinden sie sofort überall. Es zählt der vollständige Titel, ohne Groß-/Kleinschreibung; in Überschriften, bestehenden Links und den Normverweis-Mustern werden keine Links ergänzt.';
+
+// Bildoptimierung.
+$string['imageoptimize'] = 'Bilder beim Speichern optimieren';
+$string['imageoptimize_desc'] = 'Beim Speichern einer Seite werden übergroße Bilder (Banner und Artikelbilder, einschließlich eingefügter Screenshots) auf die Maximalbreite verkleinert, gemäß EXIF gedreht, von Metadaten befreit und neu kodiert. Bilder werden nie vergrößert, Dateinamen ändern sich nie, und ein Ersatz wird nur behalten, wenn er kleiner als das Original ist. Screenshots mit Transparenz bleiben PNG; Fotos werden als JPEG (neu) kodiert.';
+$string['imagemaxwidth'] = 'Maximale Bildbreite (px)';
+$string['imagemaxwidth_desc'] = 'Breitere Bilder werden beim Speichern auf diese Breite verkleinert. 1500 deckt das breiteste Handbuch-Layout ab.';
+$string['imagejpegquality'] = 'JPEG-Qualität';
+$string['imagejpegquality_desc'] = 'Qualität (50–100) für die JPEG-Neukodierung. 85 ist am Bildschirm visuell nicht von höheren Werten zu unterscheiden und deutlich kleiner.';
+$string['manageimages'] = 'Bilder optimieren';
+$string['imagesintro'] = 'Neue Bilder werden beim Speichern einer Seite automatisch optimiert (Maximalbreite {$a->width}px, JPEG-Qualität {$a->quality}). Diese Seite wendet dieselbe Behandlung auf Bilder an, die vor dem Optimierer hochgeladen wurden: Banner und Artikelbilder werden verkleinert, gemäß EXIF gedreht, von Metadaten befreit und neu kodiert — Dateinamen ändern sich nie, die Seiten funktionieren also weiter.';
+$string['imageoptimizeoff'] = 'Die automatische Optimierung beim Speichern ist in den Plugin-Einstellungen derzeit deaktiviert; die Schaltfläche unten funktioniert dennoch als einmaliger Lauf.';
+$string['imagesreport'] = '{$a->scanned} Bilder geprüft, {$a->optimized} optimiert. Gesamtgröße {$a->before} → {$a->after}, Ersparnis {$a->saved}.';
+$string['imagesarea'] = 'Dateibereich';
+$string['imagescount'] = 'Bilder';
+$string['imagessize'] = 'Größe';
+$string['imagesareabanners'] = 'Bannerbilder';
+$string['imagesareacontent'] = 'Artikelbilder (alle Revisionen)';
+$string['imagesoptimizenow'] = 'Alle Bilder jetzt optimieren';
+$string['imagesnote'] = 'GIF- (möglicherweise animiert) und SVG-Dateien werden nie angetastet. Bilder, die bereits auf oder unter der Maximalbreite liegen, werden nur neu kodiert, wenn das mindestens 10 % spart — kleine, effiziente Dateien bleiben unverändert. Historische Revisionen sind eingeschlossen; der Lauf kann bei einem großen Handbuch einen Moment dauern.';
+
 $string['styleguide'] = 'Inhalts-Stilrichtlinie';
 $string['styleguideintro'] = 'Wiederverwendbare Formatmuster für Artikel. Öffnen Sie eine Seite im Bearbeitungsmodus, wechseln Sie im Editor zur HTML-Quelltextansicht und fügen Sie ein Muster von unten ein — den Text anpassen. Derselbe Katalog steht der Handbuch-KI zur Verfügung, sodass auch generierte Entwürfe diese Muster verwenden.';
 $string['styleguidepatterns'] = 'Muster';
@@ -258,11 +281,17 @@ $string['sguse_email'] = 'Eine Beispiel-E-Mail so zeigen, wie das Personal sie a
 $string['sgtitle_chat'] = 'Chat-Beispiel (WhatsApp-Ansicht)';
 $string['sguse_chat'] = 'Ein Chat-Verlauf in Telefonbreite: chat-title und chat-day sind optional; Blasen sind is-in (weiß, links) oder is-out (grün, rechts), mit optionalem Absender (who) und Uhrzeit (when). Einzelne Blasen für Stil-Lektionen mit is-good / is-bad markieren — mit einem chat-verdict-Chip darüber. Nur erfundene Namen — nie echte Unterhaltungen einfügen.';
 $string['sgtitle_dialogue'] = 'Gesprächsleitfaden';
-$string['sguse_dialogue'] = 'Sprecherbeschriftete Repliken wie in einem Drehbuch, für Telefonprotokoll, Deeskalation und schwierige Gespräche. is-staff hebt institutionelle Repliken hervor; dlg-note ist eine kursive Regieanweisung; is-good / is-bad ergänzen eine farbige Leiste und einen Urteils-Chip pro Replik. Nur erfundene Namen.';
+$string['sguse_dialogue'] = 'Sprecherbeschriftete Repliken wie in einem Drehbuch, für Telefonprotokoll, Deeskalation und schwierige Gespräche. is-staff hebt institutionelle Repliken hervor; dlg-note ist eine kursive Regieanweisung; is-good / is-bad ergänzen eine farbige Leiste und einen Urteils-Chip pro Replik. Für Anrufskripte is-call am Container ergänzen: der Kopf erhält ein Telefon-Symbol, und die Repliken sollten beide Stimmen abwechseln (was die Familie sagt, was das Personal sagt). Nur erfundene Namen.';
 $string['sgtitle_acta'] = 'Agenda & Protokoll (Acta)';
 $string['sguse_acta'] = 'Das Sitzungspaar. hb-agenda: Zeilen mit Uhrzeit (ag-time · ag-topic · ag-who). hb-acta: Kopfblock (Teilnehmende, Vorsitz, Abwesenheiten) und eine Beschlusstabelle, in der jeder Beschluss Was, Wer (Responsable) und Bis wann (Fecha límite) trägt — die Nummerierung schreibt die Autorin/der Autor (14.1 = Acta 14, Punkt 1); ac-done kennzeichnet erledigte Beschlüsse.';
 $string['sgtitle_letter'] = 'Formeller Brief / Rundschreiben';
 $string['sguse_letter'] = 'Ein Briefkopf-Dokument in Serifenschrift, wie es gedruckt wird: Briefkopf (lt-head), Ort und Datum (lt-place), Referenzzeile (lt-ref), formeller Text und Unterschriftsblock (lt-sign). Für Rundschreiben, Bescheinigungen und offizielle Mitteilungen.';
+$string['sgtitle_acc'] = 'Akkordeons (Vorlagen-Bibliotheken)';
+$string['sguse_acc'] = 'Für lange Listenseiten — Bibliotheken von Kommunikationsvorlagen, FAQ-artige Sammlungen. Jedes hb-acc ist ein Eintrag: acc-title (der Name, mit optionalem acc-chip als Kanalhinweis) plus acc-body (der Inhalt). Zusammengehörige Einträge in hb-acc-group bündeln: Gruppen ab zwei Einträgen erhalten automatisch eine Alle-ausklappen/-einklappen-Steuerung. Die Einschübe starten geschlossen, öffnen mit sanfter Animation und sind per Tastatur bedienbar; ohne JavaScript und in der Druckansicht wird alles offen dargestellt. Ein hb-keyvalue in einem Einschub wird automatisch zu einer schmalen Ficha kompaktiert. Hinweis: Die Browsersuche findet keinen Text in geschlossenen Einschüben — dafür gibt es die Alle-ausklappen-Steuerung.';
+$string['accexpandall'] = 'Alle ausklappen';
+$string['acccollapseall'] = 'Alle einklappen';
+$string['sgtitle_course'] = 'Simulierter Kursabschnitt';
+$string['sguse_course'] = 'Eine stilisierte Nachbildung der Kursseite der Plattform für Artikel zur Kursstruktur: Abschnitte (crs-sec; is-collapsed, is-empty für den gedämpften Neukurs-Zustand, Farbtöne is-green/is-red/is-blue), Wochen-Unterabschnitte (crs-week; is-collapsed), Aktivitätszeilen (crs-act mit is-page / is-pdf / is-pptx / is-assign / is-url / is-quiz / is-forum / is-video, act-chip für die Dateityp-Pille, is-hidden + crs-badge für verborgene Elemente), Metazeilen (is-dates mit einem oder beiden Daten, is-lock für Verfügbarkeitsbedingungen) und crs-desc für die Inline-Beschreibung einer Aktivität (z. B. Prüfungsanweisungen). Zeilen mit is-good / is-bad und crs-note für Strukturstandards annotieren. Nur illustrativ — für die exakten Pixel eines echten Kurses hb-figure mit einem Screenshot verwenden.';
 $string['sgtitle_feedback'] = 'Schriftliches Feedback-Feld';
 $string['sguse_feedback'] = 'Ein Muster für jedes schriftliche Feedback-Feld: Hausaufgabenkommentare, Zeugnisbemerkungen, Lehrkräfte-Evaluationen, Beobachtungsnotizen. Der fb-type-Chip benennt den Kontext (Tarea / Informe / Evaluación docente — Freitext), fb-meta gibt die Richtung an (z. B. Docente → Estudiante), der Kommentar erscheint in einem ausgefüllten Feld (fb-field), fb-grade ist ein optionaler Noten-Chip, und is-good / is-bad ergänzen ein Urteils-Abzeichen für kontrastierende Beispiele. Nur erfundene Namen.';
 $string['pathnext'] = 'Pfad fortsetzen';

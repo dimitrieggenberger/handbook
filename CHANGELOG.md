@@ -1,5 +1,97 @@
 # Changelog
 
+## 0.27.0 (2026-07-18)
+
+Content accordions, call scripts, and centered communication patterns.
+
+- New `hb-acc` pattern for template libraries and other long list pages:
+  each entry is a title row (with optional channel chip) plus a drawer.
+  `js/contentacc.js` (plain JS, progressive enhancement) adds smooth
+  animation, keyboard support, aria wiring, and an automatic
+  expand-all/collapse-all control on every `hb-acc-group` of two or more.
+  Without JavaScript — and in the print view — drawers render open. An
+  `hb-keyvalue` ficha inside a drawer auto-compacts into a slim rail.
+  Three-level spacing rhythm (drawer padding / 0.6rem between entries /
+  2.75rem after a group) so 20+ entry pages never look cramped.
+- `hb-dialogue` gains the `is-call` variant: a phone-icon header for call
+  scripts, with turns alternating both voices (family and staff). Style
+  guide example and EN/ES/DE descriptions updated.
+- Communication simulations (`hb-email`, `hb-chat`, `hb-dialogue`,
+  `hb-agenda`, `hb-acta`, `hb-letter`, `hb-feedback`) are now centered on
+  the text measure instead of left-aligned.
+
+## 0.26.1 (2026-07-18)
+
+Banner aspect ratios unified.
+
+- Article banner is now 16:9, the same crop as the category cards, so one
+  uploaded image reads identically in both places.
+- Cards and article pages without a banner image show the same quiet 16:4
+  content-type tint strip (pages previously showed nothing), so filled and
+  unfilled states rhyme and real art stands taller.
+
+## 0.26.0 (2026-07-17)
+
+Simulated course sections (`hb-course`).
+
+- New content pattern replicating the platform's course page for articles
+  that document course structure: sections (open / collapsed / muted
+  "new-course" empty state / hue modifiers), weekly subsections (open /
+  collapsed), eight activity-row types (page, pdf, pptx, assign, url, quiz,
+  forum, video) with file-type chips, dates rows (one or both dates),
+  availability-lock bars, hidden-from-students state with badge, inline
+  activity descriptions (crs-desc, e.g. exam instructions), and teaching
+  annotations (is-good / is-bad rails, crs-note lines).
+- Catalogue entry in the style guide and the AI get_style_guide endpoint
+  with EN/ES/DE strings. Pattern CSS is central: restyling it once updates
+  every article that uses it.
+
+## 0.25.0 (2026-07-17)
+
+Wikipedia-style automatic cross-links.
+
+- New `autolink_service`: when an article mentions the exact title of
+  another published handbook page, the first mention becomes a link to that
+  page. Applied at render time only (reader and print view) — stored content
+  is never modified, links follow renames/archiving automatically, and the
+  plugin setting switches the feature off everywhere instantly.
+- Rules: whole-title matches at word boundaries, case-insensitive, first
+  occurrence per page only, longest title wins on overlaps, never
+  self-links, titles under 4 characters never link. No links are added
+  inside headings, existing links, code/pre, or the hb-* patterns that
+  carry their own navigation (cross-references, next cards, org charts).
+- PHPUnit coverage for the transform; EN/ES/DE strings.
+
+## 0.24.0 (2026-07-17)
+
+Automatic image optimisation.
+
+- New `image_service`: on page save, images in the banner and article file
+  areas (including screenshots pasted into the editor) are downscaled to a
+  configurable maximum width (default 1500px), rotated per their EXIF
+  orientation flag, stripped of metadata (including phone GPS positions) and
+  re-encoded — JPEG at configurable quality (default 85). Opaque PNGs are
+  converted to JPEG only when that is dramatically smaller (photos exported
+  as PNG); PNGs with transparency stay PNG so screenshots keep crisp text.
+  GIF and SVG are never touched. Images are never upscaled; a replacement is
+  only kept when it is smaller than the original; filenames never change, so
+  content HTML keeps working.
+- Plugin settings: enable/disable on-save optimisation, maximum width, JPEG
+  quality.
+- New manage page "Optimise images" (`manage/images.php`): per-area stock
+  (count and size), one-off run over all existing images including
+  historical revisions, and a savings report.
+
+## 0.23.0 (2026-07-17)
+
+Communication patterns for the style system: `hb-email` (mail-client card),
+`hb-chat` (WhatsApp-style thread), `hb-dialogue` (conversation script),
+`hb-agenda`/`hb-acta` (meeting pair), `hb-letter` (letterhead circular) and
+`hb-feedback` (written-feedback field for homework, reports and teacher
+evaluations), all with `is-good`/`is-bad` teaching variants where relevant.
+Catalogue entries (with the invented-names-only rule) in the editor style
+guide and the AI `get_style_guide` endpoint; EN/ES/DE strings.
+
 ## 0.14.0 (2026-07-14)
 
 Handbook AI change sets — Phase 3 (half A): external API surface and the

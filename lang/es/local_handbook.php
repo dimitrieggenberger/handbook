@@ -219,6 +219,29 @@ $string['bannerimage'] = 'Imagen de cabecera';
 $string['bannerimage_help'] = 'Opcional. Una imagen horizontal que se muestra en la tarjeta de la categoría (16:9) y en la cabecera del artículo (3:1). La imagen se recorta y centra automáticamente, sin recorte manual. Sin imagen, la tarjeta muestra un marcador discreto según el tipo de contenido.';
 
 // Guía de estilo de contenido (patrones hb-*).
+// Enlaces cruzados automáticos.
+$string['autolink'] = 'Enlazar títulos de páginas automáticamente';
+$string['autolink_desc'] = 'Enlaces cruzados al estilo Wikipedia: cuando un artículo menciona el título exacto de otra página publicada del manual, la primera mención se convierte en un enlace a esa página. Se aplica solo al mostrar — el contenido guardado nunca se modifica, los enlaces siguen automáticamente los cambios de nombre y archivado, y al desactivar esta opción desaparecen de inmediato en todas partes. Las coincidencias son por título completo, sin distinguir mayúsculas; no se agregan enlaces dentro de encabezados, enlaces existentes ni los patrones de referencias normativas.';
+
+// Optimización de imágenes.
+$string['imageoptimize'] = 'Optimizar imágenes al guardar';
+$string['imageoptimize_desc'] = 'Al guardar una página, reduce las imágenes demasiado grandes (banner e imágenes del artículo, incluidas capturas de pantalla pegadas) al ancho máximo, aplica la rotación EXIF, elimina los metadatos y las recodifica. Las imágenes nunca se agrandan, los nombres de archivo nunca cambian y el reemplazo solo se conserva si es más pequeño que el original. Las capturas con transparencia se mantienen en PNG; las fotos se (re)codifican como JPEG.';
+$string['imagemaxwidth'] = 'Ancho máximo de imagen (px)';
+$string['imagemaxwidth_desc'] = 'Las imágenes más anchas se reducen a este ancho al guardar. 1500 cubre el diseño más ancho del manual.';
+$string['imagejpegquality'] = 'Calidad JPEG';
+$string['imagejpegquality_desc'] = 'Calidad (50–100) para la recodificación JPEG. 85 es visualmente indistinguible de valores mayores en pantalla y considerablemente más liviano.';
+$string['manageimages'] = 'Optimizar imágenes';
+$string['imagesintro'] = 'Las imágenes nuevas se optimizan automáticamente al guardar una página (ancho máximo {$a->width}px, calidad JPEG {$a->quality}). Esta página aplica el mismo tratamiento a las imágenes subidas antes de que existiera el optimizador: banners e imágenes de artículos se reducen, se rotan según EXIF, se les eliminan los metadatos y se recodifican — los nombres de archivo nunca cambian, así que las páginas siguen funcionando.';
+$string['imageoptimizeoff'] = 'La optimización automática al guardar está desactivada en la configuración del plugin; el botón de abajo funciona igualmente como ejecución puntual.';
+$string['imagesreport'] = 'Se revisaron {$a->scanned} imágenes, se optimizaron {$a->optimized}. Tamaño total {$a->before} → {$a->after}, ahorro de {$a->saved}.';
+$string['imagesarea'] = 'Área de archivos';
+$string['imagescount'] = 'Imágenes';
+$string['imagessize'] = 'Tamaño';
+$string['imagesareabanners'] = 'Imágenes de banner';
+$string['imagesareacontent'] = 'Imágenes de artículos (todas las revisiones)';
+$string['imagesoptimizenow'] = 'Optimizar todas las imágenes ahora';
+$string['imagesnote'] = 'Los archivos GIF (posiblemente animados) y SVG nunca se tocan. Las imágenes que ya están en el ancho máximo o por debajo solo se recodifican si eso ahorra al menos un 10 % — los archivos pequeños y eficientes pasan intactos. Se incluyen las revisiones históricas, así que la ejecución puede tardar un momento en un manual grande.';
+
 $string['styleguide'] = 'Guía de estilo de contenido';
 $string['styleguideintro'] = 'Patrones de formato reutilizables para los artículos. Abra una página en Editar, cambie el editor a vista de código HTML y pegue uno de los patrones de abajo, adaptando el texto. El mismo catálogo está disponible para la IA del manual, así que los borradores generados también los usan.';
 $string['styleguidepatterns'] = 'Patrones';
@@ -258,11 +281,17 @@ $string['sguse_email'] = 'Muestre un correo de ejemplo tal como el personal lo v
 $string['sgtitle_chat'] = 'Ejemplo de chat (vista de WhatsApp)';
 $string['sguse_chat'] = 'Un hilo de chat en ancho de teléfono: chat-title y chat-day son opcionales; las burbujas son is-in (blanca, izquierda) o is-out (verde, derecha), con remitente (who) y hora (when) opcionales. Marque burbujas individuales con is-good / is-bad — con un chip chat-verdict encima — para lecciones de estilo. Solo nombres inventados — nunca pegue conversaciones reales.';
 $string['sgtitle_dialogue'] = 'Guion de conversación';
-$string['sguse_dialogue'] = 'Turnos con etiqueta de hablante, como un guion, para protocolo telefónico, desescalada y conversaciones difíciles. is-staff resalta los turnos institucionales; dlg-note es una acotación en cursiva; is-good / is-bad agregan una barra de color y un chip de veredicto por turno. Solo nombres inventados.';
+$string['sguse_dialogue'] = 'Turnos con etiqueta de hablante, como un guion, para protocolo telefónico, desescalada y conversaciones difíciles. is-staff resalta los turnos institucionales; dlg-note es una acotación en cursiva; is-good / is-bad agregan una barra de color y un chip de veredicto por turno. Para guiones de llamada agregue is-call al contenedor: el encabezado muestra un ícono de teléfono, y los turnos deben alternar ambas voces (lo que dice la familia y lo que dice el personal). Solo nombres inventados.';
 $string['sgtitle_acta'] = 'Agenda y acta';
 $string['sguse_acta'] = 'El par de toda reunión. hb-agenda: filas con horario (ag-time · ag-topic · ag-who). hb-acta: bloque de encabezado (participantes, preside, ausencias) y una tabla de acuerdos donde cada acuerdo lleva qué, quién (Responsable) y cuándo (Fecha límite) — la numeración la escribe el autor (14.1 = acta 14, punto 1); ac-done marca los acuerdos cumplidos.';
 $string['sgtitle_letter'] = 'Carta formal / circular';
 $string['sguse_letter'] = 'Un documento con membrete en tipografía serif, como se imprime: membrete (lt-head), lugar y fecha (lt-place), línea de referencia (lt-ref), cuerpo formal y bloque de firma (lt-sign). Para circulares, constancias y notas oficiales.';
+$string['sgtitle_acc'] = 'Acordeones (bibliotecas de plantillas)';
+$string['sguse_acc'] = 'Para páginas de listas largas — bibliotecas de plantillas de comunicación, colecciones tipo preguntas frecuentes. Cada hb-acc es una entrada: acc-title (el nombre, con un acc-chip opcional que indica el canal) más acc-body (el contenido). Agrupe entradas relacionadas en hb-acc-group: los grupos de dos o más reciben automáticamente un control de desplegar/contraer todo. Los desplegables inician cerrados, se abren con una animación suave y funcionan con teclado; sin JavaScript y en la vista de impresión todo se muestra abierto. Un hb-keyvalue dentro de un desplegable se compacta automáticamente en una ficha delgada. Nota: la búsqueda del navegador no encuentra texto en desplegables cerrados — para eso existe el control de desplegar todo.';
+$string['accexpandall'] = 'Desplegar todo';
+$string['acccollapseall'] = 'Contraer todo';
+$string['sgtitle_course'] = 'Sección de curso simulada';
+$string['sguse_course'] = 'Una réplica estilizada de la página de curso de la plataforma para artículos que documentan la estructura de los cursos: secciones (crs-sec; is-collapsed, is-empty para el estado apagado de curso nuevo, matices is-green/is-red/is-blue), subsecciones semanales (crs-week; is-collapsed), filas de actividad (crs-act con is-page / is-pdf / is-pptx / is-assign / is-url / is-quiz / is-forum / is-video, act-chip para la etiqueta de tipo de archivo, is-hidden + crs-badge para elementos ocultos a estudiantes), filas de metadatos (is-dates con una o ambas fechas, is-lock para condiciones de disponibilidad) y crs-desc para la descripción en línea de una actividad (p. ej. instrucciones de examen). Anote filas con is-good / is-bad y crs-note para estándares de estructura. Solo ilustrativo — para los píxeles literales de un curso real use hb-figure con una captura.';
 $string['sgtitle_feedback'] = 'Campo de retroalimentación escrita';
 $string['sguse_feedback'] = 'Un solo patrón para todo campo de retroalimentación escrita: comentarios de tareas, observaciones de informes, evaluaciones docentes, notas de observación. El chip fb-type nombra el contexto (Tarea / Informe / Evaluación docente — texto libre), fb-meta indica la dirección (p. ej. Docente → Estudiante), el comentario se muestra dentro de un campo relleno (fb-field), fb-grade es un chip de calificación opcional, e is-good / is-bad agregan una insignia de veredicto para ejemplos contrastados. Solo nombres inventados.';
 $string['pathnext'] = 'Continuar la ruta';
