@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.27.0 (2026-07-18)
+
+Content accordions, call scripts, and centered communication patterns.
+
+- New `hb-acc` pattern for template libraries and other long list pages:
+  each entry is a title row (with optional channel chip) plus a drawer.
+  `js/contentacc.js` (plain JS, progressive enhancement) adds smooth
+  animation, keyboard support, aria wiring, and an automatic
+  expand-all/collapse-all control on every `hb-acc-group` of two or more.
+  Without JavaScript — and in the print view — drawers render open. An
+  `hb-keyvalue` ficha inside a drawer auto-compacts into a slim rail.
+  Three-level spacing rhythm (drawer padding / 0.6rem between entries /
+  2.75rem after a group) so 20+ entry pages never look cramped.
+- `hb-dialogue` gains the `is-call` variant: a phone-icon header for call
+  scripts, with turns alternating both voices (family and staff). Style
+  guide example and EN/ES/DE descriptions updated.
+- Communication simulations (`hb-email`, `hb-chat`, `hb-dialogue`,
+  `hb-agenda`, `hb-acta`, `hb-letter`, `hb-feedback`) are now centered on
+  the text measure instead of left-aligned.
+
 ## 0.26.1 (2026-07-18)
 
 Banner aspect ratios unified.

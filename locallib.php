@@ -1594,6 +1594,28 @@ HTML);
     <span class="dlg-text">Eso no es conmigo, llame mañana.<span class="dlg-verdict is-bad">Así no</span></span>
   </div>
 </div>
+
+<!-- Variante de llamada (is-call): icono de teléfono en el encabezado;
+     los turnos alternan lo que dice la familia y lo que dice el personal. -->
+<div class="hb-dialogue is-call">
+  <div class="dlg-context">Llamada a la familia &middot; incidente en revisión</div>
+  <div class="dlg-turn is-staff">
+    <span class="dlg-who">Personal</span>
+    <span class="dlg-text">Buenas tardes. Le llamo de EuropaSchule para informarle que hoy se
+    presentó una situación relacionada con [nombre del estudiante]. Los hechos que podemos
+    confirmar son: [hechos observables].</span>
+  </div>
+  <div class="dlg-turn">
+    <span class="dlg-who">Familia</span>
+    <span class="dlg-text">¿Mi hijo está bien? ¿Qué fue exactamente lo que pasó?</span>
+  </div>
+  <p class="dlg-note">— responder solo con hechos confirmados; no especular —</p>
+  <div class="dlg-turn is-staff">
+    <span class="dlg-who">Personal</span>
+    <span class="dlg-text">Se encuentra [estado observable]. De inmediato realizamos [medidas
+    adoptadas]. Le contactaremos a más tardar el [fecha y hora] con los próximos pasos.</span>
+  </div>
+</div>
 HTML);
 
     $add('acta', <<<'HTML'
@@ -1803,6 +1825,61 @@ HTML);
       <div class="crs-note"><b>Así no:</b> sin tipo, sin tema, con numeración interna.</div>
     </div>
   </div>
+</div>
+HTML);
+
+    $add('acc', <<<'HTML'
+<div class="hb-acc-group">
+
+  <div class="hb-acc">
+    <p class="acc-title">Recordatorio de evaluaciones y temarios
+      <span class="acc-chip">WhatsApp</span></p>
+    <div class="acc-body">
+      <div class="hb-keyvalue">
+        <div class="kv-title">Ficha de uso</div>
+        <dl>
+          <dt>Uso</dt><dd>Recordar fechas de evaluación y disponibilidad de temarios.</dd>
+          <dt>Canal</dt><dd>WhatsApp institucional o grupo informativo.</dd>
+          <dt>Área</dt><dd>Coordinación Académica o docente responsable.</dd>
+        </dl>
+      </div>
+      <div class="hb-chat">
+        <div class="chat-title">Familias de [grado]<span class="sub">Mensaje colectivo</span></div>
+        <div class="hb-msg is-out">
+          <span class="who">Coordinación Académica</span>
+          <p>Estimadas familias: les recordamos que las evaluaciones del parcial se realizarán
+          del [fecha inicial] al [fecha final]. Los temarios ya están publicados en la
+          plataforma.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hb-acc">
+    <p class="acc-title">Cambio de horario o modificación del calendario
+      <span class="acc-chip">Correo</span></p>
+    <div class="acc-body">
+      <div class="hb-keyvalue">
+        <div class="kv-title">Ficha de uso</div>
+        <dl>
+          <dt>Uso</dt><dd>Informar un cambio confirmado que afecta la jornada.</dd>
+          <dt>Área</dt><dd>Dirección Oficial o Gerencia Académica.</dd>
+        </dl>
+      </div>
+      <div class="hb-email">
+        <div class="e-chrome"><i></i><i></i><i></i><span class="e-badge">Modelo</span></div>
+        <div class="e-head">
+          <div class="e-row"><span class="e-label">Asunto</span>
+            <span class="e-value e-subject">Cambio de horario del [fecha]</span></div>
+        </div>
+        <div class="e-body">
+          <p>Estimadas familias: les informamos que el [fecha] la jornada escolar se
+          desarrollará de [hora inicial] a [hora final] debido a [motivo confirmado].</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 HTML);
 

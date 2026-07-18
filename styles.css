@@ -2127,3 +2127,177 @@
     font-weight: 600;
     font-style: normal;
 }
+
+/* ---- hb-acc: content accordions for template libraries and other long
+   list pages. Authors write .hb-acc (> .acc-title + .acc-body), optionally
+   inside .hb-acc-group; js/contentacc.js adds behaviour, wrappers and the
+   expand-all control. Without JS (and in print) drawers render open. ---- */
+#page-local-handbook-area .hb-acc-group { margin: 1.1rem 0 2.75rem; }
+#page-local-handbook-area .hb-acc-tools {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 0.5rem;
+}
+#page-local-handbook-area .hb-acc-tools button {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--hb-accent);
+    padding: 0.35rem 0.1rem;
+}
+#page-local-handbook-area .hb-acc-tools button:hover { text-decoration: underline; }
+
+#page-local-handbook-area .hb-acc {
+    border: 1px solid var(--hb-line);
+    border-radius: 0.65rem;
+    background: var(--hb-surface);
+    box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05);
+    overflow: hidden;
+    max-width: 70ch;
+}
+#page-local-handbook-area .hb-acc + .hb-acc { margin-top: 0.6rem; }
+#page-local-handbook-area .local-handbook-page-body .hb-acc .acc-title {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 0;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    max-width: none;
+    cursor: pointer;
+    user-select: none;
+}
+#page-local-handbook-area .hb-acc .acc-title::before {
+    content: "\203A";
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    background: var(--hb-accent-soft);
+    color: var(--hb-accent);
+    font-size: 0.95rem;
+    line-height: 1;
+    transition: transform 0.28s ease;
+}
+#page-local-handbook-area .hb-acc .acc-title:hover { color: var(--hb-accent); }
+#page-local-handbook-area .hb-acc.is-open .acc-title::before { transform: rotate(90deg); }
+#page-local-handbook-area .hb-acc .acc-title:focus-visible {
+    outline: 2px solid var(--hb-accent);
+    outline-offset: -2px;
+}
+#page-local-handbook-area .hb-acc .acc-chip {
+    margin-left: auto;
+    flex: none;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--hb-muted);
+    border: 1px solid var(--hb-line);
+    border-radius: 999px;
+    padding: 0.1rem 0.6rem;
+}
+
+/* No JS: the drawer is an ordinary padded region, always visible. */
+#page-local-handbook-area .hb-acc:not(.js-ready) .acc-body {
+    border-top: 1px solid var(--hb-line);
+    padding: 1.1rem 1.1rem 1.5rem;
+}
+/* With JS: grid-rows animation; the injected .acc-inner clips, the injected
+   .acc-pad carries the padding so the collapsed height is exactly zero. */
+#page-local-handbook-area .hb-acc.js-ready .acc-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.34s ease;
+}
+#page-local-handbook-area .hb-acc.js-ready.is-open .acc-body { grid-template-rows: 1fr; }
+#page-local-handbook-area .hb-acc.js-ready .acc-inner {
+    overflow: hidden;
+    min-height: 0;
+    opacity: 0;
+    transition: opacity 0.26s ease 0.06s;
+}
+#page-local-handbook-area .hb-acc.js-ready.is-open .acc-inner { opacity: 1; }
+#page-local-handbook-area .hb-acc.js-ready .acc-pad {
+    border-top: 1px solid var(--hb-line);
+    padding: 1.1rem 1.1rem 1.5rem;
+}
+@media (prefers-reduced-motion: reduce) {
+    #page-local-handbook-area .hb-acc.js-ready .acc-body,
+    #page-local-handbook-area .hb-acc.js-ready .acc-inner,
+    #page-local-handbook-area .hb-acc .acc-title::before { transition: none; }
+}
+
+/* Inside a drawer the hb-keyvalue "ficha de uso" compacts into a slim rail,
+   so the template model stays the protagonist. Same markup, restyled. */
+#page-local-handbook-area .hb-acc .hb-keyvalue {
+    border: 0;
+    border-left: 3px solid var(--hb-accent-soft);
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0 0 1.25rem;
+    padding: 0.1rem 0 0.1rem 0.85rem;
+    max-width: none;
+    font-size: 0.78rem;
+    overflow: visible;
+}
+#page-local-handbook-area .hb-acc .hb-keyvalue .kv-title {
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0 0 0.35rem;
+    font-size: 0.66rem;
+}
+#page-local-handbook-area .hb-acc .hb-keyvalue dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.12rem 0.85rem;
+}
+#page-local-handbook-area .hb-acc .hb-keyvalue dt,
+#page-local-handbook-area .hb-acc .hb-keyvalue dd {
+    padding: 0;
+    border: 0;
+    background: none;
+}
+
+/* ---- hb-dialogue call variant (is-call): phone-icon header for call
+   scripts — what the family says, what the staff member says. ---- */
+#page-local-handbook-area .hb-dialogue.is-call .dlg-context {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+#page-local-handbook-area .hb-dialogue.is-call .dlg-context::before {
+    content: "\260E";
+    flex: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--hb-ok-soft);
+    color: var(--hb-ok);
+    font-size: 0.75rem;
+}
+
+/* Communication simulations sit centered on the text measure (inside
+   accordion drawers and in open article flow alike). */
+#page-local-handbook-area .hb-email,
+#page-local-handbook-area .hb-chat,
+#page-local-handbook-area .hb-dialogue,
+#page-local-handbook-area .hb-agenda,
+#page-local-handbook-area .hb-acta,
+#page-local-handbook-area .hb-letter,
+#page-local-handbook-area .hb-feedback {
+    margin-left: auto;
+    margin-right: auto;
+}

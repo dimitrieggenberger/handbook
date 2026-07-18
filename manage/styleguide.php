@@ -35,7 +35,15 @@ $url = new moodle_url('/local/handbook/manage/styleguide.php');
 local_handbook_apply_page_setup($url, $context, 'styleguide',
     get_string('styleguide', 'local_handbook'));
 
+// The hb-acc preview behaves like the real thing.
+$PAGE->requires->js(new moodle_url('/local/handbook/js/contentacc.js'));
+
 echo $OUTPUT->header();
+echo html_writer::div('', 'd-none', [
+    'data-region' => 'local-handbook-accstrings',
+    'data-expand' => get_string('accexpandall', 'local_handbook'),
+    'data-collapse' => get_string('acccollapseall', 'local_handbook'),
+]);
 echo local_handbook_render_area_actions('styleguide', $context);
 echo local_handbook_render_page_heading(get_string('styleguide', 'local_handbook'));
 

@@ -156,6 +156,15 @@ if ($revision) {
     $toc = $anchored->toc;
 }
 
+// Content accordions (hb-acc): behaviour + expand-all labels. Print never
+// loads this, so drawers render open there.
+$PAGE->requires->js(new moodle_url('/local/handbook/js/contentacc.js'));
+$contenthtml = html_writer::div('', 'd-none', [
+    'data-region' => 'local-handbook-accstrings',
+    'data-expand' => get_string('accexpandall', 'local_handbook'),
+    'data-collapse' => get_string('acccollapseall', 'local_handbook'),
+]) . $contenthtml;
+
 // Typed relations in both directions (spec 9.2).
 $outgoing = $DB->get_records_sql(
     "SELECT rel.id, rel.relationtype, p.slug, p.title, p.publishedrevisionid, p.archived
