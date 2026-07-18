@@ -419,7 +419,8 @@
 }
 
 /* Category card grid with banner images (one upload per page serves the
-   16:9 card crop here and the 3:1 article banner; both crops are CSS). */
+   16:9 card crop here and the 16:9 article banner; both crops are CSS).
+   Cards and pages without an image show a quiet 16:4 tint strip instead. */
 #page-local-handbook-area .local-handbook-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -469,12 +470,14 @@
     display: block;
 }
 /* No image: quiet content-type tint + icon, so mixed categories still read
-   as one set and editors are never forced to upload anything. */
+   as one set and editors are never forced to upload anything. The fallback
+   is a slim 16:4 strip, so cards with real art stand taller. */
 #page-local-handbook-area .local-handbook-card-media.is-fallback {
+    aspect-ratio: 16 / 4;
     background: color-mix(in srgb, var(--primary, #0078c3) 9%, transparent);
 }
 #page-local-handbook-area .local-handbook-card-media.is-fallback i {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
     color: var(--primary, #0078c3);
     opacity: 0.5;
 }
@@ -543,10 +546,11 @@
     gap: 0.5rem;
 }
 
-/* Article banner: fixed 3:1 (2:1 on small screens), image masked with
-   object-fit cover and centered on both axes. */
+/* Article banner: fixed 16:9 to match the card crop, image masked with
+   object-fit cover and centered on both axes. Pages without a banner show
+   the same quiet 16:4 tint strip as cards, so the two states rhyme. */
 #page-local-handbook-area .local-handbook-page-banner {
-    aspect-ratio: 3 / 1;
+    aspect-ratio: 16 / 9;
     border-radius: 0.75rem;
     overflow: hidden;
     margin-bottom: 1rem;
@@ -558,10 +562,17 @@
     object-position: center center;
     display: block;
 }
-@media (max-width: 640px) {
-    #page-local-handbook-area .local-handbook-page-banner {
-        aspect-ratio: 2 / 1;
-    }
+#page-local-handbook-area .local-handbook-page-banner.is-fallback {
+    aspect-ratio: 16 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--primary, #0078c3) 9%, transparent);
+}
+#page-local-handbook-area .local-handbook-page-banner.is-fallback i {
+    font-size: 2.25rem;
+    color: var(--primary, #0078c3);
+    opacity: 0.5;
 }
 
 /* =====================================================================

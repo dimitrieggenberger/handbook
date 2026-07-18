@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.26.1 (2026-07-18)
+
+Banner aspect ratios unified.
+
+- Article banner is now 16:9, the same crop as the category cards, so one
+  uploaded image reads identically in both places.
+- Cards and article pages without a banner image show the same quiet 16:4
+  content-type tint strip (pages previously showed nothing), so filled and
+  unfilled states rhyme and real art stands taller.
+
 ## 0.26.0 (2026-07-17)
 
 Simulated course sections (`hb-course`).
