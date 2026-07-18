@@ -497,9 +497,10 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
             $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
             $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
             $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-            $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            // Foreign-unique: one hide entry per user, and no separate index
+            // (a key already implies one; declaring both collides in XMLDB).
+            $table->add_key('userid', XMLDB_KEY_FOREIGN_UNIQUE, ['userid'], 'user', ['id']);
             $table->add_key('createdby', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
-            $table->add_index('useridunique', XMLDB_INDEX_UNIQUE, ['userid']);
             $dbman->create_table($table);
         }
 

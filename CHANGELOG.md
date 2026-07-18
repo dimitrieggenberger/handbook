@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.31.2 (2026-07-18)
+
+Hotfix: upgrade failure creating local_handbook_readerhide.
+
+- The 0.30.0 table definition declared both a foreign key and a separate
+  unique index on userid; XMLDB rejects the collision ("Key userid
+  collides with index useridunique"), aborting the upgrade before the
+  table was created. The key is now foreign-unique with no separate
+  index, in both the upgrade step and install.xml. Re-running the
+  upgrade completes cleanly; no data was affected.
+
 ## 0.31.1 (2026-07-18)
 
 hb-refbox: prose citations healed, verified-source treatment.
