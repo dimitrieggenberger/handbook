@@ -749,9 +749,27 @@
 #page-local-handbook-area .hb-contact.is-emergency .ic { background: var(--hb-danger-soft); color: var(--hb-danger); }
 #page-local-handbook-area .hb-contact .name { font-weight: 600; margin: 0; }
 #page-local-handbook-area .hb-contact .role { font-size: 0.78rem; color: var(--hb-muted); margin: 0.05rem 0 0.45rem; }
-#page-local-handbook-area .hb-contact dl { display: grid; grid-template-columns: auto 1fr; gap: 0.1rem 0.5rem; margin: 0; font-size: 0.82rem; }
-#page-local-handbook-area .hb-contact dt { color: var(--hb-muted); font-weight: 400; }
-#page-local-handbook-area .hb-contact dd { margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; }
+/* Stacked fields: micro-label above, value at full card width below —
+   side-by-side columns squeeze values into slivers when the cards sit in
+   a grid (long values wrapped word by word, URLs split mid-word). */
+#page-local-handbook-area .hb-contact dl { display: block; margin: 0; }
+#page-local-handbook-area .hb-contact dt {
+    color: var(--hb-muted);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin: 0.45rem 0 0;
+}
+#page-local-handbook-area .hb-contact dt:first-child { margin-top: 0; }
+#page-local-handbook-area .hb-contact dd {
+    margin: 0.05rem 0 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
 #page-local-handbook-area .hb-contact .when { margin: 0.5rem 0 0; }
 #page-local-handbook-area .hb-contact.is-emergency .when { color: var(--hb-danger); font-weight: 600; }
 
@@ -2377,4 +2395,20 @@
     content: "\1F4CE";
     font-size: 0.68rem;
     margin-right: 0.2rem;
+}
+
+/* ---- hb-fill: pending-placeholder chip. Wrap "[incorporar ...]" values
+   in <span class="hb-fill"> and unfilled fields show as a quiet amber
+   chip, visible to editors and reviewers before publishing. Works inside
+   any pattern and in plain prose. ---- */
+#page-local-handbook-area .hb-fill {
+    display: inline-block;
+    background: var(--hb-warn-soft);
+    color: var(--hb-warn);
+    border-radius: 0.3rem;
+    padding: 0 0.45rem;
+    font-size: 0.9em;
+    font-weight: 600;
+    font-style: normal;
+    line-height: 1.5;
 }

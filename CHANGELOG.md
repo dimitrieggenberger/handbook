@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.28.1 (2026-07-18)
+
+Contact cards unsquished + pending-placeholder chip.
+
+- `hb-contact` fields now render stacked (micro-label above, value at full
+  card width) instead of side-by-side columns, which squeezed long values
+  into slivers and split URLs mid-word when cards sit in a grid. CSS-only:
+  existing directory pages fix themselves.
+- New `hb-fill` chip: wrap unfilled placeholders like "[incorporar fecha]"
+  in a span with class hb-fill to render them as a quiet amber pending
+  chip, visible before publishing. Works in any pattern and plain prose.
+
 ## 0.28.0 (2026-07-18)
 
 Page attachments: official source documents on articles.

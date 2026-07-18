@@ -1541,7 +1541,11 @@ HTML);
     <div>
       <p class="name">Secretaría académica</p>
       <p class="role">Administración</p>
-      <dl><dt>Extensión</dt><dd>101</dd><dt>Horario</dt><dd>7:00&ndash;15:00</dd></dl>
+      <dl>
+        <dt>Extensión</dt><dd>101</dd>
+        <dt>Horario</dt><dd>7:00&ndash;15:00</dd>
+        <dt>Última verificación</dt><dd><span class="hb-fill">[incorporar fecha]</span></dd>
+      </dl>
       <p class="when">Autorizaciones, circulares y archivo de documentos.</p>
     </div>
   </div>
