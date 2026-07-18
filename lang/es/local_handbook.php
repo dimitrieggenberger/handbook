@@ -219,6 +219,40 @@ $string['bannerimage'] = 'Imagen de cabecera';
 $string['bannerimage_help'] = 'Opcional. Una imagen horizontal que se muestra en la tarjeta de la categoría (16:9) y en la cabecera del artículo (3:1). La imagen se recorta y centra automáticamente, sin recorte manual. Sin imagen, la tarjeta muestra un marcador discreto según el tipo de contenido.';
 
 // Guía de estilo de contenido (patrones hb-*).
+// Tablero de lectura.
+$string['readingdashboard'] = 'Tablero de lectura';
+$string['dashaudience'] = 'Audiencia';
+$string['dashaudiencestaff'] = 'Todo el personal';
+$string['dashscope'] = 'Alcance';
+$string['dashscoperequired'] = 'Toda la lectura obligatoria';
+$string['dashscopepath'] = 'Ruta';
+$string['dashscopecategory'] = 'Categoría';
+$string['dashsortdesc'] = 'Más lectura primero';
+$string['dashsortasc'] = 'Menos lectura primero';
+$string['dashconfirmed'] = 'Confirmado';
+$string['dashstale'] = 'Requiere reconfirmación';
+$string['dashpending'] = 'Pendiente';
+$string['dashtotal'] = 'Total';
+$string['dashlastactivity'] = 'Última actividad';
+$string['dashnever'] = 'nunca';
+$string['dashstalechip'] = '{$a} reconf.';
+$string['dashtilepeople'] = 'personas en la vista';
+$string['dashtileaverage'] = 'promedio confirmado';
+$string['dashtilestale'] = 'con reconfirmación pendiente';
+$string['dashtilenever'] = 'sin ninguna lectura';
+$string['dashhide'] = 'Ocultar';
+$string['dashshow'] = 'Mostrar';
+$string['dashhidden'] = 'Oculto';
+$string['dashhidenote'] = 'Nota (p. ej. licencia)';
+$string['dashhiddenby'] = 'oculto por {$a->name} · {$a->date}';
+$string['dashhiddensection'] = 'Ocultos ({$a})';
+$string['dashshowhidden'] = 'Mostrar ocultos ({$a})';
+$string['dashhidehidden'] = 'Ocultar la sección de ocultos';
+$string['dashexportcsv'] = 'Exportar CSV';
+$string['dashnopages'] = 'Este alcance aún no contiene páginas publicadas.';
+$string['dashnousers'] = 'No hay personas en esta audiencia.';
+$string['dashfootnote'] = 'Verde = confirmado en la versión publicada vigente; ámbar = confirmó una versión anterior de una página que cambió después; gris = pendiente. Las personas ocultas quedan fuera de la lista y de los promedios, pero sus registros de lectura no se tocan y pueden restaurarse en cualquier momento. Este tablero mide confirmaciones, no atención.';
+
 // Documentos adjuntos de página.
 $string['attachments'] = 'Documentos';
 $string['attachments_help'] = 'Documentos fuente oficiales que este artículo discute o referencia — la ley, la directriz, el formato. Se adjuntan a la página (no a una revisión), por lo que sobreviven a los borradores editoriales y se muestran en el panel lateral del artículo, se cuentan en las tarjetas de categoría y se listan en la página impresa. Cada archivo tiene una URL estable, así que también puede enlazarse desde el texto del artículo. Se gestionan únicamente aquí — la IA del manual no puede subir, reemplazar ni eliminar archivos.';
@@ -573,6 +607,14 @@ $string['revisionrestored'] = 'La v{$a} se restauró como nuevo borrador de trab
 
 // Privacy export paths.
 $string['privacy:acknowledgementspath'] = 'Confirmaciones de lectura';
+$string['privacy:receiptspath'] = 'Registros de lectura completada';
+$string['privacy:readerhidepath'] = 'Estado de oculto en el tablero de lectura';
+$string['privacy:metadata:local_handbook_readreceipt'] = 'Los registros de lectura completada indican qué usuario completó qué revisión publicada y cuándo.';
+$string['privacy:metadata:local_handbook_readreceipt:userid'] = 'El usuario que completó la lectura.';
+$string['privacy:metadata:local_handbook_readreceipt:timecompleted'] = 'Cuándo se registró la finalización.';
+$string['privacy:metadata:local_handbook_readerhide'] = 'La lista de ocultos del tablero de lectura registra quién fue ocultado temporalmente de la vista, por quién y el motivo opcional.';
+$string['privacy:metadata:local_handbook_readerhide:userid'] = 'El usuario ocultado.';
+$string['privacy:metadata:local_handbook_readerhide:note'] = 'El motivo opcional (p. ej. licencia).';
 $string['privacy:authoredpath'] = 'Revisiones creadas';
 $string['privacy:metadata:local_handbook_finding'] = 'Los hallazgos de calidad registran quién los reportó, a quién se asignaron y quién los resolvió.';
 

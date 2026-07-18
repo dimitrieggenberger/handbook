@@ -84,6 +84,18 @@ class provider implements
             'resolvedby' => 'privacy:metadata:local_handbook_finding',
         ], 'privacy:metadata:local_handbook_finding');
 
+        $collection->add_database_table('local_handbook_readreceipt', [
+            'userid' => 'privacy:metadata:local_handbook_readreceipt:userid',
+            'revisionid' => 'privacy:metadata:local_handbook_readreceipt',
+            'timecompleted' => 'privacy:metadata:local_handbook_readreceipt:timecompleted',
+        ], 'privacy:metadata:local_handbook_readreceipt');
+
+        $collection->add_database_table('local_handbook_readerhide', [
+            'userid' => 'privacy:metadata:local_handbook_readerhide:userid',
+            'note' => 'privacy:metadata:local_handbook_readerhide:note',
+            'createdby' => 'privacy:metadata:local_handbook_readerhide',
+        ], 'privacy:metadata:local_handbook_readerhide');
+
         return $collection;
     }
 
@@ -99,6 +111,8 @@ class provider implements
         $contextlist = new contextlist();
 
         $hasdata = $DB->record_exists('local_handbook_ack', ['userid' => $userid])
+            || $DB->record_exists('local_handbook_readreceipt', ['userid' => $userid])
+            || $DB->record_exists('local_handbook_readerhide', ['userid' => $userid])
             || $DB->record_exists('local_handbook_revision', ['createdby' => $userid])
             || $DB->record_exists('local_handbook_page', ['owneruserid' => $userid])
             || $DB->record_exists('local_handbook_finding', ['createdby' => $userid]);
@@ -121,6 +135,8 @@ class provider implements
         }
 
         $userlist->add_from_sql('userid', 'SELECT userid FROM {local_handbook_ack}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {local_handbook_readreceipt}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {local_handbook_readerhide}', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {local_handbook_revision}', []);
         $userlist->add_from_sql('owneruserid',
             'SELECT owneruserid FROM {local_handbook_page} WHERE owneruserid > 0', []);
@@ -175,6 +191,40 @@ class provider implements
                 (object)['acknowledgements' => $acks]);
         }
 
+        // Reading-completion receipts (reading paths / mark-as-read).
+        $sql = "SELECT rr.id, rr.timecompleted, rr.completionmethod,
+                       p.title, p.slug, r.versionnumber
+                  FROM {local_handbook_readreceipt} rr
+                  JOIN {local_handbook_page} p ON p.id = rr.pageid
+                  JOIN {local_handbook_revision} r ON r.id = rr.revisionid
+                 WHERE rr.userid = :userid
+              ORDER BY rr.timecompleted ASC";
+        $receipts = [];
+        foreach ($DB->get_records_sql($sql, ['userid' => $userid]) as $receipt) {
+            $receipts[] = (object)[
+                'page' => $receipt->title,
+                'slug' => $receipt->slug,
+                'readversion' => (int)$receipt->versionnumber,
+                'method' => $receipt->completionmethod,
+                'timecompleted' => transform::datetime($receipt->timecompleted),
+            ];
+        }
+        if ($receipts) {
+            writer::with_context($syscontext)->export_data(
+                array_merge($subcontext, [get_string('privacy:receiptspath', 'local_handbook')]),
+                (object)['readreceipts' => $receipts]);
+        }
+
+        // Reading-dashboard hide entry (staff on leave).
+        if ($hide = $DB->get_record('local_handbook_readerhide', ['userid' => $userid])) {
+            writer::with_context($syscontext)->export_data(
+                array_merge($subcontext, [get_string('privacy:readerhidepath', 'local_handbook')]),
+                (object)[
+                    'note' => $hide->note,
+                    'timecreated' => transform::datetime($hide->timecreated),
+                ]);
+        }
+
         // Editorial attribution (summary of authored revisions).
         $sql = "SELECT r.id, r.versionnumber, r.status, r.timecreated, p.title
                   FROM {local_handbook_revision} r
@@ -209,6 +259,8 @@ class provider implements
 
         if ($context instanceof context_system) {
             $DB->delete_records('local_handbook_ack');
+            $DB->delete_records('local_handbook_readreceipt');
+            $DB->delete_records('local_handbook_readerhide');
         }
     }
 
@@ -224,6 +276,10 @@ class provider implements
         foreach ($contextlist->get_contexts() as $context) {
             if ($context instanceof context_system) {
                 $DB->delete_records('local_handbook_ack',
+                    ['userid' => (int)$contextlist->get_user()->id]);
+                $DB->delete_records('local_handbook_readreceipt',
+                    ['userid' => (int)$contextlist->get_user()->id]);
+                $DB->delete_records('local_handbook_readerhide',
                     ['userid' => (int)$contextlist->get_user()->id]);
             }
         }
@@ -249,5 +305,7 @@ class provider implements
 
         [$insql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $DB->delete_records_select('local_handbook_ack', "userid $insql", $params);
+        $DB->delete_records_select('local_handbook_readreceipt', "userid $insql", $params);
+        $DB->delete_records_select('local_handbook_readerhide', "userid $insql", $params);
     }
 }

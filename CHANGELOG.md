@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.30.0 (2026-07-18)
+
+Reading dashboard: who has read what, person by person.
+
+- New manage page (manage/readers.php, viewreports capability): one row
+  per staff member with a segmented progress bar — green (confirmed on the
+  current published version), amber (confirmed an earlier version of a
+  page that changed since), gray (pending) — plus counts, percentage and
+  last activity ("nunca" highlighted). Sorted most-read first, one click
+  to flip.
+- Filters: audience (all staff / cohort / role) and scope (all required
+  reading / one path's required items / one category incl. children —
+  e.g. the Reglamento Interno). Summary tiles: people in view, average
+  confirmed, re-confirmations pending, no reading at all. CSV export.
+- Reversible hide-list for staff on leave (new local_handbook_readerhide
+  table + upgrade step): hidden colleagues leave the list AND the
+  aggregates, with an optional note and an audit line (who hid, when);
+  one click restores. No reading data is ever modified.
+- Privacy API: the new hide table AND the previously uncovered
+  local_handbook_readreceipt table are now declared, exported and
+  deleted through Moodle's privacy provider.
+- No AI/MCP surface: reading data about identifiable staff stays inside
+  Moodle. EN/ES/DE strings.
+
 ## 0.29.0 (2026-07-18)
 
 Optionality controls for reading paths.

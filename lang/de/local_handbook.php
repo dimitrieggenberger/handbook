@@ -219,6 +219,40 @@ $string['bannerimage'] = 'Bannerbild';
 $string['bannerimage_help'] = 'Optional. Ein Querformat-Bild, das auf der Kategoriekarte (16:9) und im Artikelkopf (3:1) angezeigt wird. Das Bild wird automatisch zugeschnitten und zentriert — kein manueller Zuschnitt nötig. Ohne Bild zeigt die Karte einen dezenten Platzhalter je nach Inhaltstyp.';
 
 // Inhalts-Stilrichtlinie (hb-*-Muster).
+// Lese-Dashboard.
+$string['readingdashboard'] = 'Lese-Dashboard';
+$string['dashaudience'] = 'Zielgruppe';
+$string['dashaudiencestaff'] = 'Gesamtes Personal';
+$string['dashscope'] = 'Umfang';
+$string['dashscoperequired'] = 'Alle Pflichtlektüre';
+$string['dashscopepath'] = 'Pfad';
+$string['dashscopecategory'] = 'Kategorie';
+$string['dashsortdesc'] = 'Meiste Lektüre zuerst';
+$string['dashsortasc'] = 'Wenigste Lektüre zuerst';
+$string['dashconfirmed'] = 'Bestätigt';
+$string['dashstale'] = 'Erneute Bestätigung nötig';
+$string['dashpending'] = 'Ausstehend';
+$string['dashtotal'] = 'Gesamt';
+$string['dashlastactivity'] = 'Letzte Aktivität';
+$string['dashnever'] = 'nie';
+$string['dashstalechip'] = '{$a} erneut';
+$string['dashtilepeople'] = 'Personen in der Ansicht';
+$string['dashtileaverage'] = 'durchschnittlich bestätigt';
+$string['dashtilestale'] = 'mit ausstehender Neubestätigung';
+$string['dashtilenever'] = 'ohne jede Lektüre';
+$string['dashhide'] = 'Ausblenden';
+$string['dashshow'] = 'Einblenden';
+$string['dashhidden'] = 'Ausgeblendet';
+$string['dashhidenote'] = 'Notiz (z. B. Elternzeit)';
+$string['dashhiddenby'] = 'ausgeblendet von {$a->name} · {$a->date}';
+$string['dashhiddensection'] = 'Ausgeblendet ({$a})';
+$string['dashshowhidden'] = 'Ausgeblendete anzeigen ({$a})';
+$string['dashhidehidden'] = 'Ausgeblendeten-Bereich verbergen';
+$string['dashexportcsv'] = 'CSV exportieren';
+$string['dashnopages'] = 'Dieser Umfang enthält noch keine veröffentlichten Seiten.';
+$string['dashnousers'] = 'Keine Personen in dieser Zielgruppe.';
+$string['dashfootnote'] = 'Grün = auf der aktuell veröffentlichten Version bestätigt; bernstein = eine frühere Version einer seither geänderten Seite bestätigt; grau = ausstehend. Ausgeblendete Personen fallen aus Liste und Durchschnitten, ihre Leseeinträge bleiben jedoch unberührt und sie können jederzeit wiederhergestellt werden. Dieses Dashboard misst Bestätigungen, nicht Aufmerksamkeit.';
+
 // Seiten-Anhänge.
 $string['attachments'] = 'Dokumente';
 $string['attachments_help'] = 'Offizielle Quelldokumente, die dieser Artikel behandelt oder referenziert — das Gesetz, die Direktive, das Formular. Sie hängen an der Seite (nicht an einer Revision), überstehen also redaktionelle Entwürfe und erscheinen im Seitenpanel des Artikels, werden auf den Kategoriekarten gezählt und auf der Druckseite gelistet. Jede Datei hat eine stabile URL und kann daher auch aus dem Artikeltext verlinkt werden. Verwaltung nur hier — die Handbuch-KI kann keine Dateien hochladen, ersetzen oder löschen.';
@@ -573,6 +607,14 @@ $string['revisionrestored'] = 'v{$a} wurde als neuer Arbeitsentwurf wiederherges
 
 // Privacy export paths.
 $string['privacy:acknowledgementspath'] = 'Lesebestätigungen';
+$string['privacy:receiptspath'] = 'Leseabschluss-Einträge';
+$string['privacy:readerhidepath'] = 'Ausgeblendet-Status im Lese-Dashboard';
+$string['privacy:metadata:local_handbook_readreceipt'] = 'Leseabschluss-Einträge halten fest, welche Person welche veröffentlichte Revision wann abgeschlossen hat.';
+$string['privacy:metadata:local_handbook_readreceipt:userid'] = 'Die Person, die die Lektüre abgeschlossen hat.';
+$string['privacy:metadata:local_handbook_readreceipt:timecompleted'] = 'Wann der Abschluss erfasst wurde.';
+$string['privacy:metadata:local_handbook_readerhide'] = 'Die Ausblendliste des Lese-Dashboards hält fest, wer vorübergehend ausgeblendet wurde, von wem und mit welcher optionalen Begründung.';
+$string['privacy:metadata:local_handbook_readerhide:userid'] = 'Die ausgeblendete Person.';
+$string['privacy:metadata:local_handbook_readerhide:note'] = 'Die optionale Begründung (z. B. Elternzeit).';
 $string['privacy:authoredpath'] = 'Erstellte Überarbeitungen';
 $string['privacy:metadata:local_handbook_finding'] = 'Qualitätsbefunde erfassen, wer sie gemeldet hat, wem sie zugewiesen wurden und wer sie gelöst hat.';
 

@@ -2412,3 +2412,100 @@
     font-style: normal;
     line-height: 1.5;
 }
+
+/* ---- Reading dashboard (manage/readers.php): summary tiles, person rows
+   with a segmented progress bar (confirmed / stale / pending), and the
+   dimmed hidden-colleagues section. ---- */
+#page-local-handbook-area .local-handbook-dash-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 1.1rem;
+}
+#page-local-handbook-area .local-handbook-dash-tile {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.65rem;
+    background: var(--bs-body-bg, #fff);
+    padding: 0.6rem 0.9rem;
+}
+#page-local-handbook-area .local-handbook-dash-tile .v { font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
+#page-local-handbook-area .local-handbook-dash-tile .k { font-size: 0.7rem; color: var(--bs-secondary-color, #6c757d); }
+
+#page-local-handbook-area .local-handbook-dash-row {
+    display: grid;
+    grid-template-columns: minmax(11rem, 15rem) 1fr minmax(8rem, auto) minmax(6.5rem, auto) auto;
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.55rem 0.6rem;
+    border-radius: 0.5rem;
+}
+#page-local-handbook-area .local-handbook-dash-row + .local-handbook-dash-row {
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+}
+#page-local-handbook-area .local-handbook-dash-row:hover {
+    background: color-mix(in srgb, var(--primary, #0078c3) 4%, transparent);
+}
+#page-local-handbook-area .local-handbook-dash-who {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+#page-local-handbook-area .local-handbook-dash-av {
+    flex: none;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+    color: var(--primary, #0078c3);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+#page-local-handbook-area .local-handbook-dash-who .nm { font-size: 0.82rem; font-weight: 500; }
+#page-local-handbook-area .local-handbook-dash-bar {
+    display: flex;
+    height: 0.6rem;
+    border-radius: 999px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+}
+#page-local-handbook-area .local-handbook-dash-bar .seg-ok { background: var(--success, #1e7d43); }
+#page-local-handbook-area .local-handbook-dash-bar .seg-stale { background: var(--warning, #9a6700); }
+#page-local-handbook-area .local-handbook-dash-nums {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+#page-local-handbook-area .local-handbook-dash-nums b { font-size: 0.82rem; }
+#page-local-handbook-area .local-handbook-dash-rechip {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--warning, #9a6700) 16%, transparent);
+    color: var(--warning, #9a6700);
+    vertical-align: 1px;
+}
+#page-local-handbook-area .local-handbook-dash-actions { display: flex; gap: 0.3rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+#page-local-handbook-area .local-handbook-dash-row.is-hidden { opacity: 0.62; }
+#page-local-handbook-area .local-handbook-dash-row.is-hidden .local-handbook-dash-bar { filter: grayscale(1); }
+#page-local-handbook-area .local-handbook-dash-notechip {
+    display: inline-block;
+    font-size: 0.62rem;
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 10%, transparent);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    color: var(--bs-secondary-color, #6c757d);
+    border-radius: 999px;
+    padding: 0.02rem 0.5rem;
+    margin-left: 0.4rem;
+    vertical-align: 1px;
+}
+@media (max-width: 860px) {
+    #page-local-handbook-area .local-handbook-dash-row { grid-template-columns: 1fr; gap: 0.35rem; }
+    #page-local-handbook-area .local-handbook-dash-actions { justify-content: flex-start; }
+}

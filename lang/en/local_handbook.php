@@ -219,6 +219,40 @@ $string['bannerimage'] = 'Banner image';
 $string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
 
 // Content style guide (hb-* patterns).
+// Reading dashboard.
+$string['readingdashboard'] = 'Reading dashboard';
+$string['dashaudience'] = 'Audience';
+$string['dashaudiencestaff'] = 'All staff';
+$string['dashscope'] = 'Scope';
+$string['dashscoperequired'] = 'All required reading';
+$string['dashscopepath'] = 'Path';
+$string['dashscopecategory'] = 'Category';
+$string['dashsortdesc'] = 'Most reading first';
+$string['dashsortasc'] = 'Least reading first';
+$string['dashconfirmed'] = 'Confirmed';
+$string['dashstale'] = 'Needs re-confirmation';
+$string['dashpending'] = 'Pending';
+$string['dashtotal'] = 'Total';
+$string['dashlastactivity'] = 'Last activity';
+$string['dashnever'] = 'never';
+$string['dashstalechip'] = '{$a} reconf.';
+$string['dashtilepeople'] = 'people in view';
+$string['dashtileaverage'] = 'average confirmed';
+$string['dashtilestale'] = 'with re-confirmations pending';
+$string['dashtilenever'] = 'with no reading at all';
+$string['dashhide'] = 'Hide';
+$string['dashshow'] = 'Show';
+$string['dashhidden'] = 'Hidden';
+$string['dashhidenote'] = 'Note (e.g. on leave)';
+$string['dashhiddenby'] = 'hidden by {$a->name} · {$a->date}';
+$string['dashhiddensection'] = 'Hidden ({$a})';
+$string['dashshowhidden'] = 'Show hidden ({$a})';
+$string['dashhidehidden'] = 'Hide the hidden section';
+$string['dashexportcsv'] = 'Export CSV';
+$string['dashnopages'] = 'This scope contains no published pages yet.';
+$string['dashnousers'] = 'No people in this audience.';
+$string['dashfootnote'] = 'Green = confirmed on the current published version; amber = confirmed an earlier version of a page that changed since; gray = pending. Hidden colleagues are excluded from the list and the aggregates, but their reading records are untouched and they can be restored at any time. This dashboard measures confirmations, not attention.';
+
 // Page attachments.
 $string['attachments'] = 'Documents';
 $string['attachments_help'] = 'Official source documents this article discusses or references — the law, the directive, the form. They are attached to the page (not to a revision), so they survive editorial drafts and are shown in the article\'s side panel, counted on category cards and listed on the printed page. Each file has a stable URL, so you can also link it from the article text. Managed here only — the Handbook AI cannot upload, replace or delete files.';
@@ -574,6 +608,14 @@ $string['revisionrestored'] = 'v{$a} was restored as a new working draft.';
 // Privacy export paths.
 $string['privacy:acknowledgementspath'] = 'Reading acknowledgements';
 $string['privacy:authoredpath'] = 'Authored revisions';
+$string['privacy:receiptspath'] = 'Reading completion receipts';
+$string['privacy:readerhidepath'] = 'Reading-dashboard hidden status';
+$string['privacy:metadata:local_handbook_readreceipt'] = 'Reading-completion receipts record which user completed which published revision and when.';
+$string['privacy:metadata:local_handbook_readreceipt:userid'] = 'The user who completed the reading.';
+$string['privacy:metadata:local_handbook_readreceipt:timecompleted'] = 'When the completion was recorded.';
+$string['privacy:metadata:local_handbook_readerhide'] = 'The reading dashboard\'s hide-list records who was temporarily hidden from view, by whom, and the optional reason.';
+$string['privacy:metadata:local_handbook_readerhide:userid'] = 'The hidden user.';
+$string['privacy:metadata:local_handbook_readerhide:note'] = 'The optional reason (e.g. on leave).';
 $string['privacy:metadata:local_handbook_finding'] = 'Quality findings record who reported, was assigned to and resolved them.';
 
 // Privacy API.
