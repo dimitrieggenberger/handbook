@@ -95,6 +95,12 @@ $banneroptions = [
     'subdirs' => 0,
     'accepted_types' => ['web_image'],
 ];
+$attachmentoptions = [
+    'maxfiles' => 20,
+    'maxbytes' => 0,
+    'subdirs' => 0,
+    'accepted_types' => ['document', 'archive', 'image'],
+];
 
 $candirectpublish = page_service::bootstrap_mode_enabled()
     && has_capability('local/handbook:publish', $context);
@@ -105,6 +111,7 @@ $form = new page_form($url->out(false), [
     'revision' => $revision,
     'editoroptions' => $editoroptions,
     'banneroptions' => $banneroptions,
+    'attachmentoptions' => $attachmentoptions,
     'candirectpublish' => $candirectpublish,
 ]);
 
@@ -164,6 +171,11 @@ if ($data = $form->get_data()) {
     // Store the banner image against the page (file area keyed by page id).
     $data = file_postupdate_standard_filemanager($data, 'bannerimage', $banneroptions, $context,
         'local_handbook', 'bannerimage', (int)$page->id);
+
+    // Attached source documents, likewise page-scoped: they survive
+    // revisions and never touch the draft/review workflow.
+    $data = file_postupdate_standard_filemanager($data, 'attachments', $attachmentoptions, $context,
+        'local_handbook', 'attachments', (int)$page->id);
 
     // Move editor draft files into the revision's file area, then save.
     $data = file_postupdate_standard_editor($data, 'content', $editoroptions, $context,
@@ -232,6 +244,8 @@ $defaults = file_prepare_standard_editor($defaults, 'content', $editoroptions, $
     'local_handbook', 'revision', $sourcerevision->id ?? null);
 $defaults = file_prepare_standard_filemanager($defaults, 'bannerimage', $banneroptions, $context,
     'local_handbook', 'bannerimage', $page->id ?? null);
+$defaults = file_prepare_standard_filemanager($defaults, 'attachments', $attachmentoptions, $context,
+    'local_handbook', 'attachments', $page->id ?? null);
 
 $form->set_data($defaults);
 

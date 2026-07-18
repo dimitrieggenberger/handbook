@@ -219,6 +219,11 @@ $string['bannerimage'] = 'Banner image';
 $string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
 
 // Content style guide (hb-* patterns).
+// Page attachments.
+$string['attachments'] = 'Documents';
+$string['attachments_help'] = 'Official source documents this article discusses or references — the law, the directive, the form. They are attached to the page (not to a revision), so they survive editorial drafts and are shown in the article\'s side panel, counted on category cards and listed on the printed page. Each file has a stable URL, so you can also link it from the article text. Managed here only — the Handbook AI cannot upload, replace or delete files.';
+$string['attachmentcount'] = 'Attached documents: {$a}';
+
 // Automatic cross-links.
 $string['autolink'] = 'Auto-link page titles';
 $string['autolink_desc'] = 'Wikipedia-style cross-links: when an article mentions the exact title of another published handbook page, the first mention becomes a link to that page. Applied at display time only — stored content is never modified, links follow renames and archiving automatically, and switching this off removes them everywhere instantly. Matches are whole-title and case-insensitive; no links are added inside headings, existing links or the cross-reference patterns.';

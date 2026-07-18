@@ -2301,3 +2301,80 @@
     margin-left: auto;
     margin-right: auto;
 }
+
+/* ---- Page attachments: the "Documentos" rail card (view.php) and the
+   paperclip count on category cards. Rows are whole-row download links;
+   the tile colour follows the file type (same language as hb-course). ---- */
+#page-local-handbook-area .local-handbook-attachments { padding-bottom: 0.5rem; }
+#page-local-handbook-area a.local-handbook-att {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 1.25rem;
+    color: inherit;
+    text-decoration: none;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+    transition: background 0.13s ease;
+}
+#page-local-handbook-area a.local-handbook-att:hover {
+    background: color-mix(in srgb, var(--primary, #0078c3) 5%, transparent);
+}
+#page-local-handbook-area .local-handbook-att .att-ic {
+    flex: none;
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    background: color-mix(in srgb, var(--bs-body-color, #1c2430) 6%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-att .att-ic.is-pdf { background: color-mix(in srgb, var(--danger, #b4232c) 12%, transparent); color: var(--danger, #b4232c); }
+#page-local-handbook-area .local-handbook-att .att-ic.is-doc { background: color-mix(in srgb, #185abd 12%, transparent); color: #185abd; }
+#page-local-handbook-area .local-handbook-att .att-ic.is-xls { background: color-mix(in srgb, #107c41 12%, transparent); color: #107c41; }
+#page-local-handbook-area .local-handbook-att .att-ic.is-ppt { background: color-mix(in srgb, #d04a2a 12%, transparent); color: #d04a2a; }
+#page-local-handbook-area .local-handbook-att .att-ic.is-img { background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent); color: var(--primary, #0078c3); }
+#page-local-handbook-area .local-handbook-att .att-info { min-width: 0; }
+#page-local-handbook-area .local-handbook-att .att-name {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+#page-local-handbook-area a.local-handbook-att:hover .att-name { color: var(--primary, #0078c3); }
+#page-local-handbook-area .local-handbook-att .att-meta {
+    display: block;
+    font-size: 0.66rem;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-top: 0.05rem;
+}
+#page-local-handbook-area .local-handbook-att .att-dl {
+    margin-left: auto;
+    flex: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.8rem;
+    transition: background 0.13s ease, color 0.13s ease;
+}
+#page-local-handbook-area a.local-handbook-att:hover .att-dl {
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+    color: var(--primary, #0078c3);
+}
+#page-local-handbook-area .local-handbook-card-clip {
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-card-clip::before {
+    content: "\1F4CE";
+    font-size: 0.68rem;
+    margin-right: 0.2rem;
+}

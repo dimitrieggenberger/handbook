@@ -219,6 +219,11 @@ $string['bannerimage'] = 'Imagen de cabecera';
 $string['bannerimage_help'] = 'Opcional. Una imagen horizontal que se muestra en la tarjeta de la categoría (16:9) y en la cabecera del artículo (3:1). La imagen se recorta y centra automáticamente, sin recorte manual. Sin imagen, la tarjeta muestra un marcador discreto según el tipo de contenido.';
 
 // Guía de estilo de contenido (patrones hb-*).
+// Documentos adjuntos de página.
+$string['attachments'] = 'Documentos';
+$string['attachments_help'] = 'Documentos fuente oficiales que este artículo discute o referencia — la ley, la directriz, el formato. Se adjuntan a la página (no a una revisión), por lo que sobreviven a los borradores editoriales y se muestran en el panel lateral del artículo, se cuentan en las tarjetas de categoría y se listan en la página impresa. Cada archivo tiene una URL estable, así que también puede enlazarse desde el texto del artículo. Se gestionan únicamente aquí — la IA del manual no puede subir, reemplazar ni eliminar archivos.';
+$string['attachmentcount'] = 'Documentos adjuntos: {$a}';
+
 // Enlaces cruzados automáticos.
 $string['autolink'] = 'Enlazar títulos de páginas automáticamente';
 $string['autolink_desc'] = 'Enlaces cruzados al estilo Wikipedia: cuando un artículo menciona el título exacto de otra página publicada del manual, la primera mención se convierte en un enlace a esa página. Se aplica solo al mostrar — el contenido guardado nunca se modifica, los enlaces siguen automáticamente los cambios de nombre y archivado, y al desactivar esta opción desaparecen de inmediato en todas partes. Las coincidencias son por título completo, sin distinguir mayúsculas; no se agregan enlaces dentro de encabezados, enlaces existentes ni los patrones de referencias normativas.';

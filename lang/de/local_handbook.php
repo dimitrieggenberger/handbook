@@ -219,6 +219,11 @@ $string['bannerimage'] = 'Bannerbild';
 $string['bannerimage_help'] = 'Optional. Ein Querformat-Bild, das auf der Kategoriekarte (16:9) und im Artikelkopf (3:1) angezeigt wird. Das Bild wird automatisch zugeschnitten und zentriert — kein manueller Zuschnitt nötig. Ohne Bild zeigt die Karte einen dezenten Platzhalter je nach Inhaltstyp.';
 
 // Inhalts-Stilrichtlinie (hb-*-Muster).
+// Seiten-Anhänge.
+$string['attachments'] = 'Dokumente';
+$string['attachments_help'] = 'Offizielle Quelldokumente, die dieser Artikel behandelt oder referenziert — das Gesetz, die Direktive, das Formular. Sie hängen an der Seite (nicht an einer Revision), überstehen also redaktionelle Entwürfe und erscheinen im Seitenpanel des Artikels, werden auf den Kategoriekarten gezählt und auf der Druckseite gelistet. Jede Datei hat eine stabile URL und kann daher auch aus dem Artikeltext verlinkt werden. Verwaltung nur hier — die Handbuch-KI kann keine Dateien hochladen, ersetzen oder löschen.';
+$string['attachmentcount'] = 'Angehängte Dokumente: {$a}';
+
 // Automatische Querverweise.
 $string['autolink'] = 'Seitentitel automatisch verlinken';
 $string['autolink_desc'] = 'Querverweise im Wikipedia-Stil: Erwähnt ein Artikel den exakten Titel einer anderen veröffentlichten Handbuchseite, wird die erste Erwähnung zu einem Link auf diese Seite. Nur bei der Anzeige angewendet — der gespeicherte Inhalt wird nie verändert, Links folgen Umbenennungen und Archivierungen automatisch, und beim Deaktivieren verschwinden sie sofort überall. Es zählt der vollständige Titel, ohne Groß-/Kleinschreibung; in Überschriften, bestehenden Links und den Normverweis-Mustern werden keine Links ergänzt.';

@@ -607,6 +607,10 @@ echo html_writer::div(
     'card mb-3'
 );
 
+// Attached source documents (laws, directives, forms) — between the
+// details and the related pages; hidden entirely when there are none.
+echo local_handbook_render_attachments_card((int)$page->id);
+
 // Typed relations, both directions, published targets only for readers.
 $relitems = '';
 foreach ([[$outgoing, false], [$incoming, true]] as [$relations, $reverse]) {

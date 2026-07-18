@@ -49,7 +49,7 @@ function local_handbook_pluginfile($course, $cm, $context, string $filearea, arr
     global $DB;
 
     if ($context->contextlevel !== CONTEXT_SYSTEM
-            || !in_array($filearea, ['revision', 'bannerimage'], true)) {
+            || !in_array($filearea, ['revision', 'bannerimage', 'attachments'], true)) {
         return false;
     }
 
@@ -59,9 +59,10 @@ function local_handbook_pluginfile($course, $cm, $context, string $filearea, arr
         return false;
     }
 
-    // Banner images (file area "bannerimage", itemid = page id): decorative
-    // page imagery, visible to anyone who may view the handbook.
-    if ($filearea === 'bannerimage') {
+    // Page-scoped files (itemid = page id): banner imagery and attached
+    // source documents (laws, directives, forms), visible to anyone who
+    // may view the handbook.
+    if ($filearea === 'bannerimage' || $filearea === 'attachments') {
         $pageid = (int)array_shift($args);
         if (!$DB->record_exists('local_handbook_page', ['id' => $pageid])) {
             return false;

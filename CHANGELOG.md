@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.28.0 (2026-07-18)
+
+Page attachments: official source documents on articles.
+
+- New page-scoped `attachments` file area (File API only, no database
+  changes): the law, directive or form an article discusses is uploaded
+  once on the edit form (up to 20 documents/archives/images) and survives
+  every revision — attaching or replacing files never touches the
+  draft/review workflow.
+- "Documentos" rail card on the article view, between details and related
+  pages: type-coloured tile (PDF/DOC/XLS/PPT/IMG/ZIP), filename, size and
+  date; the whole row downloads; hidden when the page has no files.
+- Stable pluginfile URLs, so prose and hb-refbox entries can link the
+  attached file directly.
+- Paperclip count in the category-card foot; "Documentos adjuntos" list
+  (name + size) at the end of the print view.
+- Human-only by design: no external API or MCP surface gains any
+  attachment capability. EN/ES/DE strings.
+
 ## 0.27.0 (2026-07-18)
 
 Content accordions, call scripts, and centered communication patterns.

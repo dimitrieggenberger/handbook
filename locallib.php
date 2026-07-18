@@ -1201,6 +1201,111 @@ function local_handbook_render_path_panel(stdClass $ctx): string {
 }
 
 /**
+ * Attached source documents of a page (file area "attachments").
+ *
+ * @param int $pageid Page id.
+ * @return stored_file[] Ordered by filename.
+ */
+function local_handbook_page_attachments(int $pageid): array {
+    $fs = get_file_storage();
+    return $fs->get_area_files(context_system::instance()->id, 'local_handbook',
+        'attachments', $pageid, 'filename', false);
+}
+
+/**
+ * Attachment count for a page, from a request-level cache of all counts
+ * (one query serves every card in a grid).
+ *
+ * @param int $pageid Page id.
+ * @return int
+ */
+function local_handbook_attachment_count(int $pageid): int {
+    global $DB;
+
+    static $counts = null;
+    if ($counts === null) {
+        $counts = [];
+        $sql = "SELECT itemid, COUNT(1) AS filecount
+                  FROM {files}
+                 WHERE contextid = :contextid AND component = 'local_handbook'
+                       AND filearea = 'attachments' AND filename <> '.'
+              GROUP BY itemid";
+        $records = $DB->get_records_sql($sql, ['contextid' => context_system::instance()->id]);
+        foreach ($records as $record) {
+            $counts[(int)$record->itemid] = (int)$record->filecount;
+        }
+    }
+    return $counts[$pageid] ?? 0;
+}
+
+/**
+ * Type tile (css modifier + short label) for an attachment filename.
+ *
+ * @param string $filename File name.
+ * @return string[] [$modifierclass, $label].
+ */
+function local_handbook_attachment_tile(string $filename): array {
+    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $map = [
+        'pdf' => ['is-pdf', 'PDF'],
+        'doc' => ['is-doc', 'DOC'], 'docx' => ['is-doc', 'DOC'],
+        'odt' => ['is-doc', 'DOC'], 'rtf' => ['is-doc', 'DOC'],
+        'xls' => ['is-xls', 'XLS'], 'xlsx' => ['is-xls', 'XLS'],
+        'ods' => ['is-xls', 'XLS'], 'csv' => ['is-xls', 'CSV'],
+        'ppt' => ['is-ppt', 'PPT'], 'pptx' => ['is-ppt', 'PPT'], 'odp' => ['is-ppt', 'PPT'],
+        'png' => ['is-img', 'IMG'], 'jpg' => ['is-img', 'IMG'], 'jpeg' => ['is-img', 'IMG'],
+        'gif' => ['is-img', 'IMG'], 'webp' => ['is-img', 'IMG'], 'svg' => ['is-img', 'IMG'],
+        'zip' => ['is-zip', 'ZIP'], 'rar' => ['is-zip', 'RAR'], '7z' => ['is-zip', '7Z'],
+    ];
+    if (isset($map[$extension])) {
+        return $map[$extension];
+    }
+    $label = $extension !== '' ? core_text::strtoupper(core_text::substr($extension, 0, 4)) : 'FILE';
+    return ['is-file', $label];
+}
+
+/**
+ * Render the "Documentos" rail card. Empty string when the page has no
+ * attachments, so the card simply does not appear.
+ *
+ * @param int $pageid Page id.
+ * @return string
+ */
+function local_handbook_render_attachments_card(int $pageid): string {
+    $files = local_handbook_page_attachments($pageid);
+    if (!$files) {
+        return '';
+    }
+
+    $context = context_system::instance();
+    $rows = '';
+    foreach ($files as $file) {
+        $filename = $file->get_filename();
+        [$tileclass, $tilelabel] = local_handbook_attachment_tile($filename);
+        $url = moodle_url::make_pluginfile_url($context->id, 'local_handbook', 'attachments',
+            $pageid, $file->get_filepath(), $filename, true);
+        $meta = display_size((int)$file->get_filesize()) . ' · '
+            . userdate((int)$file->get_timemodified(), get_string('strftimedatefullshort', 'langconfig'));
+        $rows .= html_writer::link($url,
+            html_writer::span(s($tilelabel), 'att-ic ' . $tileclass)
+            . html_writer::span(
+                html_writer::span(s($filename), 'att-name')
+                . html_writer::span(s($meta), 'att-meta'),
+                'att-info')
+            . html_writer::span('&#8595;', 'att-dl', ['aria-hidden' => 'true']),
+            ['class' => 'local-handbook-att']);
+    }
+
+    return html_writer::div(
+        html_writer::div(
+            html_writer::tag('h3', s(get_string('attachments', 'local_handbook')),
+                ['class' => 'h6 text-uppercase text-muted mb-0']),
+            'card-body pb-2')
+        . html_writer::div($rows, 'local-handbook-attachments'),
+        'card mb-3');
+}
+
+/**
  * Render one page as a banner card (category view, home accordion, live
  * search results all share this markup). Whole card is clickable.
  *
@@ -1243,6 +1348,12 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
             s(get_string('lastupdated', 'local_handbook') . ': '
                 . local_handbook_format_date((int)$page->timemodified)))
         . ($version ? html_writer::span(s(get_string('versionnumber', 'local_handbook', $version))) : '');
+    $attachmentcount = local_handbook_attachment_count((int)$page->id);
+    if ($attachmentcount > 0) {
+        $foot .= html_writer::span((string)$attachmentcount, 'local-handbook-card-clip', [
+            'title' => get_string('attachmentcount', 'local_handbook', $attachmentcount),
+        ]);
+    }
 
     // The card IS the link (no overlay tricks a theme can break); it contains
     // no other interactive elements, so the whole surface navigates.
