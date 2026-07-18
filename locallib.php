@@ -1159,9 +1159,14 @@ function local_handbook_render_path_panel(stdClass $ctx): string {
         html_writer::tag('i', '', ['class' => 'fa-solid fa-route me-2 text-primary', 'aria-hidden' => 'true'])
         . s(get_string('myreadingpath', 'local_handbook')),
         ['class' => 'h6 text-uppercase text-muted mb-1']);
+    $optionalbadge = !empty($ctx->path->optionalpath)
+        ? ' ' . html_writer::span(s(get_string('optionalitem', 'local_handbook')),
+            'pathpanel-optional')
+        : '';
     $body .= html_writer::tag('p', html_writer::link(
         new moodle_url('/local/handbook/path.php', ['id' => $ctx->path->id]),
-        html_writer::tag('strong', s(format_string($ctx->path->name)))), ['class' => 'mb-2']);
+        html_writer::tag('strong', s(format_string($ctx->path->name)))) . $optionalbadge,
+        ['class' => 'mb-2']);
     $body .= html_writer::div(
         html_writer::div('', 'progress-bar', [
             'role' => 'progressbar',

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.29.0 (2026-07-18)
+
+Optionality controls for reading paths.
+
+- Path editor: every item row now shows its Required/Optional badge and a
+  one-click "Make optional / Make required" toggle (the flag existed in
+  the data model but was only settable when adding an item).
+- New path-level "Optional path" checkbox on the path form (DB field
+  `optionalpath`, upgrade step included): marks the whole path as
+  recommended rather than expected reading. Labelled on the manage list,
+  the path page (with an info notice for readers), and the reading-path
+  side panel.
+- EN/ES/DE strings.
+
 ## 0.28.1 (2026-07-18)
 
 Contact cards unsquished + pending-placeholder chip.

@@ -72,6 +72,14 @@ if ($action === 'deleteitem' && $itemid) {
     redirect(new moodle_url($url, ['action' => 'edit', 'id' => $item->pathid]));
 }
 
+if ($action === 'toggleitem' && $itemid) {
+    require_sesskey();
+    $item = $DB->get_record('local_handbook_pathitem', ['id' => $itemid], '*', MUST_EXIST);
+    $DB->set_field('local_handbook_pathitem', 'required', (int)$item->required ? 0 : 1,
+        ['id' => $item->id]);
+    redirect(new moodle_url($url, ['action' => 'edit', 'id' => $item->pathid]));
+}
+
 if ($action === 'delete' && $pathid) {
     require_sesskey();
     $DB->delete_records('local_handbook_pathitem', ['pathid' => $pathid]);
@@ -106,6 +114,7 @@ if ($action === 'edit') {
         $record->active = (int)$data->active;
         $record->audiencejson = path_service::encode_audience(
             (array)($data->audiencecohorts ?? []), (array)($data->audienceroles ?? []));
+        $record->optionalpath = (int)($data->optionalpath ?? 0);
         $record->quizcmid = 0;
         $record->timemodified = $now;
         $record->modifiedby = (int)$USER->id;
@@ -153,23 +162,35 @@ if ($action === 'edit') {
         foreach ($items as $item) {
             $meta = [];
             $meta[] = $item->sectionname !== '' ? $item->sectionname : '—';
-            $meta[] = (int)$item->required
-                ? get_string('requiredreading', 'local_handbook')
-                : get_string('optionalitem', 'local_handbook');
             if ($item->quizcmid) {
                 $meta[] = get_string('connectedquiz', 'local_handbook') . ' #' . $item->quizcmid;
             }
+
+            $requiredbadge = (int)$item->required
+                ? html_writer::span(s(get_string('requiredreading', 'local_handbook')),
+                    'badge badge-primary ml-2')
+                : html_writer::span(s(get_string('optionalitem', 'local_handbook')),
+                    'badge badge-light border ml-2');
 
             $rows .= html_writer::div(
                 html_writer::div(
                     html_writer::link(new moodle_url('/local/handbook/view.php', ['page' => $item->slug]),
                         s($item->title))
+                    . $requiredbadge
                     . html_writer::div(s(implode(' · ', $meta)), 'small text-muted'),
                     'mr-auto')
-                . html_writer::link(new moodle_url($url, ['action' => 'deleteitem', 'item' => $item->id,
-                        'sesskey' => sesskey()]),
-                    s(get_string('delete', 'core')),
-                    ['class' => 'btn btn-outline-secondary btn-sm']),
+                . html_writer::div(
+                    html_writer::link(new moodle_url($url, ['action' => 'toggleitem', 'item' => $item->id,
+                            'sesskey' => sesskey()]),
+                        s((int)$item->required
+                            ? get_string('makeoptional', 'local_handbook')
+                            : get_string('makerequired', 'local_handbook')),
+                        ['class' => 'btn btn-outline-secondary btn-sm'])
+                    . ' ' . html_writer::link(new moodle_url($url, ['action' => 'deleteitem',
+                            'item' => $item->id, 'sesskey' => sesskey()]),
+                        s(get_string('delete', 'core')),
+                        ['class' => 'btn btn-outline-secondary btn-sm']),
+                    'd-flex gap-2'),
                 'd-flex flex-wrap align-items-center justify-content-between gap-2 py-2 border-bottom'
             );
         }
@@ -241,6 +262,9 @@ if (!$paths) {
             $meta[] = $path->schoolyear;
         }
         $meta[] = get_string('pathitemcount', 'local_handbook', $itemcount);
+        if ((int)$path->optionalpath) {
+            $meta[] = get_string('optionalpath', 'local_handbook');
+        }
         if (!(int)$path->active) {
             $meta[] = get_string('inactive', 'core');
         }

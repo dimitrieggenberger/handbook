@@ -76,10 +76,16 @@ if (has_capability('local/handbook:managepaths', $context)) {
 
 echo html_writer::div(
     s(get_string('myreadingpath', 'local_handbook'))
-    . ($path->schoolyear !== '' ? ' · ' . s($path->schoolyear) : ''),
+    . ($path->schoolyear !== '' ? ' · ' . s($path->schoolyear) : '')
+    . ((int)$path->optionalpath ? ' · ' . s(get_string('optionalpath', 'local_handbook')) : ''),
     'local-handbook-category-trail'
 );
 echo local_handbook_render_page_heading(format_string($path->name), $actions);
+
+if ((int)$path->optionalpath) {
+    echo html_writer::div(s(get_string('optionalpathnotice', 'local_handbook')),
+        'alert alert-info');
+}
 
 // Switcher when several paths are visible to this user.
 if (count($visiblepaths) > 1) {

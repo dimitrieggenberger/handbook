@@ -153,6 +153,7 @@
         <FIELD NAME="estimatedminutes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="reviewdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="quizcmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="optionalpath" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="1 = recommended (optional) path, 0 = expected reading"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true"/>

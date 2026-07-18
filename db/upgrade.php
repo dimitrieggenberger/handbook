@@ -473,5 +473,19 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071526, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071560) {
+        // Path-level optionality: 1 = recommended (optional) path, 0 =
+        // expected reading. Informational — it labels the path everywhere
+        // it appears; per-item required flags keep working independently.
+        $table = new xmldb_table('local_handbook_path');
+        $field = new xmldb_field('optionalpath', XMLDB_TYPE_INTEGER, '1', null,
+            XMLDB_NOTNULL, null, '0', 'quizcmid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071560, 'local', 'handbook');
+    }
+
     return true;
 }
