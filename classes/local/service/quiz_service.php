@@ -27,8 +27,11 @@ use stdClass;
  * working unchanged. All-or-nothing, unlimited attempts, options shuffled
  * per attempt; wrong answers show the pauta's mandatory feedback.
  *
- * Questions are imported from Moodle XML (the institutional pauta) by a
- * human editor — the AI can author XML but has no import surface.
+ * Questions belong to REVISIONS and ride the editorial workflow: they are
+ * imported into a working draft, reviewed together with the content, and go
+ * live when the revision is published. Readers always answer the published
+ * revision's questions. Imported from Moodle XML (the institutional pauta)
+ * by a human editor — the AI can author XML but has no import surface.
  * Supported types: multichoice (single answer, 4 options recommended) and
  * ordering (qtype_ordering convention: answers listed in correct order).
  *
@@ -45,26 +48,30 @@ class quiz_service {
     const TYPE_ORDERING = 'ordering';
 
     /**
-     * Whether a page has comprehension questions.
+     * Whether a revision has comprehension questions.
      *
-     * @param int $pageid Page id.
+     * @param int $revisionid Revision id (0 returns false).
      * @return bool
      */
-    public static function has_questions(int $pageid): bool {
+    public static function has_questions(int $revisionid): bool {
         global $DB;
-        return $DB->record_exists('local_handbook_question', ['pageid' => $pageid]);
+        return $revisionid > 0
+            && $DB->record_exists('local_handbook_question', ['revisionid' => $revisionid]);
     }
 
     /**
-     * Questions of a page with their options, ordered.
+     * Questions of a revision with their options, ordered.
      *
-     * @param int $pageid Page id.
+     * @param int $revisionid Revision id (0 returns []).
      * @return stdClass[] Questions, each with ->options (by sortorder).
      */
-    public static function get_questions(int $pageid): array {
+    public static function get_questions(int $revisionid): array {
         global $DB;
 
-        $questions = $DB->get_records('local_handbook_question', ['pageid' => $pageid],
+        if ($revisionid <= 0) {
+            return [];
+        }
+        $questions = $DB->get_records('local_handbook_question', ['revisionid' => $revisionid],
             'sortorder ASC, id ASC');
         if (!$questions) {
             return [];
@@ -225,23 +232,25 @@ class quiz_service {
     }
 
     /**
-     * Replace a page's questions with an imported set (transactional).
+     * Replace a revision's questions with an imported set (transactional).
+     * Callers must ensure the revision is an editable draft: published
+     * questions are immutable, like published content.
      *
-     * @param int $pageid Page id.
+     * @param int $revisionid Revision id.
      * @param stdClass[] $questions Normalized questions from parse_xml().
      * @param int $userid Importing editor.
      * @return void
      */
-    public static function import(int $pageid, array $questions, int $userid): void {
+    public static function import(int $revisionid, array $questions, int $userid): void {
         global $DB;
 
         $transaction = $DB->start_delegated_transaction();
-        self::delete_all($pageid);
+        self::delete_all($revisionid);
         $now = time();
         $sortorder = 0;
         foreach ($questions as $question) {
             $questionid = $DB->insert_record('local_handbook_question', (object)[
-                'pageid' => $pageid,
+                'revisionid' => $revisionid,
                 'qtype' => $question->qtype,
                 'bloomlabel' => quiz_truncate255($question->bloomlabel),
                 'title' => quiz_truncate255($question->title),
@@ -265,19 +274,68 @@ class quiz_service {
     }
 
     /**
-     * Remove every question of a page.
+     * Remove every question of a revision.
      *
-     * @param int $pageid Page id.
+     * @param int $revisionid Revision id.
      * @return void
      */
-    public static function delete_all(int $pageid): void {
+    public static function delete_all(int $revisionid): void {
         global $DB;
         $questionids = $DB->get_fieldset_select('local_handbook_question', 'id',
-            'pageid = :pageid', ['pageid' => $pageid]);
+            'revisionid = :revisionid', ['revisionid' => $revisionid]);
         if ($questionids) {
             $DB->delete_records_list('local_handbook_qoption', 'questionid', $questionids);
         }
-        $DB->delete_records('local_handbook_question', ['pageid' => $pageid]);
+        $DB->delete_records('local_handbook_question', ['revisionid' => $revisionid]);
+    }
+
+    /**
+     * Copy a revision's question set to another revision (draft creation:
+     * the new draft inherits the published questions, like content).
+     *
+     * @param int $fromrevisionid Source revision (0 or empty set = no-op).
+     * @param int $torevisionid Target revision.
+     * @return void
+     */
+    public static function copy_questions(int $fromrevisionid, int $torevisionid): void {
+        global $DB;
+
+        if ($fromrevisionid <= 0 || $torevisionid <= 0 || $fromrevisionid === $torevisionid) {
+            return;
+        }
+        foreach (self::get_questions($fromrevisionid) as $question) {
+            $copy = clone $question;
+            $options = $question->options;
+            unset($copy->id, $copy->options);
+            $copy->revisionid = $torevisionid;
+            $newid = $DB->insert_record('local_handbook_question', $copy);
+            foreach ($options as $option) {
+                $optioncopy = clone $option;
+                unset($optioncopy->id);
+                $optioncopy->questionid = $newid;
+                $DB->insert_record('local_handbook_qoption', $optioncopy);
+            }
+        }
+    }
+
+    /**
+     * Content fingerprint of a revision's question set, for "questions
+     * changed in this draft" indicators. Ignores ids and timestamps.
+     *
+     * @param int $revisionid Revision id.
+     * @return string Empty string when there are no questions.
+     */
+    public static function fingerprint(int $revisionid): string {
+        $normalized = [];
+        foreach (self::get_questions($revisionid) as $question) {
+            $options = [];
+            foreach (self::sorted_options($question) as $option) {
+                $options[] = [$option->optiontext, $option->feedback, (int)$option->iscorrect];
+            }
+            $normalized[] = [$question->qtype, $question->bloomlabel, $question->title,
+                $question->questiontext, $question->feedback, $options];
+        }
+        return $normalized ? sha1(json_encode($normalized)) : '';
     }
 
     /**

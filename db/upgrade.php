@@ -587,5 +587,95 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071570, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071574) {
+        // Comprehension questions move from the PAGE to the REVISION so they
+        // ride the editorial workflow (draft -> review -> publish) exactly
+        // like content. Existing page-scoped questions attach to the current
+        // published revision and are copied into any open working draft.
+        $table = new xmldb_table('local_handbook_question');
+
+        $revisionfield = new xmldb_field('revisionid', XMLDB_TYPE_INTEGER, '10', null,
+            XMLDB_NOTNULL, null, '0', 'id');
+        if (!$dbman->field_exists($table, $revisionfield)) {
+            $dbman->add_field($table, $revisionfield);
+        }
+
+        $pagefield = new xmldb_field('pageid');
+        if ($dbman->field_exists($table, $pagefield)) {
+            // Attach each page's set to its published revision (or the
+            // newest revision when nothing is published yet); orphans on
+            // pages without revisions are removed.
+            $pageids = $DB->get_fieldset_sql(
+                'SELECT DISTINCT pageid FROM {local_handbook_question}');
+            foreach ($pageids as $pageid) {
+                $page = $DB->get_record('local_handbook_page', ['id' => $pageid],
+                    'id, publishedrevisionid');
+                $target = $page ? (int)$page->publishedrevisionid : 0;
+                if (!$target) {
+                    $target = (int)$DB->get_field_sql(
+                        'SELECT MAX(id) FROM {local_handbook_revision} WHERE pageid = ?',
+                        [$pageid]);
+                }
+                if (!$target) {
+                    $questionids = $DB->get_fieldset_select('local_handbook_question', 'id',
+                        'pageid = ?', [$pageid]);
+                    if ($questionids) {
+                        $DB->delete_records_list('local_handbook_qoption', 'questionid', $questionids);
+                        $DB->delete_records_list('local_handbook_question', 'id', $questionids);
+                    }
+                    continue;
+                }
+                $DB->set_field_select('local_handbook_question', 'revisionid', $target,
+                    'pageid = ?', [$pageid]);
+
+                // Copy the set into open working drafts so editors keep them.
+                $drafts = $DB->get_records_select('local_handbook_revision',
+                    "pageid = :pageid AND id <> :target
+                     AND status IN ('draft', 'changes_requested', 'in_review', 'approved')",
+                    ['pageid' => $pageid, 'target' => $target], '', 'id');
+                foreach ($drafts as $draft) {
+                    $questions = $DB->get_records('local_handbook_question',
+                        ['revisionid' => $target], 'sortorder ASC, id ASC');
+                    foreach ($questions as $question) {
+                        $options = $DB->get_records('local_handbook_qoption',
+                            ['questionid' => $question->id], 'sortorder ASC, id ASC');
+                        $copy = clone $question;
+                        unset($copy->id);
+                        $copy->revisionid = (int)$draft->id;
+                        $newid = $DB->insert_record('local_handbook_question', $copy);
+                        foreach ($options as $option) {
+                            $optioncopy = clone $option;
+                            unset($optioncopy->id);
+                            $optioncopy->questionid = $newid;
+                            $DB->insert_record('local_handbook_qoption', $optioncopy);
+                        }
+                    }
+                }
+            }
+
+            // Drop the old page linkage (key, index, then field).
+            $pagekey = new xmldb_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'],
+                'local_handbook_page', ['id']);
+            $dbman->drop_key($table, $pagekey);
+            $pageindex = new xmldb_index('pageorder', XMLDB_INDEX_NOTUNIQUE,
+                ['pageid', 'sortorder']);
+            if ($dbman->index_exists($table, $pageindex)) {
+                $dbman->drop_index($table, $pageindex);
+            }
+            $dbman->drop_field($table, $pagefield);
+        }
+
+        $revisionkey = new xmldb_key('revisionid', XMLDB_KEY_FOREIGN, ['revisionid'],
+            'local_handbook_revision', ['id']);
+        $dbman->add_key($table, $revisionkey);
+        $revisionindex = new xmldb_index('revorder', XMLDB_INDEX_NOTUNIQUE,
+            ['revisionid', 'sortorder']);
+        if (!$dbman->index_exists($table, $revisionindex)) {
+            $dbman->add_index($table, $revisionindex);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071574, 'local', 'handbook');
+    }
+
     return true;
 }

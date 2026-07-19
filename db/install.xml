@@ -464,10 +464,10 @@
         <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="local_handbook_question" COMMENT="Reading-comprehension questions per page (spec: end-of-article gate). Imported from Moodle XML by editors; multichoice and ordering only">
+    <TABLE NAME="local_handbook_question" COMMENT="Reading-comprehension questions per REVISION (spec: end-of-article gate). Questions ride the editorial workflow: drafted, reviewed and published together with the content. Imported from Moodle XML by editors; multichoice and ordering only">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="qtype" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="multichoice"/>
         <FIELD NAME="bloomlabel" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Pauta q-subtitle: Bloom level and type label"/>
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Pauta q-title: natural title, never hints the answer"/>
@@ -479,11 +479,11 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+        <KEY NAME="revisionid" TYPE="foreign" FIELDS="revisionid" REFTABLE="local_handbook_revision" REFFIELDS="id"/>
         <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="pageorder" UNIQUE="false" FIELDS="pageid, sortorder"/>
+        <INDEX NAME="revorder" UNIQUE="false" FIELDS="revisionid, sortorder"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_handbook_qoption" COMMENT="Options of a comprehension question. Multichoice: iscorrect marks the right option. Ordering: sortorder is the correct position">

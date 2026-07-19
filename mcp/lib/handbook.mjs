@@ -219,6 +219,13 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
   );
 
   server.tool(
+    "handbook_get_question_guide",
+    "Authoring guide for end-of-article reading-comprehension questions: the institutional rules (2-6 questions per article, multichoice with exactly one correct answer and mandatory per-option feedback, ordering questions listing procedure steps in the correct sequence - only steps whose order is mandatory), a copy-adapt Moodle XML template, and the list of published pages that already have questions. WORKFLOW: read the article with handbook_get_page, write the XML per this guide, and hand the XML to the human editor - they import it on the page's question form in Moodle. There is NO tool to import, modify or delete questions: the reading-accreditation gate is human-only, like approval and publication. Passing the test with 100% is what marks an article as read for pages that have questions.",
+    {},
+    handler(() => ws("local_handbook_get_question_guide", {}))
+  );
+
+  server.tool(
     "handbook_get_archive_impact",
     "Before proposing to archive a page, check its impact: how many other pages relate TO it, how many active reading paths include it, and whether it is required reading. Use this to decide whether to set a replacement page and redirect.",
     { identifier: z.string().describe("Page slug or numeric id") },

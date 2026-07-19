@@ -26,6 +26,7 @@ require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
 use local_handbook\local\service\page_service;
+use local_handbook\local\service\quiz_service;
 
 $action = optional_param('action', '', PARAM_ALPHA);
 $revisionid = optional_param('rid', 0, PARAM_INT);
@@ -169,6 +170,27 @@ foreach ($queue as $revision) {
                 'from' => (int)$revision->baserevisionid,
                 'to' => $revision->id,
             ]), s(get_string('viewchanges', 'local_handbook'))),
+            'small mb-2'
+        );
+    }
+
+    // Comprehension questions ride the revision: show the reviewer the count
+    // and whether this draft changes them relative to the published set.
+    $draftqcount = count(quiz_service::get_questions((int)$revision->id));
+    $publishedrevid = (int)$DB->get_field('local_handbook_page', 'publishedrevisionid',
+        ['id' => $revision->pageid]);
+    if ($draftqcount > 0 || quiz_service::has_questions($publishedrevid)) {
+        $qchanged = quiz_service::fingerprint((int)$revision->id)
+            !== quiz_service::fingerprint($publishedrevid);
+        $body .= html_writer::div(
+            s(get_string('managequestions', 'local_handbook')) . ': ' . $draftqcount . ' '
+            . ($qchanged
+                ? html_writer::span(s(get_string('qchangedbadge', 'local_handbook')),
+                    'badge badge-warning')
+                : html_writer::span(s(get_string('qunchangedbadge', 'local_handbook')),
+                    'text-muted'))
+            . ' · ' . html_writer::link(new moodle_url('/local/handbook/manage/questions.php',
+                ['id' => (int)$revision->pageid]), s(get_string('viewrevision', 'local_handbook'))),
             'small mb-2'
         );
     }

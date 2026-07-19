@@ -256,6 +256,9 @@ class page_service {
         // the base revision's item id; copy them so the draft is complete.
         if ($base) {
             self::copy_revision_files((int)$base->id, (int)$revision->id);
+            // Comprehension questions ride with revisions: the draft starts
+            // from the published set, like the content does.
+            quiz_service::copy_questions((int)$base->id, (int)$revision->id);
         }
 
         return $revision;
