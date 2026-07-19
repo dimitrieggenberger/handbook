@@ -532,5 +532,60 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071564, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071570) {
+        // Reading-comprehension tests: per-page questions, options, attempts.
+        $table = new xmldb_table('local_handbook_question');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('qtype', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'multichoice');
+            $table->add_field('bloomlabel', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, '');
+            $table->add_field('title', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, '');
+            $table->add_field('questiontext', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('feedback', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('modifiedby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'], 'local_handbook_page', ['id']);
+            $table->add_key('modifiedby', XMLDB_KEY_FOREIGN, ['modifiedby'], 'user', ['id']);
+            $table->add_index('pageorder', XMLDB_INDEX_NOTUNIQUE, ['pageid', 'sortorder']);
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_handbook_qoption');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('questionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('optiontext', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('feedback', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('iscorrect', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('questionid', XMLDB_KEY_FOREIGN, ['questionid'], 'local_handbook_question', ['id']);
+            $table->add_index('questionorder', XMLDB_INDEX_NOTUNIQUE, ['questionid', 'sortorder']);
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_handbook_qattempt');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('revisionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('ncorrect', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('ntotal', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('passed', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'], 'local_handbook_page', ['id']);
+            $table->add_index('userpage', XMLDB_INDEX_NOTUNIQUE, ['userid', 'pageid']);
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071570, 'local', 'handbook');
+    }
+
     return true;
 }

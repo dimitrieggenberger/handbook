@@ -1226,6 +1226,220 @@ function local_handbook_render_path_panel(stdClass $ctx): string {
 }
 
 /**
+ * Render the end-of-article comprehension test: the answering form, or the
+ * graded result when $graded is provided (failed attempts re-render inline;
+ * passing redirects before this is reached).
+ *
+ * @param stdClass $page Page record.
+ * @param stdClass[] $questions Questions with options (quiz_service).
+ * @param stdClass|null $graded Result of quiz_service::grade() or null.
+ * @param array $responses Raw responses (to re-show chosen answers).
+ * @param stdClass|null $pathctx Reading-path context or null.
+ * @param bool $incomplete Submission had unanswered questions.
+ * @return string HTML.
+ */
+function local_handbook_render_quiz(stdClass $page, array $questions, ?stdClass $graded,
+        array $responses, ?stdClass $pathctx, bool $incomplete = false): string {
+    $quiz = \local_handbook\local\service\quiz_service::class;
+
+    $out = html_writer::start_div('local-handbook-quiz');
+
+    if ($incomplete) {
+        $out .= html_writer::div(s(get_string('quizincomplete', 'local_handbook')),
+            'alert alert-warning mb-2');
+    }
+    if ($graded !== null && !$graded->passed) {
+        $out .= html_writer::div(s(get_string('quizfailed', 'local_handbook', (object)[
+            'correct' => (int)$graded->ncorrect, 'total' => (int)$graded->ntotal,
+        ])), 'alert alert-warning mb-2 local-handbook-quiz-failbar');
+    }
+
+    $out .= html_writer::start_tag('form', [
+        'method' => 'post',
+        'action' => local_handbook_page_url($page)->out(false) . '#confirmar',
+        'data-region' => 'hb-quiz',
+    ]);
+    $out .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action',
+        'value' => 'quiztry']);
+    $out .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',
+        'value' => sesskey()]);
+    if ($pathctx) {
+        $out .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'pathid',
+            'value' => (int)$pathctx->path->id]);
+    }
+
+    $out .= html_writer::div(
+        html_writer::span(s(get_string('quiztitle', 'local_handbook')), 'quiz-title')
+        . html_writer::span(s(get_string('quizsubtitle', 'local_handbook')), 'quiz-sub')
+        . html_writer::span(s(get_string('quizcount', 'local_handbook', count($questions))),
+            'quiz-count'),
+        'quiz-head');
+
+    $number = 0;
+    foreach ($questions as $question) {
+        $number++;
+        $qid = (int)$question->id;
+        $detail = $graded->perquestion[$qid] ?? null;
+
+        $meta = html_writer::span((string)$number, 'q-no');
+        if (trim((string)$question->bloomlabel) !== '') {
+            $meta .= html_writer::span(s($question->bloomlabel), 'q-bloom');
+        }
+        if ($detail !== null) {
+            $meta .= html_writer::span(
+                $detail->ok
+                    ? '✓ ' . s(get_string('quizcorrect', 'local_handbook'))
+                    : '✗ ' . s(get_string($question->qtype === $quiz::TYPE_ORDERING
+                        ? 'quizorderwrong' : 'quizincorrect', 'local_handbook')),
+                'q-verdict ' . ($detail->ok ? 'is-ok' : 'is-bad'));
+        }
+        $body = html_writer::div($meta, 'q-meta');
+        if (trim((string)$question->title) !== '') {
+            $body .= html_writer::tag('p', s($question->title), ['class' => 'q-title']);
+        }
+        if (trim((string)$question->questiontext) !== '') {
+            $body .= html_writer::div(format_text($question->questiontext, FORMAT_HTML,
+                ['context' => context_system::instance()]), 'q-text');
+        }
+
+        if ($question->qtype === $quiz::TYPE_ORDERING) {
+            $body .= local_handbook_render_quiz_ordering($question, $detail, $responses[$qid] ?? '');
+            if ($detail !== null && !$detail->ok && trim((string)$question->feedback) !== '') {
+                $body .= html_writer::div(format_text($question->feedback, FORMAT_HTML,
+                    ['context' => context_system::instance()]), 'q-feedback is-bad');
+            }
+        } else {
+            $body .= local_handbook_render_quiz_multichoice($question, $detail, $responses[$qid] ?? '');
+        }
+
+        $out .= html_writer::div($body, 'quiz-q');
+    }
+
+    $out .= html_writer::div(
+        html_writer::tag('button',
+            s(get_string($graded !== null ? 'quizretry' : 'quizsubmit', 'local_handbook')),
+            ['type' => 'submit', 'class' => 'btn btn-primary'])
+        . html_writer::span(s(get_string($graded !== null ? 'quizretryhint' : 'quizhint',
+            'local_handbook', count($questions))), 'quiz-hint'),
+        'quiz-foot');
+    $out .= html_writer::end_tag('form');
+    $out .= html_writer::end_div();
+    return $out;
+}
+
+/**
+ * One multichoice question: shuffled radios, or the chosen answer with its
+ * mandatory feedback after grading.
+ *
+ * @param stdClass $question Question with options.
+ * @param stdClass|null $detail Grading detail or null (answering mode).
+ * @param string $response Raw response (chosen option id).
+ * @return string
+ */
+function local_handbook_render_quiz_multichoice(stdClass $question, ?stdClass $detail,
+        string $response): string {
+    $out = '';
+    if ($detail === null) {
+        $options = $question->options;
+        shuffle($options);
+        $letter = 'a';
+        foreach ($options as $option) {
+            $inputid = 'hbq-' . $question->id . '-' . $option->id;
+            $out .= html_writer::tag('label',
+                html_writer::empty_tag('input', ['type' => 'radio',
+                    'name' => 'q' . $question->id, 'value' => (int)$option->id,
+                    'id' => $inputid, 'class' => 'opt-radio', 'required' => 'required'])
+                . html_writer::span($letter . ')', 'opt-letter')
+                . html_writer::span(format_text($option->optiontext, FORMAT_HTML,
+                    ['context' => context_system::instance()]), 'opt-text'),
+                ['class' => 'quiz-opt', 'for' => $inputid]);
+            $letter++;
+        }
+        return $out;
+    }
+
+    // Graded: show the chosen option and its feedback (the pauta's teaching moment).
+    $chosenid = (int)$response;
+    foreach ($question->options as $option) {
+        if ((int)$option->id !== $chosenid) {
+            continue;
+        }
+        $state = $option->iscorrect ? 'is-right' : 'is-wrong';
+        $out .= html_writer::div(
+            html_writer::span('', 'opt-dot')
+            . html_writer::span(format_text($option->optiontext, FORMAT_HTML,
+                ['context' => context_system::instance()]), 'opt-text'),
+            'quiz-opt is-static ' . $state);
+        if (trim((string)$option->feedback) !== '') {
+            $out .= html_writer::div(format_text($option->feedback, FORMAT_HTML,
+                ['context' => context_system::instance()]),
+                'q-feedback ' . ($option->iscorrect ? 'is-ok' : 'is-bad'));
+        }
+    }
+    if ($out === '') {
+        $out = html_writer::div(s(get_string('quiznoanswer', 'local_handbook')),
+            'q-feedback is-bad');
+    }
+    return $out;
+}
+
+/**
+ * One ordering question: tap-in-sequence steps (JS assigns numbers), or the
+ * submitted sequence with per-position verdicts after grading. The full
+ * correct order is never revealed — it lives in the article.
+ *
+ * @param stdClass $question Question with options.
+ * @param stdClass|null $detail Grading detail or null (answering mode).
+ * @param string $response Raw response (comma-separated option ids).
+ * @return string
+ */
+function local_handbook_render_quiz_ordering(stdClass $question, ?stdClass $detail,
+        string $response): string {
+    if ($detail === null) {
+        $options = $question->options;
+        shuffle($options);
+        $steps = '';
+        foreach ($options as $option) {
+            $steps .= html_writer::div(
+                html_writer::span('·', 'seq')
+                . html_writer::span(format_text($option->optiontext, FORMAT_HTML,
+                    ['context' => context_system::instance()]), 'opt-text'),
+                'quiz-step', ['data-optionid' => (int)$option->id, 'tabindex' => '0',
+                    'role' => 'button']);
+        }
+        return html_writer::div(
+            html_writer::div(s(get_string('quizordertap', 'local_handbook')), 'q-orderhint')
+            . $steps
+            . html_writer::empty_tag('input', ['type' => 'hidden',
+                'name' => 'q' . $question->id, 'value' => ''])
+            . html_writer::link('#', s(get_string('quizorderreset', 'local_handbook')),
+                ['class' => 'q-orderreset', 'data-action' => 'reset']),
+            'quiz-ordering', ['data-region' => 'hb-ordering']);
+    }
+
+    // Graded: the submitted sequence with per-position verdicts.
+    $byid = [];
+    foreach ($question->options as $option) {
+        $byid[(int)$option->id] = $option;
+    }
+    $out = '';
+    $position = 0;
+    foreach ($detail->chosen as $optionid) {
+        $position++;
+        if (!isset($byid[$optionid])) {
+            continue;
+        }
+        $ok = $detail->positions[$optionid] ?? false;
+        $out .= html_writer::div(
+            html_writer::span((string)$position, 'seq')
+            . html_writer::span(format_text($byid[$optionid]->optiontext, FORMAT_HTML,
+                ['context' => context_system::instance()]), 'opt-text'),
+            'quiz-step is-static ' . ($ok ? 'is-posright' : 'is-poswrong'));
+    }
+    return html_writer::div($out, 'quiz-ordering');
+}
+
+/**
  * Reading minutes for a word count: ~200 words per minute (institutional
  * Spanish prose reads slower than casual text), minimum one minute.
  *

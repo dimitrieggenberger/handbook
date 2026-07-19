@@ -219,6 +219,50 @@ $string['bannerimage'] = 'Banner image';
 $string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
 
 // Content style guide (hb-* patterns).
+// Comprehension tests.
+$string['quiztitle'] = 'Reading comprehension';
+$string['quizsubtitle'] = 'Answer every question correctly to accredit your reading of this article.';
+$string['quizcount'] = '{$a} questions';
+$string['quizsubmit'] = 'Submit answers';
+$string['quizhint'] = 'Answer all {$a} questions · unlimited attempts · options are reshuffled each attempt.';
+$string['quizretry'] = 'Try again';
+$string['quizretryhint'] = 'Everything is asked again with reshuffled options; only a 100% attempt accredits the reading.';
+$string['quizfailed'] = '{$a->correct} of {$a->total} correct. Reading not yet accredited — review the feedback and try again.';
+$string['quizpassed'] = 'Reading accredited: {$a->correct} of {$a->total} correct.';
+$string['quizcorrect'] = 'Correct';
+$string['quizincorrect'] = 'Incorrect';
+$string['quizorderwrong'] = 'Wrong order';
+$string['quizincomplete'] = 'Answer every question before submitting.';
+$string['quiznoanswer'] = 'No answer was recorded for this question.';
+$string['quizordertap'] = 'Tap the steps in the order they must happen; tap again to release one.';
+$string['quizorderreset'] = 'Reset order';
+$string['managequestions'] = 'Comprehension questions';
+$string['questionsintro'] = 'Questions imported here replace the confirm-reading button of this article: only a 100% attempt records the reading. Import Moodle XML written per the institutional question-bank pauta (multichoice with one correct answer, and ordering with the answers listed in the correct sequence). Importing replaces the current set. Adding or replacing questions never invalidates existing confirmations — publish a revision with "requires re-acknowledgement" for that.';
+$string['qimportlabel'] = 'Moodle XML';
+$string['qimporthelp'] = 'Paste the XML (per the pauta). Supported types: multichoice and ordering; other types are skipped with a warning. Recommended 2–6 questions depending on article length.';
+$string['qimportbtn'] = 'Import (replaces current questions)';
+$string['qimported'] = '{$a} questions imported.';
+$string['qdeleteall'] = 'Delete all questions';
+$string['qdeleted'] = 'Questions deleted. The article uses the classic confirm-reading button again.';
+$string['confirmdeletequestions'] = 'Delete all comprehension questions of "{$a}"? The article returns to the classic confirm-reading button. Recorded receipts and attempts are kept.';
+$string['qnoneyet'] = 'This article has no comprehension questions yet: readers see the classic confirm-reading button.';
+$string['qtypemultichoice'] = 'Multiple choice';
+$string['qtypeordering'] = 'Ordering';
+$string['qoptioncount'] = '{$a} options';
+$string['backtopage'] = 'Back to the article';
+$string['qimporterrorxml'] = 'The XML could not be parsed. Verify it is well formed (the pauta recommends validating before importing).';
+$string['qimportskippedtype'] = 'Skipped a question of unsupported type "{$a}" (only multichoice and ordering apply to the reading gate).';
+$string['qimportnotitle'] = 'A question has no q-title (and no name); the pauta requires a natural title.';
+$string['qimportbadmc'] = 'Question "{$a}" rejected: multichoice needs at least 2 options and exactly one with fraction 100.';
+$string['qimportbadordering'] = 'Question "{$a}" rejected: ordering needs at least 2 steps.';
+$string['qimportnofeedback'] = 'Question "{$a}": some options have no feedback — the pauta makes feedback mandatory.';
+$string['qimportcountwarning'] = '{$a} questions imported; the pauta recommends between 2 and 6 per article.';
+$string['qimportempty'] = 'No importable questions were found in the XML.';
+$string['privacy:attemptspath'] = 'Comprehension-test attempts';
+$string['privacy:metadata:local_handbook_qattempt'] = 'Comprehension-test attempts record who attempted which article, the score, and whether it passed.';
+$string['privacy:metadata:local_handbook_qattempt:userid'] = 'The user who attempted the test.';
+$string['privacy:metadata:local_handbook_qattempt:timecreated'] = 'When the attempt was made.';
+
 // Reading dashboard.
 $string['readingdashboard'] = 'Reading dashboard';
 $string['dashaudience'] = 'Audience';

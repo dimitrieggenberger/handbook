@@ -219,6 +219,50 @@ $string['bannerimage'] = 'Bannerbild';
 $string['bannerimage_help'] = 'Optional. Ein Querformat-Bild, das auf der Kategoriekarte (16:9) und im Artikelkopf (3:1) angezeigt wird. Das Bild wird automatisch zugeschnitten und zentriert — kein manueller Zuschnitt nötig. Ohne Bild zeigt die Karte einen dezenten Platzhalter je nach Inhaltstyp.';
 
 // Inhalts-Stilrichtlinie (hb-*-Muster).
+// Verständnistests.
+$string['quiztitle'] = 'Leseverständnis';
+$string['quizsubtitle'] = 'Beantworte alle Fragen richtig, um die Lektüre dieses Artikels zu akkreditieren.';
+$string['quizcount'] = '{$a} Fragen';
+$string['quizsubmit'] = 'Antworten senden';
+$string['quizhint'] = 'Alle {$a} Fragen beantworten · unbegrenzte Versuche · Optionen werden bei jedem Versuch neu gemischt.';
+$string['quizretry'] = 'Erneut versuchen';
+$string['quizretryhint'] = 'Alles wird mit neu gemischten Optionen erneut gefragt; nur ein Versuch mit 100 % akkreditiert die Lektüre.';
+$string['quizfailed'] = '{$a->correct} von {$a->total} richtig. Die Lektüre ist noch nicht akkreditiert — sieh dir das Feedback an und versuche es erneut.';
+$string['quizpassed'] = 'Lektüre akkreditiert: {$a->correct} von {$a->total} richtig.';
+$string['quizcorrect'] = 'Richtig';
+$string['quizincorrect'] = 'Falsch';
+$string['quizorderwrong'] = 'Falsche Reihenfolge';
+$string['quizincomplete'] = 'Beantworte alle Fragen vor dem Absenden.';
+$string['quiznoanswer'] = 'Für diese Frage wurde keine Antwort erfasst.';
+$string['quizordertap'] = 'Tippe die Schritte in der Reihenfolge an, in der sie geschehen müssen; erneutes Tippen gibt einen frei.';
+$string['quizorderreset'] = 'Reihenfolge zurücksetzen';
+$string['managequestions'] = 'Verständnisfragen';
+$string['questionsintro'] = 'Hier importierte Fragen ersetzen den Lesebestätigungs-Button dieses Artikels: nur ein Versuch mit 100 % registriert die Lektüre. Moodle-XML gemäß der institutionellen Fragenbank-Pauta importieren (Multiple Choice mit genau einer richtigen Antwort, und Ordnen mit den Antworten in der korrekten Reihenfolge). Der Import ersetzt den aktuellen Satz. Fragen hinzuzufügen oder zu ersetzen macht bestehende Bestätigungen nie ungültig — dafür eine Revision mit „erfordert Neubestätigung" veröffentlichen.';
+$string['qimportlabel'] = 'Moodle-XML';
+$string['qimporthelp'] = 'XML einfügen (gemäß Pauta). Unterstützte Typen: Multiple Choice und Ordnen; andere Typen werden mit Hinweis übersprungen. Empfohlen sind 2–6 Fragen je nach Artikellänge.';
+$string['qimportbtn'] = 'Importieren (ersetzt die aktuellen Fragen)';
+$string['qimported'] = '{$a} Fragen importiert.';
+$string['qdeleteall'] = 'Alle Fragen löschen';
+$string['qdeleted'] = 'Fragen gelöscht. Der Artikel verwendet wieder den klassischen Bestätigungs-Button.';
+$string['confirmdeletequestions'] = 'Alle Verständnisfragen von „{$a}" löschen? Der Artikel kehrt zum klassischen Bestätigungs-Button zurück. Erfasste Lektüren und Versuche bleiben erhalten.';
+$string['qnoneyet'] = 'Dieser Artikel hat noch keine Verständnisfragen: Lesende sehen den klassischen Bestätigungs-Button.';
+$string['qtypemultichoice'] = 'Multiple Choice';
+$string['qtypeordering'] = 'Ordnen';
+$string['qoptioncount'] = '{$a} Optionen';
+$string['backtopage'] = 'Zurück zum Artikel';
+$string['qimporterrorxml'] = 'Das XML konnte nicht gelesen werden. Prüfe, ob es wohlgeformt ist (die Pauta empfiehlt eine Validierung vor dem Import).';
+$string['qimportskippedtype'] = 'Eine Frage des nicht unterstützten Typs „{$a}" wurde übersprungen (nur Multiple Choice und Ordnen gelten für die Lese-Akkreditierung).';
+$string['qimportnotitle'] = 'Eine Frage hat kein q-title (und kein name); die Pauta verlangt einen natürlichen Titel.';
+$string['qimportbadmc'] = 'Frage „{$a}" abgelehnt: Multiple Choice braucht mindestens 2 Optionen und genau eine mit fraction 100.';
+$string['qimportbadordering'] = 'Frage „{$a}" abgelehnt: Ordnen braucht mindestens 2 Schritte.';
+$string['qimportnofeedback'] = 'Frage „{$a}": einige Optionen haben kein Feedback — die Pauta schreibt es vor.';
+$string['qimportcountwarning'] = '{$a} Fragen importiert; die Pauta empfiehlt 2 bis 6 pro Artikel.';
+$string['qimportempty'] = 'Im XML wurden keine importierbaren Fragen gefunden.';
+$string['privacy:attemptspath'] = 'Versuche der Verständnistests';
+$string['privacy:metadata:local_handbook_qattempt'] = 'Verständnistest-Versuche erfassen, wer welchen Artikel versucht hat, die Punktzahl und ob bestanden wurde.';
+$string['privacy:metadata:local_handbook_qattempt:userid'] = 'Die Person, die den Versuch unternommen hat.';
+$string['privacy:metadata:local_handbook_qattempt:timecreated'] = 'Wann der Versuch stattfand.';
+
 // Lese-Dashboard.
 $string['readingdashboard'] = 'Lese-Dashboard';
 $string['dashaudience'] = 'Zielgruppe';

@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.32.0 (2026-07-18)
+
+Reading-comprehension tests at the end of articles.
+
+- Articles with imported questions lose the confirm-reading button: the
+  test replaces it, and only a 100% attempt records the reading — the
+  same receipt/acknowledgement the button records, so paths, the
+  dashboard and re-acknowledgement work unchanged. Articles without
+  questions keep the classic button; existing confirmations are never
+  invalidated by adding questions.
+- Two question types per the institutional pauta: multichoice (single
+  correct answer, per-option mandatory feedback, Bloom level shown from
+  q-subtitle, natural q-title) and ordering (tap the steps in sequence —
+  no drag & drop, works identically on phones; on failure only the
+  positions are marked, the correct order is never revealed).
+- Unlimited attempts, options reshuffled each attempt, all-or-nothing;
+  every attempt is recorded (new qattempt audit table). Failed attempts
+  re-render inline with the feedback; q-teachercomment blocks are
+  stripped (editor guidance, not for readers).
+- Import: manage/questions.php (linked from the article's editor line)
+  accepts Moodle XML per the pauta; multichoice/ordering only, category
+  dummies skipped, strict validation with warnings (2–6 recommended).
+  Human-only — no AI/MCP surface can import or modify questions.
+- Three new tables (question, qoption, qattempt) with upgrade steps;
+  attempts covered by the privacy provider; EN/ES/DE strings; PHPUnit
+  for parser and grader incl. tamper cases.
+
 ## 0.31.2 (2026-07-18)
 
 Hotfix: upgrade failure creating local_handbook_readerhide.
