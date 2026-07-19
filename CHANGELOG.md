@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.32.1 (2026-07-18)
+
+Question authoring via the Handbook AI (generation only).
+
+- New read-only external function `local_handbook_get_question_guide` on
+  the restricted service: the condensed pauta rules (question counts,
+  Bloom levels, mandatory feedback, ordering constraints), a copy-adapt
+  Moodle XML template, the importer's validation rules, and the list of
+  published pages that already have questions.
+- New MCP tool `handbook_get_question_guide` (Infomaniak redeploy +
+  connector refresh required). The tool description encodes the
+  workflow: read the article, write the XML, hand it to the human
+  editor — there is deliberately NO import/modify/delete surface; the
+  reading-accreditation gate stays human-only.
+
 ## 0.32.0 (2026-07-18)
 
 Reading-comprehension tests at the end of articles.

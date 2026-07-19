@@ -224,6 +224,12 @@ $functions = [
         'type' => 'read',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
     ],
+    'local_handbook_get_question_guide' => [
+        'classname' => 'local_handbook\external\get_question_guide',
+        'description' => 'Authoring guide for end-of-article comprehension questions: rules, Moodle XML template, and which pages already have questions (read-only; the AI writes XML, a human imports it).',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
     'local_handbook_list_reading_paths' => [
         'classname' => 'local_handbook\external\list_reading_paths',
         'description' => 'List reading paths with item counts (read-only).',
