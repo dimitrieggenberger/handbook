@@ -136,7 +136,7 @@ if ($action === 'quiztry') {
     require_sesskey();
     require_capability('local/handbook:acknowledge', $context);
     $pathid = optional_param('pathid', 0, PARAM_INT);
-    $quizquestions = quiz_service::get_questions((int)$page->id);
+    $quizquestions = quiz_service::get_questions((int)$page->publishedrevisionid);
     if (!$quizquestions) {
         redirect(local_handbook_page_url($page));
     }
@@ -187,7 +187,7 @@ if ($revision && has_capability('local/handbook:acknowledge', $context)) {
 // confirm button in both cards below; the JS adds the tap-to-order
 // interaction and the answered-everything submit gate.
 $quizquestions = ($ackstatus !== null || $completionstatus !== null)
-    ? quiz_service::get_questions((int)$page->id) : [];
+    ? quiz_service::get_questions((int)$page->publishedrevisionid) : [];
 if ($quizquestions) {
     $PAGE->requires->js(new moodle_url('/local/handbook/js/quiz.js'));
 }
@@ -727,7 +727,7 @@ if ($iseditorial) {
         . html_writer::link(new moodle_url('/local/handbook/manage/questions.php',
                 ['id' => $page->id]),
             s(get_string('managequestions', 'local_handbook'))
-            . ' (' . count(quiz_service::get_questions((int)$page->id)) . ')'),
+            . ' (' . count(quiz_service::get_questions((int)$page->publishedrevisionid)) . ')'),
         ['class' => 'small text-muted']
     );
 }

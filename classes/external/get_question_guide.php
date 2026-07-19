@@ -64,7 +64,7 @@ class get_question_guide extends external_api {
         $counts = [];
         $sql = "SELECT p.slug, COUNT(q.id) AS questioncount
                   FROM {local_handbook_page} p
-                  JOIN {local_handbook_question} q ON q.pageid = p.id
+                  JOIN {local_handbook_question} q ON q.revisionid = p.publishedrevisionid
                  WHERE p.publishedrevisionid > 0 AND p.archived = 0
               GROUP BY p.slug";
         foreach ($DB->get_records_sql($sql) as $record) {
@@ -97,6 +97,14 @@ FLUJO: 1) Lee el artículo completo (get_page). 2) Redacta el XML según esta
 guía. 3) Entrega el XML al editor humano: él lo pega en el formulario de
 importación de la página (manage/questions.php). LA IA NO PUEDE IMPORTAR —
 la importación es exclusivamente humana.
+
+CICLO EDITORIAL: las preguntas pertenecen a la REVISIÓN, no a la página.
+Al importar, se crean o actualizan en el BORRADOR de trabajo (se crea uno si
+no existe), pasan por la misma revisión editorial que el contenido y entran
+en vigor al PUBLICAR la revisión. Mientras tanto, los lectores siguen
+respondiendo las preguntas de la revisión publicada. Si el borrador cambia
+información que una pregunta evalúa, actualiza la pregunta en el mismo
+borrador — se revisan y publican juntos.
 
 TIPOS ADMITIDOS (los demás se omiten al importar):
 1. multichoice — opción múltiple, 4 opciones, EXACTAMENTE una correcta

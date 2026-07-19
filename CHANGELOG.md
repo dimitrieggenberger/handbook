@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.33.0 (2026-07-18)
+
+Comprehension questions join the editorial workflow.
+
+- Questions now belong to REVISIONS, not pages: importing XML places
+  them on the working draft (created automatically from the published
+  revision if none exists — content, files and questions copied),
+  reviewers see them with the revision, and they take effect atomically
+  when the revision is published. Readers always answer the published
+  revision's questions; a draft in review never changes the live test.
+- manage/questions.php reworked: published set shown read-only ("what
+  readers answer today"), working draft editable with import/delete,
+  "Questions changed" badge, and locking while the draft is in review
+  or approved — same rules as content editing.
+- Review queue: each entry shows its question count and whether the
+  draft changes the questions relative to the published set.
+- Migration (savepoint 2026071574): existing page-scoped questions
+  attach to the current published revision and are copied into open
+  working drafts; the question table's page link is replaced by a
+  revision link.
+- get_question_guide updated: counts now reflect published revisions,
+  and the guide explains the draft->review->publish cycle to the AI.
+- This closes the earlier design gap: text and questions are versioned,
+  reviewed and published together, so a published article can never be
+  live with questions about an older rule.
+
 ## 0.32.1 (2026-07-18)
 
 Question authoring via the Handbook AI (generation only).
