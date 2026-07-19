@@ -55,6 +55,20 @@ class path_form extends \moodleform {
         $mform->addElement('advcheckbox', 'active', get_string('active'));
         $mform->setDefault('active', 1);
 
+        // Path-level optionality: labels the path as recommended reading
+        // everywhere it appears, instead of expected reading.
+        $mform->addElement('advcheckbox', 'optionalpath',
+            get_string('optionalpath', 'local_handbook'));
+        $mform->addHelpButton('optionalpath', 'optionalpath', 'local_handbook');
+        $mform->setDefault('optionalpath', 0);
+
+        // Reading time: 0 = automatic (word-count based); a value overrides.
+        $mform->addElement('text', 'estimatedminutes',
+            get_string('estimatedminutes', 'local_handbook'), ['size' => 6]);
+        $mform->setType('estimatedminutes', PARAM_INT);
+        $mform->setDefault('estimatedminutes', 0);
+        $mform->addHelpButton('estimatedminutes', 'estimatedminutes', 'local_handbook');
+
         // Audience (spec 15.3): cohorts and/or system roles; empty = all staff.
         $cohortoptions = [];
         foreach ($this->_customdata['cohorts'] ?? [] as $cohort) {

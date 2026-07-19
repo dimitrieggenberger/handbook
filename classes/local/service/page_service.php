@@ -53,6 +53,21 @@ class page_service {
     public const EDITABLE_STATUSES = [self::STATUS_DRAFT, self::STATUS_CHANGES_REQUESTED];
 
     /**
+     * Word count for reading-time estimates: unicode words in the plaintext
+     * plus 33 word-equivalents per image (~10 seconds at 200 wpm). Stored on
+     * the revision at save time so displays never reload plaintexts.
+     *
+     * @param string $plaintext Plaintext of the content.
+     * @param string $content Content HTML (for the image count).
+     * @return int
+     */
+    public static function wordcount(string $plaintext, string $content): int {
+        $words = (int)preg_match_all('/[\p{L}\p{N}]+/u', $plaintext);
+        $images = (int)preg_match_all('/<img\b/i', $content);
+        return $words + $images * 33;
+    }
+
+    /**
      * Content type keys (specification 10.1). Labels come from lang strings
      * contenttype_<key>.
      *
@@ -279,6 +294,7 @@ class page_service {
         $update->content = $content;
         $update->contentformat = $contentformat;
         $update->plaintext = html_to_text($content, 0, false);
+        $update->wordcount = self::wordcount($update->plaintext, $content);
         $update->contenthash = sha1($content);
         $update->changesummary = $changesummary;
         if ($requiresreack !== null) {
@@ -679,6 +695,7 @@ class page_service {
         $revision->content = $content;
         $revision->contentformat = $contentformat;
         $revision->plaintext = html_to_text($content, 0, false);
+        $revision->wordcount = page_service::wordcount($revision->plaintext, $content);
         $revision->contenthash = sha1($content);
         $revision->changesummary = $changesummary;
         $revision->reviewnote = '';

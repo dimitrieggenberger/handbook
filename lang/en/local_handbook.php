@@ -219,6 +219,89 @@ $string['bannerimage'] = 'Banner image';
 $string['bannerimage_help'] = 'Optional. One landscape image shown on the category card (16:9) and at the top of the article (3:1). The image is cropped and centred automatically — no manual cropping needed. Without an image, the card shows a quiet content-type placeholder.';
 
 // Content style guide (hb-* patterns).
+// Comprehension tests.
+$string['quiztitle'] = 'Reading comprehension';
+$string['quizsubtitle'] = 'Answer every question correctly to accredit your reading of this article.';
+$string['quizcount'] = '{$a} questions';
+$string['quizsubmit'] = 'Submit answers';
+$string['quizhint'] = 'Answer all {$a} questions · unlimited attempts · options are reshuffled each attempt.';
+$string['quizretry'] = 'Try again';
+$string['quizretryhint'] = 'Everything is asked again with reshuffled options; only a 100% attempt accredits the reading.';
+$string['quizfailed'] = '{$a->correct} of {$a->total} correct. Reading not yet accredited — review the feedback and try again.';
+$string['quizpassed'] = 'Reading accredited: {$a->correct} of {$a->total} correct.';
+$string['quizcorrect'] = 'Correct';
+$string['quizincorrect'] = 'Incorrect';
+$string['quizorderwrong'] = 'Wrong order';
+$string['quizincomplete'] = 'Answer every question before submitting.';
+$string['quiznoanswer'] = 'No answer was recorded for this question.';
+$string['quizordertap'] = 'Tap the steps in the order they must happen; tap again to release one.';
+$string['quizorderreset'] = 'Reset order';
+$string['managequestions'] = 'Comprehension questions';
+$string['questionsintro'] = 'Questions imported here replace the confirm-reading button of this article: only a 100% attempt records the reading. Import Moodle XML written per the institutional question-bank pauta (multichoice with one correct answer, and ordering with the answers listed in the correct sequence). Importing replaces the current set. Adding or replacing questions never invalidates existing confirmations — publish a revision with "requires re-acknowledgement" for that.';
+$string['qimportlabel'] = 'Moodle XML';
+$string['qimporthelp'] = 'Paste the XML (per the pauta). Supported types: multichoice and ordering; other types are skipped with a warning. Recommended 2–6 questions depending on article length.';
+$string['qimportbtn'] = 'Import (replaces current questions)';
+$string['qimported'] = '{$a} questions imported.';
+$string['qdeleteall'] = 'Delete all questions';
+$string['qdeleted'] = 'Questions deleted. The article uses the classic confirm-reading button again.';
+$string['confirmdeletequestions'] = 'Delete all comprehension questions of "{$a}"? The article returns to the classic confirm-reading button. Recorded receipts and attempts are kept.';
+$string['qnoneyet'] = 'This article has no comprehension questions yet: readers see the classic confirm-reading button.';
+$string['qtypemultichoice'] = 'Multiple choice';
+$string['qtypeordering'] = 'Ordering';
+$string['qoptioncount'] = '{$a} options';
+$string['backtopage'] = 'Back to the article';
+$string['qimporterrorxml'] = 'The XML could not be parsed. Verify it is well formed (the pauta recommends validating before importing).';
+$string['qimportskippedtype'] = 'Skipped a question of unsupported type "{$a}" (only multichoice and ordering apply to the reading gate).';
+$string['qimportnotitle'] = 'A question has no q-title (and no name); the pauta requires a natural title.';
+$string['qimportbadmc'] = 'Question "{$a}" rejected: multichoice needs at least 2 options and exactly one with fraction 100.';
+$string['qimportbadordering'] = 'Question "{$a}" rejected: ordering needs at least 2 steps.';
+$string['qimportnofeedback'] = 'Question "{$a}": some options have no feedback — the pauta makes feedback mandatory.';
+$string['qimportcountwarning'] = '{$a} questions imported; the pauta recommends between 2 and 6 per article.';
+$string['qimportempty'] = 'No importable questions were found in the XML.';
+$string['privacy:attemptspath'] = 'Comprehension-test attempts';
+$string['privacy:metadata:local_handbook_qattempt'] = 'Comprehension-test attempts record who attempted which article, the score, and whether it passed.';
+$string['privacy:metadata:local_handbook_qattempt:userid'] = 'The user who attempted the test.';
+$string['privacy:metadata:local_handbook_qattempt:timecreated'] = 'When the attempt was made.';
+
+// Reading dashboard.
+$string['readingdashboard'] = 'Reading dashboard';
+$string['dashaudience'] = 'Audience';
+$string['dashaudiencestaff'] = 'All staff';
+$string['dashscope'] = 'Scope';
+$string['dashscoperequired'] = 'All required reading';
+$string['dashscopepath'] = 'Path';
+$string['dashscopecategory'] = 'Category';
+$string['dashsortdesc'] = 'Most reading first';
+$string['dashsortasc'] = 'Least reading first';
+$string['dashconfirmed'] = 'Confirmed';
+$string['dashstale'] = 'Needs re-confirmation';
+$string['dashpending'] = 'Pending';
+$string['dashtotal'] = 'Total';
+$string['dashlastactivity'] = 'Last activity';
+$string['dashnever'] = 'never';
+$string['dashstalechip'] = '{$a} reconf.';
+$string['dashtilepeople'] = 'people in view';
+$string['dashtileaverage'] = 'average confirmed';
+$string['dashtilestale'] = 'with re-confirmations pending';
+$string['dashtilenever'] = 'with no reading at all';
+$string['dashhide'] = 'Hide';
+$string['dashshow'] = 'Show';
+$string['dashhidden'] = 'Hidden';
+$string['dashhidenote'] = 'Note (e.g. on leave)';
+$string['dashhiddenby'] = 'hidden by {$a->name} · {$a->date}';
+$string['dashhiddensection'] = 'Hidden ({$a})';
+$string['dashshowhidden'] = 'Show hidden ({$a})';
+$string['dashhidehidden'] = 'Hide the hidden section';
+$string['dashexportcsv'] = 'Export CSV';
+$string['dashnopages'] = 'This scope contains no published pages yet.';
+$string['dashnousers'] = 'No people in this audience.';
+$string['dashfootnote'] = 'Green = confirmed on the current published version; amber = confirmed an earlier version of a page that changed since; gray = pending. Hidden colleagues are excluded from the list and the aggregates, but their reading records are untouched and they can be restored at any time. This dashboard measures confirmations, not attention.';
+
+// Page attachments.
+$string['attachments'] = 'Documents';
+$string['attachments_help'] = 'Official source documents this article discusses or references — the law, the directive, the form. They are attached to the page (not to a revision), so they survive editorial drafts and are shown in the article\'s side panel, counted on category cards and listed on the printed page. Each file has a stable URL, so you can also link it from the article text. Managed here only — the Handbook AI cannot upload, replace or delete files.';
+$string['attachmentcount'] = 'Attached documents: {$a}';
+
 // Automatic cross-links.
 $string['autolink'] = 'Auto-link page titles';
 $string['autolink_desc'] = 'Wikipedia-style cross-links: when an article mentions the exact title of another published handbook page, the first mention becomes a link to that page. Applied at display time only — stored content is never modified, links follow renames and archiving automatically, and switching this off removes them everywhere instantly. Matches are whole-title and case-insensitive; no links are added inside headings, existing links or the cross-reference patterns.';
@@ -265,7 +348,7 @@ $string['sguse_dodont'] = 'Two columns contrasting expected and unacceptable con
 $string['sgtitle_timeline'] = 'Timeline / phases';
 $string['sguse_timeline'] = 'Dated milestones in sequence; add class is-done to completed items.';
 $string['sgtitle_contact'] = 'Contacts & emergency';
-$string['sguse_contact'] = 'Who to reach and when. Add is-emergency for a red, high-visibility card.';
+$string['sguse_contact'] = 'Who to reach and when. Add is-emergency for a red, high-visibility card. Fields render stacked — a small label above the value at full card width — so long values, URLs and email addresses never squeeze into a narrow column. Wrap unfilled placeholders like [incorporar fecha] in a span with class hb-fill to show them as an amber pending chip (hb-fill works in any pattern and in plain prose).';
 $string['sgtitle_define'] = 'Definition / glossary';
 $string['sguse_define'] = 'Define institutional vocabulary, as a block or inline (hb-term).';
 $string['sgtitle_matrix'] = 'Responsibility matrix (RACI)';
@@ -302,7 +385,7 @@ $string['viewfullpath'] = 'View the full path';
 $string['sgtitle_next'] = 'Next / previous links';
 $string['sguse_next'] = 'Hand-authored continuation at the end of an article: one hb-next card (e.g. the rulebook\'s next chapter), an hb-next-group when there are several options (e.g. by role), and is-prev for a back link. For reading paths you do NOT write these: the plugin shows the next-in-path button automatically.';
 $string['sgtitle_refs'] = 'Normative cross-references';
-$string['sguse_refs'] = 'Link an article to the exact artículos that govern the topic in another document. Four levels: hb-ref (inline § chip for one decisive citation), hb-seealso (one \"Ver normativa\" line after a section — the in-body standard), hb-refbox (inset card when the legal basis needs explaining), hb-refs (end-of-article block grouped by source — the closing standard). Links are plain anchors to page-slug#art-N. Document badges: hb-doc with is-ri / is-rp / is-ed, or no modifier for other sources. The same patterns work for ANY related pages (not only reglamentos): use a neutral hb-doc badge or your own label, and link to the page (with or without an #art-N anchor).';
+$string['sguse_refs'] = 'Link an article to the exact artículos that govern the topic in another document. Four levels: hb-ref (inline § chip for one decisive citation), hb-seealso (one \"Ver normativa\" line after a section — the in-body standard), hb-refbox (inset card when the legal basis needs explaining), hb-refs (end-of-article block grouped by source — the closing standard). Links are plain anchors to page-slug#art-N. Document badges: hb-doc with is-ri / is-rp / is-ed, or no modifier for other sources. The same patterns work for ANY related pages (not only reglamentos): use a neutral hb-doc badge or your own label, and link to the page (with or without an #art-N anchor). The refbox also accepts prose: a rb-title line, quote paragraphs, and links to official sources (links with target=_blank render as chips with an external arrow). Add is-verified to the box for a green check seal on editorially verified citations of higher law. A leading p.hb-doc used as a title is healed into the same title bar automatically.';
 $string['sgtitle_legal'] = 'Rulebook / legal articles';
 $string['sguse_legal'] = 'For reglamentos and normative documents: títulos and numbered sections as headings (they feed the on-page TOC), author-written article numbers (never auto-numbered — they are canonical), lettered literals, vigency notes and derogated articles. Each article carries id=\"art-N\" for deep links. Recommended: one handbook page per título. Numbered clauses (numerales) use a plain ol with li value=\"N\" — numbering is native, so the canonical numbers are preserved and align with the article column automatically; lettered clauses use hb-literals; fichas and scales use hb-keyvalue.';
 
@@ -375,6 +458,15 @@ $string['emptypath'] = 'This reading path has no items yet.';
 $string['pathprogress'] = '{$a->confirmed} of {$a->total} required pages confirmed';
 $string['sectionprogress'] = '{$a->confirmed} of {$a->total} confirmed';
 $string['optionalitem'] = 'Optional';
+$string['makeoptional'] = 'Make optional';
+$string['makerequired'] = 'Make required';
+$string['optionalpath'] = 'Optional path';
+$string['optionalpath_help'] = 'Marks the whole path as recommended reading rather than expected reading. It is labelled as optional everywhere it appears (path page, path list, the side panel while reading). Individual pages inside any path can additionally be marked required or optional from the item list below.';
+$string['optionalpathnotice'] = 'This reading path is optional: it is recommended, not required.';
+$string['readingtimetotal'] = '≈ {$a} min of reading';
+$string['readingtimeleft'] = '≈ {$a} min left';
+$string['estimatedminutes'] = 'Estimated reading minutes';
+$string['estimatedminutes_help'] = 'Leave at 0 for the automatic estimate: the word count of the published articles at ~200 words per minute (images add a few seconds each). Set a value to override — useful when the path includes videos, forms or activities the word count cannot see.';
 $string['reconfirmitem'] = 'Reconfirm: new version published';
 $string['pendingitem'] = 'Pending';
 $string['readitem'] = 'Reading';
@@ -564,6 +656,14 @@ $string['revisionrestored'] = 'v{$a} was restored as a new working draft.';
 // Privacy export paths.
 $string['privacy:acknowledgementspath'] = 'Reading acknowledgements';
 $string['privacy:authoredpath'] = 'Authored revisions';
+$string['privacy:receiptspath'] = 'Reading completion receipts';
+$string['privacy:readerhidepath'] = 'Reading-dashboard hidden status';
+$string['privacy:metadata:local_handbook_readreceipt'] = 'Reading-completion receipts record which user completed which published revision and when.';
+$string['privacy:metadata:local_handbook_readreceipt:userid'] = 'The user who completed the reading.';
+$string['privacy:metadata:local_handbook_readreceipt:timecompleted'] = 'When the completion was recorded.';
+$string['privacy:metadata:local_handbook_readerhide'] = 'The reading dashboard\'s hide-list records who was temporarily hidden from view, by whom, and the optional reason.';
+$string['privacy:metadata:local_handbook_readerhide:userid'] = 'The hidden user.';
+$string['privacy:metadata:local_handbook_readerhide:note'] = 'The optional reason (e.g. on leave).';
 $string['privacy:metadata:local_handbook_finding'] = 'Quality findings record who reported, was assigned to and resolved them.';
 
 // Privacy API.

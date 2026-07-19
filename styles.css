@@ -749,9 +749,27 @@
 #page-local-handbook-area .hb-contact.is-emergency .ic { background: var(--hb-danger-soft); color: var(--hb-danger); }
 #page-local-handbook-area .hb-contact .name { font-weight: 600; margin: 0; }
 #page-local-handbook-area .hb-contact .role { font-size: 0.78rem; color: var(--hb-muted); margin: 0.05rem 0 0.45rem; }
-#page-local-handbook-area .hb-contact dl { display: grid; grid-template-columns: auto 1fr; gap: 0.1rem 0.5rem; margin: 0; font-size: 0.82rem; }
-#page-local-handbook-area .hb-contact dt { color: var(--hb-muted); font-weight: 400; }
-#page-local-handbook-area .hb-contact dd { margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; }
+/* Stacked fields: micro-label above, value at full card width below —
+   side-by-side columns squeeze values into slivers when the cards sit in
+   a grid (long values wrapped word by word, URLs split mid-word). */
+#page-local-handbook-area .hb-contact dl { display: block; margin: 0; }
+#page-local-handbook-area .hb-contact dt {
+    color: var(--hb-muted);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin: 0.45rem 0 0;
+}
+#page-local-handbook-area .hb-contact dt:first-child { margin-top: 0; }
+#page-local-handbook-area .hb-contact dd {
+    margin: 0.05rem 0 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
 #page-local-handbook-area .hb-contact .when { margin: 0.5rem 0 0; }
 #page-local-handbook-area .hb-contact.is-emergency .when { color: var(--hb-danger); font-weight: 600; }
 
@@ -2300,4 +2318,493 @@
 #page-local-handbook-area .hb-feedback {
     margin-left: auto;
     margin-right: auto;
+}
+
+/* ---- Page attachments: the "Documentos" rail card (view.php) and the
+   paperclip count on category cards. Rows are whole-row download links;
+   the tile colour follows the file type (same language as hb-course). ---- */
+#page-local-handbook-area .local-handbook-attachments { padding-bottom: 0.5rem; }
+#page-local-handbook-area a.local-handbook-att {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 1.25rem;
+    color: inherit;
+    text-decoration: none;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+    transition: background 0.13s ease;
+}
+#page-local-handbook-area a.local-handbook-att:hover {
+    background: color-mix(in srgb, var(--primary, #0078c3) 5%, transparent);
+}
+#page-local-handbook-area .local-handbook-att .att-ic {
+    flex: none;
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    background: color-mix(in srgb, var(--bs-body-color, #1c2430) 6%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-att .att-ic.is-pdf { background: color-mix(in srgb, var(--danger, #b4232c) 12%, transparent); color: var(--danger, #b4232c); }
+#page-local-handbook-area .local-handbook-att .att-ic.is-doc { background: color-mix(in srgb, #185abd 12%, transparent); color: #185abd; }
+#page-local-handbook-area .local-handbook-att .att-ic.is-xls { background: color-mix(in srgb, #107c41 12%, transparent); color: #107c41; }
+#page-local-handbook-area .local-handbook-att .att-ic.is-ppt { background: color-mix(in srgb, #d04a2a 12%, transparent); color: #d04a2a; }
+#page-local-handbook-area .local-handbook-att .att-ic.is-img { background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent); color: var(--primary, #0078c3); }
+#page-local-handbook-area .local-handbook-att .att-info { min-width: 0; }
+#page-local-handbook-area .local-handbook-att .att-name {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+#page-local-handbook-area a.local-handbook-att:hover .att-name { color: var(--primary, #0078c3); }
+#page-local-handbook-area .local-handbook-att .att-meta {
+    display: block;
+    font-size: 0.66rem;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-top: 0.05rem;
+}
+#page-local-handbook-area .local-handbook-att .att-dl {
+    margin-left: auto;
+    flex: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.8rem;
+    transition: background 0.13s ease, color 0.13s ease;
+}
+#page-local-handbook-area a.local-handbook-att:hover .att-dl {
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+    color: var(--primary, #0078c3);
+}
+#page-local-handbook-area .local-handbook-card-clip {
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-card-clip::before {
+    content: "\1F4CE";
+    font-size: 0.68rem;
+    margin-right: 0.2rem;
+}
+
+/* ---- hb-fill: pending-placeholder chip. Wrap "[incorporar ...]" values
+   in <span class="hb-fill"> and unfilled fields show as a quiet amber
+   chip, visible to editors and reviewers before publishing. Works inside
+   any pattern and in plain prose. ---- */
+#page-local-handbook-area .hb-fill {
+    display: inline-block;
+    background: var(--hb-warn-soft);
+    color: var(--hb-warn);
+    border-radius: 0.3rem;
+    padding: 0 0.45rem;
+    font-size: 0.9em;
+    font-weight: 600;
+    font-style: normal;
+    line-height: 1.5;
+}
+
+/* ---- Reading dashboard (manage/readers.php): summary tiles, person rows
+   with a segmented progress bar (confirmed / stale / pending), and the
+   dimmed hidden-colleagues section. ---- */
+#page-local-handbook-area .local-handbook-dash-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 1.1rem;
+}
+#page-local-handbook-area .local-handbook-dash-tile {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.65rem;
+    background: var(--bs-body-bg, #fff);
+    padding: 0.6rem 0.9rem;
+}
+#page-local-handbook-area .local-handbook-dash-tile .v { font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
+#page-local-handbook-area .local-handbook-dash-tile .k { font-size: 0.7rem; color: var(--bs-secondary-color, #6c757d); }
+
+#page-local-handbook-area .local-handbook-dash-row {
+    display: grid;
+    grid-template-columns: minmax(11rem, 15rem) 1fr minmax(8rem, auto) minmax(6.5rem, auto) auto;
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.55rem 0.6rem;
+    border-radius: 0.5rem;
+}
+#page-local-handbook-area .local-handbook-dash-row + .local-handbook-dash-row {
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+}
+#page-local-handbook-area .local-handbook-dash-row:hover {
+    background: color-mix(in srgb, var(--primary, #0078c3) 4%, transparent);
+}
+#page-local-handbook-area .local-handbook-dash-who {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+#page-local-handbook-area .local-handbook-dash-av {
+    flex: none;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+    color: var(--primary, #0078c3);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+#page-local-handbook-area .local-handbook-dash-who .nm { font-size: 0.82rem; font-weight: 500; }
+#page-local-handbook-area .local-handbook-dash-bar {
+    display: flex;
+    height: 0.6rem;
+    border-radius: 999px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+}
+#page-local-handbook-area .local-handbook-dash-bar .seg-ok { background: var(--success, #1e7d43); }
+#page-local-handbook-area .local-handbook-dash-bar .seg-stale { background: var(--warning, #9a6700); }
+#page-local-handbook-area .local-handbook-dash-nums {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+#page-local-handbook-area .local-handbook-dash-nums b { font-size: 0.82rem; }
+#page-local-handbook-area .local-handbook-dash-rechip {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--warning, #9a6700) 16%, transparent);
+    color: var(--warning, #9a6700);
+    vertical-align: 1px;
+}
+#page-local-handbook-area .local-handbook-dash-actions { display: flex; gap: 0.3rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+#page-local-handbook-area .local-handbook-dash-row.is-hidden { opacity: 0.62; }
+#page-local-handbook-area .local-handbook-dash-row.is-hidden .local-handbook-dash-bar { filter: grayscale(1); }
+#page-local-handbook-area .local-handbook-dash-notechip {
+    display: inline-block;
+    font-size: 0.62rem;
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 10%, transparent);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    color: var(--bs-secondary-color, #6c757d);
+    border-radius: 999px;
+    padding: 0.02rem 0.5rem;
+    margin-left: 0.4rem;
+    vertical-align: 1px;
+}
+@media (max-width: 860px) {
+    #page-local-handbook-area .local-handbook-dash-row { grid-template-columns: 1fr; gap: 0.35rem; }
+    #page-local-handbook-area .local-handbook-dash-actions { justify-content: flex-start; }
+}
+
+/* ---- hb-refbox: prose citations & verified sources. The box was built
+   for link lists; imported legal pages also use it with a leading
+   p.hb-doc as title plus quote paragraphs and external source links.
+   These rules heal that shape without markup changes: the leading badge
+   becomes a proper title bar, prose gets padding, external links render
+   as source chips, and is-verified swaps the section sign for a check
+   seal on editorially verified citations. ---- */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox > p.hb-doc:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.45rem 0.9rem;
+    max-width: none;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 8%, transparent);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0;
+    white-space: normal;
+    vertical-align: baseline;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox > p.hb-doc:first-child::before {
+    content: "\00a7";
+    color: var(--primary, #0078c3);
+    font-size: 0.85rem;
+}
+/* Verified variant: green check seal in the title bar. */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox.is-verified .rb-title::before,
+#page-local-handbook-area .local-handbook-page-body .hb-refbox.is-verified > p.hb-doc:first-child::before {
+    content: "\2713";
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--success, #1e7d43) 14%, transparent);
+    color: var(--success, #1e7d43);
+    font-size: 0.62rem;
+    font-weight: 800;
+}
+/* Prose inside a refbox breathes; the title rows are excluded. */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox > p:not(.hb-doc):not(.rb-title) {
+    margin: 0.6rem 0.9rem;
+    max-width: none;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox > p:last-child {
+    margin-bottom: 0.85rem;
+}
+/* External source links render as chips with the external arrow. */
+#page-local-handbook-area .local-handbook-page-body .hb-refbox a[target="_blank"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid color-mix(in srgb, var(--primary, #0078c3) 30%, var(--bs-border-color, #dee2e6));
+    border-radius: 999px;
+    padding: 0.1rem 0.7rem;
+    margin: 0.05rem 0.2rem 0.05rem 0;
+    font-size: 0.75rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 5%, transparent);
+    white-space: normal;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox a[target="_blank"]::after {
+    content: "\2197";
+    font-size: 0.7rem;
+}
+#page-local-handbook-area .local-handbook-page-body .hb-refbox a[target="_blank"]:hover {
+    text-decoration: none;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+}
+
+/* ---- End-of-article comprehension test (.local-handbook-quiz): replaces
+   the confirm-reading button on pages with questions. Multichoice radios
+   and tap-in-sequence ordering; graded results show the pauta's mandatory
+   feedback and per-position verdicts. ---- */
+#page-local-handbook-area .local-handbook-quiz {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--bs-body-bg, #fff);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.75rem 1.1rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 5%, transparent);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-title { font-weight: 700; }
+#page-local-handbook-area .local-handbook-quiz .quiz-sub {
+    flex-basis: 100%;
+    order: 3;
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-count {
+    margin-left: auto;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 999px;
+    padding: 0.1rem 0.6rem;
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-q { padding: 1rem 1.1rem 0.9rem; }
+#page-local-handbook-area .local-handbook-quiz .quiz-q + .quiz-q {
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+}
+#page-local-handbook-area .local-handbook-quiz .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-bottom: 0.25rem;
+}
+#page-local-handbook-area .local-handbook-quiz .q-no {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, transparent);
+    color: var(--primary, #0078c3);
+    font-size: 0.7rem;
+    letter-spacing: 0;
+}
+#page-local-handbook-area .local-handbook-quiz .q-bloom {
+    background: color-mix(in srgb, var(--primary, #0078c3) 10%, transparent);
+    color: var(--primary, #0078c3);
+    border-radius: 0.3rem;
+    padding: 0.05rem 0.45rem;
+}
+#page-local-handbook-area .local-handbook-quiz .q-verdict {
+    margin-left: auto;
+    border-radius: 999px;
+    padding: 0.12rem 0.6rem;
+}
+#page-local-handbook-area .local-handbook-quiz .q-verdict.is-ok {
+    background: color-mix(in srgb, var(--success, #1e7d43) 14%, transparent);
+    color: var(--success, #1e7d43);
+}
+#page-local-handbook-area .local-handbook-quiz .q-verdict.is-bad {
+    background: color-mix(in srgb, var(--danger, #b4232c) 12%, transparent);
+    color: var(--danger, #b4232c);
+}
+#page-local-handbook-area .local-handbook-quiz .q-title {
+    font-weight: 600;
+    margin: 0.1rem 0 0.4rem;
+}
+#page-local-handbook-area .local-handbook-quiz .q-text { margin-bottom: 0.6rem; }
+#page-local-handbook-area .local-handbook-quiz .q-text p { margin: 0 0 0.4rem; }
+
+#page-local-handbook-area .local-handbook-quiz .quiz-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.55rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0.35rem 0;
+    cursor: pointer;
+    font-weight: 400;
+    transition: border-color 0.12s ease, background 0.12s ease;
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-opt:hover {
+    border-color: color-mix(in srgb, var(--primary, #0078c3) 45%, var(--bs-border-color, #dee2e6));
+    background: color-mix(in srgb, var(--primary, #0078c3) 3%, transparent);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-opt .opt-radio { margin-top: 0.3rem; }
+#page-local-handbook-area .local-handbook-quiz .quiz-opt .opt-letter {
+    flex: none;
+    font-weight: 600;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-opt .opt-text p { margin: 0; }
+#page-local-handbook-area .local-handbook-quiz .quiz-opt.is-static { cursor: default; }
+#page-local-handbook-area .local-handbook-quiz .quiz-opt.is-right {
+    border-color: color-mix(in srgb, var(--success, #1e7d43) 55%, var(--bs-border-color, #dee2e6));
+    background: color-mix(in srgb, var(--success, #1e7d43) 7%, transparent);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-opt.is-wrong {
+    border-color: color-mix(in srgb, var(--danger, #b4232c) 55%, var(--bs-border-color, #dee2e6));
+    background: color-mix(in srgb, var(--danger, #b4232c) 6%, transparent);
+}
+#page-local-handbook-area .local-handbook-quiz .q-feedback {
+    margin: 0.5rem 0 0.15rem;
+    border-left: 3px solid var(--bs-border-color, #dee2e6);
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-quiz .q-feedback p { margin: 0 0 0.25rem; }
+#page-local-handbook-area .local-handbook-quiz .q-feedback.is-ok { border-left-color: var(--success, #1e7d43); }
+#page-local-handbook-area .local-handbook-quiz .q-feedback.is-bad { border-left-color: var(--danger, #b4232c); }
+
+/* ordering: tap in sequence */
+#page-local-handbook-area .local-handbook-quiz .q-orderhint {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-bottom: 0.35rem;
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.55rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0.35rem 0;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background 0.12s ease;
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step:hover {
+    border-color: color-mix(in srgb, var(--primary, #0078c3) 45%, var(--bs-border-color, #dee2e6));
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step:focus-visible {
+    outline: 2px solid var(--primary, #0078c3);
+    outline-offset: 1px;
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step .seq {
+    flex: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-top: 0.05rem;
+    border: 2px dashed color-mix(in srgb, var(--bs-secondary-color, #6c757d) 45%, transparent);
+    border-radius: 0.45rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step.is-picked {
+    border-color: var(--primary, #0078c3);
+    background: color-mix(in srgb, var(--primary, #0078c3) 5%, transparent);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step.is-picked .seq {
+    border: 0;
+    background: var(--primary, #0078c3);
+    color: #fff;
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step.is-static { cursor: default; }
+#page-local-handbook-area .local-handbook-quiz .quiz-step.is-posright {
+    border-color: color-mix(in srgb, var(--success, #1e7d43) 55%, var(--bs-border-color, #dee2e6));
+    background: color-mix(in srgb, var(--success, #1e7d43) 7%, transparent);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step.is-posright .seq {
+    border: 0;
+    background: var(--success, #1e7d43);
+    color: #fff;
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step.is-poswrong {
+    border-color: color-mix(in srgb, var(--danger, #b4232c) 55%, var(--bs-border-color, #dee2e6));
+    background: color-mix(in srgb, var(--danger, #b4232c) 6%, transparent);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-step.is-poswrong .seq {
+    border: 0;
+    background: var(--danger, #b4232c);
+    color: #fff;
+}
+#page-local-handbook-area .local-handbook-quiz .q-orderreset {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-opt .opt-dot { flex: none; width: 0.4rem; }
+
+#page-local-handbook-area .local-handbook-quiz .quiz-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    padding: 0.8rem 1.1rem 1rem;
+    border-top: 1px solid var(--bs-border-color, #dee2e6);
+}
+#page-local-handbook-area .local-handbook-quiz .quiz-hint {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color, #6c757d);
 }

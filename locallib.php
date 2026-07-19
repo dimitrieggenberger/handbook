@@ -730,6 +730,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/reports.php'),
             'visible' => has_capability('local/handbook:viewreports', $context),
         ],
+        'readers' => [
+            'label' => get_string('readingdashboard', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/readers.php'),
+            'visible' => has_capability('local/handbook:viewreports', $context),
+        ],
         'import' => [
             'label' => get_string('importseed', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/manage/import.php'),
@@ -1096,9 +1101,11 @@ function local_handbook_path_context(stdClass $page, int $requestedpathid, int $
 
     $rows = $DB->get_records_sql(
         "SELECT i.id, i.pageid, i.sectionname, i.required, i.sortorder,
-                p.slug, p.title, p.publishedrevisionid
+                p.slug, p.title, p.publishedrevisionid,
+                COALESCE(r.wordcount, 0) AS wordcount
            FROM {local_handbook_pathitem} i
            JOIN {local_handbook_page} p ON p.id = i.pageid
+      LEFT JOIN {local_handbook_revision} r ON r.id = p.publishedrevisionid
           WHERE i.pathid = :pathid AND p.archived = 0
        ORDER BY i.sortorder ASC, i.id ASC", ['pathid' => (int)$chosen->id]);
 
@@ -1130,8 +1137,17 @@ function local_handbook_path_context(stdClass $page, int $requestedpathid, int $
             'required' => (int)$row->required,
             'done' => $done,
             'iscurrent' => (int)$row->pageid === (int)$page->id,
+            'wordcount' => (int)$row->wordcount,
         ];
         $index++;
+    }
+
+    // Reading-time estimate: what is still unconfirmed, in minutes.
+    $remainingwords = 0;
+    foreach ($items as $item) {
+        if (!$item->done) {
+            $remainingwords += $item->wordcount;
+        }
     }
 
     return (object)[
@@ -1142,6 +1158,7 @@ function local_handbook_path_context(stdClass $page, int $requestedpathid, int $
             ? $items[$currentindex + 1] : null,
         'confirmed' => $confirmed,
         'total' => $total,
+        'remainingminutes' => local_handbook_reading_minutes($remainingwords),
     ];
 }
 
@@ -1159,9 +1176,14 @@ function local_handbook_render_path_panel(stdClass $ctx): string {
         html_writer::tag('i', '', ['class' => 'fa-solid fa-route me-2 text-primary', 'aria-hidden' => 'true'])
         . s(get_string('myreadingpath', 'local_handbook')),
         ['class' => 'h6 text-uppercase text-muted mb-1']);
+    $optionalbadge = !empty($ctx->path->optionalpath)
+        ? ' ' . html_writer::span(s(get_string('optionalitem', 'local_handbook')),
+            'pathpanel-optional')
+        : '';
     $body .= html_writer::tag('p', html_writer::link(
         new moodle_url('/local/handbook/path.php', ['id' => $ctx->path->id]),
-        html_writer::tag('strong', s(format_string($ctx->path->name)))), ['class' => 'mb-2']);
+        html_writer::tag('strong', s(format_string($ctx->path->name)))) . $optionalbadge,
+        ['class' => 'mb-2']);
     $body .= html_writer::div(
         html_writer::div('', 'progress-bar', [
             'role' => 'progressbar',
@@ -1173,7 +1195,10 @@ function local_handbook_render_path_panel(stdClass $ctx): string {
         'progress mb-1', ['style' => 'height: 0.4rem;']);
     $body .= html_writer::div(s(get_string('pathprogress', 'local_handbook', (object)[
         'confirmed' => $ctx->confirmed, 'total' => $ctx->total,
-    ])), 'small text-muted mb-2');
+    ]))
+        . (!empty($ctx->remainingminutes)
+            ? ' · ' . s(get_string('readingtimeleft', 'local_handbook', $ctx->remainingminutes))
+            : ''), 'small text-muted mb-2');
 
     $rows = '';
     foreach ($ctx->items as $item) {
@@ -1198,6 +1223,339 @@ function local_handbook_render_path_panel(stdClass $ctx): string {
 
     return html_writer::div(html_writer::div($body, 'card-body'),
         'card mb-3 local-handbook-pathpanel');
+}
+
+/**
+ * Render the end-of-article comprehension test: the answering form, or the
+ * graded result when $graded is provided (failed attempts re-render inline;
+ * passing redirects before this is reached).
+ *
+ * @param stdClass $page Page record.
+ * @param stdClass[] $questions Questions with options (quiz_service).
+ * @param stdClass|null $graded Result of quiz_service::grade() or null.
+ * @param array $responses Raw responses (to re-show chosen answers).
+ * @param stdClass|null $pathctx Reading-path context or null.
+ * @param bool $incomplete Submission had unanswered questions.
+ * @return string HTML.
+ */
+function local_handbook_render_quiz(stdClass $page, array $questions, ?stdClass $graded,
+        array $responses, ?stdClass $pathctx, bool $incomplete = false): string {
+    $quiz = \local_handbook\local\service\quiz_service::class;
+
+    $out = html_writer::start_div('local-handbook-quiz');
+
+    if ($incomplete) {
+        $out .= html_writer::div(s(get_string('quizincomplete', 'local_handbook')),
+            'alert alert-warning mb-2');
+    }
+    if ($graded !== null && !$graded->passed) {
+        $out .= html_writer::div(s(get_string('quizfailed', 'local_handbook', (object)[
+            'correct' => (int)$graded->ncorrect, 'total' => (int)$graded->ntotal,
+        ])), 'alert alert-warning mb-2 local-handbook-quiz-failbar');
+    }
+
+    $out .= html_writer::start_tag('form', [
+        'method' => 'post',
+        'action' => local_handbook_page_url($page)->out(false) . '#confirmar',
+        'data-region' => 'hb-quiz',
+    ]);
+    $out .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action',
+        'value' => 'quiztry']);
+    $out .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',
+        'value' => sesskey()]);
+    if ($pathctx) {
+        $out .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'pathid',
+            'value' => (int)$pathctx->path->id]);
+    }
+
+    $out .= html_writer::div(
+        html_writer::span(s(get_string('quiztitle', 'local_handbook')), 'quiz-title')
+        . html_writer::span(s(get_string('quizsubtitle', 'local_handbook')), 'quiz-sub')
+        . html_writer::span(s(get_string('quizcount', 'local_handbook', count($questions))),
+            'quiz-count'),
+        'quiz-head');
+
+    $number = 0;
+    foreach ($questions as $question) {
+        $number++;
+        $qid = (int)$question->id;
+        $detail = $graded->perquestion[$qid] ?? null;
+
+        $meta = html_writer::span((string)$number, 'q-no');
+        if (trim((string)$question->bloomlabel) !== '') {
+            $meta .= html_writer::span(s($question->bloomlabel), 'q-bloom');
+        }
+        if ($detail !== null) {
+            $meta .= html_writer::span(
+                $detail->ok
+                    ? '✓ ' . s(get_string('quizcorrect', 'local_handbook'))
+                    : '✗ ' . s(get_string($question->qtype === $quiz::TYPE_ORDERING
+                        ? 'quizorderwrong' : 'quizincorrect', 'local_handbook')),
+                'q-verdict ' . ($detail->ok ? 'is-ok' : 'is-bad'));
+        }
+        $body = html_writer::div($meta, 'q-meta');
+        if (trim((string)$question->title) !== '') {
+            $body .= html_writer::tag('p', s($question->title), ['class' => 'q-title']);
+        }
+        if (trim((string)$question->questiontext) !== '') {
+            $body .= html_writer::div(format_text($question->questiontext, FORMAT_HTML,
+                ['context' => context_system::instance()]), 'q-text');
+        }
+
+        if ($question->qtype === $quiz::TYPE_ORDERING) {
+            $body .= local_handbook_render_quiz_ordering($question, $detail, $responses[$qid] ?? '');
+            if ($detail !== null && !$detail->ok && trim((string)$question->feedback) !== '') {
+                $body .= html_writer::div(format_text($question->feedback, FORMAT_HTML,
+                    ['context' => context_system::instance()]), 'q-feedback is-bad');
+            }
+        } else {
+            $body .= local_handbook_render_quiz_multichoice($question, $detail, $responses[$qid] ?? '');
+        }
+
+        $out .= html_writer::div($body, 'quiz-q');
+    }
+
+    $out .= html_writer::div(
+        html_writer::tag('button',
+            s(get_string($graded !== null ? 'quizretry' : 'quizsubmit', 'local_handbook')),
+            ['type' => 'submit', 'class' => 'btn btn-primary'])
+        . html_writer::span(s(get_string($graded !== null ? 'quizretryhint' : 'quizhint',
+            'local_handbook', count($questions))), 'quiz-hint'),
+        'quiz-foot');
+    $out .= html_writer::end_tag('form');
+    $out .= html_writer::end_div();
+    return $out;
+}
+
+/**
+ * One multichoice question: shuffled radios, or the chosen answer with its
+ * mandatory feedback after grading.
+ *
+ * @param stdClass $question Question with options.
+ * @param stdClass|null $detail Grading detail or null (answering mode).
+ * @param string $response Raw response (chosen option id).
+ * @return string
+ */
+function local_handbook_render_quiz_multichoice(stdClass $question, ?stdClass $detail,
+        string $response): string {
+    $out = '';
+    if ($detail === null) {
+        $options = $question->options;
+        shuffle($options);
+        $letter = 'a';
+        foreach ($options as $option) {
+            $inputid = 'hbq-' . $question->id . '-' . $option->id;
+            $out .= html_writer::tag('label',
+                html_writer::empty_tag('input', ['type' => 'radio',
+                    'name' => 'q' . $question->id, 'value' => (int)$option->id,
+                    'id' => $inputid, 'class' => 'opt-radio', 'required' => 'required'])
+                . html_writer::span($letter . ')', 'opt-letter')
+                . html_writer::span(format_text($option->optiontext, FORMAT_HTML,
+                    ['context' => context_system::instance()]), 'opt-text'),
+                ['class' => 'quiz-opt', 'for' => $inputid]);
+            $letter++;
+        }
+        return $out;
+    }
+
+    // Graded: show the chosen option and its feedback (the pauta's teaching moment).
+    $chosenid = (int)$response;
+    foreach ($question->options as $option) {
+        if ((int)$option->id !== $chosenid) {
+            continue;
+        }
+        $state = $option->iscorrect ? 'is-right' : 'is-wrong';
+        $out .= html_writer::div(
+            html_writer::span('', 'opt-dot')
+            . html_writer::span(format_text($option->optiontext, FORMAT_HTML,
+                ['context' => context_system::instance()]), 'opt-text'),
+            'quiz-opt is-static ' . $state);
+        if (trim((string)$option->feedback) !== '') {
+            $out .= html_writer::div(format_text($option->feedback, FORMAT_HTML,
+                ['context' => context_system::instance()]),
+                'q-feedback ' . ($option->iscorrect ? 'is-ok' : 'is-bad'));
+        }
+    }
+    if ($out === '') {
+        $out = html_writer::div(s(get_string('quiznoanswer', 'local_handbook')),
+            'q-feedback is-bad');
+    }
+    return $out;
+}
+
+/**
+ * One ordering question: tap-in-sequence steps (JS assigns numbers), or the
+ * submitted sequence with per-position verdicts after grading. The full
+ * correct order is never revealed — it lives in the article.
+ *
+ * @param stdClass $question Question with options.
+ * @param stdClass|null $detail Grading detail or null (answering mode).
+ * @param string $response Raw response (comma-separated option ids).
+ * @return string
+ */
+function local_handbook_render_quiz_ordering(stdClass $question, ?stdClass $detail,
+        string $response): string {
+    if ($detail === null) {
+        $options = $question->options;
+        shuffle($options);
+        $steps = '';
+        foreach ($options as $option) {
+            $steps .= html_writer::div(
+                html_writer::span('·', 'seq')
+                . html_writer::span(format_text($option->optiontext, FORMAT_HTML,
+                    ['context' => context_system::instance()]), 'opt-text'),
+                'quiz-step', ['data-optionid' => (int)$option->id, 'tabindex' => '0',
+                    'role' => 'button']);
+        }
+        return html_writer::div(
+            html_writer::div(s(get_string('quizordertap', 'local_handbook')), 'q-orderhint')
+            . $steps
+            . html_writer::empty_tag('input', ['type' => 'hidden',
+                'name' => 'q' . $question->id, 'value' => ''])
+            . html_writer::link('#', s(get_string('quizorderreset', 'local_handbook')),
+                ['class' => 'q-orderreset', 'data-action' => 'reset']),
+            'quiz-ordering', ['data-region' => 'hb-ordering']);
+    }
+
+    // Graded: the submitted sequence with per-position verdicts.
+    $byid = [];
+    foreach ($question->options as $option) {
+        $byid[(int)$option->id] = $option;
+    }
+    $out = '';
+    $position = 0;
+    foreach ($detail->chosen as $optionid) {
+        $position++;
+        if (!isset($byid[$optionid])) {
+            continue;
+        }
+        $ok = $detail->positions[$optionid] ?? false;
+        $out .= html_writer::div(
+            html_writer::span((string)$position, 'seq')
+            . html_writer::span(format_text($byid[$optionid]->optiontext, FORMAT_HTML,
+                ['context' => context_system::instance()]), 'opt-text'),
+            'quiz-step is-static ' . ($ok ? 'is-posright' : 'is-poswrong'));
+    }
+    return html_writer::div($out, 'quiz-ordering');
+}
+
+/**
+ * Reading minutes for a word count: ~200 words per minute (institutional
+ * Spanish prose reads slower than casual text), minimum one minute.
+ *
+ * @param int $words Word count (image weight already baked in at save).
+ * @return int Estimated minutes, >= 1 when there are any words.
+ */
+function local_handbook_reading_minutes(int $words): int {
+    if ($words <= 0) {
+        return 0;
+    }
+    return max(1, (int)ceil($words / 200));
+}
+
+/**
+ * Attached source documents of a page (file area "attachments").
+ *
+ * @param int $pageid Page id.
+ * @return stored_file[] Ordered by filename.
+ */
+function local_handbook_page_attachments(int $pageid): array {
+    $fs = get_file_storage();
+    return $fs->get_area_files(context_system::instance()->id, 'local_handbook',
+        'attachments', $pageid, 'filename', false);
+}
+
+/**
+ * Attachment count for a page, from a request-level cache of all counts
+ * (one query serves every card in a grid).
+ *
+ * @param int $pageid Page id.
+ * @return int
+ */
+function local_handbook_attachment_count(int $pageid): int {
+    global $DB;
+
+    static $counts = null;
+    if ($counts === null) {
+        $counts = [];
+        $sql = "SELECT itemid, COUNT(1) AS filecount
+                  FROM {files}
+                 WHERE contextid = :contextid AND component = 'local_handbook'
+                       AND filearea = 'attachments' AND filename <> '.'
+              GROUP BY itemid";
+        $records = $DB->get_records_sql($sql, ['contextid' => context_system::instance()->id]);
+        foreach ($records as $record) {
+            $counts[(int)$record->itemid] = (int)$record->filecount;
+        }
+    }
+    return $counts[$pageid] ?? 0;
+}
+
+/**
+ * Type tile (css modifier + short label) for an attachment filename.
+ *
+ * @param string $filename File name.
+ * @return string[] [$modifierclass, $label].
+ */
+function local_handbook_attachment_tile(string $filename): array {
+    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $map = [
+        'pdf' => ['is-pdf', 'PDF'],
+        'doc' => ['is-doc', 'DOC'], 'docx' => ['is-doc', 'DOC'],
+        'odt' => ['is-doc', 'DOC'], 'rtf' => ['is-doc', 'DOC'],
+        'xls' => ['is-xls', 'XLS'], 'xlsx' => ['is-xls', 'XLS'],
+        'ods' => ['is-xls', 'XLS'], 'csv' => ['is-xls', 'CSV'],
+        'ppt' => ['is-ppt', 'PPT'], 'pptx' => ['is-ppt', 'PPT'], 'odp' => ['is-ppt', 'PPT'],
+        'png' => ['is-img', 'IMG'], 'jpg' => ['is-img', 'IMG'], 'jpeg' => ['is-img', 'IMG'],
+        'gif' => ['is-img', 'IMG'], 'webp' => ['is-img', 'IMG'], 'svg' => ['is-img', 'IMG'],
+        'zip' => ['is-zip', 'ZIP'], 'rar' => ['is-zip', 'RAR'], '7z' => ['is-zip', '7Z'],
+    ];
+    if (isset($map[$extension])) {
+        return $map[$extension];
+    }
+    $label = $extension !== '' ? core_text::strtoupper(core_text::substr($extension, 0, 4)) : 'FILE';
+    return ['is-file', $label];
+}
+
+/**
+ * Render the "Documentos" rail card. Empty string when the page has no
+ * attachments, so the card simply does not appear.
+ *
+ * @param int $pageid Page id.
+ * @return string
+ */
+function local_handbook_render_attachments_card(int $pageid): string {
+    $files = local_handbook_page_attachments($pageid);
+    if (!$files) {
+        return '';
+    }
+
+    $context = context_system::instance();
+    $rows = '';
+    foreach ($files as $file) {
+        $filename = $file->get_filename();
+        [$tileclass, $tilelabel] = local_handbook_attachment_tile($filename);
+        $url = moodle_url::make_pluginfile_url($context->id, 'local_handbook', 'attachments',
+            $pageid, $file->get_filepath(), $filename, true);
+        $meta = display_size((int)$file->get_filesize()) . ' · '
+            . userdate((int)$file->get_timemodified(), get_string('strftimedatefullshort', 'langconfig'));
+        $rows .= html_writer::link($url,
+            html_writer::span(s($tilelabel), 'att-ic ' . $tileclass)
+            . html_writer::span(
+                html_writer::span(s($filename), 'att-name')
+                . html_writer::span(s($meta), 'att-meta'),
+                'att-info')
+            . html_writer::span('&#8595;', 'att-dl', ['aria-hidden' => 'true']),
+            ['class' => 'local-handbook-att']);
+    }
+
+    return html_writer::div(
+        html_writer::div(
+            html_writer::tag('h3', s(get_string('attachments', 'local_handbook')),
+                ['class' => 'h6 text-uppercase text-muted mb-0']),
+            'card-body pb-2')
+        . html_writer::div($rows, 'local-handbook-attachments'),
+        'card mb-3');
 }
 
 /**
@@ -1243,6 +1601,12 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
             s(get_string('lastupdated', 'local_handbook') . ': '
                 . local_handbook_format_date((int)$page->timemodified)))
         . ($version ? html_writer::span(s(get_string('versionnumber', 'local_handbook', $version))) : '');
+    $attachmentcount = local_handbook_attachment_count((int)$page->id);
+    if ($attachmentcount > 0) {
+        $foot .= html_writer::span((string)$attachmentcount, 'local-handbook-card-clip', [
+            'title' => get_string('attachmentcount', 'local_handbook', $attachmentcount),
+        ]);
+    }
 
     // The card IS the link (no overlay tricks a theme can break); it contains
     // no other interactive elements, so the whole surface navigates.
@@ -1430,7 +1794,11 @@ HTML);
     <div>
       <p class="name">Secretaría académica</p>
       <p class="role">Administración</p>
-      <dl><dt>Extensión</dt><dd>101</dd><dt>Horario</dt><dd>7:00&ndash;15:00</dd></dl>
+      <dl>
+        <dt>Extensión</dt><dd>101</dd>
+        <dt>Horario</dt><dd>7:00&ndash;15:00</dd>
+        <dt>Última verificación</dt><dd><span class="hb-fill">[incorporar fecha]</span></dd>
+      </dl>
       <p class="when">Autorizaciones, circulares y archivo de documentos.</p>
     </div>
   </div>
@@ -1905,6 +2273,17 @@ y las faltas de presentación se tratan como faltas leves.</p>
         <a href="/local/handbook/view.php?page=reglamento-personal-capitulo-11#art-84">Artículo 84 4)</a>
         <span class="what">&mdash; presentación personal e higiene como falta leve.</span></li>
   </ul>
+</div>
+
+<!-- Forma de prosa: citas verificadas de normas superiores, con enlaces a
+     las fuentes oficiales (chips con flecha externa). is-verified agrega el
+     sello verde de verificación editorial. -->
+<div class="hb-refbox is-verified">
+  <p class="rb-title">Fundamentos superiores verificados</p>
+  <p><strong>Constitución, artículo 152:</strong> «Los padres tendrán derecho preferente a
+  escoger el tipo de educación que habrán de darles a sus hijos.»</p>
+  <p><a href="https://www.tsc.gob.hn/web/leyes/Constitucion_de_la_republica.pdf"
+      target="_blank" rel="noreferrer noopener">Constitución</a></p>
 </div>
 
 <div class="hb-refs">

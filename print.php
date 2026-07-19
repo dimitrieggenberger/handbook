@@ -92,6 +92,23 @@ if (trim((string)$page->summary) !== '') {
 
 echo local_handbook_render_revision_content($revision, $context);
 
+// Sources on record: the printed page lists which documents accompany the
+// article, even though the files themselves cannot follow the paper.
+$attachments = local_handbook_page_attachments((int)$page->id);
+if ($attachments) {
+    $items = '';
+    foreach ($attachments as $file) {
+        $items .= html_writer::tag('li',
+            s($file->get_filename()) . ' '
+            . html_writer::span('(' . s(display_size((int)$file->get_filesize())) . ')', 'text-muted'));
+    }
+    echo html_writer::div(
+        html_writer::tag('h3', s(get_string('attachments', 'local_handbook')),
+            ['class' => 'h6 text-uppercase text-muted mb-2'])
+        . html_writer::tag('ul', $items, ['class' => 'small mb-0']),
+        'local-handbook-print-attachments mt-4 pt-2 border-top');
+}
+
 // Provenance footer: printed copies age; the handbook is authoritative.
 echo html_writer::div(
     s(get_string('printfooter', 'local_handbook', (object)[

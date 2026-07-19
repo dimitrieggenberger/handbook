@@ -89,6 +89,7 @@
         <FIELD NAME="content" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
         <FIELD NAME="plaintext" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="wordcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Word count of the plaintext (plus a small weight per image), for reading-time estimates"/>
         <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" DEFAULT=""/>
         <FIELD NAME="changesummary" TYPE="text" NOTNULL="false"/>
         <FIELD NAME="reviewnote" TYPE="text" NOTNULL="false"/>
@@ -153,6 +154,7 @@
         <FIELD NAME="estimatedminutes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="reviewdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="quizcmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="optionalpath" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="1 = recommended (optional) path, 0 = expected reading"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true"/>
@@ -446,6 +448,79 @@
       <INDEXES>
         <INDEX NAME="areakey" UNIQUE="true" FIELDS="areakey"/>
         <INDEX NAME="activesort" UNIQUE="false" FIELDS="active, sortorder"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_handbook_readerhide" COMMENT="Staff temporarily hidden from the reading dashboard (e.g. on leave): a reversible view filter with an audit trail; no reading data is affected">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="note" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT=""/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign-unique" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_handbook_question" COMMENT="Reading-comprehension questions per page (spec: end-of-article gate). Imported from Moodle XML by editors; multichoice and ordering only">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="qtype" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="multichoice"/>
+        <FIELD NAME="bloomlabel" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Pauta q-subtitle: Bloom level and type label"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Pauta q-title: natural title, never hints the answer"/>
+        <FIELD NAME="questiontext" TYPE="text" NOTNULL="false" COMMENT="Pauta q-text body (HTML)"/>
+        <FIELD NAME="feedback" TYPE="text" NOTNULL="false" COMMENT="Question-level feedback shown on a wrong ordering answer (generalfeedback)"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+        <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="pageorder" UNIQUE="false" FIELDS="pageid, sortorder"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_handbook_qoption" COMMENT="Options of a comprehension question. Multichoice: iscorrect marks the right option. Ordering: sortorder is the correct position">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="optiontext" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="feedback" TYPE="text" NOTNULL="false" COMMENT="Per-option feedback (mandatory per the pauta for multichoice)"/>
+        <FIELD NAME="iscorrect" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="questionid" TYPE="foreign" FIELDS="questionid" REFTABLE="local_handbook_question" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="questionorder" UNIQUE="false" FIELDS="questionid, sortorder"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_handbook_qattempt" COMMENT="Comprehension-test attempts: audit trail of who attempted which page against which revision. Passing (100%) records the ordinary read receipt/acknowledgement">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="ncorrect" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="ntotal" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="passed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userpage" UNIQUE="false" FIELDS="userid, pageid"/>
       </INDEXES>
     </TABLE>
   </TABLES>

@@ -1,5 +1,144 @@
 # Changelog
 
+## 0.32.0 (2026-07-18)
+
+Reading-comprehension tests at the end of articles.
+
+- Articles with imported questions lose the confirm-reading button: the
+  test replaces it, and only a 100% attempt records the reading — the
+  same receipt/acknowledgement the button records, so paths, the
+  dashboard and re-acknowledgement work unchanged. Articles without
+  questions keep the classic button; existing confirmations are never
+  invalidated by adding questions.
+- Two question types per the institutional pauta: multichoice (single
+  correct answer, per-option mandatory feedback, Bloom level shown from
+  q-subtitle, natural q-title) and ordering (tap the steps in sequence —
+  no drag & drop, works identically on phones; on failure only the
+  positions are marked, the correct order is never revealed).
+- Unlimited attempts, options reshuffled each attempt, all-or-nothing;
+  every attempt is recorded (new qattempt audit table). Failed attempts
+  re-render inline with the feedback; q-teachercomment blocks are
+  stripped (editor guidance, not for readers).
+- Import: manage/questions.php (linked from the article's editor line)
+  accepts Moodle XML per the pauta; multichoice/ordering only, category
+  dummies skipped, strict validation with warnings (2–6 recommended).
+  Human-only — no AI/MCP surface can import or modify questions.
+- Three new tables (question, qoption, qattempt) with upgrade steps;
+  attempts covered by the privacy provider; EN/ES/DE strings; PHPUnit
+  for parser and grader incl. tamper cases.
+
+## 0.31.2 (2026-07-18)
+
+Hotfix: upgrade failure creating local_handbook_readerhide.
+
+- The 0.30.0 table definition declared both a foreign key and a separate
+  unique index on userid; XMLDB rejects the collision ("Key userid
+  collides with index useridunique"), aborting the upgrade before the
+  table was created. The key is now foreign-unique with no separate
+  index, in both the upgrade step and install.xml. Re-running the
+  upgrade completes cleanly; no data was affected.
+
+## 0.31.1 (2026-07-18)
+
+hb-refbox: prose citations healed, verified-source treatment.
+
+- Imported legal pages use hb-refbox with a leading p.hb-doc as title
+  plus quote paragraphs ("Fundamentos superiores verificados") — the
+  badge styling clipped the title (nowrap pill) and plain paragraphs had
+  no padding. CSS-only healing: the leading badge becomes a proper title
+  bar, prose paragraphs get padding, and existing link-list refboxes are
+  untouched. No content edits needed.
+- Links with target=_blank inside a refbox render as source chips with
+  an external arrow, so official sources look official.
+- New is-verified modifier: a green check seal in the title for
+  editorially verified citations of higher law. Style-guide refs entry
+  and EN/ES/DE descriptions updated with the prose + verified forms.
+
+## 0.31.0 (2026-07-18)
+
+Reading-time estimates for paths.
+
+- Word count stored per revision at save time (new `wordcount` column;
+  the upgrade step backfills every existing revision), counting unicode
+  words in the plaintext plus a small weight per image.
+- Path page header shows a clock with the total: "≈ N min de lectura",
+  at ~200 words per minute over the published items — or the manual
+  override when set (new "Estimated reading minutes" field on the path
+  form, for paths that include videos or activities).
+- The reading-path side panel shows the remaining time ("quedan ≈ N
+  min"), computed from the items the reader has not yet confirmed, so
+  it shrinks as they progress.
+- Estimates are labelled as approximate by design. EN/ES/DE strings.
+
+## 0.30.0 (2026-07-18)
+
+Reading dashboard: who has read what, person by person.
+
+- New manage page (manage/readers.php, viewreports capability): one row
+  per staff member with a segmented progress bar — green (confirmed on the
+  current published version), amber (confirmed an earlier version of a
+  page that changed since), gray (pending) — plus counts, percentage and
+  last activity ("nunca" highlighted). Sorted most-read first, one click
+  to flip.
+- Filters: audience (all staff / cohort / role) and scope (all required
+  reading / one path's required items / one category incl. children —
+  e.g. the Reglamento Interno). Summary tiles: people in view, average
+  confirmed, re-confirmations pending, no reading at all. CSV export.
+- Reversible hide-list for staff on leave (new local_handbook_readerhide
+  table + upgrade step): hidden colleagues leave the list AND the
+  aggregates, with an optional note and an audit line (who hid, when);
+  one click restores. No reading data is ever modified.
+- Privacy API: the new hide table AND the previously uncovered
+  local_handbook_readreceipt table are now declared, exported and
+  deleted through Moodle's privacy provider.
+- No AI/MCP surface: reading data about identifiable staff stays inside
+  Moodle. EN/ES/DE strings.
+
+## 0.29.0 (2026-07-18)
+
+Optionality controls for reading paths.
+
+- Path editor: every item row now shows its Required/Optional badge and a
+  one-click "Make optional / Make required" toggle (the flag existed in
+  the data model but was only settable when adding an item).
+- New path-level "Optional path" checkbox on the path form (DB field
+  `optionalpath`, upgrade step included): marks the whole path as
+  recommended rather than expected reading. Labelled on the manage list,
+  the path page (with an info notice for readers), and the reading-path
+  side panel.
+- EN/ES/DE strings.
+
+## 0.28.1 (2026-07-18)
+
+Contact cards unsquished + pending-placeholder chip.
+
+- `hb-contact` fields now render stacked (micro-label above, value at full
+  card width) instead of side-by-side columns, which squeezed long values
+  into slivers and split URLs mid-word when cards sit in a grid. CSS-only:
+  existing directory pages fix themselves.
+- New `hb-fill` chip: wrap unfilled placeholders like "[incorporar fecha]"
+  in a span with class hb-fill to render them as a quiet amber pending
+  chip, visible before publishing. Works in any pattern and plain prose.
+
+## 0.28.0 (2026-07-18)
+
+Page attachments: official source documents on articles.
+
+- New page-scoped `attachments` file area (File API only, no database
+  changes): the law, directive or form an article discusses is uploaded
+  once on the edit form (up to 20 documents/archives/images) and survives
+  every revision — attaching or replacing files never touches the
+  draft/review workflow.
+- "Documentos" rail card on the article view, between details and related
+  pages: type-coloured tile (PDF/DOC/XLS/PPT/IMG/ZIP), filename, size and
+  date; the whole row downloads; hidden when the page has no files.
+- Stable pluginfile URLs, so prose and hb-refbox entries can link the
+  attached file directly.
+- Paperclip count in the category-card foot; "Documentos adjuntos" list
+  (name + size) at the end of the print view.
+- Human-only by design: no external API or MCP surface gains any
+  attachment capability. EN/ES/DE strings.
+
 ## 0.27.0 (2026-07-18)
 
 Content accordions, call scripts, and centered communication patterns.

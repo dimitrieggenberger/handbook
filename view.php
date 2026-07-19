@@ -31,6 +31,7 @@ use local_handbook\local\service\ack_service;
 use local_handbook\local\service\completion_service;
 use local_handbook\local\service\page_service;
 use local_handbook\local\service\path_service;
+use local_handbook\local\service\quiz_service;
 use local_handbook\local\service\toc_service;
 
 $pageparam = required_param('page', PARAM_ALPHANUMEXT);
@@ -125,6 +126,51 @@ if ($action === 'acknowledge') {
         get_string('ackrecorded', 'local_handbook'));
 }
 
+// Comprehension test (spec: end-of-article gate). Grading happens here so a
+// failed attempt can re-render inline with per-question feedback; passing
+// records the SAME receipt/ack the confirm button records, then redirects.
+$quizgraded = null;
+$quizresponses = [];
+$quizincomplete = false;
+if ($action === 'quiztry') {
+    require_sesskey();
+    require_capability('local/handbook:acknowledge', $context);
+    $pathid = optional_param('pathid', 0, PARAM_INT);
+    $quizquestions = quiz_service::get_questions((int)$page->id);
+    if (!$quizquestions) {
+        redirect(local_handbook_page_url($page));
+    }
+    foreach ($quizquestions as $quizquestion) {
+        $quizresponses[(int)$quizquestion->id] =
+            optional_param('q' . $quizquestion->id, '', PARAM_TEXT);
+        $given = trim($quizresponses[(int)$quizquestion->id]);
+        if ($given === ''
+                || ($quizquestion->qtype === quiz_service::TYPE_ORDERING
+                    && count(array_filter(explode(',', $given))) !== count($quizquestion->options))) {
+            $quizincomplete = true;
+        }
+    }
+    if (!$quizincomplete) {
+        $quizgraded = quiz_service::grade($quizquestions, $quizresponses);
+        quiz_service::record_attempt((int)$USER->id, (int)$page->id,
+            (int)$page->publishedrevisionid, $quizgraded);
+        if ($quizgraded->passed) {
+            if ((int)$page->requiredreading) {
+                ack_service::acknowledge((int)$USER->id, $page, $pathid);
+            } else if (path_service::is_required_in_active_path((int)$page->id)) {
+                completion_service::record_receipt((int)$USER->id, $page,
+                    $pathid ? 'reading_path' : 'manual');
+            }
+            redirect(new moodle_url(local_handbook_page_url($page),
+                $pathid ? ['path' => $pathid] : [], 'confirmar'),
+                get_string('quizpassed', 'local_handbook', (object)[
+                    'correct' => (int)$quizgraded->ncorrect,
+                    'total' => (int)$quizgraded->ntotal,
+                ]));
+        }
+    }
+}
+
 // Compliance status drives the required-reading card; completion status drives
 // the lighter "mark as read" card for path-required (non-global) articles.
 $ackstatus = null;
@@ -135,6 +181,15 @@ if ($revision && has_capability('local/handbook:acknowledge', $context)) {
     } else if (path_service::is_required_in_active_path((int)$page->id)) {
         $completionstatus = completion_service::completion_status((int)$USER->id, $page);
     }
+}
+
+// When the page carries comprehension questions, the test replaces the
+// confirm button in both cards below; the JS adds the tap-to-order
+// interaction and the answered-everything submit gate.
+$quizquestions = ($ackstatus !== null || $completionstatus !== null)
+    ? quiz_service::get_questions((int)$page->id) : [];
+if ($quizquestions) {
+    $PAGE->requires->js(new moodle_url('/local/handbook/js/quiz.js'));
 }
 
 // Reading-path context (spec 8.6): the rail panel, per-item ticks and the
@@ -361,6 +416,12 @@ if ($ackstatus !== null) {
             ])), ['class' => 'mb-1']);
         $cardbody .= html_writer::tag('p', s(get_string('ackrecordinfo', 'local_handbook')),
             ['class' => 'text-muted small mb-0']);
+    } else if ($quizquestions) {
+        // The comprehension test IS the confirmation for this page.
+        $cardbody .= html_writer::tag('p', s(get_string('ackrecordinfo', 'local_handbook')),
+            ['class' => 'text-muted small']);
+        $cardbody .= local_handbook_render_quiz($page, $quizquestions, $quizgraded,
+            $quizresponses, $pathctx, $quizincomplete);
     } else {
         $cardbody .= html_writer::tag('p', s(get_string('ackrecordinfo', 'local_handbook')),
             ['class' => 'text-muted small']);
@@ -422,6 +483,16 @@ if ($completionstatus !== null) {
             ])), ['class' => 'mb-1']);
         $cardbody .= html_writer::tag('p', s(get_string('completioninfo', 'local_handbook')),
             ['class' => 'text-muted small mb-0']);
+    } else if ($quizquestions) {
+        if ($completionstatus->status === completion_service::STATUS_RECONFIRM) {
+            $cardbody .= html_writer::tag('p',
+                s(get_string('completionreread', 'local_handbook', (int)$revision->versionnumber)),
+                ['class' => 'mb-2']);
+        }
+        $cardbody .= html_writer::tag('p', s(get_string('completioninfo', 'local_handbook')),
+            ['class' => 'text-muted small']);
+        $cardbody .= local_handbook_render_quiz($page, $quizquestions, $quizgraded,
+            $quizresponses, $pathctx, $quizincomplete);
     } else {
         if ($completionstatus->status === completion_service::STATUS_RECONFIRM) {
             $cardbody .= html_writer::tag('p',
@@ -607,6 +678,10 @@ echo html_writer::div(
     'card mb-3'
 );
 
+// Attached source documents (laws, directives, forms) — between the
+// details and the related pages; hidden entirely when there are none.
+echo local_handbook_render_attachments_card((int)$page->id);
+
 // Typed relations, both directions, published targets only for readers.
 $relitems = '';
 foreach ([[$outgoing, false], [$incoming, true]] as [$relations, $reverse]) {
@@ -647,7 +722,12 @@ if ($iseditorial) {
             s(get_string('revisionhistory', 'local_handbook')))
         . ' · '
         . html_writer::link(new moodle_url('/local/handbook/review.php'),
-            s(get_string('reviewqueue', 'local_handbook'))),
+            s(get_string('reviewqueue', 'local_handbook')))
+        . ' · '
+        . html_writer::link(new moodle_url('/local/handbook/manage/questions.php',
+                ['id' => $page->id]),
+            s(get_string('managequestions', 'local_handbook'))
+            . ' (' . count(quiz_service::get_questions((int)$page->id)) . ')'),
         ['class' => 'small text-muted']
     );
 }

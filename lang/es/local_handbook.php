@@ -219,6 +219,89 @@ $string['bannerimage'] = 'Imagen de cabecera';
 $string['bannerimage_help'] = 'Opcional. Una imagen horizontal que se muestra en la tarjeta de la categoría (16:9) y en la cabecera del artículo (3:1). La imagen se recorta y centra automáticamente, sin recorte manual. Sin imagen, la tarjeta muestra un marcador discreto según el tipo de contenido.';
 
 // Guía de estilo de contenido (patrones hb-*).
+// Pruebas de comprensión.
+$string['quiztitle'] = 'Comprensión de lectura';
+$string['quizsubtitle'] = 'Acierta todas las preguntas para acreditar la lectura de este artículo.';
+$string['quizcount'] = '{$a} preguntas';
+$string['quizsubmit'] = 'Enviar respuestas';
+$string['quizhint'] = 'Responde las {$a} preguntas · intentos ilimitados · las opciones se barajan en cada intento.';
+$string['quizretry'] = 'Volver a intentar';
+$string['quizretryhint'] = 'Todo se pregunta de nuevo con opciones barajadas; solo un intento con el 100 % acredita la lectura.';
+$string['quizfailed'] = '{$a->correct} de {$a->total} correctas. Aún no se acredita la lectura — revisa la retroalimentación y vuelve a intentarlo.';
+$string['quizpassed'] = 'Lectura acreditada: {$a->correct} de {$a->total} correctas.';
+$string['quizcorrect'] = 'Correcta';
+$string['quizincorrect'] = 'Incorrecta';
+$string['quizorderwrong'] = 'Orden incorrecto';
+$string['quizincomplete'] = 'Responde todas las preguntas antes de enviar.';
+$string['quiznoanswer'] = 'No se registró respuesta para esta pregunta.';
+$string['quizordertap'] = 'Toca los pasos en el orden en que deben ocurrir; toca de nuevo para liberar uno.';
+$string['quizorderreset'] = 'Reiniciar orden';
+$string['managequestions'] = 'Preguntas de comprensión';
+$string['questionsintro'] = 'Las preguntas importadas aquí reemplazan el botón de confirmación de lectura de este artículo: solo un intento con el 100 % registra la lectura. Importe XML de Moodle redactado según la pauta institucional del banco de preguntas (opción múltiple con una respuesta correcta, y ordenar con las respuestas listadas en la secuencia correcta). Importar reemplaza el conjunto actual. Agregar o reemplazar preguntas nunca invalida confirmaciones existentes — para eso publique una revisión con «requiere reconfirmación».';
+$string['qimportlabel'] = 'XML de Moodle';
+$string['qimporthelp'] = 'Pegue el XML (según la pauta). Tipos compatibles: opción múltiple y ordenar; otros tipos se omiten con aviso. Se recomiendan de 2 a 6 preguntas según la extensión del artículo.';
+$string['qimportbtn'] = 'Importar (reemplaza las preguntas actuales)';
+$string['qimported'] = '{$a} preguntas importadas.';
+$string['qdeleteall'] = 'Eliminar todas las preguntas';
+$string['qdeleted'] = 'Preguntas eliminadas. El artículo vuelve a usar el botón clásico de confirmación de lectura.';
+$string['confirmdeletequestions'] = '¿Eliminar todas las preguntas de comprensión de «{$a}»? El artículo vuelve al botón clásico de confirmación. Los registros de lectura e intentos se conservan.';
+$string['qnoneyet'] = 'Este artículo aún no tiene preguntas de comprensión: los lectores ven el botón clásico de confirmación de lectura.';
+$string['qtypemultichoice'] = 'Opción múltiple';
+$string['qtypeordering'] = 'Ordenar';
+$string['qoptioncount'] = '{$a} opciones';
+$string['backtopage'] = 'Volver al artículo';
+$string['qimporterrorxml'] = 'No se pudo interpretar el XML. Verifique que esté bien formado (la pauta recomienda validarlo antes de importar).';
+$string['qimportskippedtype'] = 'Se omitió una pregunta de tipo no compatible «{$a}» (solo opción múltiple y ordenar aplican a la acreditación de lectura).';
+$string['qimportnotitle'] = 'Una pregunta no tiene q-title (ni name); la pauta exige un título natural.';
+$string['qimportbadmc'] = 'Pregunta «{$a}» rechazada: opción múltiple requiere al menos 2 opciones y exactamente una con fraction 100.';
+$string['qimportbadordering'] = 'Pregunta «{$a}» rechazada: ordenar requiere al menos 2 pasos.';
+$string['qimportnofeedback'] = 'Pregunta «{$a}»: algunas opciones no tienen retroalimentación — la pauta la exige.';
+$string['qimportcountwarning'] = 'Se importaron {$a} preguntas; la pauta recomienda entre 2 y 6 por artículo.';
+$string['qimportempty'] = 'No se encontraron preguntas importables en el XML.';
+$string['privacy:attemptspath'] = 'Intentos de pruebas de comprensión';
+$string['privacy:metadata:local_handbook_qattempt'] = 'Los intentos de pruebas de comprensión registran quién intentó qué artículo, el puntaje y si aprobó.';
+$string['privacy:metadata:local_handbook_qattempt:userid'] = 'El usuario que realizó el intento.';
+$string['privacy:metadata:local_handbook_qattempt:timecreated'] = 'Cuándo se realizó el intento.';
+
+// Tablero de lectura.
+$string['readingdashboard'] = 'Tablero de lectura';
+$string['dashaudience'] = 'Audiencia';
+$string['dashaudiencestaff'] = 'Todo el personal';
+$string['dashscope'] = 'Alcance';
+$string['dashscoperequired'] = 'Toda la lectura obligatoria';
+$string['dashscopepath'] = 'Ruta';
+$string['dashscopecategory'] = 'Categoría';
+$string['dashsortdesc'] = 'Más lectura primero';
+$string['dashsortasc'] = 'Menos lectura primero';
+$string['dashconfirmed'] = 'Confirmado';
+$string['dashstale'] = 'Requiere reconfirmación';
+$string['dashpending'] = 'Pendiente';
+$string['dashtotal'] = 'Total';
+$string['dashlastactivity'] = 'Última actividad';
+$string['dashnever'] = 'nunca';
+$string['dashstalechip'] = '{$a} reconf.';
+$string['dashtilepeople'] = 'personas en la vista';
+$string['dashtileaverage'] = 'promedio confirmado';
+$string['dashtilestale'] = 'con reconfirmación pendiente';
+$string['dashtilenever'] = 'sin ninguna lectura';
+$string['dashhide'] = 'Ocultar';
+$string['dashshow'] = 'Mostrar';
+$string['dashhidden'] = 'Oculto';
+$string['dashhidenote'] = 'Nota (p. ej. licencia)';
+$string['dashhiddenby'] = 'oculto por {$a->name} · {$a->date}';
+$string['dashhiddensection'] = 'Ocultos ({$a})';
+$string['dashshowhidden'] = 'Mostrar ocultos ({$a})';
+$string['dashhidehidden'] = 'Ocultar la sección de ocultos';
+$string['dashexportcsv'] = 'Exportar CSV';
+$string['dashnopages'] = 'Este alcance aún no contiene páginas publicadas.';
+$string['dashnousers'] = 'No hay personas en esta audiencia.';
+$string['dashfootnote'] = 'Verde = confirmado en la versión publicada vigente; ámbar = confirmó una versión anterior de una página que cambió después; gris = pendiente. Las personas ocultas quedan fuera de la lista y de los promedios, pero sus registros de lectura no se tocan y pueden restaurarse en cualquier momento. Este tablero mide confirmaciones, no atención.';
+
+// Documentos adjuntos de página.
+$string['attachments'] = 'Documentos';
+$string['attachments_help'] = 'Documentos fuente oficiales que este artículo discute o referencia — la ley, la directriz, el formato. Se adjuntan a la página (no a una revisión), por lo que sobreviven a los borradores editoriales y se muestran en el panel lateral del artículo, se cuentan en las tarjetas de categoría y se listan en la página impresa. Cada archivo tiene una URL estable, así que también puede enlazarse desde el texto del artículo. Se gestionan únicamente aquí — la IA del manual no puede subir, reemplazar ni eliminar archivos.';
+$string['attachmentcount'] = 'Documentos adjuntos: {$a}';
+
 // Enlaces cruzados automáticos.
 $string['autolink'] = 'Enlazar títulos de páginas automáticamente';
 $string['autolink_desc'] = 'Enlaces cruzados al estilo Wikipedia: cuando un artículo menciona el título exacto de otra página publicada del manual, la primera mención se convierte en un enlace a esa página. Se aplica solo al mostrar — el contenido guardado nunca se modifica, los enlaces siguen automáticamente los cambios de nombre y archivado, y al desactivar esta opción desaparecen de inmediato en todas partes. Las coincidencias son por título completo, sin distinguir mayúsculas; no se agregan enlaces dentro de encabezados, enlaces existentes ni los patrones de referencias normativas.';
@@ -265,7 +348,7 @@ $string['sguse_dodont'] = 'Dos columnas que contrastan la conducta esperada y la
 $string['sgtitle_timeline'] = 'Línea de tiempo / fases';
 $string['sguse_timeline'] = 'Hitos con fecha en secuencia; agregue la clase is-done a los completados.';
 $string['sgtitle_contact'] = 'Contactos y emergencia';
-$string['sguse_contact'] = 'A quién contactar y cuándo. Agregue is-emergency para una tarjeta roja de alta visibilidad.';
+$string['sguse_contact'] = 'A quién contactar y cuándo. Agregue is-emergency para una tarjeta roja de alta visibilidad. Los campos se muestran apilados — una etiqueta pequeña sobre el valor a todo el ancho de la tarjeta — para que valores largos, URLs y correos nunca se compriman en una columna estrecha. Envuelva los marcadores sin completar como [incorporar fecha] en un span con clase hb-fill para mostrarlos como un chip ámbar de pendiente (hb-fill funciona en cualquier patrón y en texto normal).';
 $string['sgtitle_define'] = 'Definición / glosario';
 $string['sguse_define'] = 'Define vocabulario institucional, como bloque o en línea (hb-term).';
 $string['sgtitle_matrix'] = 'Matriz de responsabilidades (RACI)';
@@ -302,7 +385,7 @@ $string['viewfullpath'] = 'Ver la ruta completa';
 $string['sgtitle_next'] = 'Enlaces siguiente / anterior';
 $string['sguse_next'] = 'Continuación escrita a mano al final de un artículo: una tarjeta hb-next (p. ej. el siguiente capítulo del reglamento), un hb-next-group cuando hay varias opciones (p. ej. según el rol), e is-prev para volver. Para rutas de lectura NO se escriben: el plugin muestra automáticamente el botón de siguiente en la ruta.';
 $string['sgtitle_refs'] = 'Referencias normativas cruzadas';
-$string['sguse_refs'] = 'Enlaza un artículo con los artículos exactos que regulan el tema en otro documento. Cuatro niveles: hb-ref (chip § en línea para una cita decisiva), hb-seealso (una línea \"Ver normativa\" tras una sección: el estándar dentro del cuerpo), hb-refbox (tarjeta cuando hay que explicar la base legal), hb-refs (bloque al final del artículo agrupado por documento: el estándar de cierre). Los enlaces son anclas simples a slug#art-N. Insignias de documento: hb-doc con is-ri / is-rp / is-ed, o sin modificador para otras fuentes. Los mismos patrones sirven para CUALQUIER página relacionada (no solo reglamentos): use una insignia hb-doc neutra o su propia etiqueta, y enlace a la página (con o sin ancla #art-N).';
+$string['sguse_refs'] = 'Enlaza un artículo con los artículos exactos que regulan el tema en otro documento. Cuatro niveles: hb-ref (chip § en línea para una cita decisiva), hb-seealso (una línea \"Ver normativa\" tras una sección: el estándar dentro del cuerpo), hb-refbox (tarjeta cuando hay que explicar la base legal), hb-refs (bloque al final del artículo agrupado por documento: el estándar de cierre). Los enlaces son anclas simples a slug#art-N. Insignias de documento: hb-doc con is-ri / is-rp / is-ed, o sin modificador para otras fuentes. Los mismos patrones sirven para CUALQUIER página relacionada (no solo reglamentos): use una insignia hb-doc neutra o su propia etiqueta, y enlace a la página (con o sin ancla #art-N). El refbox también acepta prosa: una línea rb-title, párrafos de citas y enlaces a las fuentes oficiales (los enlaces con target=_blank se muestran como chips con flecha externa). Agregue is-verified a la caja para un sello verde de verificación en citas editorialmente verificadas de normas superiores. Un p.hb-doc inicial usado como título se corrige automáticamente a la misma barra de título.';
 $string['sgtitle_legal'] = 'Reglamento / artículos legales';
 $string['sguse_legal'] = 'Para reglamentos y documentos normativos: títulos y secciones numeradas como encabezados (alimentan el índice de la página), números de artículo escritos por el autor (nunca automáticos: son canónicos), literales con letra, notas de vigencia y artículos derogados. Cada artículo lleva id=\"art-N\" para enlaces directos. Recomendado: una página del manual por título. Los numerales usan un ol simple con li value=\"N\": la numeración es nativa, conserva los números canónicos y se alinea sola con la columna del artículo; los literales con letra usan hb-literals; fichas y escalas usan hb-keyvalue.';
 
@@ -375,6 +458,15 @@ $string['emptypath'] = 'Esta ruta de lectura todavía no tiene elementos.';
 $string['pathprogress'] = '{$a->confirmed} de {$a->total} páginas obligatorias confirmadas';
 $string['sectionprogress'] = '{$a->confirmed} de {$a->total} confirmadas';
 $string['optionalitem'] = 'Opcional';
+$string['makeoptional'] = 'Hacer opcional';
+$string['makerequired'] = 'Hacer obligatoria';
+$string['optionalpath'] = 'Ruta opcional';
+$string['optionalpath_help'] = 'Marca toda la ruta como lectura recomendada en lugar de lectura esperada. Se etiqueta como opcional en todos los lugares donde aparece (página de la ruta, lista de rutas, panel lateral durante la lectura). Además, las páginas individuales de cualquier ruta pueden marcarse como obligatorias u opcionales desde la lista de elementos de abajo.';
+$string['optionalpathnotice'] = 'Esta ruta de lectura es opcional: se recomienda, pero no es obligatoria.';
+$string['readingtimetotal'] = '≈ {$a} min de lectura';
+$string['readingtimeleft'] = 'quedan ≈ {$a} min';
+$string['estimatedminutes'] = 'Minutos estimados de lectura';
+$string['estimatedminutes_help'] = 'Deje 0 para la estimación automática: el conteo de palabras de los artículos publicados a ~200 palabras por minuto (las imágenes suman unos segundos cada una). Escriba un valor para sobrescribirla — útil cuando la ruta incluye videos, formularios o actividades que el conteo de palabras no puede ver.';
 $string['reconfirmitem'] = 'Reconfirmar: nueva versión publicada';
 $string['pendingitem'] = 'Pendiente';
 $string['readitem'] = 'Lectura';
@@ -563,6 +655,14 @@ $string['revisionrestored'] = 'La v{$a} se restauró como nuevo borrador de trab
 
 // Privacy export paths.
 $string['privacy:acknowledgementspath'] = 'Confirmaciones de lectura';
+$string['privacy:receiptspath'] = 'Registros de lectura completada';
+$string['privacy:readerhidepath'] = 'Estado de oculto en el tablero de lectura';
+$string['privacy:metadata:local_handbook_readreceipt'] = 'Los registros de lectura completada indican qué usuario completó qué revisión publicada y cuándo.';
+$string['privacy:metadata:local_handbook_readreceipt:userid'] = 'El usuario que completó la lectura.';
+$string['privacy:metadata:local_handbook_readreceipt:timecompleted'] = 'Cuándo se registró la finalización.';
+$string['privacy:metadata:local_handbook_readerhide'] = 'La lista de ocultos del tablero de lectura registra quién fue ocultado temporalmente de la vista, por quién y el motivo opcional.';
+$string['privacy:metadata:local_handbook_readerhide:userid'] = 'El usuario ocultado.';
+$string['privacy:metadata:local_handbook_readerhide:note'] = 'El motivo opcional (p. ej. licencia).';
 $string['privacy:authoredpath'] = 'Revisiones creadas';
 $string['privacy:metadata:local_handbook_finding'] = 'Los hallazgos de calidad registran quién los reportó, a quién se asignaron y quién los resolvió.';
 

@@ -116,6 +116,13 @@ class page_form extends \moodleform {
             $this->_customdata['banneroptions']);
         $mform->addHelpButton('bannerimage_filemanager', 'bannerimage', 'local_handbook');
 
+        // Attached source documents (optional): the law, directive or form
+        // the article discusses. Page-scoped, human-managed only.
+        $mform->addElement('filemanager', 'attachments_filemanager',
+            get_string('attachments', 'local_handbook'), null,
+            $this->_customdata['attachmentoptions']);
+        $mform->addHelpButton('attachments_filemanager', 'attachments', 'local_handbook');
+
         // Draft content.
         $mform->addElement('editor', 'content_editor', get_string('pagecontent', 'local_handbook'), null,
             $this->_customdata['editoroptions']);
