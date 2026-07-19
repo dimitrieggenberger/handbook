@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.33.1 (2026-07-19)
+
+Hotfix: the test now shows on every quiz-bearing article.
+
+- The comprehension test only rendered when the article was globally
+  required reading or a required item of an active reading path — on any
+  other page the questions published fine but the test block never
+  appeared. A page whose published revision has questions now always
+  shows the completion card with the test, and passing records a read
+  receipt regardless of path membership (the receipt satisfies any path
+  that later includes the article and feeds the dashboard's category
+  scope).
+
 ## 0.33.0 (2026-07-18)
 
 Comprehension questions join the editorial workflow.

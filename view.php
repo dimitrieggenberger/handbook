@@ -157,7 +157,10 @@ if ($action === 'quiztry') {
         if ($quizgraded->passed) {
             if ((int)$page->requiredreading) {
                 ack_service::acknowledge((int)$USER->id, $page, $pathid);
-            } else if (path_service::is_required_in_active_path((int)$page->id)) {
+            } else {
+                // Any quiz-bearing page records a receipt on passing, whether
+                // or not it is required in a path: the receipt satisfies every
+                // path that ever includes the article and feeds the dashboard.
                 completion_service::record_receipt((int)$USER->id, $page,
                     $pathid ? 'reading_path' : 'manual');
             }
@@ -171,14 +174,18 @@ if ($action === 'quiztry') {
     }
 }
 
-// Compliance status drives the required-reading card; completion status drives
-// the lighter "mark as read" card for path-required (non-global) articles.
+// Compliance status drives the required-reading card; completion status
+// drives the lighter "mark as read" card. A page whose published revision
+// carries comprehension questions ALWAYS gets the completion card (the test
+// is the point, whether or not the page is required anywhere).
+$publishedhasquiz = $revision
+    && quiz_service::has_questions((int)$page->publishedrevisionid);
 $ackstatus = null;
 $completionstatus = null;
 if ($revision && has_capability('local/handbook:acknowledge', $context)) {
     if ((int)$page->requiredreading) {
         $ackstatus = ack_service::get_status((int)$USER->id, $page);
-    } else if (path_service::is_required_in_active_path((int)$page->id)) {
+    } else if ($publishedhasquiz || path_service::is_required_in_active_path((int)$page->id)) {
         $completionstatus = completion_service::completion_status((int)$USER->id, $page);
     }
 }
