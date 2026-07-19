@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.33.2 (2026-07-19)
+
+Hotfix: fatal error on the review queue with two or more pending drafts.
+
+- The bulk "Approve all" button (shown only when more than one draft is
+  in review) passed an options array as the fourth argument of the
+  `single_button` constructor; Moodle 5 requires the string type
+  constant there, so the queue page crashed the moment a second draft
+  was submitted. It now passes `single_button::BUTTON_PRIMARY`.
+
 ## 0.33.1 (2026-07-19)
 
 Hotfix: the test now shows on every quiz-bearing article.
