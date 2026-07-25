@@ -1661,6 +1661,65 @@
 #page-local-handbook-area .hb-chat .chat-verdict.is-bad { background: var(--hb-danger-soft); color: var(--hb-danger); }
 #page-local-handbook-area .hb-chat .chat-verdict.is-good { background: var(--hb-ok-soft); color: var(--hb-ok); }
 
+/* ---- hb-vs: two complete communication sims compared side by side.
+   auto-fit measures the width actually available (drawers, mobile),
+   so the panes stack without a device breakpoint. ---- */
+#page-local-handbook-area .hb-vs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.5rem), 1fr));
+    gap: 1rem;
+    align-items: start;
+    margin: 1.25rem 0;
+}
+#page-local-handbook-area .hb-vs .vs-item {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--hb-line);
+    border-radius: 1rem;
+    background: var(--hb-surface);
+    padding: 0.65rem 0.65rem 0.75rem;
+}
+#page-local-handbook-area .hb-vs .vs-item.is-bad {
+    border-color: color-mix(in srgb, var(--hb-danger) 38%, var(--hb-line));
+}
+#page-local-handbook-area .hb-vs .vs-item.is-good {
+    border-color: color-mix(in srgb, var(--hb-ok) 38%, var(--hb-line));
+}
+#page-local-handbook-area .hb-vs .vs-tag {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.85rem;
+    border-radius: 999px;
+    margin-bottom: 0.6rem;
+}
+#page-local-handbook-area .hb-vs .vs-tag::before { font-size: 0.78rem; line-height: 1; }
+#page-local-handbook-area .hb-vs .is-bad > .vs-tag { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-vs .is-bad > .vs-tag::before { content: "\2715"; }
+#page-local-handbook-area .hb-vs .is-good > .vs-tag { background: var(--hb-ok-soft); color: var(--hb-ok); }
+#page-local-handbook-area .hb-vs .is-good > .vs-tag::before { content: "\2713"; }
+#page-local-handbook-area .hb-vs .vs-note {
+    margin: 0.65rem 0.25rem 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--hb-muted);
+    max-width: none;
+}
+#page-local-handbook-area .hb-vs .vs-note strong { color: var(--hb-ink); }
+/* Sims fill the pane and stay centered; the pane border replaces
+   their own outer margin. */
+#page-local-handbook-area .hb-vs .vs-item > .hb-chat,
+#page-local-handbook-area .hb-vs .vs-item > .hb-email,
+#page-local-handbook-area .hb-vs .vs-item > .hb-dialogue {
+    margin: 0 auto;
+    width: 100%;
+}
+
 /* ---- hb-dialogue: screenplay-style conversation script ---- */
 #page-local-handbook-area .hb-dialogue {
     border: 1px solid var(--hb-line);

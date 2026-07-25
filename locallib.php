@@ -1939,6 +1939,41 @@ HTML);
 </div>
 HTML);
 
+    $add('vs', <<<'HTML'
+<div class="hb-vs">
+  <div class="vs-item is-bad">
+    <span class="vs-tag">Así no</span>
+    <div class="hb-chat">
+      <div class="chat-title">Madre de Mateo P.
+        <span class="sub">en línea</span></div>
+      <div class="chat-day">Martes 21:47</div>
+      <div class="hb-msg is-out">
+        <p>señora la nota de mateo estuvo pesima hay que hablar URGENTE</p>
+        <span class="when">21:47</span>
+      </div>
+    </div>
+    <p class="vs-note"><strong>Qué falla:</strong> sin saludo, mayúsculas que suenan a grito
+    y fuera del horario laboral.</p>
+  </div>
+  <div class="vs-item is-good">
+    <span class="vs-tag">Así sí</span>
+    <div class="hb-chat">
+      <div class="chat-title">Madre de Mateo P.
+        <span class="sub">en línea</span></div>
+      <div class="chat-day">Miércoles 14:10</div>
+      <div class="hb-msg is-out">
+        <p>Buenas tardes. Quisiera coordinar una breve reunión para conversar sobre el avance
+        de Mateo en Matemáticas. ¿Le queda bien el viernes a las 14:30, presencial o por
+        llamada?</p>
+        <span class="when">14:10</span>
+      </div>
+    </div>
+    <p class="vs-note"><strong>Qué funciona:</strong> saludo, motivo concreto y propuesta
+    con fecha y hora, dentro del horario laboral.</p>
+  </div>
+</div>
+HTML);
+
     $add('dialogue', <<<'HTML'
 <div class="hb-dialogue">
   <div class="dlg-context">Llamada: madre molesta por una calificación &middot; Recepción &rarr; Coordinación</div>

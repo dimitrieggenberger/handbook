@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.34.0 (2026-07-25)
+
+New pattern hb-vs: side-by-side "así no / así sí" comparisons.
+
+- A wrapper that places two complete communication simulations next to
+  each other — a bad example and a good one — instead of stacking them
+  in a single phone. Each pane (`vs-item is-bad` / `is-good`) carries a
+  verdict chip (`vs-tag`), a faintly tinted border in the verdict
+  colour, and an optional `vs-note` footer explaining why. Markup order
+  is display order, so bad-first and good-first both work.
+- Responsive without a device breakpoint: the grid measures the width
+  actually available, so panes sit in columns on desktop and stack on
+  mobile — and also inside Moodle's narrow drawer layouts.
+- Generic by design: panes accept hb-chat, hb-email or hb-dialogue, so
+  email and phone-script comparisons come for free. Catalogue entry and
+  style-guide strings added in EN/ES/DE; the Handbook AI picks the
+  pattern up automatically through get_style_guide.
+
 ## 0.33.2 (2026-07-19)
 
 Hotfix: fatal error on the review queue with two or more pending drafts.
