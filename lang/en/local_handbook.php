@@ -237,6 +237,36 @@ $string['quiznoanswer'] = 'No answer was recorded for this question.';
 $string['quizordertap'] = 'Tap the steps in the order they must happen; tap again to release one.';
 $string['quizorderreset'] = 'Reset order';
 $string['managequestions'] = 'Comprehension questions';
+
+// Responsible people (position holders) shown on a page.
+$string['holder'] = 'Responsible';
+$string['holders'] = 'Responsible people';
+$string['manageholders'] = 'Responsible people';
+$string['holdersintro'] = 'The people shown here appear in the page\'s sidebar as the current holders of the position the page describes. Each assignment binds a real Moodle account (photo, profile and platform messaging come from the account) with a role label and optional contact fields — only what you type here is shown; the account\'s own email never is. When a person changes, edit the assignment: the article text stays untouched.';
+$string['addholder'] = 'Add person';
+$string['editholder'] = 'Edit assignment';
+$string['holderuser'] = 'Moodle account';
+$string['holderuserplaceholder'] = 'Search by name…';
+$string['holderrolelabel'] = 'Role on this page';
+$string['holdercontactemail'] = 'Contact email (shown on the page)';
+$string['holdercontactphone'] = 'Extension / hours';
+$string['holderwhatsapp'] = 'Institutional WhatsApp';
+$string['holdersincedate'] = 'In the position since';
+$string['holdersince'] = 'In the position since {$a}';
+$string['holdersortorder'] = 'Display order';
+$string['holdercontactshort'] = 'Contact';
+$string['holdersaved'] = 'Assignment saved.';
+$string['holderdeleted'] = 'Assignment removed.';
+$string['holderremove'] = 'Remove';
+$string['noholders'] = 'No people are assigned to this page yet.';
+$string['holdertransition'] = 'Position in transition';
+$string['holdermessage'] = 'Send message';
+$string['holderprofile'] = 'View profile';
+$string['holderemail'] = 'Email';
+$string['holderphone'] = 'Extension';
+$string['holderwhatsapplink'] = 'WhatsApp';
+$string['holderinvaliduser'] = 'Select a valid user account.';
+$string['holderinvalidwhatsapp'] = 'Enter the WhatsApp number in international format, e.g. +504 9911-2233.';
 $string['questionsintro'] = 'Comprehension questions follow the same editorial workflow as content: importing XML places them on the page\'s WORKING DRAFT (created automatically if none exists), reviewers see them with the revision, and they take effect when the revision is published. Readers keep answering the published revision\'s questions meanwhile. Only a 100% attempt records the reading; articles whose published revision has no questions keep the classic confirm-reading button. Publishing with "requires re-acknowledgement" makes everyone pass the new test.';
 $string['qimportlabel'] = 'Moodle XML';
 $string['qimporthelp'] = 'Paste the XML (per the pauta). Supported types: multichoice and ordering; other types are skipped with a warning. Recommended 2–6 questions depending on article length.';
@@ -678,6 +708,10 @@ $string['privacy:metadata:local_handbook_readerhide'] = 'The reading dashboard\'
 $string['privacy:metadata:local_handbook_readerhide:userid'] = 'The hidden user.';
 $string['privacy:metadata:local_handbook_readerhide:note'] = 'The optional reason (e.g. on leave).';
 $string['privacy:metadata:local_handbook_finding'] = 'Quality findings record who reported, was assigned to and resolved them.';
+$string['privacy:holderspath'] = 'Responsible-for pages';
+$string['privacy:metadata:local_handbook_holder'] = 'Assignments of a person as the responsible holder of the position a handbook page describes, with institutional contact details.';
+$string['privacy:metadata:local_handbook_holder:userid'] = 'The user shown as responsible on the page.';
+$string['privacy:metadata:local_handbook_holder:rolelabel'] = 'The role label shown next to the person.';
 
 // Privacy API.
 $string['privacy:metadata:local_handbook_revision'] = 'Handbook revisions record which user created, modified, reviewed, approved or published them.';

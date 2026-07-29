@@ -628,6 +628,10 @@ if (count($toc) >= 2) {
         'card mb-3');
 }
 
+// The people currently holding the position this page describes —
+// human-managed assignments to real Moodle accounts (manage/holders.php).
+echo local_handbook_render_holders_card((int)$page->id);
+
 $rows = '';
 $rows .= html_writer::tag('dt', s(get_string('contenttype', 'local_handbook')), ['class' => 'col-5'])
     . html_writer::tag('dd', s(get_string('contenttype_' . $page->contenttype, 'local_handbook')), ['class' => 'col-7']);
@@ -734,7 +738,12 @@ if ($iseditorial) {
         . html_writer::link(new moodle_url('/local/handbook/manage/questions.php',
                 ['id' => $page->id]),
             s(get_string('managequestions', 'local_handbook'))
-            . ' (' . count(quiz_service::get_questions((int)$page->publishedrevisionid)) . ')'),
+            . ' (' . count(quiz_service::get_questions((int)$page->publishedrevisionid)) . ')')
+        . ' · '
+        . html_writer::link(new moodle_url('/local/handbook/manage/holders.php',
+                ['id' => $page->id]),
+            s(get_string('manageholders', 'local_handbook'))
+            . ' (' . \local_handbook\local\service\holder_service::count_for_page((int)$page->id) . ')'),
         ['class' => 'small text-muted']
     );
 }

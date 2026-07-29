@@ -103,6 +103,11 @@ class provider implements
             'createdby' => 'privacy:metadata:local_handbook_readerhide',
         ], 'privacy:metadata:local_handbook_readerhide');
 
+        $collection->add_database_table('local_handbook_holder', [
+            'userid' => 'privacy:metadata:local_handbook_holder:userid',
+            'rolelabel' => 'privacy:metadata:local_handbook_holder:rolelabel',
+        ], 'privacy:metadata:local_handbook_holder');
+
         return $collection;
     }
 
@@ -121,6 +126,7 @@ class provider implements
             || $DB->record_exists('local_handbook_readreceipt', ['userid' => $userid])
             || $DB->record_exists('local_handbook_qattempt', ['userid' => $userid])
             || $DB->record_exists('local_handbook_readerhide', ['userid' => $userid])
+            || $DB->record_exists('local_handbook_holder', ['userid' => $userid])
             || $DB->record_exists('local_handbook_revision', ['createdby' => $userid])
             || $DB->record_exists('local_handbook_page', ['owneruserid' => $userid])
             || $DB->record_exists('local_handbook_finding', ['createdby' => $userid]);
@@ -146,6 +152,7 @@ class provider implements
         $userlist->add_from_sql('userid', 'SELECT userid FROM {local_handbook_readreceipt}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {local_handbook_qattempt}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {local_handbook_readerhide}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {local_handbook_holder}', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {local_handbook_revision}', []);
         $userlist->add_from_sql('owneruserid',
             'SELECT owneruserid FROM {local_handbook_page} WHERE owneruserid > 0', []);
@@ -245,6 +252,28 @@ class provider implements
                 (object)['attempts' => $attempts]);
         }
 
+        // Responsible-person assignments (position holder on pages).
+        $sql = "SELECT h.id, h.rolelabel, h.sincedate, h.timecreated, p.title
+                  FROM {local_handbook_holder} h
+                  JOIN {local_handbook_page} p ON p.id = h.pageid
+                 WHERE h.userid = :userid
+              ORDER BY h.timecreated ASC";
+        $holderships = [];
+        foreach ($DB->get_records_sql($sql, ['userid' => $userid]) as $holdership) {
+            $holderships[] = (object)[
+                'page' => $holdership->title,
+                'rolelabel' => $holdership->rolelabel,
+                'sincedate' => $holdership->sincedate
+                    ? transform::datetime($holdership->sincedate) : null,
+                'timecreated' => transform::datetime($holdership->timecreated),
+            ];
+        }
+        if ($holderships) {
+            writer::with_context($syscontext)->export_data(
+                array_merge($subcontext, [get_string('privacy:holderspath', 'local_handbook')]),
+                (object)['assignments' => $holderships]);
+        }
+
         // Reading-dashboard hide entry (staff on leave).
         if ($hide = $DB->get_record('local_handbook_readerhide', ['userid' => $userid])) {
             writer::with_context($syscontext)->export_data(
@@ -292,6 +321,7 @@ class provider implements
             $DB->delete_records('local_handbook_readreceipt');
             $DB->delete_records('local_handbook_qattempt');
             $DB->delete_records('local_handbook_readerhide');
+            $DB->delete_records('local_handbook_holder');
         }
     }
 
@@ -313,6 +343,8 @@ class provider implements
                 $DB->delete_records('local_handbook_qattempt',
                     ['userid' => (int)$contextlist->get_user()->id]);
                 $DB->delete_records('local_handbook_readerhide',
+                    ['userid' => (int)$contextlist->get_user()->id]);
+                $DB->delete_records('local_handbook_holder',
                     ['userid' => (int)$contextlist->get_user()->id]);
             }
         }
@@ -341,5 +373,6 @@ class provider implements
         $DB->delete_records_select('local_handbook_readreceipt', "userid $insql", $params);
         $DB->delete_records_select('local_handbook_qattempt', "userid $insql", $params);
         $DB->delete_records_select('local_handbook_readerhide', "userid $insql", $params);
+        $DB->delete_records_select('local_handbook_holder', "userid $insql", $params);
     }
 }

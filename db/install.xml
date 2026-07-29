@@ -523,5 +523,30 @@
         <INDEX NAME="userpage" UNIQUE="false" FIELDS="userid, pageid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_handbook_holder" COMMENT="People responsible for a page (position holders): a real Moodle account plus a per-page role label and optional institutional contact fields. Managed by humans in the manage area only; the Handbook AI has no surface here">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="rolelabel" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="What this person is on this page (Directora General, Representante docente...)"/>
+        <FIELD NAME="contactemail" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Institutional contact email shown on the page; the account email is never displayed"/>
+        <FIELD NAME="contactphone" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Extension / office hours, free text"/>
+        <FIELD NAME="whatsapp" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" COMMENT="Institutional WhatsApp number, rendered as a wa.me link"/>
+        <FIELD NAME="sincedate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="In the position since (0 = not shown)"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="pageorder" UNIQUE="false" FIELDS="pageid, sortorder"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

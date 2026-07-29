@@ -237,6 +237,36 @@ $string['quiznoanswer'] = 'No se registró respuesta para esta pregunta.';
 $string['quizordertap'] = 'Toca los pasos en el orden en que deben ocurrir; toca de nuevo para liberar uno.';
 $string['quizorderreset'] = 'Reiniciar orden';
 $string['managequestions'] = 'Preguntas de comprensión';
+
+// Responsables (titulares del cargo) mostrados en una página.
+$string['holder'] = 'Responsable';
+$string['holders'] = 'Responsables';
+$string['manageholders'] = 'Responsables';
+$string['holdersintro'] = 'Las personas listadas aquí aparecen en la columna lateral de la página como titulares actuales del cargo que la página describe. Cada asignación vincula una cuenta real de Moodle (la foto, el perfil y la mensajería de la plataforma salen de la cuenta) con una etiqueta de rol y campos de contacto opcionales — solo se muestra lo que se escribe aquí; el correo de la cuenta nunca se muestra. Cuando cambia la persona, se edita la asignación: el texto del artículo no se toca.';
+$string['addholder'] = 'Agregar persona';
+$string['editholder'] = 'Editar asignación';
+$string['holderuser'] = 'Cuenta de Moodle';
+$string['holderuserplaceholder'] = 'Buscar por nombre…';
+$string['holderrolelabel'] = 'Cargo / rol en esta página';
+$string['holdercontactemail'] = 'Correo de contacto (se muestra en la página)';
+$string['holdercontactphone'] = 'Extensión / horario';
+$string['holderwhatsapp'] = 'WhatsApp institucional';
+$string['holdersincedate'] = 'En el cargo desde';
+$string['holdersince'] = 'En el cargo desde {$a}';
+$string['holdersortorder'] = 'Orden de aparición';
+$string['holdercontactshort'] = 'Contacto';
+$string['holdersaved'] = 'Asignación guardada.';
+$string['holderdeleted'] = 'Asignación eliminada.';
+$string['holderremove'] = 'Quitar';
+$string['noholders'] = 'Esta página aún no tiene personas asignadas.';
+$string['holdertransition'] = 'Cargo en transición';
+$string['holdermessage'] = 'Enviar mensaje';
+$string['holderprofile'] = 'Ver perfil';
+$string['holderemail'] = 'Correo';
+$string['holderphone'] = 'Extensión';
+$string['holderwhatsapplink'] = 'WhatsApp';
+$string['holderinvaliduser'] = 'Seleccione una cuenta de usuario válida.';
+$string['holderinvalidwhatsapp'] = 'Escriba el número de WhatsApp en formato internacional, p. ej. +504 9911-2233.';
 $string['questionsintro'] = 'Las preguntas de comprensión siguen el mismo flujo editorial que el contenido: al importar XML se colocan en el BORRADOR de trabajo de la página (se crea automáticamente si no existe), los revisores las ven junto con la revisión, y entran en vigor al publicarla. Mientras tanto, los lectores siguen respondiendo las preguntas de la revisión publicada. Solo un intento con el 100 % registra la lectura; los artículos cuya revisión publicada no tiene preguntas conservan el botón clásico de confirmación. Publicar con «requiere reconfirmación» hace que todos aprueben la nueva prueba.';
 $string['qimportlabel'] = 'XML de Moodle';
 $string['qimporthelp'] = 'Pegue el XML (según la pauta). Tipos compatibles: opción múltiple y ordenar; otros tipos se omiten con aviso. Se recomiendan de 2 a 6 preguntas según la extensión del artículo.';
@@ -678,6 +708,10 @@ $string['privacy:metadata:local_handbook_readerhide:userid'] = 'El usuario ocult
 $string['privacy:metadata:local_handbook_readerhide:note'] = 'El motivo opcional (p. ej. licencia).';
 $string['privacy:authoredpath'] = 'Revisiones creadas';
 $string['privacy:metadata:local_handbook_finding'] = 'Los hallazgos de calidad registran quién los reportó, a quién se asignaron y quién los resolvió.';
+$string['privacy:holderspath'] = 'Responsable de páginas';
+$string['privacy:metadata:local_handbook_holder'] = 'Asignaciones de una persona como titular responsable del cargo que una página del manual describe, con datos de contacto institucionales.';
+$string['privacy:metadata:local_handbook_holder:userid'] = 'La persona mostrada como responsable en la página.';
+$string['privacy:metadata:local_handbook_holder:rolelabel'] = 'La etiqueta de rol mostrada junto a la persona.';
 
 // Privacy API.
 $string['privacy:metadata:local_handbook_revision'] = 'Las revisiones del manual registran qué usuario las creó, modificó, revisó, aprobó o publicó.';

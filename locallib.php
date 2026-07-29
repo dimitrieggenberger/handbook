@@ -1559,6 +1559,171 @@ function local_handbook_render_attachments_card(int $pageid): string {
 }
 
 /**
+ * Render the "Responsable(s)" rail card: the people currently holding the
+ * position a page describes. One assignment renders the full holder layout
+ * (photo, role, contact rows, message/profile buttons); several render as
+ * compact team rows. Empty string when nothing is assigned.
+ *
+ * Photo, profile link and platform messaging come from the Moodle account;
+ * email/extension/WhatsApp are the assignment's explicit fields — the
+ * account email is never displayed. A deleted or suspended account shows
+ * as "position in transition" instead of broken data.
+ *
+ * @param int $pageid Page id.
+ * @return string
+ */
+function local_handbook_render_holders_card(int $pageid): string {
+    global $CFG, $OUTPUT;
+
+    $holders = \local_handbook\local\service\holder_service::get_holders($pageid);
+    if (!$holders) {
+        return '';
+    }
+
+    $messagingon = !empty($CFG->messaging);
+    // $link is a moodle_url or a plain string (mailto: — moodle_url cannot
+    // represent hostless schemes); null renders a non-clickable row.
+    $contactrow = static function (string $icon, string $label, string $value,
+            $link, string $extraclass = '', bool $newtab = false): string {
+        $inner = html_writer::span(s($icon), 'lh-ic')
+            . html_writer::span(
+                html_writer::span(s($label), 'lh-lbl')
+                . html_writer::span(s($value), 'lh-val'));
+        if ($link) {
+            $attrs = ['class' => trim('lh-row ' . $extraclass)];
+            if ($newtab) {
+                $attrs['target'] = '_blank';
+                $attrs['rel'] = 'noopener';
+            }
+            return html_writer::link($link, $inner, $attrs);
+        }
+        return html_writer::div($inner, trim('lh-row ' . $extraclass));
+    };
+
+    $body = '';
+    if (count($holders) === 1) {
+        $holder = reset($holders);
+        $user = core_user::get_user((int)$holder->userid, '*', IGNORE_MISSING);
+        $active = $user && !$user->deleted && !$user->suspended;
+
+        if ($active) {
+            $identity = html_writer::div(s(fullname($user)), 'lh-name');
+        } else {
+            $identity = html_writer::div(
+                s(get_string('holdertransition', 'local_handbook')), 'lh-name lh-transition');
+        }
+        $identity .= html_writer::div(s($holder->rolelabel), 'lh-role');
+        if ($active && (int)$holder->sincedate > 0) {
+            $identity .= html_writer::span(
+                s(get_string('holdersince', 'local_handbook',
+                    userdate((int)$holder->sincedate,
+                        get_string('strftimedatefullshort', 'langconfig')))),
+                'lh-since');
+        }
+
+        $body .= html_writer::div(
+            ($active ? $OUTPUT->user_picture($user, ['size' => 100, 'link' => false]) : '')
+            . html_writer::div($identity),
+            'lh-top');
+
+        if ($active) {
+            if (trim((string)$holder->contactemail) !== '') {
+                $body .= $contactrow('✉', get_string('holderemail', 'local_handbook'),
+                    $holder->contactemail, 'mailto:' . $holder->contactemail);
+            }
+            if (trim((string)$holder->contactphone) !== '') {
+                $body .= $contactrow('☎', get_string('holderphone', 'local_handbook'),
+                    $holder->contactphone, null);
+            }
+            $waurl = trim((string)$holder->whatsapp) !== ''
+                ? \local_handbook\local\service\holder_service::wa_url($holder->whatsapp) : null;
+            if ($waurl) {
+                $body .= $contactrow('☎', get_string('holderwhatsapplink', 'local_handbook'),
+                    $holder->whatsapp, $waurl, 'is-wa', true);
+            }
+
+            $buttons = '';
+            if ($messagingon) {
+                $buttons .= html_writer::link(
+                    new moodle_url('/message/index.php', ['id' => (int)$user->id]),
+                    s(get_string('holdermessage', 'local_handbook')),
+                    ['class' => 'btn btn-primary btn-sm']);
+            }
+            $buttons .= html_writer::link(
+                new moodle_url('/user/profile.php', ['id' => (int)$user->id]),
+                s(get_string('holderprofile', 'local_handbook')),
+                ['class' => 'btn btn-secondary btn-sm']);
+            $body .= html_writer::div($buttons, 'lh-actions');
+        }
+    } else {
+        foreach ($holders as $holder) {
+            $user = core_user::get_user((int)$holder->userid, '*', IGNORE_MISSING);
+            $active = $user && !$user->deleted && !$user->suspended;
+
+            if (!$active) {
+                $body .= html_writer::div(
+                    html_writer::div(
+                        html_writer::div(s(get_string('holdertransition', 'local_handbook')),
+                            'lh-nm lh-transition')
+                        . html_writer::div(s($holder->rolelabel), 'lh-rl'),
+                        'lh-grow'),
+                    'lh-member');
+                continue;
+            }
+
+            $quick = '';
+            if (trim((string)$holder->contactemail) !== '') {
+                $quick .= html_writer::link(
+                    'mailto:' . $holder->contactemail, '✉',
+                    ['title' => s(get_string('holderemail', 'local_handbook')
+                        . ': ' . $holder->contactemail)]);
+            }
+            $waurl = trim((string)$holder->whatsapp) !== ''
+                ? \local_handbook\local\service\holder_service::wa_url($holder->whatsapp) : null;
+            if ($waurl) {
+                $quick .= html_writer::link($waurl, '☎', [
+                    'class' => 'is-wa',
+                    'title' => s(get_string('holderwhatsapplink', 'local_handbook')
+                        . ': ' . $holder->whatsapp),
+                    'target' => '_blank', 'rel' => 'noopener',
+                ]);
+            }
+            if ($messagingon) {
+                $quick .= html_writer::link(
+                    new moodle_url('/message/index.php', ['id' => (int)$user->id]), '💬',
+                    ['title' => s(get_string('holdermessage', 'local_handbook'))]);
+            }
+
+            $body .= html_writer::div(
+                $OUTPUT->user_picture($user, ['size' => 35, 'link' => false])
+                . html_writer::div(
+                    html_writer::div(
+                        html_writer::link(
+                            new moodle_url('/user/profile.php', ['id' => (int)$user->id]),
+                            s(fullname($user))),
+                        'lh-nm')
+                    . html_writer::div(s($holder->rolelabel), 'lh-rl'),
+                    'lh-grow')
+                . html_writer::div($quick, 'lh-quick'),
+                'lh-member');
+        }
+    }
+
+    $title = count($holders) === 1
+        ? get_string('holder', 'local_handbook')
+        : get_string('holders', 'local_handbook');
+
+    return html_writer::div(
+        html_writer::div(
+            html_writer::tag('h3', s($title),
+                ['class' => 'h6 text-uppercase text-muted mb-0']),
+            'card-body pb-2')
+        . html_writer::div($body,
+            'local-handbook-holders' . (count($holders) > 1 ? ' is-team' : '')),
+        'card mb-3');
+}
+
+/**
  * Render one page as a banner card (category view, home accordion, live
  * search results all share this markup). Whole card is clickable.
  *

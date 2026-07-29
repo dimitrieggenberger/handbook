@@ -2867,3 +2867,137 @@
     font-size: 0.75rem;
     color: var(--bs-secondary-color, #6c757d);
 }
+
+/* ---- Responsible-person rail card (view.php): the people currently
+   holding the position a page describes. One holder renders the full
+   layout, several render as compact team rows. Rail cards live outside
+   .local-handbook-page-body, so bootstrap variables are used directly
+   (same approach as the attachments card). ---- */
+#page-local-handbook-area .local-handbook-holders { padding-bottom: 0.35rem; }
+#page-local-handbook-area .local-handbook-holders .lh-top {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.1rem 1.25rem 0.75rem;
+}
+#page-local-handbook-area .local-handbook-holders .lh-top img.userpicture {
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary, #0078c3) 18%, transparent);
+}
+#page-local-handbook-area .local-handbook-holders .lh-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.3;
+}
+#page-local-handbook-area .local-handbook-holders .lh-role {
+    font-size: 0.78rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-holders .lh-since {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--success, #1e7d43);
+    background: color-mix(in srgb, var(--success, #1e7d43) 13%, var(--bs-body-bg, #ffffff));
+    border-radius: 999px;
+    padding: 0.02rem 0.55rem;
+    margin-top: 0.2rem;
+}
+#page-local-handbook-area .local-handbook-holders .lh-transition {
+    font-style: italic;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-holders .lh-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8rem;
+    color: inherit;
+    text-decoration: none;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+}
+#page-local-handbook-area a.lh-row:hover {
+    background: color-mix(in srgb, var(--bs-body-color, #1c2430) 4%, var(--bs-body-bg, #ffffff));
+    text-decoration: none;
+    color: inherit;
+}
+#page-local-handbook-area .local-handbook-holders .lh-ic {
+    width: 1.9rem;
+    height: 1.9rem;
+    flex: none;
+    border-radius: 0.45rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, var(--bs-body-bg, #ffffff));
+    color: var(--primary, #0078c3);
+}
+#page-local-handbook-area .local-handbook-holders .lh-row.is-wa .lh-ic {
+    background: color-mix(in srgb, #25d366 16%, var(--bs-body-bg, #ffffff));
+    color: color-mix(in srgb, #25d366 55%, var(--bs-body-color, #1c2430));
+}
+#page-local-handbook-area .local-handbook-holders .lh-lbl {
+    display: block;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-holders .lh-val {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+#page-local-handbook-area .local-handbook-holders .lh-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.8rem 1.25rem 0.9rem;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+}
+#page-local-handbook-area .local-handbook-holders .lh-actions .btn { flex: 1; }
+
+#page-local-handbook-area .local-handbook-holders .lh-member {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 1.25rem;
+    font-size: 0.8rem;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 45%, transparent);
+}
+#page-local-handbook-area .local-handbook-holders.is-team .lh-member:first-child { border-top: 0; }
+#page-local-handbook-area .local-handbook-holders .lh-member img.userpicture {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    flex: none;
+}
+#page-local-handbook-area .local-handbook-holders .lh-grow { flex: 1; min-width: 0; }
+#page-local-handbook-area .local-handbook-holders .lh-nm {
+    font-weight: 600;
+    line-height: 1.25;
+}
+#page-local-handbook-area .local-handbook-holders .lh-nm a { color: inherit; }
+#page-local-handbook-area .local-handbook-holders .lh-rl {
+    font-size: 0.7rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-holders .lh-quick { display: flex; gap: 0.35rem; }
+#page-local-handbook-area .local-handbook-holders .lh-quick a {
+    width: 1.7rem;
+    height: 1.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.4rem;
+    font-size: 0.78rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, var(--bs-body-bg, #ffffff));
+    color: var(--primary, #0078c3);
+    text-decoration: none;
+}
+#page-local-handbook-area .local-handbook-holders .lh-quick a.is-wa {
+    background: color-mix(in srgb, #25d366 16%, var(--bs-body-bg, #ffffff));
+    color: color-mix(in srgb, #25d366 55%, var(--bs-body-color, #1c2430));
+}

@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.35.0 (2026-07-29)
+
+Responsible people: the position holder appears on the page.
+
+- Pages tied to a position (Coordinación Académica, comités, equipos)
+  now show WHO holds it in a sidebar "Responsable" card: profile photo,
+  name, role label, optional "in the position since" chip, contact rows
+  (email, extension/hours, institutional WhatsApp as a wa.me link) and
+  buttons for platform messaging and the Moodle profile.
+- Assignments bind real Moodle accounts, not typed text: photo, profile
+  and messaging always come from the account, so a personnel change is
+  one assignment edit — the article text never mentions names. Only the
+  contact data typed into the assignment is shown; the account's own
+  email never is. A suspended or deleted account renders as "Cargo en
+  transición" instead of broken data.
+- One page, one OR many people: a single assignment renders the full
+  holder layout; several render as compact team rows, each with its own
+  role label (Preside, Representante docente…), ordered by a display
+  order you control — built for pages like the leadership team.
+- New manage screen (Responsables, linked from the editors' line on
+  every article) with a searchable account picker; human-only and
+  outside the editorial workflow like banners and attachments — the
+  Handbook AI has no surface here. Privacy provider covers the new
+  table (export and delete). New table: local_handbook_holder.
+
 ## 0.34.0 (2026-07-25)
 
 New pattern hb-vs: side-by-side "así no / así sí" comparisons.

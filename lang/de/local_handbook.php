@@ -237,6 +237,36 @@ $string['quiznoanswer'] = 'Für diese Frage wurde keine Antwort erfasst.';
 $string['quizordertap'] = 'Tippe die Schritte in der Reihenfolge an, in der sie geschehen müssen; erneutes Tippen gibt einen frei.';
 $string['quizorderreset'] = 'Reihenfolge zurücksetzen';
 $string['managequestions'] = 'Verständnisfragen';
+
+// Verantwortliche (Amtsinhaber) auf einer Seite.
+$string['holder'] = 'Verantwortlich';
+$string['holders'] = 'Verantwortliche';
+$string['manageholders'] = 'Verantwortliche';
+$string['holdersintro'] = 'Die hier eingetragenen Personen erscheinen in der Seitenleiste als aktuelle Inhaber der Funktion, die die Seite beschreibt. Jede Zuordnung verknüpft ein echtes Moodle-Konto (Foto, Profil und Plattform-Nachrichten kommen aus dem Konto) mit einer Rollenbezeichnung und optionalen Kontaktfeldern — angezeigt wird nur, was hier eingetragen ist; die E-Mail des Kontos nie. Bei einem Personalwechsel wird die Zuordnung bearbeitet: der Artikeltext bleibt unberührt.';
+$string['addholder'] = 'Person hinzufügen';
+$string['editholder'] = 'Zuordnung bearbeiten';
+$string['holderuser'] = 'Moodle-Konto';
+$string['holderuserplaceholder'] = 'Nach Name suchen…';
+$string['holderrolelabel'] = 'Funktion / Rolle auf dieser Seite';
+$string['holdercontactemail'] = 'Kontakt-E-Mail (wird auf der Seite angezeigt)';
+$string['holdercontactphone'] = 'Durchwahl / Zeiten';
+$string['holderwhatsapp'] = 'Institutionelles WhatsApp';
+$string['holdersincedate'] = 'Im Amt seit';
+$string['holdersince'] = 'Im Amt seit {$a}';
+$string['holdersortorder'] = 'Anzeigereihenfolge';
+$string['holdercontactshort'] = 'Kontakt';
+$string['holdersaved'] = 'Zuordnung gespeichert.';
+$string['holderdeleted'] = 'Zuordnung entfernt.';
+$string['holderremove'] = 'Entfernen';
+$string['noholders'] = 'Dieser Seite sind noch keine Personen zugeordnet.';
+$string['holdertransition'] = 'Funktion in Übergabe';
+$string['holdermessage'] = 'Nachricht senden';
+$string['holderprofile'] = 'Profil ansehen';
+$string['holderemail'] = 'E-Mail';
+$string['holderphone'] = 'Durchwahl';
+$string['holderwhatsapplink'] = 'WhatsApp';
+$string['holderinvaliduser'] = 'Wählen Sie ein gültiges Benutzerkonto aus.';
+$string['holderinvalidwhatsapp'] = 'Geben Sie die WhatsApp-Nummer im internationalen Format an, z. B. +504 9911-2233.';
 $string['questionsintro'] = 'Verständnisfragen folgen demselben redaktionellen Workflow wie Inhalte: importiertes XML landet im ARBEITSENTWURF der Seite (wird automatisch angelegt, falls keiner existiert), Prüfende sehen die Fragen mit der Revision, und sie treten mit deren Veröffentlichung in Kraft. Lesende beantworten unterdessen weiter die Fragen der veröffentlichten Revision. Nur ein Versuch mit 100 % registriert die Lektüre; Artikel ohne Fragen in der veröffentlichten Revision behalten den klassischen Bestätigungs-Button. Veröffentlichen mit „erfordert Neubestätigung" lässt alle die neue Prüfung ablegen.';
 $string['qimportlabel'] = 'Moodle-XML';
 $string['qimporthelp'] = 'XML einfügen (gemäß Pauta). Unterstützte Typen: Multiple Choice und Ordnen; andere Typen werden mit Hinweis übersprungen. Empfohlen sind 2–6 Fragen je nach Artikellänge.';
@@ -678,6 +708,10 @@ $string['privacy:metadata:local_handbook_readerhide:userid'] = 'Die ausgeblendet
 $string['privacy:metadata:local_handbook_readerhide:note'] = 'Die optionale Begründung (z. B. Elternzeit).';
 $string['privacy:authoredpath'] = 'Erstellte Überarbeitungen';
 $string['privacy:metadata:local_handbook_finding'] = 'Qualitätsbefunde erfassen, wer sie gemeldet hat, wem sie zugewiesen wurden und wer sie gelöst hat.';
+$string['privacy:holderspath'] = 'Verantwortlich für Seiten';
+$string['privacy:metadata:local_handbook_holder'] = 'Zuordnungen einer Person als verantwortliche Inhaberin/verantwortlicher Inhaber der Funktion, die eine Handbuchseite beschreibt, mit institutionellen Kontaktdaten.';
+$string['privacy:metadata:local_handbook_holder:userid'] = 'Die auf der Seite als verantwortlich angezeigte Person.';
+$string['privacy:metadata:local_handbook_holder:rolelabel'] = 'Die neben der Person angezeigte Rollenbezeichnung.';
 
 // Privacy API.
 $string['privacy:metadata:local_handbook_revision'] = 'Handbuch-Überarbeitungen erfassen, welche Nutzer sie erstellt, geändert, geprüft, freigegeben oder veröffentlicht haben.';
