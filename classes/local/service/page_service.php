@@ -173,7 +173,15 @@ class page_service {
         $page->aiaccess = $data->aiaccess ?? 'full';
         $page->language = $data->language ?? 'es';
         $page->translationgroupid = 0;
+        // New pages join the END of their category: importance is curated
+        // with the reorder arrows, never implied by creation date.
         $page->sortorder = (int)($data->sortorder ?? 0);
+        if ($page->sortorder <= 0) {
+            $max = $DB->get_field_sql(
+                'SELECT MAX(sortorder) FROM {local_handbook_page} WHERE categoryid = ?',
+                [$page->categoryid]);
+            $page->sortorder = (int)$max + 1;
+        }
         $page->archived = 0;
         $page->timecreated = $now;
         $page->timemodified = $now;
@@ -195,6 +203,44 @@ class page_service {
 
         $page->draftrevision = $revision;
         return $page;
+    }
+
+    /**
+     * Move a page up or down within its category's display order.
+     *
+     * Operates on the category's published, non-archived pages in their
+     * CURRENT display order (sortorder, then title), then renumbers the
+     * whole set 1..n — which also normalizes legacy pages that still share
+     * sortorder 0 the first time a category is reordered.
+     *
+     * @param int $pageid Page to move.
+     * @param string $direction 'up' or 'down'.
+     * @return void
+     */
+    public static function move_in_category(int $pageid, string $direction): void {
+        global $DB;
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
+        $siblings = $DB->get_records_select('local_handbook_page',
+            'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0',
+            ['categoryid' => (int)$page->categoryid], 'sortorder ASC, title ASC', 'id, sortorder');
+
+        $ordered = array_keys($siblings);
+        $pos = array_search((int)$pageid, array_map('intval', $ordered), true);
+        if ($pos === false) {
+            return;
+        }
+        $target = $direction === 'up' ? $pos - 1 : $pos + 1;
+        if ($target < 0 || $target >= count($ordered)) {
+            return;
+        }
+        [$ordered[$pos], $ordered[$target]] = [$ordered[$target], $ordered[$pos]];
+
+        foreach (array_values($ordered) as $index => $id) {
+            if ((int)$siblings[$id]->sortorder !== $index + 1) {
+                $DB->set_field('local_handbook_page', 'sortorder', $index + 1, ['id' => $id]);
+            }
+        }
     }
 
     /**

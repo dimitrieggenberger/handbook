@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.37.0 (2026-08-01)
+
+Home layout, manual page ordering, slim no-image article banner.
+
+- Home: the category accordion now sits immediately after the search
+  field — the handbook's front door comes first. The personal row
+  (pending reading, path progress, editorial work) follows it, then
+  the highlights.
+- Page order inside a category is now curated, not chronological: a
+  "Reorder pages" button on every category page (category managers)
+  switches to a numbered list with up/down arrows, and the order set
+  there applies everywhere the category lists its pages (category page
+  + home accordion). First use normalizes legacy pages that shared
+  sortorder 0; NEW pages always join at the END, so important early
+  pages stay where you put them.
+- Article top banner without a hero image collapses to a slim accent
+  strip instead of a tall empty tint — readers get to the text.
+  Category/home cards keep their 16:4 fallback.
+
 ## 0.36.0 (2026-08-01)
 
 The gray zone: opened but never confirmed, visible on the dashboard.

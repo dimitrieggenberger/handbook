@@ -179,18 +179,9 @@ if ($iseditorial) {
     $personalcards[] = $body;
 }
 
-if ($personalcards) {
-    $columnclass = 'col-lg-' . (count($personalcards) === 3 ? '4' : (count($personalcards) === 2 ? '6' : '12'));
-    echo html_writer::start_div('row');
-    foreach ($personalcards as $card) {
-        echo html_writer::div(
-            html_writer::div(html_writer::div($card, 'card-body'), 'card mb-3 flex-fill'),
-            $columnclass . ' d-flex');
-    }
-    echo html_writer::end_div();
-}
-
 // ---- Categories: full-width, two-column accordion -------------------------.
+// The categories are the handbook's front door, so they come right after the
+// search; the personal row follows them.
 // Each category is a native <details> drawer; opening it reveals its pages as
 // banner cards (same renderer as the category view) plus subcategory chips.
 
@@ -281,6 +272,19 @@ if (!$categories) {
             ['class' => 'local-handbook-cat-acc']);
     }
     echo html_writer::div($items, 'local-handbook-cat-grid mb-4');
+}
+
+// ---- Personal row: pending reading, path progress, editorial work ----------.
+
+if ($personalcards) {
+    $columnclass = 'col-lg-' . (count($personalcards) === 3 ? '4' : (count($personalcards) === 2 ? '6' : '12'));
+    echo html_writer::start_div('row');
+    foreach ($personalcards as $card) {
+        echo html_writer::div(
+            html_writer::div(html_writer::div($card, 'card-body'), 'card mb-3 flex-fill'),
+            $columnclass . ' d-flex');
+    }
+    echo html_writer::end_div();
 }
 
 // ---- Highlights row (formerly the rail) ------------------------------------.

@@ -67,6 +67,9 @@ $string['pagecount'] = '{$a} pages';
 $string['pagecountone'] = '1 page';
 $string['subcategories'] = 'Subcategories';
 $string['pagesincategory'] = 'Pages in this category';
+$string['reorderpages'] = 'Reorder pages';
+$string['reorderdone'] = 'Done reordering';
+$string['reorderintro'] = 'Use the arrows to set the order in which this category\'s pages appear — on this page and in the home accordion alike. New pages join at the end; move the important ones to the top.';
 $string['emptycategory'] = 'This category has no published pages yet.';
 
 // Reader view.

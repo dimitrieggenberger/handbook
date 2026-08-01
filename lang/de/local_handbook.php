@@ -67,6 +67,9 @@ $string['pagecount'] = '{$a} Seiten';
 $string['pagecountone'] = '1 Seite';
 $string['subcategories'] = 'Unterkategorien';
 $string['pagesincategory'] = 'Seiten in dieser Kategorie';
+$string['reorderpages'] = 'Seiten sortieren';
+$string['reorderdone'] = 'Sortieren beenden';
+$string['reorderintro'] = 'Mit den Pfeilen legen Sie fest, in welcher Reihenfolge die Seiten dieser Kategorie erscheinen — auf dieser Seite wie im Akkordeon der Startseite. Neue Seiten werden am Ende angefügt; wichtige Seiten gehören nach oben.';
 $string['emptycategory'] = 'Diese Kategorie enthält noch keine veröffentlichten Seiten.';
 
 // Reader view.

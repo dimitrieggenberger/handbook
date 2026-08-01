@@ -67,6 +67,9 @@ $string['pagecount'] = '{$a} páginas';
 $string['pagecountone'] = '1 página';
 $string['subcategories'] = 'Subcategorías';
 $string['pagesincategory'] = 'Páginas de esta categoría';
+$string['reorderpages'] = 'Ordenar páginas';
+$string['reorderdone'] = 'Terminar de ordenar';
+$string['reorderintro'] = 'Use las flechas para fijar el orden en que aparecen las páginas de esta categoría — tanto en esta página como en el acordeón de la portada. Las páginas nuevas se añaden al final; suba las importantes al principio.';
 $string['emptycategory'] = 'Esta categoría todavía no tiene páginas publicadas.';
 
 // Reader view.

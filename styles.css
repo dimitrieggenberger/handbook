@@ -562,15 +562,20 @@
     object-position: center center;
     display: block;
 }
+/* Without a hero image the article banner collapses to a slim accent
+   strip — the reader gets to the text, not to a big empty tint. (Cards
+   keep their 16:4 fallback; only the article top slims down.) */
 #page-local-handbook-area .local-handbook-page-banner.is-fallback {
-    aspect-ratio: 16 / 4;
+    aspect-ratio: auto;
+    min-height: 0;
+    padding: 0.45rem 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background: color-mix(in srgb, var(--primary, #0078c3) 9%, transparent);
 }
 #page-local-handbook-area .local-handbook-page-banner.is-fallback i {
-    font-size: 2.25rem;
+    font-size: 0.95rem;
     color: var(--primary, #0078c3);
     opacity: 0.5;
 }
