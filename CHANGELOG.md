@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.36.0 (2026-08-01)
+
+The gray zone: opened but never confirmed, visible on the dashboard.
+
+- Every open of a PUBLISHED article by a logged-in user is now recorded
+  (one row per person and page: first visit, last visit, open count).
+  Editor previews of unpublished pages are not counted, and opens NEVER
+  grant reading credit — the confirmed percentage is untouched.
+- The reading dashboard shows the signal as a striped gray bar segment
+  between confirmed and untouched, a per-row "hojeados" chip, and a new
+  tile counting pages opened without confirming across the visible
+  audience. The red tile now means "no activity at all" (neither
+  confirmations nor opens), and last activity includes visits — so the
+  browse-but-don't-commit pattern (recent activity, low confirmed, wide
+  gray) is visible at a glance.
+- Clicking a person opens a per-teacher detail: every page in scope
+  with its state — Confirmado / Reconfirmar / Abierto sin confirmar
+  (visit count + last visit) / Sin abrir — sorted actionable-first.
+  CSV export gains the opened/opens columns.
+- Data honesty, spelled out in the footnotes: "opened" means loaded,
+  not read; openings are recorded only from this version onward. The
+  new table joins the privacy API (export and delete); no AI surface.
+  New table: local_handbook_pageview.
+
 ## 0.35.0 (2026-07-29)
 
 Responsible people: the position holder appears on the page.

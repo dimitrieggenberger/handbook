@@ -30,6 +30,7 @@ require_once(__DIR__ . '/locallib.php');
 use local_handbook\local\service\ack_service;
 use local_handbook\local\service\completion_service;
 use local_handbook\local\service\page_service;
+use local_handbook\local\service\pageview_service;
 use local_handbook\local\service\path_service;
 use local_handbook\local\service\quiz_service;
 use local_handbook\local\service\toc_service;
@@ -248,6 +249,14 @@ $memberpaths = $DB->get_records_sql(
        JOIN {local_handbook_path} pa ON pa.id = i.pathid
       WHERE i.pageid = :pageid AND pa.active = 1
    ORDER BY pa.schoolyear DESC", ['pageid' => $page->id]);
+
+// Soft reading signal (the gray zone): count this open of the published
+// article. Views never grant reading credit — the dashboard shows them as
+// "opened without confirming". No $revision means an editor previewing an
+// unpublished page; that is not a reading signal and is not counted.
+if ($revision && isloggedin() && !isguestuser()) {
+    pageview_service::record((int)$USER->id, (int)$page->id);
+}
 
 echo $OUTPUT->header();
 echo local_handbook_render_area_actions('home', $context);

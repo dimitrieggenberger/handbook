@@ -2533,6 +2533,69 @@
 }
 #page-local-handbook-area .local-handbook-dash-bar .seg-ok { background: var(--success, #1e7d43); }
 #page-local-handbook-area .local-handbook-dash-bar .seg-stale { background: var(--warning, #9a6700); }
+/* The gray zone: recorded activity without commitment — striped so it
+   never reads as the plain "untouched" background. */
+#page-local-handbook-area .local-handbook-dash-bar .seg-viewed {
+    background: repeating-linear-gradient(-55deg,
+        color-mix(in srgb, var(--bs-secondary-color, #6c757d) 22%, transparent) 0 4px,
+        color-mix(in srgb, var(--bs-secondary-color, #6c757d) 45%, transparent) 4px 7px);
+}
+#page-local-handbook-area .local-handbook-dash-gzchip {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+    vertical-align: 1px;
+}
+#page-local-handbook-area .local-handbook-dash-drow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 12rem minmax(11rem, auto);
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.5rem 0.6rem;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+    font-size: 0.85rem;
+}
+#page-local-handbook-area .local-handbook-dash-drow:first-child { border-top: 0; }
+#page-local-handbook-area .local-handbook-dash-drow .pg { font-weight: 500; color: inherit; }
+#page-local-handbook-area .local-handbook-dash-dmeta {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+#page-local-handbook-area .local-handbook-dash-state {
+    justify-self: start;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 0.12rem 0.6rem;
+}
+#page-local-handbook-area .local-handbook-dash-state.is-confirmed {
+    background: color-mix(in srgb, var(--success, #1e7d43) 13%, var(--bs-body-bg, #ffffff));
+    color: var(--success, #1e7d43);
+}
+#page-local-handbook-area .local-handbook-dash-state.is-stale {
+    background: color-mix(in srgb, var(--warning, #9a6700) 16%, var(--bs-body-bg, #ffffff));
+    color: var(--warning, #9a6700);
+}
+#page-local-handbook-area .local-handbook-dash-state.is-viewed {
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-dash-state.is-none {
+    background: color-mix(in srgb, var(--danger, #b4232c) 12%, var(--bs-body-bg, #ffffff));
+    color: var(--danger, #b4232c);
+}
+@media (max-width: 48rem) {
+    #page-local-handbook-area .local-handbook-dash-drow { grid-template-columns: 1fr; gap: 0.25rem; }
+    #page-local-handbook-area .local-handbook-dash-dmeta { text-align: left; }
+}
 #page-local-handbook-area .local-handbook-dash-nums {
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
