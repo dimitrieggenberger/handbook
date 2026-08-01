@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.38.1 (2026-08-01)
+
+Home: two-column layout under the search.
+
+- The search stays full width; below it the categories take the left
+  two thirds and the personal rail (pending compulsory reading,
+  continue reading, reading-path progress, editorial work) stacks in
+  the right third. On small screens the rail drops below the
+  categories.
+
 ## 0.38.0 (2026-08-01)
 
 Featured pages, continue reading, drawer descriptions, drag-and-drop.
