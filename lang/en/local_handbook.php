@@ -69,7 +69,13 @@ $string['subcategories'] = 'Subcategories';
 $string['pagesincategory'] = 'Pages in this category';
 $string['reorderpages'] = 'Reorder pages';
 $string['reorderdone'] = 'Done reordering';
-$string['reorderintro'] = 'Use the arrows to set the order in which this category\'s pages appear — on this page and in the home accordion alike. New pages join at the end; move the important ones to the top.';
+$string['reorderintro'] = 'Drag the rows (or use the arrows) to set the order in which this category\'s pages appear — on this page and in the home accordion alike. New pages join at the end. The ★ pins one page as the category\'s featured page: it always comes first, as a full-width card.';
+$string['reorderdrag'] = 'Drag to reorder';
+$string['featurepin'] = 'Feature (pin first)';
+$string['featureunpin'] = 'Unpin featured';
+$string['featuredbadge'] = 'Featured';
+$string['continuereadingcard'] = 'Continue reading';
+$string['openedago'] = 'opened {$a}';
 $string['emptycategory'] = 'This category has no published pages yet.';
 
 // Reader view.

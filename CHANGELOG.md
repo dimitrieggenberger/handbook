@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.38.0 (2026-08-01)
+
+Featured pages, continue reading, drawer descriptions, drag-and-drop.
+
+- Featured page per category: in reorder mode the ★ button pins ONE
+  page per category. It always renders first — as a full-width card
+  with a star pill — on the category page and in the home accordion;
+  unpinning returns it to the normal order. New page field: featured.
+- "Continuar leyendo" on the home page: a personal card listing the
+  articles you opened most recently that are still unconfirmed on
+  their current version (fed by the gray-zone records). Confirmed
+  pages drop out automatically.
+- The home accordion drawers now open with the category's description
+  as a one-line summary above the chips and cards.
+- Reorder mode supports drag-and-drop (plain JS, saved in the
+  background); the up/down arrows remain as the no-JS and touch
+  fallback, and the featured row is pinned and not draggable.
+
 ## 0.37.0 (2026-08-01)
 
 Home layout, manual page ordering, slim no-image article banner.

@@ -221,8 +221,12 @@ class page_service {
         global $DB;
 
         $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
+        if (!empty($page->featured)) {
+            // The featured page is pinned first; unpin it to reorder it.
+            return;
+        }
         $siblings = $DB->get_records_select('local_handbook_page',
-            'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0',
+            'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0 AND featured = 0',
             ['categoryid' => (int)$page->categoryid], 'sortorder ASC, title ASC', 'id, sortorder');
 
         $ordered = array_keys($siblings);
@@ -235,6 +239,72 @@ class page_service {
             return;
         }
         [$ordered[$pos], $ordered[$target]] = [$ordered[$target], $ordered[$pos]];
+
+        self::renumber($siblings, $ordered);
+    }
+
+    /**
+     * Persist a full drag-and-drop order for a category's non-featured
+     * published pages. Ids not belonging to the category (or featured, or
+     * unpublished) are ignored; category pages missing from $pageids keep
+     * their relative order after the given ones.
+     *
+     * @param int $categoryid Category.
+     * @param int[] $pageids Page ids in the desired order.
+     * @return void
+     */
+    public static function set_category_order(int $categoryid, array $pageids): void {
+        global $DB;
+
+        $siblings = $DB->get_records_select('local_handbook_page',
+            'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0 AND featured = 0',
+            ['categoryid' => $categoryid], 'sortorder ASC, title ASC', 'id, sortorder');
+
+        $ordered = [];
+        foreach ($pageids as $id) {
+            if (isset($siblings[(int)$id])) {
+                $ordered[] = (int)$id;
+            }
+        }
+        foreach (array_keys($siblings) as $id) {
+            if (!in_array((int)$id, $ordered, true)) {
+                $ordered[] = (int)$id;
+            }
+        }
+
+        self::renumber($siblings, $ordered);
+    }
+
+    /**
+     * Toggle the category's featured page. Featuring a page unfeatures any
+     * other page of the same category — at most one pin per category.
+     *
+     * @param int $pageid Page.
+     * @param bool $featured Pin (true) or unpin (false).
+     * @return void
+     */
+    public static function set_featured(int $pageid, bool $featured): void {
+        global $DB;
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
+        if ($featured) {
+            $DB->set_field_select('local_handbook_page', 'featured', 0,
+                'categoryid = :categoryid AND featured = 1',
+                ['categoryid' => (int)$page->categoryid]);
+        }
+        $DB->set_field('local_handbook_page', 'featured', $featured ? 1 : 0, ['id' => $pageid]);
+    }
+
+    /**
+     * Write 1..n sortorder values for an ordered id list (skips unchanged
+     * rows).
+     *
+     * @param stdClass[] $siblings Records keyed by id with ->sortorder.
+     * @param int[] $ordered Ids in the desired order.
+     * @return void
+     */
+    protected static function renumber(array $siblings, array $ordered): void {
+        global $DB;
 
         foreach (array_values($ordered) as $index => $id) {
             if ((int)$siblings[$id]->sortorder !== $index + 1) {

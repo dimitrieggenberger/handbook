@@ -69,7 +69,13 @@ $string['subcategories'] = 'Subcategorías';
 $string['pagesincategory'] = 'Páginas de esta categoría';
 $string['reorderpages'] = 'Ordenar páginas';
 $string['reorderdone'] = 'Terminar de ordenar';
-$string['reorderintro'] = 'Use las flechas para fijar el orden en que aparecen las páginas de esta categoría — tanto en esta página como en el acordeón de la portada. Las páginas nuevas se añaden al final; suba las importantes al principio.';
+$string['reorderintro'] = 'Arrastre las filas (o use las flechas) para fijar el orden en que aparecen las páginas de esta categoría — tanto en esta página como en el acordeón de la portada. Las páginas nuevas se añaden al final. La ★ destaca una página de la categoría: siempre va primera, como tarjeta a todo lo ancho.';
+$string['reorderdrag'] = 'Arrastrar para ordenar';
+$string['featurepin'] = 'Destacar (fijar primera)';
+$string['featureunpin'] = 'Quitar destacado';
+$string['featuredbadge'] = 'Destacado';
+$string['continuereadingcard'] = 'Continuar leyendo';
+$string['openedago'] = 'abierto el {$a}';
 $string['emptycategory'] = 'Esta categoría todavía no tiene páginas publicadas.';
 
 // Reader view.

@@ -57,6 +57,37 @@ if ($move && ($dir === 'up' || $dir === 'down')) {
         ['id' => $category->id, 'reorder' => 1]));
 }
 
+// Pin / unpin the category's featured page (at most one per category).
+$featureaction = optional_param('feature', 0, PARAM_INT);
+$featureset = optional_param('set', 0, PARAM_BOOL);
+if ($featureaction) {
+    require_sesskey();
+    require_capability('local/handbook:managecategories', $context);
+    $featurepage = $DB->get_record('local_handbook_page', ['id' => $featureaction], '*', MUST_EXIST);
+    if ((int)$featurepage->categoryid === (int)$category->id) {
+        page_service::set_featured($featureaction, (bool)$featureset);
+    }
+    redirect(new moodle_url('/local/handbook/category.php',
+        ['id' => $category->id, 'reorder' => 1]));
+}
+
+// Persist a full drag-and-drop order (posted by js/reorder.js; the up/down
+// arrows remain the no-JS fallback).
+if (optional_param('action', '', PARAM_ALPHA) === 'saveorder') {
+    require_sesskey();
+    require_capability('local/handbook:managecategories', $context);
+    $order = array_filter(array_map('intval',
+        explode(',', optional_param('order', '', PARAM_SEQUENCE))));
+    page_service::set_category_order((int)$category->id, $order);
+    if (optional_param('ajax', 0, PARAM_BOOL)) {
+        @header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => true]);
+        exit;
+    }
+    redirect(new moodle_url('/local/handbook/category.php',
+        ['id' => $category->id, 'reorder' => 1]));
+}
+
 $url = new moodle_url('/local/handbook/category.php', ['id' => $category->id]);
 local_handbook_apply_page_setup($url, $context, 'home',
     format_string($category->name), format_string($category->name));
@@ -117,39 +148,76 @@ echo html_writer::div($heading, 'd-flex align-items-center justify-content-betwe
 if (!$pages) {
     echo html_writer::div(s(get_string('emptycategory', 'local_handbook')), 'alert alert-info');
 } else if ($reorder) {
-    // Reorder mode: the same pages as a numbered list with up/down arrows.
-    // The order set here is the order everywhere: this category page and
-    // the home accordion alike.
+    // Reorder mode: the same pages as a numbered list. Rows can be dragged
+    // (js/reorder.js) or moved with the arrows (no-JS fallback); the pinned
+    // featured page stays first and is reordered by unpinning it. The order
+    // set here is the order everywhere: this page and the home accordion.
     echo html_writer::tag('p', s(get_string('reorderintro', 'local_handbook')),
         ['class' => 'text-muted small']);
     $items = '';
-    $last = count($pages) - 1;
+    $plain = array_values(array_filter($pages, static fn(stdClass $p): bool => empty($p->featured)));
+    $plainlast = count($plain) - 1;
+    $plainindex = -1;
     foreach (array_values($pages) as $index => $page) {
-        $arrows = '';
-        if ($index > 0) {
-            $arrows .= html_writer::link(new moodle_url($url,
-                    ['reorder' => 1, 'move' => $page->id, 'dir' => 'up', 'sesskey' => sesskey()]),
-                '↑', ['class' => 'btn btn-outline-secondary btn-sm',
-                    'title' => get_string('moveup'), 'aria-label' => get_string('moveup')]);
+        $isfeatured = !empty($page->featured);
+        if (!$isfeatured) {
+            $plainindex++;
         }
-        if ($index < $last) {
-            $arrows .= html_writer::link(new moodle_url($url,
-                    ['reorder' => 1, 'move' => $page->id, 'dir' => 'down', 'sesskey' => sesskey()]),
-                '↓', ['class' => 'btn btn-outline-secondary btn-sm ml-1',
-                    'title' => get_string('movedown'), 'aria-label' => get_string('movedown')]);
+
+        $actions = '';
+        if ($isfeatured) {
+            $actions .= html_writer::link(new moodle_url($url,
+                    ['reorder' => 1, 'feature' => $page->id, 'set' => 0, 'sesskey' => sesskey()]),
+                s(get_string('featureunpin', 'local_handbook')),
+                ['class' => 'btn btn-outline-secondary btn-sm']);
+        } else {
+            $actions .= html_writer::link(new moodle_url($url,
+                    ['reorder' => 1, 'feature' => $page->id, 'set' => 1, 'sesskey' => sesskey()]),
+                '★', ['class' => 'btn btn-outline-secondary btn-sm mr-1',
+                    'title' => get_string('featurepin', 'local_handbook'),
+                    'aria-label' => get_string('featurepin', 'local_handbook')]);
+            if ($plainindex > 0) {
+                $actions .= html_writer::link(new moodle_url($url,
+                        ['reorder' => 1, 'move' => $page->id, 'dir' => 'up', 'sesskey' => sesskey()]),
+                    '↑', ['class' => 'btn btn-outline-secondary btn-sm',
+                        'title' => get_string('moveup'), 'aria-label' => get_string('moveup')]);
+            }
+            if ($plainindex < $plainlast) {
+                $actions .= html_writer::link(new moodle_url($url,
+                        ['reorder' => 1, 'move' => $page->id, 'dir' => 'down', 'sesskey' => sesskey()]),
+                    '↓', ['class' => 'btn btn-outline-secondary btn-sm ml-1',
+                        'title' => get_string('movedown'), 'aria-label' => get_string('movedown')]);
+            }
         }
+
+        $badge = $isfeatured
+            ? html_writer::span('★', 'badge badge-primary mr-2',
+                ['title' => get_string('featuredbadge', 'local_handbook')])
+            : html_writer::span((string)($index + 1), 'badge badge-secondary mr-2 reorder-num');
+
         $items .= html_writer::div(
-            html_writer::span((string)($index + 1), 'badge badge-secondary mr-2')
+            (!$isfeatured
+                ? html_writer::span('⠿', 'reorder-grip text-muted mr-2',
+                    ['title' => get_string('reorderdrag', 'local_handbook'), 'aria-hidden' => 'true'])
+                : '')
+            . $badge
             . html_writer::span(
                 html_writer::link(local_handbook_page_url($page), s(format_string($page->title)))
                 . (trim((string)$page->summary) !== ''
                     ? html_writer::div(s(shorten_text($page->summary, 90)), 'small text-muted')
                     : ''),
                 'flex-grow-1 min-width-0 mr-2')
-            . html_writer::span($arrows, 'text-nowrap'),
-            'list-group-item d-flex align-items-center');
+            . html_writer::span($actions, 'text-nowrap'),
+            'list-group-item d-flex align-items-center'
+            . ($isfeatured ? ' is-featured-row' : ' reorder-row'),
+            ['data-pageid' => $page->id]);
     }
-    echo html_writer::div($items, 'list-group mb-3');
+    echo html_writer::div($items, 'list-group mb-3 local-handbook-reorder', [
+        'data-region' => 'handbook-reorder',
+        'data-action-url' => $url->out(false),
+        'data-sesskey' => sesskey(),
+    ]);
+    $PAGE->requires->js(new moodle_url('/local/handbook/js/reorder.js'));
 } else {
     $versions = local_handbook_published_versions($pages);
     $cards = '';

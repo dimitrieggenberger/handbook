@@ -2597,6 +2597,39 @@
     background: color-mix(in srgb, var(--danger, #b4232c) 12%, var(--bs-body-bg, #ffffff));
     color: var(--danger, #b4232c);
 }
+
+/* ---- Featured page (one pin per category): full-row card with a star
+   pill; its banner flattens so the wide card stays banner-like instead
+   of becoming a wall of image. ---- */
+#page-local-handbook-area .local-handbook-card.is-featured { grid-column: 1 / -1; }
+#page-local-handbook-area .local-handbook-card.is-featured .local-handbook-card-media {
+    aspect-ratio: 16 / 5;
+}
+#page-local-handbook-area .local-handbook-card.is-featured .local-handbook-card-media.is-fallback {
+    aspect-ratio: 16 / 2.5;
+}
+#page-local-handbook-area .local-handbook-card-pill.is-featured {
+    background: color-mix(in srgb, var(--warning, #9a6700) 16%, transparent);
+    color: var(--warning, #9a6700);
+}
+
+/* ---- Category accordion: one-line description under the summary row ---- */
+#page-local-handbook-area .cat-acc-desc { margin: 0 0 0.7rem; }
+
+/* ---- Category reorder mode: drag affordances (js/reorder.js) ---- */
+#page-local-handbook-area .local-handbook-reorder .reorder-row { cursor: grab; }
+#page-local-handbook-area .local-handbook-reorder .reorder-row.is-dragging {
+    opacity: 0.55;
+    cursor: grabbing;
+}
+#page-local-handbook-area .local-handbook-reorder .reorder-grip {
+    cursor: grab;
+    user-select: none;
+    letter-spacing: -0.15em;
+}
+#page-local-handbook-area .local-handbook-reorder .is-featured-row {
+    background: color-mix(in srgb, var(--warning, #9a6700) 6%, transparent);
+}
 @media (max-width: 48rem) {
     #page-local-handbook-area .local-handbook-dash-drow { grid-template-columns: 1fr; gap: 0.25rem; }
     #page-local-handbook-area .local-handbook-dash-dmeta { text-align: left; }

@@ -69,7 +69,13 @@ $string['subcategories'] = 'Unterkategorien';
 $string['pagesincategory'] = 'Seiten in dieser Kategorie';
 $string['reorderpages'] = 'Seiten sortieren';
 $string['reorderdone'] = 'Sortieren beenden';
-$string['reorderintro'] = 'Mit den Pfeilen legen Sie fest, in welcher Reihenfolge die Seiten dieser Kategorie erscheinen — auf dieser Seite wie im Akkordeon der Startseite. Neue Seiten werden am Ende angefügt; wichtige Seiten gehören nach oben.';
+$string['reorderintro'] = 'Ziehen Sie die Zeilen (oder nutzen Sie die Pfeile), um festzulegen, in welcher Reihenfolge die Seiten dieser Kategorie erscheinen — auf dieser Seite wie im Akkordeon der Startseite. Neue Seiten werden am Ende angefügt. Der ★ hebt eine Seite der Kategorie hervor: sie steht immer zuerst, als Karte über die volle Breite.';
+$string['reorderdrag'] = 'Zum Sortieren ziehen';
+$string['featurepin'] = 'Hervorheben (zuerst anpinnen)';
+$string['featureunpin'] = 'Hervorhebung entfernen';
+$string['featuredbadge'] = 'Hervorgehoben';
+$string['continuereadingcard'] = 'Weiterlesen';
+$string['openedago'] = 'geöffnet am {$a}';
 $string['emptycategory'] = 'Diese Kategorie enthält noch keine veröffentlichten Seiten.';
 
 // Reader view.

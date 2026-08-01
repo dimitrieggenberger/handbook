@@ -729,5 +729,18 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071584, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071588) {
+        // Featured page per category: pinned first and rendered as a wide
+        // card on the category page and the home accordion.
+        $table = new xmldb_table('local_handbook_page');
+        $field = new xmldb_field('featured', XMLDB_TYPE_INTEGER, '1', null,
+            XMLDB_NOTNULL, null, '0', 'sortorder');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071588, 'local', 'handbook');
+    }
+
     return true;
 }

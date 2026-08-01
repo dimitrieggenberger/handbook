@@ -974,7 +974,7 @@ function local_handbook_get_published_pages(int $categoryid): array {
 
     return $DB->get_records_select('local_handbook_page',
         'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0',
-        ['categoryid' => $categoryid], 'sortorder ASC, title ASC');
+        ['categoryid' => $categoryid], 'featured DESC, sortorder ASC, title ASC');
 }
 
 /**
@@ -1748,7 +1748,12 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
             'local-handbook-card-media is-fallback');
     }
 
-    $pills = html_writer::span(
+    $pills = '';
+    if (!empty($page->featured)) {
+        $pills .= html_writer::span('★ ' . s(get_string('featuredbadge', 'local_handbook')),
+            'local-handbook-card-pill is-featured');
+    }
+    $pills .= html_writer::span(
         s(get_string('contenttype_' . $page->contenttype, 'local_handbook')),
         'local-handbook-card-pill');
     if ((int)$page->requiredreading) {
@@ -1779,7 +1784,7 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
         $media
         . html_writer::div($body, 'local-handbook-card-body')
         . html_writer::div($foot, 'local-handbook-card-foot'),
-        ['class' => 'local-handbook-card']);
+        ['class' => 'local-handbook-card' . (!empty($page->featured) ? ' is-featured' : '')]);
 }
 
 /**

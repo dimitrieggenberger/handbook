@@ -76,6 +76,33 @@ class pageview_service {
     }
 
     /**
+     * "Continue reading" candidates: the pages a user opened most
+     * recently that are still unconfirmed on their current published
+     * version. Confirmed pages drop out — reopening a confirmed article
+     * is reference use, not unfinished reading.
+     *
+     * @param int $userid User.
+     * @param int $limit Maximum pages.
+     * @return \stdClass[] Page records with ->lastviewed, newest first.
+     */
+    public static function continue_candidates(int $userid, int $limit = 4): array {
+        global $DB;
+
+        $sql = "SELECT p.*, v.lastviewed
+                  FROM {local_handbook_pageview} v
+                  JOIN {local_handbook_page} p ON p.id = v.pageid
+                 WHERE v.userid = :userid AND p.publishedrevisionid > 0 AND p.archived = 0
+                   AND NOT EXISTS (SELECT 1 FROM {local_handbook_ack} a
+                                    WHERE a.userid = v.userid AND a.pageid = p.id
+                                      AND a.revisionid = p.publishedrevisionid)
+                   AND NOT EXISTS (SELECT 1 FROM {local_handbook_readreceipt} r
+                                    WHERE r.userid = v.userid AND r.pageid = p.id
+                                      AND r.revisionid = p.publishedrevisionid)
+              ORDER BY v.lastviewed DESC";
+        return $DB->get_records_sql($sql, ['userid' => $userid], 0, $limit);
+    }
+
+    /**
      * A user's view rows over a page set, keyed by page id.
      *
      * @param int $userid User.
