@@ -76,6 +76,15 @@ $string['featureunpin'] = 'Hervorhebung entfernen';
 $string['featuredbadge'] = 'Hervorgehoben';
 $string['continuereadingcard'] = 'Weiterlesen';
 $string['openedago'] = 'geöffnet am {$a}';
+
+// Überarbeitungsmodus (Lesevorhang, während die Leitung eine Seite prüft).
+$string['markreviewpage'] = 'In Überarbeitung setzen';
+$string['markreadypage'] = 'Als fertig markieren';
+$string['pagemarkedreview'] = 'Die Seite ist jetzt im Überarbeitungsmodus: Lesende sehen sie ausgegraut ohne Inhalt; Redaktion und KI behalten Zugriff.';
+$string['pagemarkedready'] = 'Die Seite ist für Lesende wieder verfügbar.';
+$string['underreviewpill'] = 'In Überarbeitung';
+$string['underreviewnotice'] = 'Diese Seite wird derzeit vom Leitungsteam überarbeitet und ist in Kürze wieder verfügbar. Ihr Inhalt ist vorübergehend ausgeblendet.';
+$string['underreviewbanner'] = 'Überarbeitungsmodus: Lesende sehen diese Seite derzeit ausgegraut ohne Inhalt. Nutzen Sie „Als fertig markieren", sobald die Überarbeitung abgeschlossen ist.';
 $string['emptycategory'] = 'Diese Kategorie enthält noch keine veröffentlichten Seiten.';
 
 // Reader view.

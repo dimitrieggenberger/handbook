@@ -96,6 +96,35 @@ if ((int)$page->archived === 1 && !$iseditorial) {
     // notice_only: fall through and render the page with an archived banner.
 }
 
+// Revision mode toggle (publishers only): a reader-facing curtain while
+// the leadership team reviews the page — the published revision, links
+// and AI access stay untouched.
+if ($action === 'markreview' || $action === 'markready') {
+    require_sesskey();
+    require_capability('local/handbook:publish', $context);
+    page_service::set_under_review($page, $action === 'markreview');
+    redirect(local_handbook_page_url($page),
+        get_string($action === 'markreview' ? 'pagemarkedreview' : 'pagemarkedready',
+            'local_handbook'));
+}
+
+// Revision mode, reader side: the page visibly exists (listed, linked,
+// searchable) but shows a muted notice instead of its content until it
+// is marked ready. Editorial users fall through and read/edit as usual.
+if ((int)$page->underreview === 1 && !$iseditorial) {
+    echo $OUTPUT->header();
+    echo local_handbook_render_area_actions('home', $context);
+    echo local_handbook_render_category_trail((int)$page->categoryid);
+    echo local_handbook_render_page_heading(format_string($page->title));
+    echo html_writer::div(
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-hourglass-half me-2',
+            'aria-hidden' => 'true'])
+        . s(get_string('underreviewnotice', 'local_handbook')),
+        'alert alert-secondary');
+    echo $OUTPUT->footer();
+    exit;
+}
+
 // Archive / unarchive (publishers only; history is never deleted, 11.3).
 if ($action === 'archive' || $action === 'unarchive') {
     require_sesskey();
@@ -289,6 +318,16 @@ $actions .= html_writer::link(
     ['class' => 'btn btn-outline-secondary btn-sm']
 );
 if (has_capability('local/handbook:publish', $context)) {
+    $reviewaction = (int)$page->underreview === 1 ? 'markready' : 'markreview';
+    $actions .= html_writer::link(
+        new moodle_url('/local/handbook/view.php', ['page' => $page->slug,
+            'action' => $reviewaction, 'sesskey' => sesskey()]),
+        html_writer::tag('i', '', ['class' => 'fa-solid '
+            . ($reviewaction === 'markready' ? 'fa-circle-check' : 'fa-hourglass-half')
+            . ' me-2', 'aria-hidden' => 'true'])
+            . s(get_string($reviewaction . 'page', 'local_handbook')),
+        ['class' => 'btn btn-outline-secondary btn-sm']
+    );
     $archiveaction = (int)$page->archived === 1 ? 'unarchive' : 'archive';
     $actions .= html_writer::link(
         new moodle_url('/local/handbook/view.php', ['page' => $page->slug,
@@ -305,6 +344,14 @@ if (has_capability('local/handbook:publish', $context)) {
     );
 }
 echo local_handbook_render_page_heading(format_string($page->title), $actions);
+
+if ((int)$page->underreview === 1) {
+    echo html_writer::div(
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-hourglass-half me-2',
+            'aria-hidden' => 'true'])
+        . s(get_string('underreviewbanner', 'local_handbook')),
+        'alert alert-info');
+}
 
 if ((int)$page->archived === 1) {
     $archivedmsg = s(get_string('archivedpage', 'local_handbook'));

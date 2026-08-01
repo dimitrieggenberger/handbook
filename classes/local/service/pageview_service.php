@@ -92,6 +92,7 @@ class pageview_service {
                   FROM {local_handbook_pageview} v
                   JOIN {local_handbook_page} p ON p.id = v.pageid
                  WHERE v.userid = :userid AND p.publishedrevisionid > 0 AND p.archived = 0
+                   AND p.underreview = 0
                    AND NOT EXISTS (SELECT 1 FROM {local_handbook_ack} a
                                     WHERE a.userid = v.userid AND a.pageid = p.id
                                       AND a.revisionid = p.publishedrevisionid)

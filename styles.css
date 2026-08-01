@@ -2613,6 +2613,18 @@
     color: var(--warning, #9a6700);
 }
 
+/* ---- Revision mode: the page exists but is muted for readers until
+   leadership marks it ready — grayed card, desaturated banner. ---- */
+#page-local-handbook-area .local-handbook-card.is-underreview { opacity: 0.62; }
+#page-local-handbook-area .local-handbook-card.is-underreview:hover { opacity: 0.85; }
+#page-local-handbook-area .local-handbook-card.is-underreview .local-handbook-card-media {
+    filter: grayscale(0.85);
+}
+#page-local-handbook-area .local-handbook-card-pill.is-review {
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+}
+
 /* ---- Category accordion: one-line description under the summary row ---- */
 #page-local-handbook-area .cat-acc-desc { margin: 0 0 0.7rem; }
 

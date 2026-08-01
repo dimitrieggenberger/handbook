@@ -185,7 +185,7 @@ class ack_service {
         global $DB;
 
         $pages = $DB->get_records_select('local_handbook_page',
-            'requiredreading = 1 AND publishedrevisionid > 0 AND archived = 0',
+            'requiredreading = 1 AND publishedrevisionid > 0 AND archived = 0 AND underreview = 0',
             [], 'title ASC');
 
         $pending = [];

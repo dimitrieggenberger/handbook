@@ -76,6 +76,15 @@ $string['featureunpin'] = 'Unpin featured';
 $string['featuredbadge'] = 'Featured';
 $string['continuereadingcard'] = 'Continue reading';
 $string['openedago'] = 'opened {$a}';
+
+// Revision mode (reader-facing curtain while leadership reviews a page).
+$string['markreviewpage'] = 'Put in revision';
+$string['markreadypage'] = 'Mark as ready';
+$string['pagemarkedreview'] = 'The page is now in revision mode: readers see it muted without content; editors and the AI keep access.';
+$string['pagemarkedready'] = 'The page is available to readers again.';
+$string['underreviewpill'] = 'In revision';
+$string['underreviewnotice'] = 'This page is being revised by the leadership team and will be available again shortly. Its content is temporarily hidden.';
+$string['underreviewbanner'] = 'Revision mode: readers currently see this page muted without its content. Use "Mark as ready" when the revision is finished.';
 $string['emptycategory'] = 'This category has no published pages yet.';
 
 // Reader view.

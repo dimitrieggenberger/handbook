@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.39.0 (2026-08-01)
+
+Revision mode: pages muted for readers while leadership reviews them.
+
+- Publishers get a "Poner en revisión" button on every article (next
+  to archive). Under review, READERS still see the page everywhere —
+  listed with a grayed-out card and an "En revisión" pill, linked from
+  other articles — but opening it shows a short notice instead of the
+  content until it is marked ready again ("Marcar como lista").
+- Editorial users keep full access (read, edit, review, publish) with
+  an informational banner on the page; the Handbook AI keeps its read
+  access untouched (subject to the page's own aiaccess setting). The
+  published revision itself is never modified — this is a reader-facing
+  curtain, not an editorial state.
+- While under review, a page drops out of the "pending compulsory
+  reading" and "continue reading" cards, so teachers are never chased
+  to read something they cannot open. New page field: underreview.
+
 ## 0.38.1 (2026-08-01)
 
 Home: two-column layout under the search.

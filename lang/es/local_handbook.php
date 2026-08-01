@@ -76,6 +76,15 @@ $string['featureunpin'] = 'Quitar destacado';
 $string['featuredbadge'] = 'Destacado';
 $string['continuereadingcard'] = 'Continuar leyendo';
 $string['openedago'] = 'abierto el {$a}';
+
+// Modo revisión (cortina para lectores mientras dirección revisa la página).
+$string['markreviewpage'] = 'Poner en revisión';
+$string['markreadypage'] = 'Marcar como lista';
+$string['pagemarkedreview'] = 'La página quedó en modo revisión: los lectores la ven atenuada y sin contenido; el equipo editorial y la IA mantienen el acceso.';
+$string['pagemarkedready'] = 'La página vuelve a estar disponible para los lectores.';
+$string['underreviewpill'] = 'En revisión';
+$string['underreviewnotice'] = 'Esta página está siendo revisada por el equipo directivo y volverá a estar disponible pronto. Su contenido está oculto temporalmente.';
+$string['underreviewbanner'] = 'Modo revisión: los lectores ven esta página atenuada y sin contenido. Use «Marcar como lista» cuando termine la revisión.';
 $string['emptycategory'] = 'Esta categoría todavía no tiene páginas publicadas.';
 
 // Reader view.

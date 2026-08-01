@@ -742,5 +742,18 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071588, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071592) {
+        // Revision mode: readers see the page muted without content until
+        // leadership marks it ready; editorial users and the AI keep access.
+        $table = new xmldb_table('local_handbook_page');
+        $field = new xmldb_field('underreview', XMLDB_TYPE_INTEGER, '1', null,
+            XMLDB_NOTNULL, null, '0', 'featured');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071592, 'local', 'handbook');
+    }
+
     return true;
 }

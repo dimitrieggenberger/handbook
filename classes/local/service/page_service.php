@@ -640,6 +640,34 @@ class page_service {
     }
 
     /**
+     * Put a page into (or take it out of) revision mode.
+     *
+     * Under review, READERS see the page muted — it stays listed and
+     * linked, but a notice replaces the content until leadership marks it
+     * ready again. Editorial users read and edit as usual, and the AI
+     * keeps its read access (subject to the page's own aiaccess setting):
+     * this is a reader-facing curtain, not an editorial state — the
+     * published revision itself is untouched.
+     *
+     * @param stdClass $page Page record.
+     * @param bool $underreview Target state.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function set_under_review(stdClass $page, bool $underreview, int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+
+        $update = new stdClass();
+        $update->id = $page->id;
+        $update->underreview = (int)$underreview;
+        $update->timemodified = time();
+        $update->modifiedby = $userid;
+        $DB->update_record('local_handbook_page', $update);
+    }
+
+    /**
      * Restore an older revision as a new working draft (spec 11.3):
      * creates a new revision based on the old content; it does not erase
      * later history.

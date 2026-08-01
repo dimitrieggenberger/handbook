@@ -1749,6 +1749,10 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
     }
 
     $pills = '';
+    if (!empty($page->underreview)) {
+        $pills .= html_writer::span(s(get_string('underreviewpill', 'local_handbook')),
+            'local-handbook-card-pill is-review');
+    }
     if (!empty($page->featured)) {
         $pills .= html_writer::span('★ ' . s(get_string('featuredbadge', 'local_handbook')),
             'local-handbook-card-pill is-featured');
@@ -1784,7 +1788,8 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
         $media
         . html_writer::div($body, 'local-handbook-card-body')
         . html_writer::div($foot, 'local-handbook-card-foot'),
-        ['class' => 'local-handbook-card' . (!empty($page->featured) ? ' is-featured' : '')]);
+        ['class' => 'local-handbook-card' . (!empty($page->featured) ? ' is-featured' : '')
+            . (!empty($page->underreview) ? ' is-underreview' : '')]);
 }
 
 /**
