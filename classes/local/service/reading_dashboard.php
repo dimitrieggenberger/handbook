@@ -169,7 +169,9 @@ class reading_dashboard {
      *
      * @param stdClass[] $users Audience (keyed by user id).
      * @param int[] $pageset Map pageid => current published revision id.
-     * @return stdClass[] Rows: {user, confirmed, stale, pending, total, percent, lastactivity}.
+     * @return stdClass[] Rows: {user, confirmed, stale, viewed, viewopens,
+     *                    pending, total, percent, lastactivity}. viewed is
+     *                    the gray zone: pages opened but never confirmed.
      */
     public static function build_rows(array $users, array $pageset): array {
         global $DB;
@@ -181,6 +183,8 @@ class reading_dashboard {
                 'user' => $user,
                 'confirmed' => 0,
                 'stale' => 0,
+                'viewed' => 0,
+                'viewopens' => 0,
                 'pending' => $total,
                 'total' => $total,
                 'percent' => 0,
@@ -211,6 +215,7 @@ class reading_dashboard {
                  WHERE src.pageid $pagesql AND src.userid $usersql
               GROUP BY src.userid, src.pageid";
 
+        $confirmedpairs = [];
         $recordset = $DB->get_recordset_sql($sql, $pageparams + $userparams);
         foreach ($recordset as $record) {
             $row = $rows[(int)$record->userid];
@@ -221,6 +226,25 @@ class reading_dashboard {
             }
             $row->pending--;
             $row->lastactivity = max($row->lastactivity, (int)$record->lasttime);
+            $confirmedpairs[(int)$record->userid][(int)$record->pageid] = true;
+        }
+        $recordset->close();
+
+        // The gray zone: pages opened but never confirmed in any version.
+        // Opens never touch the percentage; they refine "pending" into
+        // "looked at it" vs "never opened", and count into last activity.
+        $viewsql = "SELECT v.userid, v.pageid, v.viewcount, v.lastviewed
+                      FROM {local_handbook_pageview} v
+                     WHERE v.pageid $pagesql AND v.userid $usersql";
+        $recordset = $DB->get_recordset_sql($viewsql, $pageparams + $userparams);
+        foreach ($recordset as $record) {
+            $row = $rows[(int)$record->userid];
+            if (!isset($confirmedpairs[(int)$record->userid][(int)$record->pageid])) {
+                $row->viewed++;
+                $row->viewopens += (int)$record->viewcount;
+                $row->pending--;
+            }
+            $row->lastactivity = max($row->lastactivity, (int)$record->lastviewed);
         }
         $recordset->close();
 
@@ -229,6 +253,79 @@ class reading_dashboard {
         }
 
         return $rows;
+    }
+
+    /**
+     * One user's per-page reading detail over a page set, for the
+     * dashboard drill-down: every page with its state — confirmed
+     * (current version), stale (older version), viewed (opened, never
+     * confirmed) or none — plus confirmation time and visit data.
+     * Ordered: none and viewed first (the actionable tail), then stale,
+     * then confirmed; alphabetical within each state.
+     *
+     * @param int $userid User.
+     * @param int[] $pageset Map pageid => current published revision id.
+     * @return stdClass[] Items: {page, state, confirmtime, viewcount, lastviewed}.
+     */
+    public static function user_detail(int $userid, array $pageset): array {
+        global $DB;
+
+        if (!$pageset) {
+            return [];
+        }
+
+        [$pagesql, $pageparams] = $DB->get_in_or_equal(array_keys($pageset), SQL_PARAMS_NAMED, 'pg');
+        $pages = $DB->get_records_select('local_handbook_page', "id $pagesql",
+            $pageparams, 'title ASC', 'id, title, slug, publishedrevisionid');
+
+        $sql = "SELECT src.pageid,
+                       MAX(CASE WHEN src.revisionid = p.publishedrevisionid THEN 1 ELSE 0 END) AS iscurrent,
+                       MAX(src.confirmtime) AS lasttime
+                  FROM (
+                       SELECT r.userid, r.pageid, r.revisionid, r.timecompleted AS confirmtime
+                         FROM {local_handbook_readreceipt} r
+                        UNION ALL
+                       SELECT a.userid, a.pageid, a.revisionid, a.timeacknowledged AS confirmtime
+                         FROM {local_handbook_ack} a
+                       ) src
+                  JOIN {local_handbook_page} p ON p.id = src.pageid
+                 WHERE src.pageid $pagesql AND src.userid = :userid
+              GROUP BY src.pageid";
+        $confirmations = $DB->get_records_sql($sql, $pageparams + ['userid' => $userid]);
+
+        $views = pageview_service::user_views($userid, array_keys($pageset));
+
+        $items = [];
+        foreach ($pages as $page) {
+            $pageid = (int)$page->id;
+            $confirmation = $confirmations[$pageid] ?? null;
+            $view = $views[$pageid] ?? null;
+            if ($confirmation && (int)$confirmation->iscurrent) {
+                $state = 'confirmed';
+            } else if ($confirmation) {
+                $state = 'stale';
+            } else if ($view) {
+                $state = 'viewed';
+            } else {
+                $state = 'none';
+            }
+            $items[] = (object)[
+                'page' => $page,
+                'state' => $state,
+                'confirmtime' => $confirmation ? (int)$confirmation->lasttime : 0,
+                'viewcount' => $view ? (int)$view->viewcount : 0,
+                'lastviewed' => $view ? (int)$view->lastviewed : 0,
+            ];
+        }
+
+        $order = ['none' => 0, 'viewed' => 1, 'stale' => 2, 'confirmed' => 3];
+        usort($items, static function (stdClass $a, stdClass $b) use ($order): int {
+            $cmp = $order[$a->state] <=> $order[$b->state];
+            return $cmp !== 0 ? $cmp
+                : strcoll((string)$a->page->title, (string)$b->page->title);
+        });
+
+        return $items;
     }
 
     /**

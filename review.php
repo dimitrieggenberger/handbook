@@ -129,7 +129,7 @@ foreach ($queue as $revision) {
 if ($canapprove && $inreviewcount > 1) {
     $approveallbutton = new single_button(
         new moodle_url($url, ['action' => 'approveall', 'sesskey' => sesskey()]),
-        get_string('approveall', 'local_handbook', $inreviewcount), 'post', ['type' => 'primary']);
+        get_string('approveall', 'local_handbook', $inreviewcount), 'post', single_button::BUTTON_PRIMARY);
     $approveallbutton->add_confirm_action(
         get_string('confirmapproveall', 'local_handbook', $inreviewcount));
     echo html_writer::div($OUTPUT->render($approveallbutton), 'mb-3');

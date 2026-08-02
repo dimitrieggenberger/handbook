@@ -173,7 +173,15 @@ class page_service {
         $page->aiaccess = $data->aiaccess ?? 'full';
         $page->language = $data->language ?? 'es';
         $page->translationgroupid = 0;
+        // New pages join the END of their category: importance is curated
+        // with the reorder arrows, never implied by creation date.
         $page->sortorder = (int)($data->sortorder ?? 0);
+        if ($page->sortorder <= 0) {
+            $max = $DB->get_field_sql(
+                'SELECT MAX(sortorder) FROM {local_handbook_page} WHERE categoryid = ?',
+                [$page->categoryid]);
+            $page->sortorder = (int)$max + 1;
+        }
         $page->archived = 0;
         $page->timecreated = $now;
         $page->timemodified = $now;
@@ -195,6 +203,114 @@ class page_service {
 
         $page->draftrevision = $revision;
         return $page;
+    }
+
+    /**
+     * Move a page up or down within its category's display order.
+     *
+     * Operates on the category's published, non-archived pages in their
+     * CURRENT display order (sortorder, then title), then renumbers the
+     * whole set 1..n — which also normalizes legacy pages that still share
+     * sortorder 0 the first time a category is reordered.
+     *
+     * @param int $pageid Page to move.
+     * @param string $direction 'up' or 'down'.
+     * @return void
+     */
+    public static function move_in_category(int $pageid, string $direction): void {
+        global $DB;
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
+        if (!empty($page->featured)) {
+            // The featured page is pinned first; unpin it to reorder it.
+            return;
+        }
+        $siblings = $DB->get_records_select('local_handbook_page',
+            'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0 AND featured = 0',
+            ['categoryid' => (int)$page->categoryid], 'sortorder ASC, title ASC', 'id, sortorder');
+
+        $ordered = array_keys($siblings);
+        $pos = array_search((int)$pageid, array_map('intval', $ordered), true);
+        if ($pos === false) {
+            return;
+        }
+        $target = $direction === 'up' ? $pos - 1 : $pos + 1;
+        if ($target < 0 || $target >= count($ordered)) {
+            return;
+        }
+        [$ordered[$pos], $ordered[$target]] = [$ordered[$target], $ordered[$pos]];
+
+        self::renumber($siblings, $ordered);
+    }
+
+    /**
+     * Persist a full drag-and-drop order for a category's non-featured
+     * published pages. Ids not belonging to the category (or featured, or
+     * unpublished) are ignored; category pages missing from $pageids keep
+     * their relative order after the given ones.
+     *
+     * @param int $categoryid Category.
+     * @param int[] $pageids Page ids in the desired order.
+     * @return void
+     */
+    public static function set_category_order(int $categoryid, array $pageids): void {
+        global $DB;
+
+        $siblings = $DB->get_records_select('local_handbook_page',
+            'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0 AND featured = 0',
+            ['categoryid' => $categoryid], 'sortorder ASC, title ASC', 'id, sortorder');
+
+        $ordered = [];
+        foreach ($pageids as $id) {
+            if (isset($siblings[(int)$id])) {
+                $ordered[] = (int)$id;
+            }
+        }
+        foreach (array_keys($siblings) as $id) {
+            if (!in_array((int)$id, $ordered, true)) {
+                $ordered[] = (int)$id;
+            }
+        }
+
+        self::renumber($siblings, $ordered);
+    }
+
+    /**
+     * Toggle the category's featured page. Featuring a page unfeatures any
+     * other page of the same category — at most one pin per category.
+     *
+     * @param int $pageid Page.
+     * @param bool $featured Pin (true) or unpin (false).
+     * @return void
+     */
+    public static function set_featured(int $pageid, bool $featured): void {
+        global $DB;
+
+        $page = $DB->get_record('local_handbook_page', ['id' => $pageid], '*', MUST_EXIST);
+        if ($featured) {
+            $DB->set_field_select('local_handbook_page', 'featured', 0,
+                'categoryid = :categoryid AND featured = 1',
+                ['categoryid' => (int)$page->categoryid]);
+        }
+        $DB->set_field('local_handbook_page', 'featured', $featured ? 1 : 0, ['id' => $pageid]);
+    }
+
+    /**
+     * Write 1..n sortorder values for an ordered id list (skips unchanged
+     * rows).
+     *
+     * @param stdClass[] $siblings Records keyed by id with ->sortorder.
+     * @param int[] $ordered Ids in the desired order.
+     * @return void
+     */
+    protected static function renumber(array $siblings, array $ordered): void {
+        global $DB;
+
+        foreach (array_values($ordered) as $index => $id) {
+            if ((int)$siblings[$id]->sortorder !== $index + 1) {
+                $DB->set_field('local_handbook_page', 'sortorder', $index + 1, ['id' => $id]);
+            }
+        }
     }
 
     /**
@@ -521,6 +637,34 @@ class page_service {
             'other' => ['archived' => (int)$archived],
         ]);
         $event->trigger();
+    }
+
+    /**
+     * Put a page into (or take it out of) revision mode.
+     *
+     * Under review, READERS see the page muted — it stays listed and
+     * linked, but a notice replaces the content until leadership marks it
+     * ready again. Editorial users read and edit as usual, and the AI
+     * keeps its read access (subject to the page's own aiaccess setting):
+     * this is a reader-facing curtain, not an editorial state — the
+     * published revision itself is untouched.
+     *
+     * @param stdClass $page Page record.
+     * @param bool $underreview Target state.
+     * @param int $userid Acting user (0 = current user).
+     * @return void
+     */
+    public static function set_under_review(stdClass $page, bool $underreview, int $userid = 0): void {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+
+        $update = new stdClass();
+        $update->id = $page->id;
+        $update->underreview = (int)$underreview;
+        $update->timemodified = time();
+        $update->modifiedby = $userid;
+        $DB->update_record('local_handbook_page', $update);
     }
 
     /**

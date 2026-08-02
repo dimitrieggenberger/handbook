@@ -54,6 +54,8 @@
         <FIELD NAME="language" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="es"/>
         <FIELD NAME="translationgroupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="featured" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="At most one per category: pinned first and rendered as a wide card"/>
+        <FIELD NAME="underreview" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Revision mode: readers see the page muted without content until leadership marks it ready; editorial users and the AI keep access"/>
         <FIELD NAME="archived" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="archivereason" TYPE="char" LENGTH="40" NOTNULL="true" DEFAULT="" COMMENT="Structured archive reason (spec 22)"/>
         <FIELD NAME="replacementpageid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Superseding page (0 = none)"/>
@@ -521,6 +523,49 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="userpage" UNIQUE="false" FIELDS="userid, pageid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_handbook_pageview" COMMENT="Soft reading signal (the gray zone): one row per user and page with first/last visit and open count, written when the published article is opened. Never grants reading credit; dashboard context only, no AI surface">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="viewcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="firstviewed" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="lastviewed" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userpage" UNIQUE="true" FIELDS="userid, pageid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_handbook_holder" COMMENT="People responsible for a page (position holders): a real Moodle account plus a per-page role label and optional institutional contact fields. Managed by humans in the manage area only; the Handbook AI has no surface here">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="rolelabel" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="What this person is on this page (Directora General, Representante docente...)"/>
+        <FIELD NAME="contactemail" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Institutional contact email shown on the page; the account email is never displayed"/>
+        <FIELD NAME="contactphone" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Extension / office hours, free text"/>
+        <FIELD NAME="whatsapp" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" COMMENT="Institutional WhatsApp number, rendered as a wa.me link"/>
+        <FIELD NAME="sincedate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="In the position since (0 = not shown)"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="pageorder" UNIQUE="false" FIELDS="pageid, sortorder"/>
       </INDEXES>
     </TABLE>
   </TABLES>

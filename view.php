@@ -30,6 +30,7 @@ require_once(__DIR__ . '/locallib.php');
 use local_handbook\local\service\ack_service;
 use local_handbook\local\service\completion_service;
 use local_handbook\local\service\page_service;
+use local_handbook\local\service\pageview_service;
 use local_handbook\local\service\path_service;
 use local_handbook\local\service\quiz_service;
 use local_handbook\local\service\toc_service;
@@ -95,6 +96,35 @@ if ((int)$page->archived === 1 && !$iseditorial) {
     // notice_only: fall through and render the page with an archived banner.
 }
 
+// Revision mode toggle (publishers only): a reader-facing curtain while
+// the leadership team reviews the page — the published revision, links
+// and AI access stay untouched.
+if ($action === 'markreview' || $action === 'markready') {
+    require_sesskey();
+    require_capability('local/handbook:publish', $context);
+    page_service::set_under_review($page, $action === 'markreview');
+    redirect(local_handbook_page_url($page),
+        get_string($action === 'markreview' ? 'pagemarkedreview' : 'pagemarkedready',
+            'local_handbook'));
+}
+
+// Revision mode, reader side: the page visibly exists (listed, linked,
+// searchable) but shows a muted notice instead of its content until it
+// is marked ready. Editorial users fall through and read/edit as usual.
+if ((int)$page->underreview === 1 && !$iseditorial) {
+    echo $OUTPUT->header();
+    echo local_handbook_render_area_actions('home', $context);
+    echo local_handbook_render_category_trail((int)$page->categoryid);
+    echo local_handbook_render_page_heading(format_string($page->title));
+    echo html_writer::div(
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-hourglass-half me-2',
+            'aria-hidden' => 'true'])
+        . s(get_string('underreviewnotice', 'local_handbook')),
+        'alert alert-secondary');
+    echo $OUTPUT->footer();
+    exit;
+}
+
 // Archive / unarchive (publishers only; history is never deleted, 11.3).
 if ($action === 'archive' || $action === 'unarchive') {
     require_sesskey();
@@ -157,7 +187,10 @@ if ($action === 'quiztry') {
         if ($quizgraded->passed) {
             if ((int)$page->requiredreading) {
                 ack_service::acknowledge((int)$USER->id, $page, $pathid);
-            } else if (path_service::is_required_in_active_path((int)$page->id)) {
+            } else {
+                // Any quiz-bearing page records a receipt on passing, whether
+                // or not it is required in a path: the receipt satisfies every
+                // path that ever includes the article and feeds the dashboard.
                 completion_service::record_receipt((int)$USER->id, $page,
                     $pathid ? 'reading_path' : 'manual');
             }
@@ -171,14 +204,18 @@ if ($action === 'quiztry') {
     }
 }
 
-// Compliance status drives the required-reading card; completion status drives
-// the lighter "mark as read" card for path-required (non-global) articles.
+// Compliance status drives the required-reading card; completion status
+// drives the lighter "mark as read" card. A page whose published revision
+// carries comprehension questions ALWAYS gets the completion card (the test
+// is the point, whether or not the page is required anywhere).
+$publishedhasquiz = $revision
+    && quiz_service::has_questions((int)$page->publishedrevisionid);
 $ackstatus = null;
 $completionstatus = null;
 if ($revision && has_capability('local/handbook:acknowledge', $context)) {
     if ((int)$page->requiredreading) {
         $ackstatus = ack_service::get_status((int)$USER->id, $page);
-    } else if (path_service::is_required_in_active_path((int)$page->id)) {
+    } else if ($publishedhasquiz || path_service::is_required_in_active_path((int)$page->id)) {
         $completionstatus = completion_service::completion_status((int)$USER->id, $page);
     }
 }
@@ -242,6 +279,14 @@ $memberpaths = $DB->get_records_sql(
       WHERE i.pageid = :pageid AND pa.active = 1
    ORDER BY pa.schoolyear DESC", ['pageid' => $page->id]);
 
+// Soft reading signal (the gray zone): count this open of the published
+// article. Views never grant reading credit — the dashboard shows them as
+// "opened without confirming". No $revision means an editor previewing an
+// unpublished page; that is not a reading signal and is not counted.
+if ($revision && isloggedin() && !isguestuser()) {
+    pageview_service::record((int)$USER->id, (int)$page->id);
+}
+
 echo $OUTPUT->header();
 echo local_handbook_render_area_actions('home', $context);
 
@@ -273,6 +318,16 @@ $actions .= html_writer::link(
     ['class' => 'btn btn-outline-secondary btn-sm']
 );
 if (has_capability('local/handbook:publish', $context)) {
+    $reviewaction = (int)$page->underreview === 1 ? 'markready' : 'markreview';
+    $actions .= html_writer::link(
+        new moodle_url('/local/handbook/view.php', ['page' => $page->slug,
+            'action' => $reviewaction, 'sesskey' => sesskey()]),
+        html_writer::tag('i', '', ['class' => 'fa-solid '
+            . ($reviewaction === 'markready' ? 'fa-circle-check' : 'fa-hourglass-half')
+            . ' me-2', 'aria-hidden' => 'true'])
+            . s(get_string($reviewaction . 'page', 'local_handbook')),
+        ['class' => 'btn btn-outline-secondary btn-sm']
+    );
     $archiveaction = (int)$page->archived === 1 ? 'unarchive' : 'archive';
     $actions .= html_writer::link(
         new moodle_url('/local/handbook/view.php', ['page' => $page->slug,
@@ -289,6 +344,14 @@ if (has_capability('local/handbook:publish', $context)) {
     );
 }
 echo local_handbook_render_page_heading(format_string($page->title), $actions);
+
+if ((int)$page->underreview === 1) {
+    echo html_writer::div(
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-hourglass-half me-2',
+            'aria-hidden' => 'true'])
+        . s(get_string('underreviewbanner', 'local_handbook')),
+        'alert alert-info');
+}
 
 if ((int)$page->archived === 1) {
     $archivedmsg = s(get_string('archivedpage', 'local_handbook'));
@@ -621,6 +684,10 @@ if (count($toc) >= 2) {
         'card mb-3');
 }
 
+// The people currently holding the position this page describes —
+// human-managed assignments to real Moodle accounts (manage/holders.php).
+echo local_handbook_render_holders_card((int)$page->id);
+
 $rows = '';
 $rows .= html_writer::tag('dt', s(get_string('contenttype', 'local_handbook')), ['class' => 'col-5'])
     . html_writer::tag('dd', s(get_string('contenttype_' . $page->contenttype, 'local_handbook')), ['class' => 'col-7']);
@@ -727,7 +794,12 @@ if ($iseditorial) {
         . html_writer::link(new moodle_url('/local/handbook/manage/questions.php',
                 ['id' => $page->id]),
             s(get_string('managequestions', 'local_handbook'))
-            . ' (' . count(quiz_service::get_questions((int)$page->publishedrevisionid)) . ')'),
+            . ' (' . count(quiz_service::get_questions((int)$page->publishedrevisionid)) . ')')
+        . ' · '
+        . html_writer::link(new moodle_url('/local/handbook/manage/holders.php',
+                ['id' => $page->id]),
+            s(get_string('manageholders', 'local_handbook'))
+            . ' (' . \local_handbook\local\service\holder_service::count_for_page((int)$page->id) . ')'),
         ['class' => 'small text-muted']
     );
 }

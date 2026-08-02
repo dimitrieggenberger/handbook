@@ -562,15 +562,20 @@
     object-position: center center;
     display: block;
 }
+/* Without a hero image the article banner collapses to a slim accent
+   strip — the reader gets to the text, not to a big empty tint. (Cards
+   keep their 16:4 fallback; only the article top slims down.) */
 #page-local-handbook-area .local-handbook-page-banner.is-fallback {
-    aspect-ratio: 16 / 4;
+    aspect-ratio: auto;
+    min-height: 0;
+    padding: 0.45rem 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background: color-mix(in srgb, var(--primary, #0078c3) 9%, transparent);
 }
 #page-local-handbook-area .local-handbook-page-banner.is-fallback i {
-    font-size: 2.25rem;
+    font-size: 0.95rem;
     color: var(--primary, #0078c3);
     opacity: 0.5;
 }
@@ -1661,6 +1666,65 @@
 #page-local-handbook-area .hb-chat .chat-verdict.is-bad { background: var(--hb-danger-soft); color: var(--hb-danger); }
 #page-local-handbook-area .hb-chat .chat-verdict.is-good { background: var(--hb-ok-soft); color: var(--hb-ok); }
 
+/* ---- hb-vs: two complete communication sims compared side by side.
+   auto-fit measures the width actually available (drawers, mobile),
+   so the panes stack without a device breakpoint. ---- */
+#page-local-handbook-area .hb-vs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.5rem), 1fr));
+    gap: 1rem;
+    align-items: start;
+    margin: 1.25rem 0;
+}
+#page-local-handbook-area .hb-vs .vs-item {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--hb-line);
+    border-radius: 1rem;
+    background: var(--hb-surface);
+    padding: 0.65rem 0.65rem 0.75rem;
+}
+#page-local-handbook-area .hb-vs .vs-item.is-bad {
+    border-color: color-mix(in srgb, var(--hb-danger) 38%, var(--hb-line));
+}
+#page-local-handbook-area .hb-vs .vs-item.is-good {
+    border-color: color-mix(in srgb, var(--hb-ok) 38%, var(--hb-line));
+}
+#page-local-handbook-area .hb-vs .vs-tag {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.85rem;
+    border-radius: 999px;
+    margin-bottom: 0.6rem;
+}
+#page-local-handbook-area .hb-vs .vs-tag::before { font-size: 0.78rem; line-height: 1; }
+#page-local-handbook-area .hb-vs .is-bad > .vs-tag { background: var(--hb-danger-soft); color: var(--hb-danger); }
+#page-local-handbook-area .hb-vs .is-bad > .vs-tag::before { content: "\2715"; }
+#page-local-handbook-area .hb-vs .is-good > .vs-tag { background: var(--hb-ok-soft); color: var(--hb-ok); }
+#page-local-handbook-area .hb-vs .is-good > .vs-tag::before { content: "\2713"; }
+#page-local-handbook-area .hb-vs .vs-note {
+    margin: 0.65rem 0.25rem 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--hb-muted);
+    max-width: none;
+}
+#page-local-handbook-area .hb-vs .vs-note strong { color: var(--hb-ink); }
+/* Sims fill the pane and stay centered; the pane border replaces
+   their own outer margin. */
+#page-local-handbook-area .hb-vs .vs-item > .hb-chat,
+#page-local-handbook-area .hb-vs .vs-item > .hb-email,
+#page-local-handbook-area .hb-vs .vs-item > .hb-dialogue {
+    margin: 0 auto;
+    width: 100%;
+}
+
 /* ---- hb-dialogue: screenplay-style conversation script ---- */
 #page-local-handbook-area .hb-dialogue {
     border: 1px solid var(--hb-line);
@@ -2474,6 +2538,114 @@
 }
 #page-local-handbook-area .local-handbook-dash-bar .seg-ok { background: var(--success, #1e7d43); }
 #page-local-handbook-area .local-handbook-dash-bar .seg-stale { background: var(--warning, #9a6700); }
+/* The gray zone: recorded activity without commitment — striped so it
+   never reads as the plain "untouched" background. */
+#page-local-handbook-area .local-handbook-dash-bar .seg-viewed {
+    background: repeating-linear-gradient(-55deg,
+        color-mix(in srgb, var(--bs-secondary-color, #6c757d) 22%, transparent) 0 4px,
+        color-mix(in srgb, var(--bs-secondary-color, #6c757d) 45%, transparent) 4px 7px);
+}
+#page-local-handbook-area .local-handbook-dash-gzchip {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+    vertical-align: 1px;
+}
+#page-local-handbook-area .local-handbook-dash-drow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 12rem minmax(11rem, auto);
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.5rem 0.6rem;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+    font-size: 0.85rem;
+}
+#page-local-handbook-area .local-handbook-dash-drow:first-child { border-top: 0; }
+#page-local-handbook-area .local-handbook-dash-drow .pg { font-weight: 500; color: inherit; }
+#page-local-handbook-area .local-handbook-dash-dmeta {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+#page-local-handbook-area .local-handbook-dash-state {
+    justify-self: start;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 0.12rem 0.6rem;
+}
+#page-local-handbook-area .local-handbook-dash-state.is-confirmed {
+    background: color-mix(in srgb, var(--success, #1e7d43) 13%, var(--bs-body-bg, #ffffff));
+    color: var(--success, #1e7d43);
+}
+#page-local-handbook-area .local-handbook-dash-state.is-stale {
+    background: color-mix(in srgb, var(--warning, #9a6700) 16%, var(--bs-body-bg, #ffffff));
+    color: var(--warning, #9a6700);
+}
+#page-local-handbook-area .local-handbook-dash-state.is-viewed {
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-dash-state.is-none {
+    background: color-mix(in srgb, var(--danger, #b4232c) 12%, var(--bs-body-bg, #ffffff));
+    color: var(--danger, #b4232c);
+}
+
+/* ---- Featured page (one pin per category): full-row card with a star
+   pill; its banner flattens so the wide card stays banner-like instead
+   of becoming a wall of image. ---- */
+#page-local-handbook-area .local-handbook-card.is-featured { grid-column: 1 / -1; }
+#page-local-handbook-area .local-handbook-card.is-featured .local-handbook-card-media {
+    aspect-ratio: 16 / 5;
+}
+#page-local-handbook-area .local-handbook-card.is-featured .local-handbook-card-media.is-fallback {
+    aspect-ratio: 16 / 2.5;
+}
+#page-local-handbook-area .local-handbook-card-pill.is-featured {
+    background: color-mix(in srgb, var(--warning, #9a6700) 16%, transparent);
+    color: var(--warning, #9a6700);
+}
+
+/* ---- Revision mode: the page exists but is muted for readers until
+   leadership marks it ready — grayed card, desaturated banner. ---- */
+#page-local-handbook-area .local-handbook-card.is-underreview { opacity: 0.62; }
+#page-local-handbook-area .local-handbook-card.is-underreview:hover { opacity: 0.85; }
+#page-local-handbook-area .local-handbook-card.is-underreview .local-handbook-card-media {
+    filter: grayscale(0.85);
+}
+#page-local-handbook-area .local-handbook-card-pill.is-review {
+    background: color-mix(in srgb, var(--bs-secondary-color, #6c757d) 14%, transparent);
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+/* ---- Category accordion: one-line description under the summary row ---- */
+#page-local-handbook-area .cat-acc-desc { margin: 0 0 0.7rem; }
+
+/* ---- Category reorder mode: drag affordances (js/reorder.js) ---- */
+#page-local-handbook-area .local-handbook-reorder .reorder-row { cursor: grab; }
+#page-local-handbook-area .local-handbook-reorder .reorder-row.is-dragging {
+    opacity: 0.55;
+    cursor: grabbing;
+}
+#page-local-handbook-area .local-handbook-reorder .reorder-grip {
+    cursor: grab;
+    user-select: none;
+    letter-spacing: -0.15em;
+}
+#page-local-handbook-area .local-handbook-reorder .is-featured-row {
+    background: color-mix(in srgb, var(--warning, #9a6700) 6%, transparent);
+}
+@media (max-width: 48rem) {
+    #page-local-handbook-area .local-handbook-dash-drow { grid-template-columns: 1fr; gap: 0.25rem; }
+    #page-local-handbook-area .local-handbook-dash-dmeta { text-align: left; }
+}
 #page-local-handbook-area .local-handbook-dash-nums {
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
@@ -2807,4 +2979,138 @@
 #page-local-handbook-area .local-handbook-quiz .quiz-hint {
     font-size: 0.75rem;
     color: var(--bs-secondary-color, #6c757d);
+}
+
+/* ---- Responsible-person rail card (view.php): the people currently
+   holding the position a page describes. One holder renders the full
+   layout, several render as compact team rows. Rail cards live outside
+   .local-handbook-page-body, so bootstrap variables are used directly
+   (same approach as the attachments card). ---- */
+#page-local-handbook-area .local-handbook-holders { padding-bottom: 0.35rem; }
+#page-local-handbook-area .local-handbook-holders .lh-top {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.1rem 1.25rem 0.75rem;
+}
+#page-local-handbook-area .local-handbook-holders .lh-top img.userpicture {
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary, #0078c3) 18%, transparent);
+}
+#page-local-handbook-area .local-handbook-holders .lh-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.3;
+}
+#page-local-handbook-area .local-handbook-holders .lh-role {
+    font-size: 0.78rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-holders .lh-since {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--success, #1e7d43);
+    background: color-mix(in srgb, var(--success, #1e7d43) 13%, var(--bs-body-bg, #ffffff));
+    border-radius: 999px;
+    padding: 0.02rem 0.55rem;
+    margin-top: 0.2rem;
+}
+#page-local-handbook-area .local-handbook-holders .lh-transition {
+    font-style: italic;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-holders .lh-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8rem;
+    color: inherit;
+    text-decoration: none;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+}
+#page-local-handbook-area a.lh-row:hover {
+    background: color-mix(in srgb, var(--bs-body-color, #1c2430) 4%, var(--bs-body-bg, #ffffff));
+    text-decoration: none;
+    color: inherit;
+}
+#page-local-handbook-area .local-handbook-holders .lh-ic {
+    width: 1.9rem;
+    height: 1.9rem;
+    flex: none;
+    border-radius: 0.45rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, var(--bs-body-bg, #ffffff));
+    color: var(--primary, #0078c3);
+}
+#page-local-handbook-area .local-handbook-holders .lh-row.is-wa .lh-ic {
+    background: color-mix(in srgb, #25d366 16%, var(--bs-body-bg, #ffffff));
+    color: color-mix(in srgb, #25d366 55%, var(--bs-body-color, #1c2430));
+}
+#page-local-handbook-area .local-handbook-holders .lh-lbl {
+    display: block;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-holders .lh-val {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+#page-local-handbook-area .local-handbook-holders .lh-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.8rem 1.25rem 0.9rem;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 75%, transparent);
+}
+#page-local-handbook-area .local-handbook-holders .lh-actions .btn { flex: 1; }
+
+#page-local-handbook-area .local-handbook-holders .lh-member {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 1.25rem;
+    font-size: 0.8rem;
+    border-top: 1px solid color-mix(in srgb, var(--bs-border-color, #dee2e6) 45%, transparent);
+}
+#page-local-handbook-area .local-handbook-holders.is-team .lh-member:first-child { border-top: 0; }
+#page-local-handbook-area .local-handbook-holders .lh-member img.userpicture {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    flex: none;
+}
+#page-local-handbook-area .local-handbook-holders .lh-grow { flex: 1; min-width: 0; }
+#page-local-handbook-area .local-handbook-holders .lh-nm {
+    font-weight: 600;
+    line-height: 1.25;
+}
+#page-local-handbook-area .local-handbook-holders .lh-nm a { color: inherit; }
+#page-local-handbook-area .local-handbook-holders .lh-rl {
+    font-size: 0.7rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+#page-local-handbook-area .local-handbook-holders .lh-quick { display: flex; gap: 0.35rem; }
+#page-local-handbook-area .local-handbook-holders .lh-quick a {
+    width: 1.7rem;
+    height: 1.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.4rem;
+    font-size: 0.78rem;
+    background: color-mix(in srgb, var(--primary, #0078c3) 12%, var(--bs-body-bg, #ffffff));
+    color: var(--primary, #0078c3);
+    text-decoration: none;
+}
+#page-local-handbook-area .local-handbook-holders .lh-quick a.is-wa {
+    background: color-mix(in srgb, #25d366 16%, var(--bs-body-bg, #ffffff));
+    color: color-mix(in srgb, #25d366 55%, var(--bs-body-color, #1c2430));
 }

@@ -1,5 +1,160 @@
 # Changelog
 
+## 0.39.0 (2026-08-01)
+
+Revision mode: pages muted for readers while leadership reviews them.
+
+- Publishers get a "Poner en revisión" button on every article (next
+  to archive). Under review, READERS still see the page everywhere —
+  listed with a grayed-out card and an "En revisión" pill, linked from
+  other articles — but opening it shows a short notice instead of the
+  content until it is marked ready again ("Marcar como lista").
+- Editorial users keep full access (read, edit, review, publish) with
+  an informational banner on the page; the Handbook AI keeps its read
+  access untouched (subject to the page's own aiaccess setting). The
+  published revision itself is never modified — this is a reader-facing
+  curtain, not an editorial state.
+- While under review, a page drops out of the "pending compulsory
+  reading" and "continue reading" cards, so teachers are never chased
+  to read something they cannot open. New page field: underreview.
+
+## 0.38.1 (2026-08-01)
+
+Home: two-column layout under the search.
+
+- The search stays full width; below it the categories take the left
+  two thirds and the personal rail (pending compulsory reading,
+  continue reading, reading-path progress, editorial work) stacks in
+  the right third. On small screens the rail drops below the
+  categories.
+
+## 0.38.0 (2026-08-01)
+
+Featured pages, continue reading, drawer descriptions, drag-and-drop.
+
+- Featured page per category: in reorder mode the ★ button pins ONE
+  page per category. It always renders first — as a full-width card
+  with a star pill — on the category page and in the home accordion;
+  unpinning returns it to the normal order. New page field: featured.
+- "Continuar leyendo" on the home page: a personal card listing the
+  articles you opened most recently that are still unconfirmed on
+  their current version (fed by the gray-zone records). Confirmed
+  pages drop out automatically.
+- The home accordion drawers now open with the category's description
+  as a one-line summary above the chips and cards.
+- Reorder mode supports drag-and-drop (plain JS, saved in the
+  background); the up/down arrows remain as the no-JS and touch
+  fallback, and the featured row is pinned and not draggable.
+
+## 0.37.0 (2026-08-01)
+
+Home layout, manual page ordering, slim no-image article banner.
+
+- Home: the category accordion now sits immediately after the search
+  field — the handbook's front door comes first. The personal row
+  (pending reading, path progress, editorial work) follows it, then
+  the highlights.
+- Page order inside a category is now curated, not chronological: a
+  "Reorder pages" button on every category page (category managers)
+  switches to a numbered list with up/down arrows, and the order set
+  there applies everywhere the category lists its pages (category page
+  + home accordion). First use normalizes legacy pages that shared
+  sortorder 0; NEW pages always join at the END, so important early
+  pages stay where you put them.
+- Article top banner without a hero image collapses to a slim accent
+  strip instead of a tall empty tint — readers get to the text.
+  Category/home cards keep their 16:4 fallback.
+
+## 0.36.0 (2026-08-01)
+
+The gray zone: opened but never confirmed, visible on the dashboard.
+
+- Every open of a PUBLISHED article by a logged-in user is now recorded
+  (one row per person and page: first visit, last visit, open count).
+  Editor previews of unpublished pages are not counted, and opens NEVER
+  grant reading credit — the confirmed percentage is untouched.
+- The reading dashboard shows the signal as a striped gray bar segment
+  between confirmed and untouched, a per-row "hojeados" chip, and a new
+  tile counting pages opened without confirming across the visible
+  audience. The red tile now means "no activity at all" (neither
+  confirmations nor opens), and last activity includes visits — so the
+  browse-but-don't-commit pattern (recent activity, low confirmed, wide
+  gray) is visible at a glance.
+- Clicking a person opens a per-teacher detail: every page in scope
+  with its state — Confirmado / Reconfirmar / Abierto sin confirmar
+  (visit count + last visit) / Sin abrir — sorted actionable-first.
+  CSV export gains the opened/opens columns.
+- Data honesty, spelled out in the footnotes: "opened" means loaded,
+  not read; openings are recorded only from this version onward. The
+  new table joins the privacy API (export and delete); no AI surface.
+  New table: local_handbook_pageview.
+
+## 0.35.0 (2026-07-29)
+
+Responsible people: the position holder appears on the page.
+
+- Pages tied to a position (Coordinación Académica, comités, equipos)
+  now show WHO holds it in a sidebar "Responsable" card: profile photo,
+  name, role label, optional "in the position since" chip, contact rows
+  (email, extension/hours, institutional WhatsApp as a wa.me link) and
+  buttons for platform messaging and the Moodle profile.
+- Assignments bind real Moodle accounts, not typed text: photo, profile
+  and messaging always come from the account, so a personnel change is
+  one assignment edit — the article text never mentions names. Only the
+  contact data typed into the assignment is shown; the account's own
+  email never is. A suspended or deleted account renders as "Cargo en
+  transición" instead of broken data.
+- One page, one OR many people: a single assignment renders the full
+  holder layout; several render as compact team rows, each with its own
+  role label (Preside, Representante docente…), ordered by a display
+  order you control — built for pages like the leadership team.
+- New manage screen (Responsables, linked from the editors' line on
+  every article) with a searchable account picker; human-only and
+  outside the editorial workflow like banners and attachments — the
+  Handbook AI has no surface here. Privacy provider covers the new
+  table (export and delete). New table: local_handbook_holder.
+
+## 0.34.0 (2026-07-25)
+
+New pattern hb-vs: side-by-side "así no / así sí" comparisons.
+
+- A wrapper that places two complete communication simulations next to
+  each other — a bad example and a good one — instead of stacking them
+  in a single phone. Each pane (`vs-item is-bad` / `is-good`) carries a
+  verdict chip (`vs-tag`), a faintly tinted border in the verdict
+  colour, and an optional `vs-note` footer explaining why. Markup order
+  is display order, so bad-first and good-first both work.
+- Responsive without a device breakpoint: the grid measures the width
+  actually available, so panes sit in columns on desktop and stack on
+  mobile — and also inside Moodle's narrow drawer layouts.
+- Generic by design: panes accept hb-chat, hb-email or hb-dialogue, so
+  email and phone-script comparisons come for free. Catalogue entry and
+  style-guide strings added in EN/ES/DE; the Handbook AI picks the
+  pattern up automatically through get_style_guide.
+
+## 0.33.2 (2026-07-19)
+
+Hotfix: fatal error on the review queue with two or more pending drafts.
+
+- The bulk "Approve all" button (shown only when more than one draft is
+  in review) passed an options array as the fourth argument of the
+  `single_button` constructor; Moodle 5 requires the string type
+  constant there, so the queue page crashed the moment a second draft
+  was submitted. It now passes `single_button::BUTTON_PRIMARY`.
+
+## 0.33.1 (2026-07-19)
+
+Hotfix: the test now shows on every quiz-bearing article.
+
+- The comprehension test only rendered when the article was globally
+  required reading or a required item of an active reading path — on any
+  other page the questions published fine but the test block never
+  appeared. A page whose published revision has questions now always
+  shows the completion card with the test, and passing records a read
+  receipt regardless of path membership (the receipt satisfies any path
+  that later includes the article and feeds the dashboard's category
+  scope).
+
 ## 0.33.0 (2026-07-18)
 
 Comprehension questions join the editorial workflow.

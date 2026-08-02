@@ -974,7 +974,7 @@ function local_handbook_get_published_pages(int $categoryid): array {
 
     return $DB->get_records_select('local_handbook_page',
         'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0',
-        ['categoryid' => $categoryid], 'sortorder ASC, title ASC');
+        ['categoryid' => $categoryid], 'featured DESC, sortorder ASC, title ASC');
 }
 
 /**
@@ -1559,6 +1559,171 @@ function local_handbook_render_attachments_card(int $pageid): string {
 }
 
 /**
+ * Render the "Responsable(s)" rail card: the people currently holding the
+ * position a page describes. One assignment renders the full holder layout
+ * (photo, role, contact rows, message/profile buttons); several render as
+ * compact team rows. Empty string when nothing is assigned.
+ *
+ * Photo, profile link and platform messaging come from the Moodle account;
+ * email/extension/WhatsApp are the assignment's explicit fields — the
+ * account email is never displayed. A deleted or suspended account shows
+ * as "position in transition" instead of broken data.
+ *
+ * @param int $pageid Page id.
+ * @return string
+ */
+function local_handbook_render_holders_card(int $pageid): string {
+    global $CFG, $OUTPUT;
+
+    $holders = \local_handbook\local\service\holder_service::get_holders($pageid);
+    if (!$holders) {
+        return '';
+    }
+
+    $messagingon = !empty($CFG->messaging);
+    // $link is a moodle_url or a plain string (mailto: — moodle_url cannot
+    // represent hostless schemes); null renders a non-clickable row.
+    $contactrow = static function (string $icon, string $label, string $value,
+            $link, string $extraclass = '', bool $newtab = false): string {
+        $inner = html_writer::span(s($icon), 'lh-ic')
+            . html_writer::span(
+                html_writer::span(s($label), 'lh-lbl')
+                . html_writer::span(s($value), 'lh-val'));
+        if ($link) {
+            $attrs = ['class' => trim('lh-row ' . $extraclass)];
+            if ($newtab) {
+                $attrs['target'] = '_blank';
+                $attrs['rel'] = 'noopener';
+            }
+            return html_writer::link($link, $inner, $attrs);
+        }
+        return html_writer::div($inner, trim('lh-row ' . $extraclass));
+    };
+
+    $body = '';
+    if (count($holders) === 1) {
+        $holder = reset($holders);
+        $user = core_user::get_user((int)$holder->userid, '*', IGNORE_MISSING);
+        $active = $user && !$user->deleted && !$user->suspended;
+
+        if ($active) {
+            $identity = html_writer::div(s(fullname($user)), 'lh-name');
+        } else {
+            $identity = html_writer::div(
+                s(get_string('holdertransition', 'local_handbook')), 'lh-name lh-transition');
+        }
+        $identity .= html_writer::div(s($holder->rolelabel), 'lh-role');
+        if ($active && (int)$holder->sincedate > 0) {
+            $identity .= html_writer::span(
+                s(get_string('holdersince', 'local_handbook',
+                    userdate((int)$holder->sincedate,
+                        get_string('strftimedatefullshort', 'langconfig')))),
+                'lh-since');
+        }
+
+        $body .= html_writer::div(
+            ($active ? $OUTPUT->user_picture($user, ['size' => 100, 'link' => false]) : '')
+            . html_writer::div($identity),
+            'lh-top');
+
+        if ($active) {
+            if (trim((string)$holder->contactemail) !== '') {
+                $body .= $contactrow('✉', get_string('holderemail', 'local_handbook'),
+                    $holder->contactemail, 'mailto:' . $holder->contactemail);
+            }
+            if (trim((string)$holder->contactphone) !== '') {
+                $body .= $contactrow('☎', get_string('holderphone', 'local_handbook'),
+                    $holder->contactphone, null);
+            }
+            $waurl = trim((string)$holder->whatsapp) !== ''
+                ? \local_handbook\local\service\holder_service::wa_url($holder->whatsapp) : null;
+            if ($waurl) {
+                $body .= $contactrow('☎', get_string('holderwhatsapplink', 'local_handbook'),
+                    $holder->whatsapp, $waurl, 'is-wa', true);
+            }
+
+            $buttons = '';
+            if ($messagingon) {
+                $buttons .= html_writer::link(
+                    new moodle_url('/message/index.php', ['id' => (int)$user->id]),
+                    s(get_string('holdermessage', 'local_handbook')),
+                    ['class' => 'btn btn-primary btn-sm']);
+            }
+            $buttons .= html_writer::link(
+                new moodle_url('/user/profile.php', ['id' => (int)$user->id]),
+                s(get_string('holderprofile', 'local_handbook')),
+                ['class' => 'btn btn-secondary btn-sm']);
+            $body .= html_writer::div($buttons, 'lh-actions');
+        }
+    } else {
+        foreach ($holders as $holder) {
+            $user = core_user::get_user((int)$holder->userid, '*', IGNORE_MISSING);
+            $active = $user && !$user->deleted && !$user->suspended;
+
+            if (!$active) {
+                $body .= html_writer::div(
+                    html_writer::div(
+                        html_writer::div(s(get_string('holdertransition', 'local_handbook')),
+                            'lh-nm lh-transition')
+                        . html_writer::div(s($holder->rolelabel), 'lh-rl'),
+                        'lh-grow'),
+                    'lh-member');
+                continue;
+            }
+
+            $quick = '';
+            if (trim((string)$holder->contactemail) !== '') {
+                $quick .= html_writer::link(
+                    'mailto:' . $holder->contactemail, '✉',
+                    ['title' => s(get_string('holderemail', 'local_handbook')
+                        . ': ' . $holder->contactemail)]);
+            }
+            $waurl = trim((string)$holder->whatsapp) !== ''
+                ? \local_handbook\local\service\holder_service::wa_url($holder->whatsapp) : null;
+            if ($waurl) {
+                $quick .= html_writer::link($waurl, '☎', [
+                    'class' => 'is-wa',
+                    'title' => s(get_string('holderwhatsapplink', 'local_handbook')
+                        . ': ' . $holder->whatsapp),
+                    'target' => '_blank', 'rel' => 'noopener',
+                ]);
+            }
+            if ($messagingon) {
+                $quick .= html_writer::link(
+                    new moodle_url('/message/index.php', ['id' => (int)$user->id]), '💬',
+                    ['title' => s(get_string('holdermessage', 'local_handbook'))]);
+            }
+
+            $body .= html_writer::div(
+                $OUTPUT->user_picture($user, ['size' => 35, 'link' => false])
+                . html_writer::div(
+                    html_writer::div(
+                        html_writer::link(
+                            new moodle_url('/user/profile.php', ['id' => (int)$user->id]),
+                            s(fullname($user))),
+                        'lh-nm')
+                    . html_writer::div(s($holder->rolelabel), 'lh-rl'),
+                    'lh-grow')
+                . html_writer::div($quick, 'lh-quick'),
+                'lh-member');
+        }
+    }
+
+    $title = count($holders) === 1
+        ? get_string('holder', 'local_handbook')
+        : get_string('holders', 'local_handbook');
+
+    return html_writer::div(
+        html_writer::div(
+            html_writer::tag('h3', s($title),
+                ['class' => 'h6 text-uppercase text-muted mb-0']),
+            'card-body pb-2')
+        . html_writer::div($body,
+            'local-handbook-holders' . (count($holders) > 1 ? ' is-team' : '')),
+        'card mb-3');
+}
+
+/**
  * Render one page as a banner card (category view, home accordion, live
  * search results all share this markup). Whole card is clickable.
  *
@@ -1583,7 +1748,16 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
             'local-handbook-card-media is-fallback');
     }
 
-    $pills = html_writer::span(
+    $pills = '';
+    if (!empty($page->underreview)) {
+        $pills .= html_writer::span(s(get_string('underreviewpill', 'local_handbook')),
+            'local-handbook-card-pill is-review');
+    }
+    if (!empty($page->featured)) {
+        $pills .= html_writer::span('★ ' . s(get_string('featuredbadge', 'local_handbook')),
+            'local-handbook-card-pill is-featured');
+    }
+    $pills .= html_writer::span(
         s(get_string('contenttype_' . $page->contenttype, 'local_handbook')),
         'local-handbook-card-pill');
     if ((int)$page->requiredreading) {
@@ -1614,7 +1788,8 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
         $media
         . html_writer::div($body, 'local-handbook-card-body')
         . html_writer::div($foot, 'local-handbook-card-foot'),
-        ['class' => 'local-handbook-card']);
+        ['class' => 'local-handbook-card' . (!empty($page->featured) ? ' is-featured' : '')
+            . (!empty($page->underreview) ? ' is-underreview' : '')]);
 }
 
 /**
@@ -1935,6 +2110,41 @@ HTML);
     <p>Buenas tardes. Quisiera coordinar una breve reunión para conversar sobre el avance
     de Mateo. ¿Le queda bien el miércoles a las 14:30, presencial o por llamada?</p>
     <span class="when">14:10</span>
+  </div>
+</div>
+HTML);
+
+    $add('vs', <<<'HTML'
+<div class="hb-vs">
+  <div class="vs-item is-bad">
+    <span class="vs-tag">Así no</span>
+    <div class="hb-chat">
+      <div class="chat-title">Madre de Mateo P.
+        <span class="sub">en línea</span></div>
+      <div class="chat-day">Martes 21:47</div>
+      <div class="hb-msg is-out">
+        <p>señora la nota de mateo estuvo pesima hay que hablar URGENTE</p>
+        <span class="when">21:47</span>
+      </div>
+    </div>
+    <p class="vs-note"><strong>Qué falla:</strong> sin saludo, mayúsculas que suenan a grito
+    y fuera del horario laboral.</p>
+  </div>
+  <div class="vs-item is-good">
+    <span class="vs-tag">Así sí</span>
+    <div class="hb-chat">
+      <div class="chat-title">Madre de Mateo P.
+        <span class="sub">en línea</span></div>
+      <div class="chat-day">Miércoles 14:10</div>
+      <div class="hb-msg is-out">
+        <p>Buenas tardes. Quisiera coordinar una breve reunión para conversar sobre el avance
+        de Mateo en Matemáticas. ¿Le queda bien el viernes a las 14:30, presencial o por
+        llamada?</p>
+        <span class="when">14:10</span>
+      </div>
+    </div>
+    <p class="vs-note"><strong>Qué funciona:</strong> saludo, motivo concreto y propuesta
+    con fecha y hora, dentro del horario laboral.</p>
   </div>
 </div>
 HTML);

@@ -40,6 +40,7 @@ $scope = optional_param('scope', 'required', PARAM_ALPHANUMEXT);
 $dir = optional_param('dir', 'desc', PARAM_ALPHA);
 $showhidden = optional_param('showhidden', 0, PARAM_BOOL);
 $action = optional_param('action', '', PARAM_ALPHA);
+$detailuser = optional_param('detail', 0, PARAM_INT);
 
 $baseparams = ['audience' => $audience, 'scope' => $scope, 'dir' => $dir,
     'showhidden' => (int)$showhidden];
@@ -105,14 +106,16 @@ usort($hiddenrows, $sorter);
 $count = count($visiblerows);
 $sumpercent = 0;
 $withstale = 0;
-$neverread = 0;
+$totalviewed = 0;
+$noactivity = 0;
 foreach ($visiblerows as $row) {
     $sumpercent += $row->percent;
     if ($row->stale > 0) {
         $withstale++;
     }
-    if ($row->confirmed === 0 && $row->stale === 0) {
-        $neverread++;
+    $totalviewed += $row->viewed;
+    if ($row->confirmed === 0 && $row->stale === 0 && $row->viewed === 0) {
+        $noactivity++;
     }
 }
 $avgpercent = $count > 0 ? (int)round($sumpercent / $count) : 0;
@@ -127,6 +130,8 @@ if ($action === 'export' && confirm_sesskey()) {
         get_string('fullname'), get_string('email'),
         get_string('dashconfirmed', 'local_handbook'),
         get_string('dashstale', 'local_handbook'),
+        get_string('dashviewed', 'local_handbook'),
+        get_string('dashopens', 'local_handbook'),
         get_string('dashpending', 'local_handbook'),
         get_string('dashtotal', 'local_handbook'), '%',
         get_string('dashlastactivity', 'local_handbook'),
@@ -136,13 +141,71 @@ if ($action === 'export' && confirm_sesskey()) {
     foreach (array_merge($visiblerows, $hiddenrows) as $row) {
         $export->add_data([
             fullname($row->user), $row->user->email,
-            $row->confirmed, $row->stale, $row->pending, $row->total, $row->percent,
+            $row->confirmed, $row->stale, $row->viewed, $row->viewopens,
+            $row->pending, $row->total, $row->percent,
             $row->lastactivity ? userdate($row->lastactivity, get_string('strftimedatetimeshort', 'langconfig')) : '-',
             isset($row->hideinfo) ? 1 : 0,
             $row->hideinfo->note ?? '',
         ]);
     }
     $export->download_file();
+    exit;
+}
+
+// ---- Per-teacher detail (drill-down) ----------------------------------------.
+
+if ($detailuser) {
+    $subject = core_user::get_user($detailuser, '*', MUST_EXIST);
+    $items = reading_dashboard::user_detail($detailuser, $pageset);
+
+    echo $OUTPUT->header();
+    echo local_handbook_render_area_actions('readers', $context);
+    echo local_handbook_render_page_heading(get_string('dashdetail', 'local_handbook')
+        . ': ' . fullname($subject));
+
+    echo html_writer::tag('p',
+        html_writer::link($url, s(get_string('dashdetailback', 'local_handbook'))),
+        ['class' => 'mb-3']);
+
+    if (!$items) {
+        echo html_writer::div(s(get_string('dashnopages', 'local_handbook')), 'alert alert-info');
+    } else {
+        $list = '';
+        foreach ($items as $item) {
+            $statechip = html_writer::span(
+                s(get_string('dashstate' . $item->state, 'local_handbook')),
+                'local-handbook-dash-state is-' . $item->state);
+
+            $datefmt = get_string('strftimedatefullshort', 'langconfig');
+            if ($item->state === 'confirmed') {
+                $meta = get_string('dashconfirmedmeta', 'local_handbook',
+                    userdate($item->confirmtime, $datefmt));
+            } else if ($item->state === 'stale') {
+                $meta = get_string('dashstalemeta', 'local_handbook',
+                    userdate($item->confirmtime, $datefmt));
+            } else if ($item->state === 'viewed') {
+                $meta = get_string('dashvisitsmeta', 'local_handbook', (object)[
+                    'count' => $item->viewcount,
+                    'date' => userdate($item->lastviewed, $datefmt),
+                ]);
+            } else {
+                $meta = '—';
+            }
+
+            $list .= html_writer::div(
+                html_writer::link(
+                    new moodle_url('/local/handbook/view.php', ['page' => $item->page->slug]),
+                    s(format_string($item->page->title)), ['class' => 'pg'])
+                . $statechip
+                . html_writer::span(s($meta), 'small text-muted local-handbook-dash-dmeta'),
+                'local-handbook-dash-drow');
+        }
+        echo html_writer::div(html_writer::div($list, 'card-body py-2'), 'card mb-3');
+    }
+
+    echo html_writer::tag('p', s(get_string('dashdetailfootnote', 'local_handbook')),
+        ['class' => 'small text-muted mt-2']);
+    echo $OUTPUT->footer();
     exit;
 }
 
@@ -204,7 +267,8 @@ echo html_writer::div(
     $tile((string)$count, get_string('dashtilepeople', 'local_handbook'))
     . $tile($avgpercent . '%', get_string('dashtileaverage', 'local_handbook'), 'success')
     . $tile((string)$withstale, get_string('dashtilestale', 'local_handbook'), 'warning')
-    . $tile((string)$neverread, get_string('dashtilenever', 'local_handbook'), 'danger'),
+    . $tile((string)$totalviewed, get_string('dashtileviewed', 'local_handbook'), 'secondary')
+    . $tile((string)$noactivity, get_string('dashtilenever', 'local_handbook'), 'danger'),
     'local-handbook-dash-tiles');
 
 if (!$pageset) {
@@ -219,19 +283,25 @@ $renderrow = static function (stdClass $row, bool $hidden) use ($url): string {
 
     $okwidth = $row->total > 0 ? $row->confirmed * 100 / $row->total : 0;
     $stalewidth = $row->total > 0 ? $row->stale * 100 / $row->total : 0;
+    $viewedwidth = $row->total > 0 ? $row->viewed * 100 / $row->total : 0;
     $bar = html_writer::div(
         html_writer::div('', 'seg-ok', ['style' => 'width:' . round($okwidth, 1) . '%'])
-        . html_writer::div('', 'seg-stale', ['style' => 'width:' . round($stalewidth, 1) . '%']),
+        . html_writer::div('', 'seg-stale', ['style' => 'width:' . round($stalewidth, 1) . '%'])
+        . html_writer::div('', 'seg-viewed', ['style' => 'width:' . round($viewedwidth, 1) . '%']),
         'local-handbook-dash-bar');
 
     $stalechip = $row->stale > 0
         ? html_writer::span(s(get_string('dashstalechip', 'local_handbook', $row->stale)),
             'local-handbook-dash-rechip')
         : '';
+    $viewedchip = $row->viewed > 0
+        ? html_writer::span(s(get_string('dashviewedchip', 'local_handbook', $row->viewed)),
+            'local-handbook-dash-gzchip')
+        : '';
     $nums = html_writer::span(
         html_writer::tag('b', $row->percent . '%')
         . ' ' . html_writer::span($row->confirmed . '/' . $row->total, 'frac text-muted')
-        . $stalechip, 'local-handbook-dash-nums');
+        . $stalechip . $viewedchip, 'local-handbook-dash-nums');
 
     $last = $row->lastactivity
         ? html_writer::span(s(userdate($row->lastactivity,
@@ -239,7 +309,9 @@ $renderrow = static function (stdClass $row, bool $hidden) use ($url): string {
         : html_writer::span(s(get_string('dashnever', 'local_handbook')),
             'small font-weight-bold text-danger');
 
-    $namebits = html_writer::span(s(fullname($user)), 'nm');
+    $namebits = html_writer::span(
+        html_writer::link(new moodle_url($url, ['detail' => $user->id]), s(fullname($user))),
+        'nm');
     if ($hidden && isset($row->hideinfo)) {
         if ($row->hideinfo->note !== '') {
             $namebits .= ' ' . html_writer::span(s($row->hideinfo->note), 'local-handbook-dash-notechip');

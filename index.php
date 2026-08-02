@@ -27,6 +27,7 @@ require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
 use local_handbook\local\service\ack_service;
+use local_handbook\local\service\pageview_service;
 use local_handbook\local\service\path_service;
 use local_handbook\local\service\report_service;
 
@@ -112,6 +113,22 @@ if (has_capability('local/handbook:acknowledge', $context)) {
     $personalcards[] = $body;
 }
 
+// Continue where you left off: recently opened articles still unconfirmed
+// on their current version (fed by the gray-zone view records).
+$continue = pageview_service::continue_candidates((int)$USER->id, 4);
+if ($continue) {
+    $body = html_writer::tag('h3',
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-book-open me-2 text-info',
+            'aria-hidden' => 'true'])
+        . s(get_string('continuereadingcard', 'local_handbook')),
+        ['class' => 'h6 text-uppercase text-muted mb-3']);
+    $body .= local_handbook_render_pagelist($continue, static function(stdClass $page): string {
+        return get_string('openedago', 'local_handbook',
+            userdate((int)$page->lastviewed, get_string('strftimedatefullshort', 'langconfig')));
+    });
+    $personalcards[] = $body;
+}
+
 $visiblepaths = path_service::visible_paths((int)$USER->id,
     has_capability('local/handbook:managepaths', $context));
 if ($visiblepaths) {
@@ -179,18 +196,14 @@ if ($iseditorial) {
     $personalcards[] = $body;
 }
 
-if ($personalcards) {
-    $columnclass = 'col-lg-' . (count($personalcards) === 3 ? '4' : (count($personalcards) === 2 ? '6' : '12'));
-    echo html_writer::start_div('row');
-    foreach ($personalcards as $card) {
-        echo html_writer::div(
-            html_writer::div(html_writer::div($card, 'card-body'), 'card mb-3 flex-fill'),
-            $columnclass . ' d-flex');
-    }
-    echo html_writer::end_div();
-}
+// ---- Two-column body under the full-width search: categories on the
+// left (2/3), the personal rail on the right (1/3). On small screens the
+// rail stacks below the categories.
 
-// ---- Categories: full-width, two-column accordion -------------------------.
+echo html_writer::start_div('row');
+echo html_writer::start_div('col-lg-8');
+
+// ---- Categories: accordion of drawers --------------------------------------.
 // Each category is a native <details> drawer; opening it reveals its pages as
 // banner cards (same renderer as the category view) plus subcategory chips.
 
@@ -239,8 +252,16 @@ if (!$categories) {
             . html_writer::tag('i', '', ['class' => 'fa-solid fa-chevron-down cat-acc-chevron',
                 'aria-hidden' => 'true']));
 
-        // Drawer: subcategory chips + page cards + open-category link.
+        // Drawer: one-line description + subcategory chips + page cards +
+        // open-category link.
         $drawer = '';
+        if (trim((string)$category->description) !== '') {
+            $desc = shorten_text(trim(html_to_text(format_text($category->description,
+                $category->descriptionformat, ['context' => $context]), 0, false)), 160);
+            if ($desc !== '') {
+                $drawer .= html_writer::div(s($desc), 'cat-acc-desc small text-muted');
+            }
+        }
         if ($children) {
             $chips = '';
             foreach ($children as $child) {
@@ -282,6 +303,17 @@ if (!$categories) {
     }
     echo html_writer::div($items, 'local-handbook-cat-grid mb-4');
 }
+
+echo html_writer::end_div(); // .col-lg-8.
+
+// ---- Personal rail: pending reading, continue reading, path, editorial ----.
+
+echo html_writer::start_div('col-lg-4');
+foreach ($personalcards as $card) {
+    echo html_writer::div(html_writer::div($card, 'card-body'), 'card mb-3');
+}
+echo html_writer::end_div(); // .col-lg-4.
+echo html_writer::end_div(); // .row.
 
 // ---- Highlights row (formerly the rail) ------------------------------------.
 
