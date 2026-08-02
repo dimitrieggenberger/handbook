@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.39.1 (2026-08-02)
+
+Hotfix: headings hugging the block above them (e.g. after a timeline).
+
+- Only h3 had its top margin restored against Bootstrap's zeroed
+  heading margins, so a month heading written as h2/h4 between two
+  hb-timeline blocks sat almost flush under the previous section. All
+  heading levels in the article body now get breathing room (h2–h3:
+  2rem, h4–h6: 1.6rem, none when first), and the timeline's own bottom
+  margin grew so following plain text is not cramped either.
+
 ## 0.39.0 (2026-08-01)
 
 Revision mode: pages muted for readers while leadership reviews them.
