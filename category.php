@@ -25,12 +25,14 @@
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
+use local_handbook\local\service\audience_service;
 use local_handbook\local\service\page_service;
 
 $categoryid = required_param('id', PARAM_INT);
 $reorder = optional_param('reorder', 0, PARAM_BOOL);
 $move = optional_param('move', 0, PARAM_INT);
 $dir = optional_param('dir', '', PARAM_ALPHA);
+$aud = optional_param('aud', 0, PARAM_INT);
 
 $context = context_system::instance();
 local_handbook_require_view($context);
@@ -133,7 +135,22 @@ if ($children) {
 // Published pages of this category, as an image-led card grid. One banner
 // upload per page serves both the card (16:9) and the article top (3:1);
 // pages without an image get a content-type tint fallback.
-$pages = local_handbook_get_published_pages((int)$category->id);
+$allaudiences = audience_service::get_all(true);
+if ($aud && !isset($allaudiences[$aud])) {
+    $aud = 0;
+}
+if ($aud) {
+    // Portal preview (staff-only surface): only this audience's articles.
+    echo html_writer::div(
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-eye me-2', 'aria-hidden' => 'true'])
+        . s(get_string('audiencepreviewbanner', 'local_handbook',
+            format_string($allaudiences[$aud]->name)))
+        . ' ' . html_writer::link(new moodle_url('/local/handbook/category.php',
+            ['id' => $category->id]), s(get_string('audienceviewall', 'local_handbook'))),
+        'alert alert-info');
+}
+
+$pages = local_handbook_get_published_pages((int)$category->id, $aud);
 
 $heading = html_writer::tag('h3', s(get_string('pagesincategory', 'local_handbook')),
     ['class' => 'h5 mb-0']);
@@ -220,8 +237,10 @@ if (!$pages) {
     $PAGE->requires->js(new moodle_url('/local/handbook/js/reorder.js'));
 } else {
     $versions = local_handbook_published_versions($pages);
+    $audmap = audience_service::page_audience_map(array_keys($pages));
     $cards = '';
     foreach ($pages as $page) {
+        $page->audiences = $audmap[(int)$page->id] ?? [];
         $cards .= local_handbook_render_page_card($page,
             $versions[(int)$page->publishedrevisionid] ?? 0);
     }

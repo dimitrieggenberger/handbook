@@ -700,6 +700,11 @@ function local_handbook_render_area_actions(string $currentpage, context_system 
             'url' => new moodle_url('/local/handbook/manage/areas.php'),
             'visible' => has_capability('local/handbook:managecategories', $context),
         ],
+        'audiences' => [
+            'label' => get_string('manageaudiences', 'local_handbook'),
+            'url' => new moodle_url('/local/handbook/manage/audiences.php'),
+            'visible' => has_capability('local/handbook:managecategories', $context),
+        ],
         'paths' => [
             'label' => get_string('managepaths', 'local_handbook'),
             'url' => new moodle_url('/local/handbook/manage/paths.php'),
@@ -946,18 +951,26 @@ function local_handbook_get_categories(int $parentid = 0, bool $includehidden = 
 /**
  * Count published, non-archived pages per category.
  *
+ * @param int $audienceid Count only pages tagged with this audience (0 = all).
  * @return array Map of categoryid => count.
  */
-function local_handbook_count_published_pages_by_category(): array {
+function local_handbook_count_published_pages_by_category(int $audienceid = 0): array {
     global $DB;
 
-    $sql = "SELECT categoryid, COUNT(*) AS pagecount
-              FROM {local_handbook_page}
-             WHERE publishedrevisionid > 0 AND archived = 0
-          GROUP BY categoryid";
+    $params = [];
+    $audsql = '';
+    if ($audienceid > 0) {
+        $audsql = ' AND EXISTS (SELECT 1 FROM {local_handbook_pageaud} pa
+            WHERE pa.pageid = p.id AND pa.audienceid = :audienceid)';
+        $params['audienceid'] = $audienceid;
+    }
+    $sql = "SELECT p.categoryid, COUNT(*) AS pagecount
+              FROM {local_handbook_page} p
+             WHERE p.publishedrevisionid > 0 AND p.archived = 0$audsql
+          GROUP BY p.categoryid";
 
     $counts = [];
-    foreach ($DB->get_records_sql($sql) as $row) {
+    foreach ($DB->get_records_sql($sql, $params) as $row) {
         $counts[(int)$row->categoryid] = (int)$row->pagecount;
     }
     return $counts;
@@ -967,14 +980,21 @@ function local_handbook_count_published_pages_by_category(): array {
  * Fetch published, non-archived pages of a category, ordered for display.
  *
  * @param int $categoryid Category id.
+ * @param int $audienceid Restrict to pages tagged with this audience (0 = all).
  * @return stdClass[]
  */
-function local_handbook_get_published_pages(int $categoryid): array {
+function local_handbook_get_published_pages(int $categoryid, int $audienceid = 0): array {
     global $DB;
 
-    return $DB->get_records_select('local_handbook_page',
-        'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0',
-        ['categoryid' => $categoryid], 'featured DESC, sortorder ASC, title ASC');
+    $where = 'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0';
+    $params = ['categoryid' => $categoryid];
+    if ($audienceid > 0) {
+        $where .= ' AND EXISTS (SELECT 1 FROM {local_handbook_pageaud} pa
+            WHERE pa.pageid = {local_handbook_page}.id AND pa.audienceid = :audienceid)';
+        $params['audienceid'] = $audienceid;
+    }
+    return $DB->get_records_select('local_handbook_page', $where, $params,
+        'featured DESC, sortorder ASC, title ASC');
 }
 
 /**
@@ -1771,6 +1791,16 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
             ? html_writer::tag('p', s($page->summary), ['class' => 'local-handbook-card-summary'])
             : '');
 
+    // Audience chips when the caller attached them ($page->audiences via
+    // audience_service::page_audience_map) — dots keep the card quiet.
+    if (!empty($page->audiences)) {
+        $chips = '';
+        foreach ($page->audiences as $audience) {
+            $chips .= local_handbook_audience_chip($audience);
+        }
+        $body .= html_writer::div($chips, 'local-handbook-card-audiences');
+    }
+
     $foot = html_writer::span(
             s(get_string('lastupdated', 'local_handbook') . ': '
                 . local_handbook_format_date((int)$page->timemodified)))
@@ -1790,6 +1820,21 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
         . html_writer::div($foot, 'local-handbook-card-foot'),
         ['class' => 'local-handbook-card' . (!empty($page->featured) ? ' is-featured' : '')
             . (!empty($page->underreview) ? ' is-underreview' : '')]);
+}
+
+/**
+ * Render one audience as a coloured dot chip.
+ *
+ * @param stdClass $audience Audience record (name, colorhex).
+ * @return string
+ */
+function local_handbook_audience_chip(stdClass $audience): string {
+    $color = preg_match('/^#[0-9a-fA-F]{6}$/', (string)$audience->colorhex)
+        ? $audience->colorhex : '#6c757d';
+    return html_writer::span(
+        html_writer::span('', 'aud-dot', ['style' => 'background:' . $color . ';'])
+        . s(format_string($audience->name)),
+        'local-handbook-aud-chip', ['style' => 'color:' . $color . ';']);
 }
 
 /**

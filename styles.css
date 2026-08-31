@@ -73,11 +73,25 @@
 #page-local-handbook-area .local-handbook-page-body li {
     max-width: 70ch;
 }
+/* Bootstrap zeroes heading top margins; restore breathing room above
+   every section heading inside the article body, not only h3 — a month
+   heading after a timeline (or any block) must not hug the block above. */
+#page-local-handbook-area .local-handbook-page-body h2,
 #page-local-handbook-area .local-handbook-page-body h3 {
     scroll-margin-top: 90px;
     margin-top: 2rem;
 }
-#page-local-handbook-area .local-handbook-page-body h3:first-child {
+#page-local-handbook-area .local-handbook-page-body h4,
+#page-local-handbook-area .local-handbook-page-body h5,
+#page-local-handbook-area .local-handbook-page-body h6 {
+    scroll-margin-top: 90px;
+    margin-top: 1.6rem;
+}
+#page-local-handbook-area .local-handbook-page-body h2:first-child,
+#page-local-handbook-area .local-handbook-page-body h3:first-child,
+#page-local-handbook-area .local-handbook-page-body h4:first-child,
+#page-local-handbook-area .local-handbook-page-body h5:first-child,
+#page-local-handbook-area .local-handbook-page-body h6:first-child {
     margin-top: 0;
 }
 #page-local-handbook-area .local-handbook-page-body .table-responsive {
@@ -738,7 +752,7 @@
 #page-local-handbook-area .hb-dont li::before { content: "\2715"; position: absolute; left: 0; color: var(--hb-danger); font-weight: 700; }
 
 /* ---- timeline / phases ---- */
-#page-local-handbook-area .hb-timeline { list-style: none; margin: 1.1rem 0 0.4rem; padding: 0 0 0 1.35rem; border-left: 2px solid var(--hb-line); }
+#page-local-handbook-area .hb-timeline { list-style: none; margin: 1.1rem 0 1rem; padding: 0 0 0 1.35rem; border-left: 2px solid var(--hb-line); }
 #page-local-handbook-area .hb-timeline > li { position: relative; padding: 0 0 1.25rem 1.25rem; }
 #page-local-handbook-area .hb-timeline > li:last-child { padding-bottom: 0; }
 #page-local-handbook-area .hb-timeline > li::before { content: ""; position: absolute; left: -1.95rem; top: 0.15rem; width: 1rem; height: 1rem; border-radius: 50%; background: var(--hb-surface); border: 2px solid var(--hb-accent); }
@@ -2627,6 +2641,28 @@
 
 /* ---- Category accordion: one-line description under the summary row ---- */
 #page-local-handbook-area .cat-acc-desc { margin: 0 0 0.7rem; }
+
+/* ---- Audience chips (multi-audience handbook): coloured dot + name,
+   on cards, in the article details card and in the manage listing. ---- */
+#page-local-handbook-area .local-handbook-aud-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-right: 0.55rem;
+}
+#page-local-handbook-area .local-handbook-aud-chip .aud-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex: none;
+}
+#page-local-handbook-area .local-handbook-card-audiences {
+    margin-top: 0.4rem;
+    line-height: 1.4;
+}
 
 /* ---- Category reorder mode: drag affordances (js/reorder.js) ---- */
 #page-local-handbook-area .local-handbook-reorder .reorder-row { cursor: grab; }

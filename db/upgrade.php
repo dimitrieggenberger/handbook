@@ -755,5 +755,65 @@ function xmldb_local_handbook_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2026071592, 'local', 'handbook');
     }
 
+    if ($oldversion < 2026071596) {
+        // Audience vocabulary + page tags (phase 1 of the multi-audience
+        // handbook): audiences are labels on articles, never copies of the
+        // manual. Untagged pages stay internal to staff.
+        $table = new xmldb_table('local_handbook_audience');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('audiencekey', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $table->add_field('matchtype', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'profile');
+        $table->add_field('profilefield', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, '');
+        $table->add_field('profilevalue', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, '');
+        $table->add_field('colorhex', XMLDB_TYPE_CHAR, '7', null, XMLDB_NOTNULL, null, '');
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('active', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('modifiedby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('modifiedby', XMLDB_KEY_FOREIGN, ['modifiedby'], 'user', ['id']);
+        $table->add_index('audiencekey', XMLDB_INDEX_UNIQUE, ['audiencekey']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_handbook_pageaud');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('audienceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('pageid', XMLDB_KEY_FOREIGN, ['pageid'], 'local_handbook_page', ['id']);
+        $table->add_key('audienceid', XMLDB_KEY_FOREIGN, ['audienceid'],
+            'local_handbook_audience', ['id']);
+        $table->add_index('pageaudience', XMLDB_INDEX_UNIQUE, ['pageid', 'audienceid']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Seed the agreed starting audiences. Profile values are left empty
+        // (never matching) until leadership fills in the real field values.
+        $now = time();
+        $seed = [
+            ['personal', 'Personal', 'staff', '', '', '#6c757d', 1],
+            ['estudiantescasa', 'Estudiantes en casa', 'profile', 'city', '', '#7c5cbf', 2],
+            ['estudianteshibrido', 'Estudiantes híbridos', 'profile', 'city', '', '#b0592b', 3],
+            ['estudiantescampus', 'Estudiantes en campus', 'profile', 'city', '', '#0078c3', 4],
+            ['familias', 'Familias', 'profile', 'city', '', '#1e7d43', 5],
+        ];
+        foreach ($seed as [$key, $name, $matchtype, $field, $value, $color, $order]) {
+            if (!$DB->record_exists('local_handbook_audience', ['audiencekey' => $key])) {
+                $DB->insert_record('local_handbook_audience', (object)[
+                    'audiencekey' => $key, 'name' => $name, 'matchtype' => $matchtype,
+                    'profilefield' => $field, 'profilevalue' => $value, 'colorhex' => $color,
+                    'sortorder' => $order, 'active' => 1, 'timemodified' => $now,
+                    'modifiedby' => 0,
+                ]);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026071596, 'local', 'handbook');
+    }
+
     return true;
 }

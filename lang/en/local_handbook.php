@@ -85,6 +85,36 @@ $string['pagemarkedready'] = 'The page is available to readers again.';
 $string['underreviewpill'] = 'In revision';
 $string['underreviewnotice'] = 'This page is being revised by the leadership team and will be available again shortly. Its content is temporarily hidden.';
 $string['underreviewbanner'] = 'Revision mode: readers currently see this page muted without its content. Use "Mark as ready" when the revision is finished.';
+
+// Audiences (multi-audience handbook, phase 1).
+$string['audiences'] = 'Audiences';
+$string['manageaudiences'] = 'Audiences';
+$string['manageaudiences_help'] = 'Audiences are labels on articles, never copies of the manual: a page appears in every tagged audience\'s portal, and a page with no tags stays internal to staff. Each audience defines who belongs to it — staff by handbook role, everyone else by a user profile field value agreed by leadership.';
+$string['newaudience'] = 'New audience';
+$string['editaudience'] = 'Edit audience';
+$string['audiencename'] = 'Name';
+$string['audiencekey'] = 'Key';
+$string['audiencekeytaken'] = 'Another audience already uses this key.';
+$string['audiencematchtype'] = 'Who belongs to it';
+$string['audiencematch_profile'] = 'Users whose profile field has a specific value';
+$string['audiencematch_staff'] = 'All handbook staff (by role)';
+$string['audienceprofilefield'] = 'Profile field (city, department, institution or a custom field shortname)';
+$string['audienceprofilevalue'] = 'Required value (case-insensitive; empty never matches)';
+$string['audiencecolor'] = 'Chip colour (hex)';
+$string['audiencecolorinvalid'] = 'Use a hex colour like #0078c3.';
+$string['audienceactive'] = 'Active';
+$string['audiencesaved'] = 'Audience saved.';
+$string['audiencedeleted'] = 'Audience deleted.';
+$string['audienceinuse'] = 'This audience cannot be deleted: {$a} page(s) still carry its tag.';
+$string['audiencepagecount'] = '{$a} page(s)';
+$string['audiencenomatcher'] = 'no membership value set yet';
+$string['confirmdeleteaudience'] = 'Delete the audience "{$a}"?';
+$string['noaudiences'] = 'No audiences defined yet.';
+$string['audiencesfootnote'] = 'Portals for these audiences are in staff-only preview (the audience selector on the handbook home). Real access for students and families is a later, deliberate step: it requires filling in the profile-field values here and granting their Moodle roles access to the handbook.';
+$string['audiencesnote'] = 'The article appears in every checked audience\'s portal. Nothing checked = internal staff article. Tags apply immediately (they are page settings, not part of the draft).';
+$string['audienceview'] = 'Audience view';
+$string['audienceviewall'] = 'Full handbook (staff)';
+$string['audiencepreviewbanner'] = 'Portal preview "{$a}": readers of this audience will see exactly these articles once access opens. Only staff can see this preview today.';
 $string['emptycategory'] = 'This category has no published pages yet.';
 
 // Reader view.

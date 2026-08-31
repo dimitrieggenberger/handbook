@@ -85,6 +85,36 @@ $string['pagemarkedready'] = 'La página vuelve a estar disponible para los lect
 $string['underreviewpill'] = 'En revisión';
 $string['underreviewnotice'] = 'Esta página está siendo revisada por el equipo directivo y volverá a estar disponible pronto. Su contenido está oculto temporalmente.';
 $string['underreviewbanner'] = 'Modo revisión: los lectores ven esta página atenuada y sin contenido. Use «Marcar como lista» cuando termine la revisión.';
+
+// Audiencias (manual multi-audiencia, fase 1).
+$string['audiences'] = 'Audiencias';
+$string['manageaudiences'] = 'Audiencias';
+$string['manageaudiences_help'] = 'Las audiencias son etiquetas de los artículos, nunca copias del manual: una página aparece en el portal de cada audiencia marcada, y una página sin etiquetas queda interna del personal. Cada audiencia define quién pertenece a ella — el personal por su rol del manual, los demás por un valor acordado en un campo del perfil de usuario.';
+$string['newaudience'] = 'Nueva audiencia';
+$string['editaudience'] = 'Editar audiencia';
+$string['audiencename'] = 'Nombre';
+$string['audiencekey'] = 'Clave';
+$string['audiencekeytaken'] = 'Otra audiencia ya usa esta clave.';
+$string['audiencematchtype'] = 'Quién pertenece a ella';
+$string['audiencematch_profile'] = 'Usuarios cuyo campo de perfil tiene un valor específico';
+$string['audiencematch_staff'] = 'Todo el personal del manual (por rol)';
+$string['audienceprofilefield'] = 'Campo de perfil (city, department, institution o clave de campo personalizado)';
+$string['audienceprofilevalue'] = 'Valor requerido (sin distinguir mayúsculas; vacío nunca coincide)';
+$string['audiencecolor'] = 'Color de la etiqueta (hex)';
+$string['audiencecolorinvalid'] = 'Use un color hex como #0078c3.';
+$string['audienceactive'] = 'Activa';
+$string['audiencesaved'] = 'Audiencia guardada.';
+$string['audiencedeleted'] = 'Audiencia eliminada.';
+$string['audienceinuse'] = 'No se puede eliminar: {$a} página(s) aún llevan esta etiqueta.';
+$string['audiencepagecount'] = '{$a} página(s)';
+$string['audiencenomatcher'] = 'aún sin valor de pertenencia';
+$string['confirmdeleteaudience'] = '¿Eliminar la audiencia «{$a}»?';
+$string['noaudiences'] = 'Aún no hay audiencias definidas.';
+$string['audiencesfootnote'] = 'Los portales de estas audiencias están en vista previa solo para el personal (el selector de audiencia en la portada del manual). El acceso real de estudiantes y familias es un paso posterior y deliberado: requiere completar aquí los valores del campo de perfil y dar acceso al manual a sus roles de Moodle.';
+$string['audiencesnote'] = 'El artículo aparece en el portal de cada audiencia marcada. Nada marcado = artículo interno del personal. Las etiquetas aplican de inmediato (son ajustes de la página, no parte del borrador).';
+$string['audienceview'] = 'Vista de audiencia';
+$string['audienceviewall'] = 'Manual completo (personal)';
+$string['audiencepreviewbanner'] = 'Vista previa del portal «{$a}»: los lectores de esta audiencia verán exactamente estos artículos cuando se abra el acceso. Hoy solo el personal ve esta vista.';
 $string['emptycategory'] = 'Esta categoría todavía no tiene páginas publicadas.';
 
 // Reader view.

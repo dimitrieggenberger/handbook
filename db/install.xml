@@ -568,5 +568,42 @@
         <INDEX NAME="pageorder" UNIQUE="false" FIELDS="pageid, sortorder"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_handbook_audience" COMMENT="Reader audiences (Personal, Estudiantes en casa/hibridos/campus, Familias): controlled vocabulary with a membership matcher — staff by handbook role, everyone else by a user profile field value">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="audiencekey" TYPE="char" LENGTH="40" NOTNULL="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="matchtype" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="profile" COMMENT="staff = anyone with handbook staff access; profile = user profile field equals profilevalue"/>
+        <FIELD NAME="profilefield" TYPE="char" LENGTH="40" NOTNULL="true" DEFAULT="" COMMENT="Core user field (city, department, institution) or custom profile field shortname"/>
+        <FIELD NAME="profilevalue" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="" COMMENT="Value the field must equal (case-insensitive); empty never matches"/>
+        <FIELD NAME="colorhex" TYPE="char" LENGTH="7" NOTNULL="true" DEFAULT="" COMMENT="Chip colour, e.g. #7c5cbf"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="audiencekey" UNIQUE="true" FIELDS="audiencekey"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_handbook_pageaud" COMMENT="Page-to-audience tags: an article appears in every tagged audience portal. No tags = internal staff article. Human-edited in page settings; the AI may only propose">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="audienceid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="local_handbook_page" REFFIELDS="id"/>
+        <KEY NAME="audienceid" TYPE="foreign" FIELDS="audienceid" REFTABLE="local_handbook_audience" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="pageaudience" UNIQUE="true" FIELDS="pageid, audienceid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

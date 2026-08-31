@@ -28,6 +28,7 @@ require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
 use local_handbook\local\service\ack_service;
+use local_handbook\local\service\audience_service;
 use local_handbook\local\service\completion_service;
 use local_handbook\local\service\page_service;
 use local_handbook\local\service\pageview_service;
@@ -699,6 +700,16 @@ $rows .= html_writer::tag('dt', s(get_string('authoritylevel', 'local_handbook')
 if (trim((string)$page->responsiblearea) !== '') {
     $rows .= html_writer::tag('dt', s(get_string('responsiblearea', 'local_handbook')), ['class' => 'col-5'])
         . html_writer::tag('dd', s($page->responsiblearea), ['class' => 'col-7']);
+}
+
+$pageaudiences = audience_service::page_audience_map([(int)$page->id])[(int)$page->id] ?? [];
+if ($pageaudiences) {
+    $audchips = '';
+    foreach ($pageaudiences as $pageaudience) {
+        $audchips .= local_handbook_audience_chip($pageaudience) . ' ';
+    }
+    $rows .= html_writer::tag('dt', s(get_string('audiences', 'local_handbook')), ['class' => 'col-5'])
+        . html_writer::tag('dd', $audchips, ['class' => 'col-7']);
 }
 
 if ((int)$page->owneruserid > 0) {

@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.40.0 (2026-08-02)
+
+Multi-audience handbook, phase 1: audiences, tags and portal previews.
+
+- Audience vocabulary (manage area → Audiencias), seeded with the five
+  agreed audiences: Personal (matched by handbook role), Estudiantes en
+  casa / híbridos / en campus and Familias (each matched by a user
+  profile field value — default field "city", values left EMPTY until
+  leadership sets them, so nothing matches by accident). Vocabulary is
+  extensible without code.
+- Page settings gain audience checkboxes: the article appears in every
+  checked audience's portal; nothing checked = internal staff article
+  (the safe default). Tags are page-scoped and human-edited — the AI
+  has no surface here yet (proposals may come later).
+- Portal previews, staff-only: an audience selector on the handbook
+  home filters the category accordion to exactly what that audience's
+  portal will show — categories with nothing for the audience vanish,
+  and the category pages follow the filter. Coloured audience chips
+  appear on cards and in the article details card.
+- NO access change: students and families cannot enter the handbook
+  yet. Phase 2 (opening real access, hard filters on search and all
+  reader surfaces) comes after leadership fills the profile values and
+  reviews the previews. New tables: local_handbook_audience,
+  local_handbook_pageaud.
+
+## 0.39.1 (2026-08-02)
+
+Hotfix: headings hugging the block above them (e.g. after a timeline).
+
+- Only h3 had its top margin restored against Bootstrap's zeroed
+  heading margins, so a month heading written as h2/h4 between two
+  hb-timeline blocks sat almost flush under the previous section. All
+  heading levels in the article body now get breathing room (h2–h3:
+  2rem, h4–h6: 1.6rem, none when first), and the timeline's own bottom
+  margin grew so following plain text is not cramped either.
+
 ## 0.39.0 (2026-08-01)
 
 Revision mode: pages muted for readers while leadership reviews them.
