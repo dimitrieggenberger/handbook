@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.42.0 (2026-08-02)
+
+Multi-audience handbook, phase 3: consult connectors and variant pages.
+
+- New READ-ONLY web service "Institutional Handbook Consultation"
+  (local_handbook_readonly) with exactly six lookup functions: list
+  categories/pages, get page, search, relations, context index. No
+  drafts, findings, change sets, revision history or working drafts.
+- Audience-aware API: a consult account WITHOUT the staff view
+  capability is audience-restricted exactly like a reader — it belongs
+  to audiences via its profile-field value, and every consult function
+  filters to tagged, published, non-under-review pages (relations only
+  show pairs whose BOTH endpoints are visible; direct access to an
+  invisible page 404s). A consult account WITH view (teachers) reads
+  the whole handbook; per-page aiaccess rules apply as always. All
+  other API functions keep the strict staff requirement.
+- MCP adapter: new HANDBOOK_MCP_MODE=consult — registers only the six
+  lookup tools and ships Spanish answer-structure instructions (direct
+  answer → detail → cited source; honest "not covered" answers; no
+  write offers). DEPLOY.md documents running consult instances beside
+  the editorial connector. REQUIRES an Infomaniak redeploy to use.
+- New typed relation "variantof" (Variante por audiencia) for pages
+  that share a topic but need a different tone per audience — the AI
+  can propose variant links through the existing change-set relations
+  channel, and phase-2 filtering already hides a variant's counterpart
+  from readers who cannot see it.
+- Family read-acknowledgements stay deliberately unbuilt: compliance
+  remains a staff instrument until real usage shows a need.
+
 ## 0.41.0 (2026-08-02)
 
 Multi-audience handbook, phase 2: real access with hard filtering.

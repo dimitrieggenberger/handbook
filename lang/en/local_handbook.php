@@ -656,6 +656,8 @@ $string['relation_assessmentfor'] = 'Assessment for';
 $string['relationrev_assessmentfor'] = 'Connected assessment';
 $string['relation_translationof'] = 'Translation of';
 $string['relationrev_translationof'] = 'Translated as';
+$string['relation_variantof'] = 'Audience variant of';
+$string['relationrev_variantof'] = 'Has audience variant';
 
 // Quality findings (spec 19).
 $string['reportproblem'] = 'Report a problem';

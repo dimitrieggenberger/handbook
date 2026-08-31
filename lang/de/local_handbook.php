@@ -656,6 +656,8 @@ $string['relation_assessmentfor'] = 'Überprüfung für';
 $string['relationrev_assessmentfor'] = 'Verbundene Überprüfung';
 $string['relation_translationof'] = 'Übersetzung von';
 $string['relationrev_translationof'] = 'Übersetzt als';
+$string['relation_variantof'] = 'Zielgruppenvariante von';
+$string['relationrev_variantof'] = 'Hat Zielgruppenvariante';
 
 // Quality findings (spec 19).
 $string['reportproblem'] = 'Fehler melden';

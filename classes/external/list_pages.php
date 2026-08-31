@@ -71,12 +71,15 @@ class list_pages extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        helper::require_read($context);
+        $restriction = helper::require_consult_read($context);
 
         [$limitfrom, $limitnum] = helper::paginate($params['page'], $params['perpage']);
 
         $where = "p.aiaccess <> 'excluded'";
         $sqlparams = [];
+        [$consultwhere, $consultparams] = helper::consult_where($restriction, 'p', 'lpv');
+        $where .= $consultwhere;
+        $sqlparams += $consultparams;
         if ($params['categoryid']) {
             $where .= ' AND p.categoryid = :categoryid';
             $sqlparams['categoryid'] = $params['categoryid'];

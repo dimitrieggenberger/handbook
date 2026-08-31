@@ -184,3 +184,41 @@ grant review, approval, application or publication; a human still approves and
 applies every change in Moodle. Grant them in **Site administration → Users →
 Permissions → Define roles →** the service-account role → set each to **Allow**.
 They ship with no default assignment, so they are off until you add them.
+
+## Consultation instances (read-only Q&A connectors)
+
+Phase 3 of the multi-audience handbook adds a second KIND of connector:
+consultation ("+Manual") instances that answer questions and can change
+nothing. Each instance is one extra Node app (or one extra port/path on the
+same host) with three differences from the editorial deployment:
+
+1. **Mode**: `HANDBOOK_MCP_MODE=consult` — registers only six lookup tools
+   (search, get page, context index, categories, page lists, relations) and
+   ships answer-structure instructions in Spanish (direct answer → detail →
+   source citation; "not covered" answers; no write offers).
+2. **Moodle account**: a dedicated `handbook-consulta-*` account authorised
+   on the **"Institutional Handbook Consultation (read-only)"** service
+   (`local_handbook_readonly`), NOT on the editorial service. Grant it:
+   - Staff consultation (teachers): `apiaccess` + `view` → it reads the
+     whole handbook (aiaccess rules still apply per page).
+   - Per-audience consultation (e.g. families): `apiaccess` ONLY — no
+     `view` — and set the audience's profile-field value (e.g. `city`)
+     on the account itself. The plugin then filters every function to
+     that audience's tagged, published, non-under-review pages,
+     server-side. The account IS the audience boundary.
+3. **Secrets**: its own `HANDBOOK_WSTOKEN` (token for that account on the
+   readonly service) and its own `HANDBOOK_MCP_AUTH_TOKEN`.
+
+Example `.env` for a teachers' consultation instance:
+
+```
+HANDBOOK_BASE_URL=https://moodle.europaschule.eu
+HANDBOOK_WSTOKEN=<token of handbook-consulta on local_handbook_readonly>
+HANDBOOK_MCP_AUTH_TOKEN=<long random string, distinct from the editorial one>
+HANDBOOK_MCP_MODE=consult
+HANDBOOK_MCP_PATH=/consulta
+```
+
+In ChatGPT, add it as a separate connector ("+Manual") pointing at the
+consult path with its own Bearer token. The editorial connector is
+unchanged; both can run side by side from the same Git checkout.

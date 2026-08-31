@@ -76,7 +76,7 @@ class search_pages extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        helper::require_read($context);
+        $restriction = helper::require_consult_read($context);
 
         $query = trim($params['query']);
         if (\core_text::strlen($query) < 2) {
@@ -91,6 +91,9 @@ class search_pages extends external_api {
             . $DB->sql_like('p.summary', ':q2', false) . ' OR '
             . $DB->sql_like('r.plaintext', ':q3', false) . ')';
         $sqlparams = ['q1' => $like, 'q2' => $like, 'q3' => $like];
+        [$consultwhere, $consultparams] = helper::consult_where($restriction, 'p', 'spv');
+        $where .= $consultwhere;
+        $sqlparams += $consultparams;
 
         if ($params['contenttype'] !== '') {
             $where .= ' AND p.contenttype = :contenttype';

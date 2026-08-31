@@ -58,10 +58,23 @@ class list_relations extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        helper::require_read($context);
+        $restriction = helper::require_consult_read($context);
 
         $page = helper::get_page_by_identifier($params['identifier']);
         helper::assert_not_excluded($page);
+        helper::assert_consult_visible($page, $restriction);
+
+        // For a restricted consultation caller, BOTH endpoints must be
+        // visible — a relation into an internal article must not reveal
+        // even its title.
+        $consultjoin = '';
+        $consultparams = [];
+        if ($restriction !== null) {
+            [$svis, $sparams] = helper::consult_where($restriction, 's', 'rls');
+            [$tvis, $tparams] = helper::consult_where($restriction, 't', 'rlt');
+            $consultjoin = $svis . $tvis;
+            $consultparams = $sparams + $tparams;
+        }
 
         $sql = "SELECT rel.id, rel.relationtype, rel.sourcepageid, rel.targetpageid,
                        s.slug AS sourceslug, s.title AS sourcetitle, s.aiaccess AS sourceai,
@@ -69,11 +82,12 @@ class list_relations extends external_api {
                   FROM {local_handbook_relation} rel
                   JOIN {local_handbook_page} s ON s.id = rel.sourcepageid
                   JOIN {local_handbook_page} t ON t.id = rel.targetpageid
-                 WHERE rel.sourcepageid = :pageid1 OR rel.targetpageid = :pageid2
+                 WHERE (rel.sourcepageid = :pageid1 OR rel.targetpageid = :pageid2)$consultjoin
               ORDER BY rel.sortorder ASC, rel.id ASC";
 
         $result = [];
-        foreach ($DB->get_records_sql($sql, ['pageid1' => $page->id, 'pageid2' => $page->id]) as $rel) {
+        foreach ($DB->get_records_sql($sql,
+                ['pageid1' => $page->id, 'pageid2' => $page->id] + $consultparams) as $rel) {
             if ($rel->sourceai === 'excluded' || $rel->targetai === 'excluded') {
                 continue;
             }

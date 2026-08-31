@@ -16,7 +16,11 @@
  *   HANDBOOK_WSTOKEN           authorised service-account token
  *   HANDBOOK_MCP_AUTH_TOKEN    long random string the connector sends as
  *                             "Authorization: Bearer <token>"
- *   HANDBOOK_MCP_MODE          readwrite-drafts (default) or readonly
+ *   HANDBOOK_MCP_MODE          readwrite-drafts (default), readonly, or consult
+ *                              (consult = question-answering: six lookup tools
+ *                              + answer instructions; use with a token whose
+ *                              Moodle account carries the audience profile
+ *                              value so the plugin filters server-side)
  *   HANDBOOK_MCP_PORT          listen port (default 3000)
  *   HANDBOOK_MCP_PATH          MCP route (default /mcp)
  */
@@ -68,7 +72,8 @@ loadEnvFile(join(homedir(), ".handbook-mcp.env"));
 const baseUrl = (process.env.HANDBOOK_BASE_URL || "").replace(/\/+$/, "");
 const wstoken = process.env.HANDBOOK_WSTOKEN || "";
 const authToken = process.env.HANDBOOK_MCP_AUTH_TOKEN || "";
-const mode = process.env.HANDBOOK_MCP_MODE === "readonly" ? "readonly" : "readwrite-drafts";
+const mode = ["readonly", "consult"].includes(process.env.HANDBOOK_MCP_MODE)
+  ? process.env.HANDBOOK_MCP_MODE : "readwrite-drafts";
 // Infomaniak (and most managed Node hosts) inject the port via PORT.
 const port = Number(process.env.PORT || process.env.HANDBOOK_MCP_PORT || 3000);
 const mcpPath = process.env.HANDBOOK_MCP_PATH || "/mcp";

@@ -18,7 +18,8 @@ import { buildHandbookServer } from "./lib/handbook.mjs";
 
 const baseUrl = (process.env.HANDBOOK_BASE_URL || "").replace(/\/+$/, "");
 const token = process.env.HANDBOOK_WSTOKEN || "";
-const mode = process.env.HANDBOOK_MCP_MODE === "readonly" ? "readonly" : "readwrite-drafts";
+const mode = ["readonly", "consult"].includes(process.env.HANDBOOK_MCP_MODE)
+  ? process.env.HANDBOOK_MCP_MODE : "readwrite-drafts";
 
 if (!baseUrl || !token) {
   console.error("handbook-mcp: set HANDBOOK_BASE_URL and HANDBOOK_WSTOKEN.");

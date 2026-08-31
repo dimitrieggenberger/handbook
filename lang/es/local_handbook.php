@@ -656,6 +656,8 @@ $string['relation_assessmentfor'] = 'Evaluación de';
 $string['relationrev_assessmentfor'] = 'Evaluación conectada';
 $string['relation_translationof'] = 'Traducción de';
 $string['relationrev_translationof'] = 'Traducida como';
+$string['relation_variantof'] = 'Variante por audiencia de';
+$string['relationrev_variantof'] = 'Tiene variante por audiencia';
 
 // Quality findings (spec 19).
 $string['reportproblem'] = 'Reportar un error';
