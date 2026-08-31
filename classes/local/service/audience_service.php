@@ -185,6 +185,82 @@ class audience_service {
     }
 
     /**
+     * The current user's audience restriction (phase 2 gate), cached per
+     * request.
+     *
+     * null  = unrestricted: the user holds the staff view capability and
+     *         sees the whole handbook, as always.
+     * array = restricted reader: the ids of the audiences the user belongs
+     *         to; only pages tagged with one of them exist for this user.
+     *         An EMPTY array means no handbook access at all.
+     *
+     * @return int[]|null
+     */
+    public static function reader_restriction(): ?array {
+        global $USER;
+
+        static $cached = false;
+        static $value = null;
+        if ($cached !== false) {
+            return $value;
+        }
+        $cached = true;
+
+        if (has_capability('local/handbook:view', context_system::instance())) {
+            $value = null;
+        } else if (isloggedin() && !isguestuser()) {
+            $value = array_keys(self::user_audiences($USER));
+        } else {
+            $value = [];
+        }
+        return $value;
+    }
+
+    /**
+     * SQL fragment restricting a page query to tagged audiences.
+     *
+     * @param string $alias Page table alias in the outer query (may be a
+     *                      {table} placeholder when the query has no alias).
+     * @param int|int[] $audienceids One id, or a set (a restricted reader's
+     *                      union). An empty set matches NOTHING.
+     * @param string $prefix Unique parameter/alias prefix per fragment.
+     * @return array [$wheresql (no leading AND), $params]
+     */
+    public static function visibility_sql(string $alias, $audienceids, string $prefix = 'audv'): array {
+        global $DB;
+
+        $ids = is_array($audienceids)
+            ? array_values(array_filter(array_map('intval', $audienceids)))
+            : ((int)$audienceids > 0 ? [(int)$audienceids] : []);
+        if (!$ids) {
+            return ['1 = 0', []];
+        }
+        [$insql, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, $prefix);
+        return ["EXISTS (SELECT 1 FROM {local_handbook_pageaud} {$prefix}pa
+            WHERE {$prefix}pa.pageid = {$alias}.id AND {$prefix}pa.audienceid $insql)", $params];
+    }
+
+    /**
+     * Whether a page carries at least one of the given audience tags.
+     *
+     * @param int $pageid Page id.
+     * @param int[] $audienceids A restricted reader's audience ids.
+     * @return bool
+     */
+    public static function page_visible_to_restricted(int $pageid, array $audienceids): bool {
+        global $DB;
+
+        $ids = array_values(array_filter(array_map('intval', $audienceids)));
+        if (!$ids) {
+            return false;
+        }
+        [$insql, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'pv');
+        $params['pageid'] = $pageid;
+        return $DB->record_exists_select('local_handbook_pageaud',
+            "pageid = :pageid AND audienceid $insql", $params);
+    }
+
+    /**
      * The audiences a user belongs to, by each audience's matcher.
      *
      * @param stdClass $user Full user record.

@@ -109,6 +109,16 @@ if ($action === 'markreview' || $action === 'markready') {
             'local_handbook'));
 }
 
+// Audience gate (phase 2): for restricted readers (students, families)
+// only pages tagged with one of their audiences exist — an untagged or
+// foreign-audience page 404s exactly like an unpublished one, so
+// internal articles never reveal themselves.
+$restriction = audience_service::reader_restriction();
+if ($restriction !== null
+        && !audience_service::page_visible_to_restricted((int)$page->id, $restriction)) {
+    throw new moodle_exception('errorpagenotfound', 'local_handbook');
+}
+
 // Revision mode, reader side: the page visibly exists (listed, linked,
 // searchable) but shows a muted notice instead of its content until it
 // is marked ready. Editorial users fall through and read/edit as usual.
@@ -258,19 +268,27 @@ $contenthtml = html_writer::div('', 'd-none', [
     'data-collapse' => get_string('acccollapseall', 'local_handbook'),
 ]) . $contenthtml;
 
-// Typed relations in both directions (spec 9.2).
+// Typed relations in both directions (spec 9.2). Restricted readers only
+// see related pages that exist for them — internal articles must not
+// reveal even their titles.
+$relvisibility = '';
+$relparams = [];
+if ($restriction !== null) {
+    [$relvis, $relparams] = audience_service::visibility_sql('p', $restriction, 'rel');
+    $relvisibility = ' AND ' . $relvis;
+}
 $outgoing = $DB->get_records_sql(
     "SELECT rel.id, rel.relationtype, p.slug, p.title, p.publishedrevisionid, p.archived
        FROM {local_handbook_relation} rel
        JOIN {local_handbook_page} p ON p.id = rel.targetpageid
-      WHERE rel.sourcepageid = :pageid
-   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id]);
+      WHERE rel.sourcepageid = :pageid$relvisibility
+   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id] + $relparams);
 $incoming = $DB->get_records_sql(
     "SELECT rel.id, rel.relationtype, p.slug, p.title, p.publishedrevisionid, p.archived
        FROM {local_handbook_relation} rel
        JOIN {local_handbook_page} p ON p.id = rel.sourcepageid
-      WHERE rel.targetpageid = :pageid
-   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id]);
+      WHERE rel.targetpageid = :pageid$relvisibility
+   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id] + $relparams);
 
 // Reading paths that include this page (for the acknowledgement card).
 $memberpaths = $DB->get_records_sql(

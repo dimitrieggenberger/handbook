@@ -48,6 +48,17 @@ const LOCAL_HANDBOOK_PAGE_TYPE = 'local-handbook-area';
  */
 function local_handbook_require_view(context_system $context): void {
     require_login(null, false);
+    if (has_capability('local/handbook:view', $context)) {
+        return;
+    }
+    // Multi-audience phase 2: members of at least one audience (students,
+    // families — matched via each audience's profile-field rule) enter
+    // without the staff capability; inside, they only ever see pages
+    // tagged with their audiences (reader_restriction gates every
+    // reader surface).
+    if (\local_handbook\local\service\audience_service::reader_restriction()) {
+        return;
+    }
     require_capability('local/handbook:view', $context);
 }
 
@@ -951,18 +962,21 @@ function local_handbook_get_categories(int $parentid = 0, bool $includehidden = 
 /**
  * Count published, non-archived pages per category.
  *
- * @param int $audienceid Count only pages tagged with this audience (0 = all).
+ * @param int|int[] $audienceid Count only pages tagged with this audience
+ *        (0 = all); an array is a restricted reader's audience union.
  * @return array Map of categoryid => count.
  */
-function local_handbook_count_published_pages_by_category(int $audienceid = 0): array {
+function local_handbook_count_published_pages_by_category($audienceid = 0): array {
     global $DB;
 
     $params = [];
     $audsql = '';
-    if ($audienceid > 0) {
-        $audsql = ' AND EXISTS (SELECT 1 FROM {local_handbook_pageaud} pa
-            WHERE pa.pageid = p.id AND pa.audienceid = :audienceid)';
-        $params['audienceid'] = $audienceid;
+    // An array always filters (an empty one — a restricted reader in no
+    // audience — matches nothing); an int filters only when > 0.
+    if (is_array($audienceid) || (int)$audienceid > 0) {
+        [$vis, $params] = \local_handbook\local\service\audience_service::visibility_sql(
+            'p', $audienceid, 'cnt');
+        $audsql = ' AND ' . $vis;
     }
     $sql = "SELECT p.categoryid, COUNT(*) AS pagecount
               FROM {local_handbook_page} p
@@ -980,18 +994,20 @@ function local_handbook_count_published_pages_by_category(int $audienceid = 0): 
  * Fetch published, non-archived pages of a category, ordered for display.
  *
  * @param int $categoryid Category id.
- * @param int $audienceid Restrict to pages tagged with this audience (0 = all).
+ * @param int|int[] $audienceid Restrict to pages tagged with this audience
+ *        (0 = all); an array is a restricted reader's audience union.
  * @return stdClass[]
  */
-function local_handbook_get_published_pages(int $categoryid, int $audienceid = 0): array {
+function local_handbook_get_published_pages(int $categoryid, $audienceid = 0): array {
     global $DB;
 
     $where = 'categoryid = :categoryid AND publishedrevisionid > 0 AND archived = 0';
     $params = ['categoryid' => $categoryid];
-    if ($audienceid > 0) {
-        $where .= ' AND EXISTS (SELECT 1 FROM {local_handbook_pageaud} pa
-            WHERE pa.pageid = {local_handbook_page}.id AND pa.audienceid = :audienceid)';
-        $params['audienceid'] = $audienceid;
+    if (is_array($audienceid) || (int)$audienceid > 0) {
+        [$vis, $visparams] = \local_handbook\local\service\audience_service::visibility_sql(
+            '{local_handbook_page}', $audienceid, 'gpp');
+        $where .= ' AND ' . $vis;
+        $params += $visparams;
     }
     return $DB->get_records_select('local_handbook_page', $where, $params,
         'featured DESC, sortorder ASC, title ASC');
@@ -1001,18 +1017,27 @@ function local_handbook_get_published_pages(int $categoryid, int $audienceid = 0
  * Fetch the most recently published pages across the handbook.
  *
  * @param int $limit Maximum number of pages.
+ * @param int|int[] $audienceid Restrict to tagged pages (0 = all; an array
+ *        is a restricted reader's audience union).
  * @return stdClass[] Page records with ->timepublished and ->versionnumber.
  */
-function local_handbook_get_recently_published(int $limit = 5): array {
+function local_handbook_get_recently_published(int $limit = 5, $audienceid = 0): array {
     global $DB;
 
+    $params = [];
+    $audsql = '';
+    if (is_array($audienceid) || (int)$audienceid > 0) {
+        [$vis, $params] = \local_handbook\local\service\audience_service::visibility_sql(
+            'p', $audienceid, 'rec');
+        $audsql = ' AND ' . $vis;
+    }
     $sql = "SELECT p.*, r.timepublished, r.versionnumber
               FROM {local_handbook_page} p
               JOIN {local_handbook_revision} r ON r.id = p.publishedrevisionid
-             WHERE p.archived = 0
+             WHERE p.archived = 0$audsql
           ORDER BY r.timepublished DESC";
 
-    return $DB->get_records_sql($sql, [], 0, $limit);
+    return $DB->get_records_sql($sql, $params, 0, $limit);
 }
 
 /**

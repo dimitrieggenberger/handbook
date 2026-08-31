@@ -97,9 +97,19 @@ class autolink_service {
             return $cache;
         }
 
-        $records = $DB->get_records_select('local_handbook_page',
-            'publishedrevisionid > 0 AND archived = 0 AND id <> :id',
-            ['id' => $excludepageid], '', 'id, title, slug');
+        // Restricted readers (phase 2) only get links to pages that exist
+        // for them — a link into an internal article would just 404.
+        $where = 'publishedrevisionid > 0 AND archived = 0 AND id <> :id';
+        $params = ['id' => $excludepageid];
+        $restriction = audience_service::reader_restriction();
+        if ($restriction !== null) {
+            [$vis, $visparams] = audience_service::visibility_sql(
+                '{local_handbook_page}', $restriction, 'al');
+            $where .= ' AND ' . $vis;
+            $params += $visparams;
+        }
+        $records = $DB->get_records_select('local_handbook_page', $where, $params,
+            '', 'id, title, slug');
 
         $targets = [];
         foreach ($records as $record) {

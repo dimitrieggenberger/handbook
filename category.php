@@ -46,6 +46,19 @@ if (!$category || (!(int)$category->visible
 $canreorder = has_capability('local/handbook:managecategories', $context);
 $reorder = $reorder && $canreorder;
 
+$allaudiences = audience_service::get_all(true);
+if ($aud && !isset($allaudiences[$aud])) {
+    $aud = 0;
+}
+
+// Restricted readers (phase 2): forced onto the union of their audiences;
+// the staff preview parameter is ignored for them.
+$restriction = audience_service::reader_restriction();
+if ($restriction !== null) {
+    $aud = 0;
+}
+$audfilter = $restriction !== null ? $restriction : $aud;
+
 // Move a page up/down in this category's display order, then return to
 // the reorder view.
 if ($move && ($dir === 'up' || $dir === 'down')) {
@@ -110,35 +123,39 @@ if (trim((string)$category->description) !== '') {
 // Subcategories.
 $children = local_handbook_get_categories((int)$category->id,
     has_capability('local/handbook:managecategories', $context));
-$counts = local_handbook_count_published_pages_by_category();
+$counts = local_handbook_count_published_pages_by_category($audfilter);
 
 if ($children) {
-    echo html_writer::tag('h3', s(get_string('subcategories', 'local_handbook')), ['class' => 'h5 mb-3']);
     $items = '';
     foreach ($children as $child) {
         $pagecount = $counts[(int)$child->id] ?? 0;
+        if (($aud || $restriction !== null) && $pagecount === 0) {
+            // Portal view: subcategories empty for this audience vanish.
+            continue;
+        }
         $countlabel = $pagecount === 1
             ? get_string('pagecountone', 'local_handbook')
             : get_string('pagecount', 'local_handbook', $pagecount);
         $items .= html_writer::tag('li',
-            html_writer::link(new moodle_url('/local/handbook/category.php', ['id' => $child->id]),
+            html_writer::link(new moodle_url('/local/handbook/category.php',
+                ['id' => $child->id] + ($aud ? ['aud' => $aud] : [])),
                 s($child->name))
             . html_writer::span(s($countlabel), 'page-meta')
         );
     }
-    echo html_writer::div(
-        html_writer::div(html_writer::tag('ul', $items, ['class' => 'local-handbook-pagelist']), 'card-body'),
-        'card mb-4'
-    );
+    if ($items !== '') {
+        echo html_writer::tag('h3', s(get_string('subcategories', 'local_handbook')),
+            ['class' => 'h5 mb-3']);
+        echo html_writer::div(
+            html_writer::div(html_writer::tag('ul', $items, ['class' => 'local-handbook-pagelist']), 'card-body'),
+            'card mb-4'
+        );
+    }
 }
 
 // Published pages of this category, as an image-led card grid. One banner
 // upload per page serves both the card (16:9) and the article top (3:1);
 // pages without an image get a content-type tint fallback.
-$allaudiences = audience_service::get_all(true);
-if ($aud && !isset($allaudiences[$aud])) {
-    $aud = 0;
-}
 if ($aud) {
     // Portal preview (staff-only surface): only this audience's articles.
     echo html_writer::div(
@@ -150,7 +167,7 @@ if ($aud) {
         'alert alert-info');
 }
 
-$pages = local_handbook_get_published_pages((int)$category->id, $aud);
+$pages = local_handbook_get_published_pages((int)$category->id, $audfilter);
 
 $heading = html_writer::tag('h3', s(get_string('pagesincategory', 'local_handbook')),
     ['class' => 'h5 mb-0']);

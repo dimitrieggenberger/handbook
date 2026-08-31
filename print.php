@@ -43,6 +43,18 @@ if (!$page || !$page->publishedrevisionid
     throw new moodle_exception('errorpagenotfound', 'local_handbook');
 }
 
+// Same reader gates as view.php: revision mode mutes content for
+// non-editorial users, and restricted readers only reach pages tagged
+// with one of their audiences.
+if ((int)$page->underreview === 1 && !local_handbook_user_is_editorial($context)) {
+    throw new moodle_exception('errorpagenotfound', 'local_handbook');
+}
+$printrestriction = \local_handbook\local\service\audience_service::reader_restriction();
+if ($printrestriction !== null && !\local_handbook\local\service\audience_service
+        ::page_visible_to_restricted((int)$page->id, $printrestriction)) {
+    throw new moodle_exception('errorpagenotfound', 'local_handbook');
+}
+
 $revision = $DB->get_record('local_handbook_revision',
     ['id' => $page->publishedrevisionid], '*', MUST_EXIST);
 

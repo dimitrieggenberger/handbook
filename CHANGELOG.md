@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.41.0 (2026-08-02)
+
+Multi-audience handbook, phase 2: real access with hard filtering.
+
+- Entry: a logged-in Moodle user who matches at least one audience (via
+  the profile-field values set in Audiencias) now enters the handbook
+  WITHOUT the staff capability — the profile value is the ticket. An
+  audience with an empty value stays closed, so nothing opens until
+  leadership fills the values in.
+- Restricted readers (students, families) live inside the union of
+  their audiences on EVERY reader surface: home (categories, drawers,
+  highlights, continue-reading), category pages and subcategory lists,
+  search and live search, automatic title links, article view and
+  print. Untagged or foreign-audience pages 404 like unpublished ones —
+  internal articles never reveal themselves, not even by title.
+- Compliance stays staff-only (confirmations, tests, dashboard — all
+  capability-gated as before); revision mode mutes for everyone, and
+  print now enforces it too. Staff keep the full view plus per-audience
+  portal previews. No DB change; no MCP redeploy.
+
 ## 0.40.0 (2026-08-02)
 
 Multi-audience handbook, phase 1: audiences, tags and portal previews.
