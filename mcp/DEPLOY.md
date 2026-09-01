@@ -74,7 +74,19 @@ chmod 600 ~/.handbook-mcp.env
 
 Generate the auth token with `openssl rand -hex 32`. Then **Restart** the app.
 
-Verify: `https://mcp.example.eu/health` → `{"status":"ok","mode":"readwrite-drafts"}`.
+To also serve the WordPress toolset on the same endpoint (harmonization —
+see `../docs/WORDPRESS_HARMONIZATION.md`), append the WordPress secrets to
+the same file; the connector, URL and Bearer token stay unchanged:
+
+```
+WORDPRESS_BASE_URL=https://www.example.eu
+WORDPRESS_APP_USER=handbook-ai
+WORDPRESS_APP_PASSWORD=<application password>
+WORDPRESS_MCP_MODE=readwrite-drafts
+```
+
+Verify: `https://mcp.example.eu/health` → `{"status":"ok","mode":"readwrite-drafts","wordpress":"readwrite-drafts"}`
+(`"wordpress":"disabled"` when the three WordPress secrets are absent).
 The startup log shows `{"event":"listening",...}`; a bad/absent connector token
 logs `{"event":"auth_rejected",...}`.
 

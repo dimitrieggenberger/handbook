@@ -5,6 +5,12 @@ external API (see `../docs/API.md`) as tools for Claude, ChatGPT and other
 MCP clients (spec §18). It is a separate deliverable: not part of the Moodle
 plugin ZIP, deployed wherever the AI client runs.
 
+It also ships a sibling adapter for the public **WordPress** site
+(`lib/wordpress.mjs`, stdio entry `wordpress-server.mjs`) with the same
+workflow guarantee, so one agent session can keep the website and the
+handbook harmonized — see the WordPress section below and
+`../docs/WORDPRESS_HARMONIZATION.md` for the cross-checking workflow.
+
 The adapter can only do what its Moodle token allows. Use the restricted
 "Institutional Handbook API" service with a service account that has
 `apiaccess` + `view` + `edit` and **never** `publish` — there is no publish
@@ -95,3 +101,45 @@ changes; treat metadata, scope, authority and dates as part of the meaning;
 always provide a change summary; cite pages and sections in findings;
 distinguish confirmed from possible contradictions; respect intentional
 modality differences.
+
+## WordPress adapter
+
+Same workflow, applied to the public website via the core WordPress REST
+API (no WordPress plugin needed): agents read published content and stage
+**proposal drafts**; human editors apply and publish in wp-admin. Two
+enforcement layers: the adapter has no publish/delete tool and refuses to
+touch anything that is not a draft/pending proposal, and the service
+account holds the WordPress **Contributor** role, which cannot publish or
+edit live content even in principle. Setup (service account, Application
+Password) is in `../docs/WORDPRESS_HARMONIZATION.md` §5.
+
+Configuration via environment variables:
+
+- `WORDPRESS_BASE_URL` — e.g. `https://www.europaschule.eu`
+- `WORDPRESS_APP_USER` — the service account's username
+- `WORDPRESS_APP_PASSWORD` — an Application Password of that account
+- `WORDPRESS_MCP_MODE` — `readwrite-drafts` (default) or `readonly`
+
+Claude Code:
+
+```bash
+claude mcp add wordpress \
+  -e WORDPRESS_BASE_URL=https://www.europaschule.eu \
+  -e WORDPRESS_APP_USER=handbook-ai \
+  -e WORDPRESS_APP_PASSWORD=YOUR_APP_PASSWORD \
+  -- node "E:/Codex Moodle Plugins/Handbook/mcp/wordpress-server.mjs"
+```
+
+For Claude Desktop add a second `wordpress` entry beside `handbook` in
+`claude_desktop_config.json` pointing at `wordpress-server.mjs` with the
+three variables above. The remote HTTP endpoint (`http-server.mjs`)
+serves the `wp_*` tools automatically on the same URL and Bearer token as
+soon as the `WORDPRESS_*` secrets are configured (see `DEPLOY.md`), so
+ChatGPT needs no second connector.
+
+Tools — read: `wp_get_context_index`, `wp_search`, `wp_get_content`,
+`wp_list_pages`, `wp_list_posts`, `wp_list_categories`, `wp_list_changes`
+(incremental-sync counterpart of `handbook_list_changes`),
+`wp_list_proposals`. Proposal (workflow-safe): `wp_create_proposal_draft`,
+`wp_update_proposal_draft` (concurrency-checked), and
+`wp_submit_proposal_for_review`. There is no publish tool, by design.

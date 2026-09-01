@@ -19,6 +19,15 @@
  *   HANDBOOK_MCP_MODE          readwrite-drafts (default) or readonly
  *   HANDBOOK_MCP_PORT          listen port (default 3000)
  *   HANDBOOK_MCP_PATH          MCP route (default /mcp)
+ *
+ * Optional WordPress toolset (docs/WORDPRESS_HARMONIZATION.md): when the
+ * three variables below are set, the SAME endpoint also advertises the wp_*
+ * tools from lib/wordpress.mjs, so one agent session can cross-check the
+ * handbook against the public website. No publish tool on either side.
+ *   WORDPRESS_BASE_URL         e.g. https://www.europaschule.eu
+ *   WORDPRESS_APP_USER         WordPress service account (Contributor role)
+ *   WORDPRESS_APP_PASSWORD     an Application Password of that account
+ *   WORDPRESS_MCP_MODE         readwrite-drafts (default) or readonly
  */
 
 import { createServer } from "node:http";
@@ -31,6 +40,7 @@ import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { buildHandbookServer } from "./lib/handbook.mjs";
+import { makeWp, registerWordPressTools } from "./lib/wordpress.mjs";
 
 // Load KEY=VALUE lines from a file into process.env, without adding a
 // dependency. Only fills variables that are not already set, so real
@@ -69,6 +79,12 @@ const baseUrl = (process.env.HANDBOOK_BASE_URL || "").replace(/\/+$/, "");
 const wstoken = process.env.HANDBOOK_WSTOKEN || "";
 const authToken = process.env.HANDBOOK_MCP_AUTH_TOKEN || "";
 const mode = process.env.HANDBOOK_MCP_MODE === "readonly" ? "readonly" : "readwrite-drafts";
+// WordPress toolset is optional: enabled only when all three secrets exist.
+const wpBaseUrl = (process.env.WORDPRESS_BASE_URL || "").replace(/\/+$/, "");
+const wpUser = process.env.WORDPRESS_APP_USER || "";
+const wpAppPassword = process.env.WORDPRESS_APP_PASSWORD || "";
+const wpMode = process.env.WORDPRESS_MCP_MODE === "readonly" ? "readonly" : "readwrite-drafts";
+const wordpressEnabled = Boolean(wpBaseUrl && wpUser && wpAppPassword);
 // Infomaniak (and most managed Node hosts) inject the port via PORT.
 const port = Number(process.env.PORT || process.env.HANDBOOK_MCP_PORT || 3000);
 const mcpPath = process.env.HANDBOOK_MCP_PATH || "/mcp";
@@ -104,7 +120,7 @@ app.use(express.json({ limit: "4mb" }));
 
 // Health check: reveals nothing sensitive, needs no auth.
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", mode });
+  res.json({ status: "ok", mode, wordpress: wordpressEnabled ? wpMode : "disabled" });
 });
 
 // Active transports keyed by MCP session id.
@@ -137,6 +153,10 @@ app.post(mcpPath, async (req, res) => {
       }
     };
     const server = buildHandbookServer({ baseUrl, token: wstoken, mode });
+    if (wordpressEnabled) {
+      const wpClient = makeWp({ baseUrl: wpBaseUrl, user: wpUser, appPassword: wpAppPassword });
+      registerWordPressTools(server, wpClient, { mode: wpMode });
+    }
     await server.connect(transport);
   } else {
     res.status(400).json(rpcError("Bad Request: no valid session"));
@@ -169,7 +189,10 @@ function rpcError(message) {
 
 const httpServer = createServer(app);
 httpServer.listen(port, () => {
-  log({ event: "listening", port, path: mcpPath, mode, base: baseUrl });
+  log({
+    event: "listening", port, path: mcpPath, mode, base: baseUrl,
+    wordpress: wordpressEnabled ? { base: wpBaseUrl, mode: wpMode } : "disabled",
+  });
 });
 
 // Graceful shutdown.

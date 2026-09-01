@@ -1,15 +1,17 @@
 {
   "name": "handbook-mcp",
-  "version": "0.1.0",
-  "description": "MCP adapter for the EuropaSchule Manual Institucional (local_handbook) external API",
+  "version": "0.2.0",
+  "description": "MCP adapter for the EuropaSchule Manual Institucional (local_handbook) external API and the public WordPress site",
   "type": "module",
   "bin": {
-    "handbook-mcp": "server.mjs"
+    "handbook-mcp": "server.mjs",
+    "wordpress-mcp": "wordpress-server.mjs"
   },
   "scripts": {
     "start": "node http-server.mjs",
     "start:http": "node http-server.mjs",
-    "start:stdio": "node server.mjs"
+    "start:stdio": "node server.mjs",
+    "start:wordpress": "node wordpress-server.mjs"
   },
   "engines": {
     "node": ">=18"
