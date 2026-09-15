@@ -59,13 +59,21 @@ Add to `claude_desktop_config.json` (Settings → Developer → Edit config):
 }
 ```
 
-## ChatGPT and claude.ai (web)
+## ChatGPT, claude.ai and Claude Desktop (remote)
 
-Both need the server reachable over HTTPS (remote MCP) rather than stdio.
-Options: host this adapter behind an HTTP↔stdio bridge (e.g. `supergateway`)
-on a small VPS or the Moodle host, or add an HTTP transport later. For
-ChatGPT, a Custom GPT with Actions pointing directly at the REST API
-(`../docs/API.md`) is the simpler route today.
+`http-server.mjs` is the remote Streamable-HTTP transport with the same
+tools. It accepts two kinds of credential, both tied to the single Moodle
+service account:
+
+- the shared connector key as `Authorization: Bearer <HANDBOOK_MCP_AUTH_TOKEN>`
+  (ChatGPT custom connectors, or Claude Code with `--header`);
+- OAuth 2.1 with dynamic client registration and PKCE (`lib/oauth.mjs`):
+  claude.ai and Claude Desktop custom connectors register themselves and send
+  the person to a consent page where the same key is typed once. Enabled by
+  setting `HANDBOOK_MCP_PUBLIC_URL` to the public https origin.
+
+Deployment, secrets and connector setup: `DEPLOY.md`. Local end-to-end check
+of both paths: `npm run test:oauth`.
 
 ## Tools
 
