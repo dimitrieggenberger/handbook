@@ -3,19 +3,34 @@
  * Remote Streamable-HTTP entry point for the Handbook MCP adapter.
  *
  * Exposes the same tools as the local stdio server (lib/handbook.mjs) over an
- * authenticated HTTPS endpoint so a ChatGPT (Enterprise/Edu) custom connector
- * can reach them (spec 36.7). There is no publish tool, by design.
+ * authenticated HTTPS endpoint so remote MCP clients can reach them
+ * (spec 36.7). There is no publish tool, by design.
  *
- * Two separate secrets, never confused:
+ * Two ways in, one authority:
+ *   - Shared key: "Authorization: Bearer <HANDBOOK_MCP_AUTH_TOKEN>". This is
+ *     what a ChatGPT custom connector sends.
+ *   - OAuth 2.1 (lib/oauth.mjs): clients that discover authorization through
+ *     the MCP spec (claude.ai and Claude Desktop connectors, MCP Inspector)
+ *     register themselves, send a person to the consent page, where the same
+ *     shared key is typed once, and then hold their own tokens.
+ *   Either way the tools run through the single Moodle service account.
+ *
+ * Secrets, never confused:
  *   - HANDBOOK_WSTOKEN         Moodle token; stays server-side, never sent to
  *                             the client, never logged.
- *   - HANDBOOK_MCP_AUTH_TOKEN  bearer token the connector must present to us.
+ *   - HANDBOOK_MCP_AUTH_TOKEN  the shared connector key (Bearer, and the
+ *                             consent page); also seeds the OAuth signing key.
  *
  * Configuration (environment):
  *   HANDBOOK_BASE_URL          e.g. https://learn.europaschule.eu
  *   HANDBOOK_WSTOKEN           authorised service-account token
- *   HANDBOOK_MCP_AUTH_TOKEN    long random string the connector sends as
- *                             "Authorization: Bearer <token>"
+ *   HANDBOOK_MCP_AUTH_TOKEN    long random string (>= 24 chars)
+ *   HANDBOOK_MCP_PUBLIC_URL    public https origin of this app, e.g.
+ *                             https://mcp.europaschule.eu — enables OAuth.
+ *                             Without it only the shared key works.
+ *   HANDBOOK_MCP_OAUTH_SECRET  optional separate token-signing secret
+ *   HANDBOOK_MCP_OAUTH_STATE   optional path of the OAuth state file
+ *                             (default ~/.handbook-mcp-oauth.json)
  *   HANDBOOK_MCP_MODE          readwrite-drafts (default) or readonly
  *   HANDBOOK_MCP_PORT          listen port (default 3000)
  *   HANDBOOK_MCP_PATH          MCP route (default /mcp)
@@ -30,7 +45,11 @@ import { homedir } from "node:os";
 import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import { mcpAuthRouter, getOAuthProtectedResourceMetadataUrl } from "@modelcontextprotocol/sdk/server/auth/router.js";
+import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
+import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
 import { buildHandbookServer } from "./lib/handbook.mjs";
+import { HandbookOAuthProvider, SCOPE, deriveSigningKey } from "./lib/oauth.mjs";
 
 // Load KEY=VALUE lines from a file into process.env, without adding a
 // dependency. Only fills variables that are not already set, so real
@@ -68,10 +87,12 @@ loadEnvFile(join(homedir(), ".handbook-mcp.env"));
 const baseUrl = (process.env.HANDBOOK_BASE_URL || "").replace(/\/+$/, "");
 const wstoken = process.env.HANDBOOK_WSTOKEN || "";
 const authToken = process.env.HANDBOOK_MCP_AUTH_TOKEN || "";
+const publicUrl = (process.env.HANDBOOK_MCP_PUBLIC_URL || "").replace(/\/+$/, "");
 const mode = process.env.HANDBOOK_MCP_MODE === "readonly" ? "readonly" : "readwrite-drafts";
 // Infomaniak (and most managed Node hosts) inject the port via PORT.
 const port = Number(process.env.PORT || process.env.HANDBOOK_MCP_PORT || 3000);
 const mcpPath = process.env.HANDBOOK_MCP_PATH || "/mcp";
+const approvePath = "/oauth/approve";
 
 if (!baseUrl || !wstoken) {
   console.error("handbook-mcp: set HANDBOOK_BASE_URL and HANDBOOK_WSTOKEN.");
@@ -82,41 +103,88 @@ if (!authToken || authToken.length < 24) {
   process.exit(1);
 }
 
-/** Constant-time bearer-token check; never logs the token. */
-function authorized(req) {
-  const header = req.headers.authorization || "";
-  const match = header.match(/^Bearer\s+(.+)$/i);
-  if (!match) {
-    return false;
-  }
-  const provided = Buffer.from(match[1]);
-  const expected = Buffer.from(authToken);
-  return provided.length === expected.length && timingSafeEqual(provided, expected);
-}
-
 /** Minimal structured log line — never includes tokens or content bodies. */
 function log(fields) {
   console.error(JSON.stringify({ ts: new Date().toISOString(), ...fields }));
 }
 
+/** Constant-time comparison with the shared connector key. */
+function isSharedKey(token) {
+  const provided = Buffer.from(token);
+  const expected = Buffer.from(authToken);
+  return provided.length === expected.length && timingSafeEqual(provided, expected);
+}
+
 const app = express();
+// One reverse proxy (Passenger / the host's front end) sits in front of us;
+// the SDK's rate limiters key on the client IP it forwards.
+app.set("trust proxy", 1);
 app.use(express.json({ limit: "4mb" }));
 
 // Health check: reveals nothing sensitive, needs no auth.
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", mode });
+  res.json({ status: "ok", mode, oauth: Boolean(publicUrl) });
 });
+
+// ---- authorization -------------------------------------------------------
+
+let oauth = null;
+let resourceMetadataUrl;
+if (publicUrl) {
+  oauth = new HandbookOAuthProvider({
+    signingKey: deriveSigningKey(authToken, process.env.HANDBOOK_MCP_OAUTH_SECRET || ""),
+    connectorKey: authToken,
+    statePath: process.env.HANDBOOK_MCP_OAUTH_STATE || join(homedir(), ".handbook-mcp-oauth.json"),
+    approvePath,
+    log,
+  });
+  const issuerUrl = new URL(publicUrl);
+  const resourceServerUrl = new URL(mcpPath, publicUrl);
+  resourceMetadataUrl = getOAuthProtectedResourceMetadataUrl(resourceServerUrl);
+  // /.well-known/oauth-authorization-server, /.well-known/oauth-protected-resource<mcpPath>,
+  // /authorize, /token, /register, /revoke.
+  app.use(mcpAuthRouter({
+    provider: oauth,
+    issuerUrl,
+    resourceServerUrl,
+    scopesSupported: [SCOPE],
+    resourceName: "Manual Institucional EuropaSchule",
+  }));
+  // Some clients look for the protected-resource document at the root path.
+  app.get("/.well-known/oauth-protected-resource", (_req, res) => {
+    res.redirect(307, resourceMetadataUrl);
+  });
+  app.post(approvePath, express.urlencoded({ extended: false }), oauth.approveHandler());
+} else {
+  log({ event: "oauth_disabled", reason: "HANDBOOK_MCP_PUBLIC_URL not set; shared key only" });
+}
+
+/** Shared key first, then OAuth access tokens. Rejections are logged. */
+const verifier = {
+  async verifyAccessToken(token) {
+    if (isSharedKey(token)) {
+      return { token, clientId: "shared-key", scopes: [SCOPE], expiresAt: Math.floor(Date.now() / 1000) + 3600, extra: { auth: "shared-key" } };
+    }
+    if (oauth) {
+      try {
+        return await oauth.verifyAccessToken(token);
+      } catch (error) {
+        log({ event: "auth_rejected", path: mcpPath, reason: error.message });
+        throw error;
+      }
+    }
+    log({ event: "auth_rejected", path: mcpPath });
+    throw new InvalidTokenError("Unauthorized");
+  },
+};
+const authenticate = requireBearerAuth({ verifier, resourceMetadataUrl });
+
+// ---- MCP transport -------------------------------------------------------
 
 // Active transports keyed by MCP session id.
 const transports = {};
 
-app.post(mcpPath, async (req, res) => {
-  if (!authorized(req)) {
-    log({ event: "auth_rejected", path: mcpPath });
-    res.status(401).json(rpcError("Unauthorized"));
-    return;
-  }
-
+app.post(mcpPath, authenticate, async (req, res) => {
   const sessionId = req.headers["mcp-session-id"];
   let transport;
 
@@ -127,7 +195,7 @@ app.post(mcpPath, async (req, res) => {
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (sid) => {
         transports[sid] = transport;
-        log({ event: "session_open", session: sid });
+        log({ event: "session_open", session: sid, auth: req.auth?.extra?.auth || "unknown", client: req.auth?.clientId || "" });
       },
     });
     transport.onclose = () => {
@@ -148,10 +216,6 @@ app.post(mcpPath, async (req, res) => {
 
 // SSE stream + session teardown reuse one authenticated handler.
 const sessionRequest = async (req, res) => {
-  if (!authorized(req)) {
-    res.status(401).json(rpcError("Unauthorized"));
-    return;
-  }
   const sessionId = req.headers["mcp-session-id"];
   if (!sessionId || !transports[sessionId]) {
     res.status(400).send("Invalid or missing session id");
@@ -159,8 +223,8 @@ const sessionRequest = async (req, res) => {
   }
   await transports[sessionId].handleRequest(req, res);
 };
-app.get(mcpPath, sessionRequest);
-app.delete(mcpPath, sessionRequest);
+app.get(mcpPath, authenticate, sessionRequest);
+app.delete(mcpPath, authenticate, sessionRequest);
 
 /** JSON-RPC-shaped error body. */
 function rpcError(message) {
@@ -169,7 +233,7 @@ function rpcError(message) {
 
 const httpServer = createServer(app);
 httpServer.listen(port, () => {
-  log({ event: "listening", port, path: mcpPath, mode, base: baseUrl });
+  log({ event: "listening", port, path: mcpPath, mode, base: baseUrl, oauth: Boolean(publicUrl), issuer: publicUrl || null });
 });
 
 // Graceful shutdown.

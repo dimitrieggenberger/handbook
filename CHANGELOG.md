@@ -1,5 +1,24 @@
 # Changelog
 
+## MCP adapter 0.2.0 (2026-09-15)
+
+Remote transport accepts OAuth 2.1 as well as the shared key.
+
+- `mcp/http-server.mjs` now serves its own authorization server
+  (`mcp/lib/oauth.mjs`): dynamic client registration, authorization code
+  with PKCE, refresh-token rotation and revocation, standard discovery
+  documents, and a consent page where the connector key is typed once.
+  claude.ai and Claude Desktop custom connectors can connect; ChatGPT keeps
+  sending the key as a Bearer token. Enabled by `HANDBOOK_MCP_PUBLIC_URL`;
+  without it the server behaves exactly as before.
+- Tokens are signed and stateless; registered clients and revocations
+  persist in `~/.handbook-mcp-oauth.json`, so redeploys do not disconnect
+  clients. Rotating the connector key invalidates every OAuth token.
+- Unauthenticated requests answer 401 with the `WWW-Authenticate` resource
+  metadata the MCP authorization spec requires. No new tool, still no
+  approve or publish tool. `npm run test:oauth` checks the whole flow.
+- Not part of the plugin ZIP; `version.php` unchanged.
+
 ## 0.39.0 (2026-08-01)
 
 Revision mode: pages muted for readers while leadership reviews them.
