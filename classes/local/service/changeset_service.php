@@ -182,7 +182,7 @@ class changeset_service {
     public static function relation_types(): array {
         return ['relatedto', 'dependson', 'implements', 'replaces', 'supersedes',
             'exceptionto', 'procedurefor', 'quickguidefor', 'templatefor',
-            'assessmentfor', 'translationof'];
+            'assessmentfor', 'translationof', 'variantof'];
     }
 
     /** @var string[] Change-set states that reject further drafting. */

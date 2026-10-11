@@ -50,6 +50,75 @@ class helper {
     }
 
     /**
+     * Capability check for CONSULTATION read functions (multi-audience
+     * phase 3): a caller with the staff view capability reads the full
+     * handbook (returns null); a caller without it may still consult when
+     * it belongs to at least one audience — e.g. a per-audience
+     * consultation service account whose profile field carries the
+     * audience value. Such a caller receives its audience-id union and
+     * every result must be filtered through consult_where() /
+     * assert_consult_visible().
+     *
+     * Only the consultation function set uses this gate; every other
+     * function keeps the strict staff requirement of require_read().
+     *
+     * @param context_system $context System context.
+     * @return int[]|null Restriction (null = unrestricted staff caller).
+     */
+    public static function require_consult_read(context_system $context): ?array {
+        require_capability('local/handbook:apiaccess', $context);
+        if (has_capability('local/handbook:view', $context)) {
+            return null;
+        }
+        $restriction = \local_handbook\local\service\audience_service::reader_restriction();
+        if (!$restriction) {
+            // No staff capability and no audience: the standard error.
+            require_capability('local/handbook:view', $context);
+        }
+        return $restriction;
+    }
+
+    /**
+     * Deny direct access to a page invisible to a restricted consultation
+     * caller — indistinguishable from a page that does not exist. Pages
+     * under revision mode are likewise withheld from restricted callers.
+     *
+     * @param stdClass $page Page record.
+     * @param int[]|null $restriction From require_consult_read().
+     * @return void
+     */
+    public static function assert_consult_visible(stdClass $page, ?array $restriction): void {
+        if ($restriction === null) {
+            return;
+        }
+        if ((int)$page->publishedrevisionid === 0 || (int)$page->archived === 1
+                || (int)($page->underreview ?? 0) === 1
+                || !\local_handbook\local\service\audience_service::page_visible_to_restricted(
+                    (int)$page->id, $restriction)) {
+            throw new moodle_exception('errorpagenotfound', 'local_handbook');
+        }
+    }
+
+    /**
+     * AND-prefixed WHERE fragment confining a page query to what a
+     * restricted consultation caller may see; empty for staff callers.
+     *
+     * @param int[]|null $restriction From require_consult_read().
+     * @param string $alias Page table alias in the query.
+     * @param string $prefix Unique parameter prefix.
+     * @return array [$wheresql, $params]
+     */
+    public static function consult_where(?array $restriction, string $alias, string $prefix): array {
+        if ($restriction === null) {
+            return ['', []];
+        }
+        [$vis, $params] = \local_handbook\local\service\audience_service::visibility_sql(
+            $alias, $restriction, $prefix);
+        return [" AND $vis AND {$alias}.underreview = 0 AND {$alias}.archived = 0"
+            . " AND {$alias}.publishedrevisionid > 0", $params];
+    }
+
+    /**
      * Capability check for draft-write functions.
      *
      * @param context_system $context System context.

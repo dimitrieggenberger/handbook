@@ -33,8 +33,7 @@ require_once(__DIR__ . '/locallib.php');
 $query = trim(optional_param('q', '', PARAM_RAW));
 
 $context = context_system::instance();
-require_login(null, false);
-require_capability('local/handbook:view', $context);
+local_handbook_require_view($context);
 
 $limit = 12;
 $response = ['count' => 0, 'html' => ''];
@@ -46,6 +45,15 @@ if (\core_text::strlen($query) >= 2) {
         . $DB->sql_like('p.summary', ':q2', false) . ' OR '
         . $DB->sql_like('r.plaintext', ':q3', false) . ')';
     $sqlparams = ['q1' => $like, 'q2' => $like, 'q3' => $like];
+
+    // Restricted readers (phase 2) search only within their portal.
+    $restriction = \local_handbook\local\service\audience_service::reader_restriction();
+    if ($restriction !== null) {
+        [$vis, $visparams] = \local_handbook\local\service\audience_service::visibility_sql(
+            'p', $restriction, 'srch');
+        $where .= ' AND ' . $vis;
+        $sqlparams += $visparams;
+    }
 
     $total = (int)$DB->count_records_sql(
         "SELECT COUNT(1)

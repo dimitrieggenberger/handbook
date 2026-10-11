@@ -59,10 +59,11 @@ class get_page extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        helper::require_read($context);
+        $restriction = helper::require_consult_read($context);
 
         $page = helper::get_page_by_identifier($params['identifier']);
         helper::assert_not_excluded($page);
+        helper::assert_consult_visible($page, $restriction);
 
         if (!$page->publishedrevisionid) {
             throw new moodle_exception('notpublished', 'local_handbook');

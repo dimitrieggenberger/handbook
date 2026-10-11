@@ -1,8 +1,9 @@
 # Changelog
 
-## 0.39.1 (2026-10-11)
+## 0.42.1 (2026-10-11)
 
-Dark mode: the handbook follows Space's dark theme.
+Dark mode: the handbook follows Space's dark theme. Built on 0.42.0, the
+release the site runs (feature/handbook-ai-editorial-expansion, merged in).
 
 - With Space's dark mode on, the handbook kept its light colours: white
   category rows, search panel, cards, rails and article patterns on the dark
@@ -19,6 +20,9 @@ Dark mode: the handbook follows Space's dark theme.
   article pattern tokens derive from them, so every content pattern follows.
   Light mode keeps each literal; printing from dark mode resets the roles,
   so paper stays white. The hb-chat thread stays a light phone on purpose.
+- Audience chips (0.40.0+) take their admin-chosen colour as a CSS variable
+  (`--aud`), so on the dark page the name mixes toward the text colour; the
+  dot keeps the true colour. Light mode looks the same.
 - Bootstrap's muted, secondary and warning text, links on the authority note
   and on secondary alerts, and the hovered area tab are readable in dark mode.
 - Light mode contrast: amber and red pattern text (RACI "C", "Así no"
@@ -52,6 +56,91 @@ Remote transport accepts OAuth 2.1 as well as the shared key.
   metadata the MCP authorization spec requires. No new tool, still no
   approve or publish tool. `npm run test:oauth` checks the whole flow.
 - Not part of the plugin ZIP; `version.php` unchanged.
+
+## 0.42.0 (2026-08-02)
+
+Multi-audience handbook, phase 3: consult connectors and variant pages.
+
+- New READ-ONLY web service "Institutional Handbook Consultation"
+  (local_handbook_readonly) with exactly six lookup functions: list
+  categories/pages, get page, search, relations, context index. No
+  drafts, findings, change sets, revision history or working drafts.
+- Audience-aware API: a consult account WITHOUT the staff view
+  capability is audience-restricted exactly like a reader — it belongs
+  to audiences via its profile-field value, and every consult function
+  filters to tagged, published, non-under-review pages (relations only
+  show pairs whose BOTH endpoints are visible; direct access to an
+  invisible page 404s). A consult account WITH view (teachers) reads
+  the whole handbook; per-page aiaccess rules apply as always. All
+  other API functions keep the strict staff requirement.
+- MCP adapter: new HANDBOOK_MCP_MODE=consult — registers only the six
+  lookup tools and ships Spanish answer-structure instructions (direct
+  answer → detail → cited source; honest "not covered" answers; no
+  write offers). DEPLOY.md documents running consult instances beside
+  the editorial connector. REQUIRES an Infomaniak redeploy to use.
+- New typed relation "variantof" (Variante por audiencia) for pages
+  that share a topic but need a different tone per audience — the AI
+  can propose variant links through the existing change-set relations
+  channel, and phase-2 filtering already hides a variant's counterpart
+  from readers who cannot see it.
+- Family read-acknowledgements stay deliberately unbuilt: compliance
+  remains a staff instrument until real usage shows a need.
+
+## 0.41.0 (2026-08-02)
+
+Multi-audience handbook, phase 2: real access with hard filtering.
+
+- Entry: a logged-in Moodle user who matches at least one audience (via
+  the profile-field values set in Audiencias) now enters the handbook
+  WITHOUT the staff capability — the profile value is the ticket. An
+  audience with an empty value stays closed, so nothing opens until
+  leadership fills the values in.
+- Restricted readers (students, families) live inside the union of
+  their audiences on EVERY reader surface: home (categories, drawers,
+  highlights, continue-reading), category pages and subcategory lists,
+  search and live search, automatic title links, article view and
+  print. Untagged or foreign-audience pages 404 like unpublished ones —
+  internal articles never reveal themselves, not even by title.
+- Compliance stays staff-only (confirmations, tests, dashboard — all
+  capability-gated as before); revision mode mutes for everyone, and
+  print now enforces it too. Staff keep the full view plus per-audience
+  portal previews. No DB change; no MCP redeploy.
+
+## 0.40.0 (2026-08-02)
+
+Multi-audience handbook, phase 1: audiences, tags and portal previews.
+
+- Audience vocabulary (manage area → Audiencias), seeded with the five
+  agreed audiences: Personal (matched by handbook role), Estudiantes en
+  casa / híbridos / en campus and Familias (each matched by a user
+  profile field value — default field "city", values left EMPTY until
+  leadership sets them, so nothing matches by accident). Vocabulary is
+  extensible without code.
+- Page settings gain audience checkboxes: the article appears in every
+  checked audience's portal; nothing checked = internal staff article
+  (the safe default). Tags are page-scoped and human-edited — the AI
+  has no surface here yet (proposals may come later).
+- Portal previews, staff-only: an audience selector on the handbook
+  home filters the category accordion to exactly what that audience's
+  portal will show — categories with nothing for the audience vanish,
+  and the category pages follow the filter. Coloured audience chips
+  appear on cards and in the article details card.
+- NO access change: students and families cannot enter the handbook
+  yet. Phase 2 (opening real access, hard filters on search and all
+  reader surfaces) comes after leadership fills the profile values and
+  reviews the previews. New tables: local_handbook_audience,
+  local_handbook_pageaud.
+
+## 0.39.1 (2026-08-02)
+
+Hotfix: headings hugging the block above them (e.g. after a timeline).
+
+- Only h3 had its top margin restored against Bootstrap's zeroed
+  heading margins, so a month heading written as h2/h4 between two
+  hb-timeline blocks sat almost flush under the previous section. All
+  heading levels in the article body now get breathing room (h2–h3:
+  2rem, h4–h6: 1.6rem, none when first), and the timeline's own bottom
+  margin grew so following plain text is not cramped either.
 
 ## 0.39.0 (2026-08-01)
 

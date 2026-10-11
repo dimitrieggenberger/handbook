@@ -307,4 +307,25 @@ $services = [
         'downloadfiles' => 0,
         'uploadfiles' => 0,
     ],
+    // Consultation service (multi-audience phase 3): READ-ONLY, for the
+    // teachers' and per-audience consult connectors. No draft, finding,
+    // change-set or editorial-history function is included. A consult
+    // account WITHOUT the staff view capability is audience-restricted:
+    // it belongs to audiences via its profile field like any reader, and
+    // every function filters to tagged, published, non-under-review pages.
+    'Institutional Handbook Consultation (read-only)' => [
+        'functions' => [
+            'local_handbook_list_categories',
+            'local_handbook_list_pages',
+            'local_handbook_get_page',
+            'local_handbook_search_pages',
+            'local_handbook_list_relations',
+            'local_handbook_get_context_index',
+        ],
+        'shortname' => 'local_handbook_readonly',
+        'restrictedusers' => 1,
+        'enabled' => 1,
+        'downloadfiles' => 0,
+        'uploadfiles' => 0,
+    ],
 ];

@@ -28,6 +28,7 @@ require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
 use local_handbook\local\service\ack_service;
+use local_handbook\local\service\audience_service;
 use local_handbook\local\service\completion_service;
 use local_handbook\local\service\page_service;
 use local_handbook\local\service\pageview_service;
@@ -106,6 +107,16 @@ if ($action === 'markreview' || $action === 'markready') {
     redirect(local_handbook_page_url($page),
         get_string($action === 'markreview' ? 'pagemarkedreview' : 'pagemarkedready',
             'local_handbook'));
+}
+
+// Audience gate (phase 2): for restricted readers (students, families)
+// only pages tagged with one of their audiences exist — an untagged or
+// foreign-audience page 404s exactly like an unpublished one, so
+// internal articles never reveal themselves.
+$restriction = audience_service::reader_restriction();
+if ($restriction !== null
+        && !audience_service::page_visible_to_restricted((int)$page->id, $restriction)) {
+    throw new moodle_exception('errorpagenotfound', 'local_handbook');
 }
 
 // Revision mode, reader side: the page visibly exists (listed, linked,
@@ -257,19 +268,27 @@ $contenthtml = html_writer::div('', 'd-none', [
     'data-collapse' => get_string('acccollapseall', 'local_handbook'),
 ]) . $contenthtml;
 
-// Typed relations in both directions (spec 9.2).
+// Typed relations in both directions (spec 9.2). Restricted readers only
+// see related pages that exist for them — internal articles must not
+// reveal even their titles.
+$relvisibility = '';
+$relparams = [];
+if ($restriction !== null) {
+    [$relvis, $relparams] = audience_service::visibility_sql('p', $restriction, 'rel');
+    $relvisibility = ' AND ' . $relvis;
+}
 $outgoing = $DB->get_records_sql(
     "SELECT rel.id, rel.relationtype, p.slug, p.title, p.publishedrevisionid, p.archived
        FROM {local_handbook_relation} rel
        JOIN {local_handbook_page} p ON p.id = rel.targetpageid
-      WHERE rel.sourcepageid = :pageid
-   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id]);
+      WHERE rel.sourcepageid = :pageid$relvisibility
+   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id] + $relparams);
 $incoming = $DB->get_records_sql(
     "SELECT rel.id, rel.relationtype, p.slug, p.title, p.publishedrevisionid, p.archived
        FROM {local_handbook_relation} rel
        JOIN {local_handbook_page} p ON p.id = rel.sourcepageid
-      WHERE rel.targetpageid = :pageid
-   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id]);
+      WHERE rel.targetpageid = :pageid$relvisibility
+   ORDER BY rel.sortorder ASC, rel.id ASC", ['pageid' => $page->id] + $relparams);
 
 // Reading paths that include this page (for the acknowledgement card).
 $memberpaths = $DB->get_records_sql(
@@ -699,6 +718,16 @@ $rows .= html_writer::tag('dt', s(get_string('authoritylevel', 'local_handbook')
 if (trim((string)$page->responsiblearea) !== '') {
     $rows .= html_writer::tag('dt', s(get_string('responsiblearea', 'local_handbook')), ['class' => 'col-5'])
         . html_writer::tag('dd', s($page->responsiblearea), ['class' => 'col-7']);
+}
+
+$pageaudiences = audience_service::page_audience_map([(int)$page->id])[(int)$page->id] ?? [];
+if ($pageaudiences) {
+    $audchips = '';
+    foreach ($pageaudiences as $pageaudience) {
+        $audchips .= local_handbook_audience_chip($pageaudience) . ' ';
+    }
+    $rows .= html_writer::tag('dt', s(get_string('audiences', 'local_handbook')), ['class' => 'col-5'])
+        . html_writer::tag('dd', $audchips, ['class' => 'col-7']);
 }
 
 if ((int)$page->owneruserid > 0) {

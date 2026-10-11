@@ -139,6 +139,15 @@ if (\core_text::strlen($query) >= 2 || $contenttype !== '' || $categoryid) {
     $where = 'p.archived = 0 AND p.publishedrevisionid > 0';
     $sqlparams = [];
 
+    // Restricted readers (phase 2) search only within their portal.
+    $restriction = \local_handbook\local\service\audience_service::reader_restriction();
+    if ($restriction !== null) {
+        [$vis, $visparams] = \local_handbook\local\service\audience_service::visibility_sql(
+            'p', $restriction, 'srch');
+        $where .= ' AND ' . $vis;
+        $sqlparams += $visparams;
+    }
+
     if (\core_text::strlen($query) >= 2) {
         $where .= ' AND ('
             . $DB->sql_like('p.title', ':q1', false) . ' OR '

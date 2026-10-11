@@ -31,7 +31,11 @@
  *   HANDBOOK_MCP_OAUTH_SECRET  optional separate token-signing secret
  *   HANDBOOK_MCP_OAUTH_STATE   optional path of the OAuth state file
  *                             (default ~/.handbook-mcp-oauth.json)
- *   HANDBOOK_MCP_MODE          readwrite-drafts (default) or readonly
+ *   HANDBOOK_MCP_MODE          readwrite-drafts (default), readonly, or consult
+ *                              (consult = question-answering: six lookup tools
+ *                              + answer instructions; use with a token whose
+ *                              Moodle account carries the audience profile
+ *                              value so the plugin filters server-side)
  *   HANDBOOK_MCP_PORT          listen port (default 3000)
  *   HANDBOOK_MCP_PATH          MCP route (default /mcp)
  */
@@ -88,7 +92,8 @@ const baseUrl = (process.env.HANDBOOK_BASE_URL || "").replace(/\/+$/, "");
 const wstoken = process.env.HANDBOOK_WSTOKEN || "";
 const authToken = process.env.HANDBOOK_MCP_AUTH_TOKEN || "";
 const publicUrl = (process.env.HANDBOOK_MCP_PUBLIC_URL || "").replace(/\/+$/, "");
-const mode = process.env.HANDBOOK_MCP_MODE === "readonly" ? "readonly" : "readwrite-drafts";
+const mode = ["readonly", "consult"].includes(process.env.HANDBOOK_MCP_MODE)
+  ? process.env.HANDBOOK_MCP_MODE : "readwrite-drafts";
 // Infomaniak (and most managed Node hosts) inject the port via PORT.
 const port = Number(process.env.PORT || process.env.HANDBOOK_MCP_PORT || 3000);
 const mcpPath = process.env.HANDBOOK_MCP_PATH || "/mcp";
