@@ -51,7 +51,9 @@ class list_categories extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        helper::require_read($context);
+        // Consultation callers may list categories too (structure only —
+        // the page functions themselves enforce the audience filter).
+        helper::require_consult_read($context);
 
         $categories = $DB->get_records('local_handbook_category', ['visible' => 1],
             'parentid ASC, sortorder ASC, name ASC');

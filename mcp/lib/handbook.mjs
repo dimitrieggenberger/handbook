@@ -758,14 +758,116 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
   );
 }
 
+// ---- Consultation mode (multi-audience phase 3) ---------------------------.
+
+/**
+ * Server instructions for consultation instances: how the assistant should
+ * answer staff/student/family questions from the handbook. The Moodle
+ * service account behind the token decides WHAT is visible: an account
+ * without the staff capability is audience-restricted server-side.
+ */
+const CONSULT_INSTRUCTIONS = [
+  "Eres el asistente de CONSULTA del Manual Institucional de EuropaSchule.",
+  "Respondes únicamente con base en los artículos del manual que estas",
+  "herramientas devuelven; nunca inventes normas, fechas ni procedimientos.",
+  "",
+  "Estructura recomendada de cada respuesta:",
+  "1. Respuesta directa en 2-4 frases, en español claro.",
+  "2. Detalle o pasos, siguiendo el orden del artículo cuando sea un",
+  "   procedimiento.",
+  "3. Fuente: el título exacto del artículo (y su versión si está",
+  "   disponible), para que la persona pueda abrirlo en el manual.",
+  "",
+  "Si el manual no cubre la pregunta, dilo con claridad y sugiere",
+  "contactar a la persona responsable indicada en el artículo más",
+  "cercano al tema. Si dos artículos parecen contradecirse, cita ambos",
+  "y recomienda confirmar con dirección. No tienes herramientas de",
+  "escritura: no ofrezcas crear ni modificar contenido.",
+].join("\n");
+
+/**
+ * Register ONLY the consultation tool set: read-only lookups a question-
+ * answering assistant needs. No drafts, no findings, no change sets, no
+ * revision history, no working drafts.
+ *
+ * @param {McpServer} server
+ * @param {(fn: string, params?: object) => Promise<any>} ws
+ */
+export function registerConsultTools(server, ws) {
+  server.tool(
+    "handbook_search",
+    "Search published handbook pages by title, summary and text. Returns page summaries with slugs. Results are already filtered to what this connector's audience may read.",
+    {
+      query: z.string().describe("Search text (min 2 characters)"),
+      contenttype: z.string().optional().describe("Filter: policy, procedure, standard, guideline, quickguide, template, example, roledescription"),
+      categoryid: z.number().int().optional().describe("Filter by category id"),
+    },
+    handler(({ query, contenttype, categoryid }) =>
+      ws("local_handbook_search_pages", {
+        query,
+        contenttype: contenttype ?? "",
+        categoryid: categoryid ?? 0,
+      }))
+  );
+
+  server.tool(
+    "handbook_get_context_index",
+    "Compact index of the pages this connector may read: metadata, category path, dates and relations — but NOT full content. Load this first, then fetch full content only for the relevant pages.",
+    {},
+    handler(() => ws("local_handbook_get_context_index", { includearchived: false }))
+  );
+
+  server.tool(
+    "handbook_get_page",
+    "Get one handbook page with its published content (HTML + plain text), metadata and version. Always cite the page title (and version) when answering from it.",
+    { identifier: z.string().describe("Page slug or numeric id") },
+    handler(({ identifier }) => ws("local_handbook_get_page", { identifier }))
+  );
+
+  server.tool(
+    "handbook_list_categories",
+    "List the handbook's category tree (id, parentid, slug, name).",
+    {},
+    handler(() => ws("local_handbook_list_categories"))
+  );
+
+  server.tool(
+    "handbook_list_pages",
+    "List handbook pages (summaries without content), optionally by category. Only pages this connector's audience may read are returned.",
+    {
+      categoryid: z.number().int().optional().describe("Filter by category id"),
+    },
+    handler(({ categoryid }) =>
+      ws("local_handbook_list_pages", { categoryid: categoryid ?? 0, includearchived: false }))
+  );
+
+  server.tool(
+    "handbook_list_relations",
+    "Typed relations of a page (related, depends on, variant of…), both directions, restricted to pages this connector may read. Use it to point people at connected articles.",
+    { identifier: z.string().describe("Page slug or numeric id") },
+    handler(({ identifier }) => ws("local_handbook_list_relations", { identifier }))
+  );
+}
+
 /**
  * Build a fully-wired Handbook MCP server (transport-agnostic).
+ *
+ * Modes: "readwrite-drafts" (editorial connector), "readonly" (full read
+ * surface, no writes) and "consult" (question-answering: the six lookup
+ * tools plus answer-structure instructions; pair it with a token whose
+ * Moodle account carries the audience profile value so the plugin
+ * filters everything server-side).
  *
  * @param {{ baseUrl: string, token: string, mode?: string, name?: string, version?: string }} config
  * @returns {McpServer}
  */
 export function buildHandbookServer({ baseUrl, token, mode = "readwrite-drafts", name = "handbook", version = "0.2.0" }) {
   const ws = makeWs({ baseUrl, token });
+  if (mode === "consult") {
+    const server = new McpServer({ name, version }, { instructions: CONSULT_INSTRUCTIONS });
+    registerConsultTools(server, ws);
+    return server;
+  }
   const server = new McpServer({ name, version });
   registerHandbookTools(server, ws, { mode });
   return server;

@@ -101,6 +101,22 @@ class page_form extends \moodleform {
         $mform->addElement('select', 'aiaccess', get_string('aiaccess', 'local_handbook'), $aiaccesslevels);
         $mform->setDefault('aiaccess', 'full');
 
+        // Audience tags (multi-audience handbook): the article appears in
+        // every checked audience's portal. Nothing checked = internal staff.
+        $audiences = \local_handbook\local\service\audience_service::get_all(true);
+        if ($audiences) {
+            $group = [];
+            foreach ($audiences as $audience) {
+                $group[] = $mform->createElement('advcheckbox', 'aud' . $audience->id, '',
+                    format_string($audience->name));
+            }
+            $mform->addGroup($group, 'audiencesgroup',
+                get_string('audiences', 'local_handbook'), ' &nbsp; ', false);
+            $mform->addElement('static', 'audiencesnote', '',
+                \html_writer::span(get_string('audiencesnote', 'local_handbook'),
+                    'small text-muted'));
+        }
+
         $mform->addElement('date_selector', 'reviewdate', get_string('reviewdate', 'local_handbook'),
             ['optional' => true]);
 

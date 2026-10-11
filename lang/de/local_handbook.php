@@ -85,6 +85,37 @@ $string['pagemarkedready'] = 'Die Seite ist für Lesende wieder verfügbar.';
 $string['underreviewpill'] = 'In Überarbeitung';
 $string['underreviewnotice'] = 'Diese Seite wird derzeit vom Leitungsteam überarbeitet und ist in Kürze wieder verfügbar. Ihr Inhalt ist vorübergehend ausgeblendet.';
 $string['underreviewbanner'] = 'Überarbeitungsmodus: Lesende sehen diese Seite derzeit ausgegraut ohne Inhalt. Nutzen Sie „Als fertig markieren", sobald die Überarbeitung abgeschlossen ist.';
+
+// Zielgruppen (Mehrzielgruppen-Handbuch, Phase 1).
+$string['audiences'] = 'Zielgruppen';
+$string['manageaudiences'] = 'Zielgruppen';
+$string['manageaudiences_help'] = 'Zielgruppen sind Etiketten an Artikeln, nie Kopien des Handbuchs: eine Seite erscheint im Portal jeder markierten Zielgruppe, eine Seite ohne Etiketten bleibt intern für das Personal. Jede Zielgruppe definiert ihre Zugehörigkeit — Personal über die Handbuch-Rolle, alle anderen über einen vereinbarten Wert in einem Profilfeld.';
+$string['newaudience'] = 'Neue Zielgruppe';
+$string['editaudience'] = 'Zielgruppe bearbeiten';
+$string['audiencename'] = 'Name';
+$string['audiencekey'] = 'Schlüssel';
+$string['audiencekeytaken'] = 'Eine andere Zielgruppe verwendet diesen Schlüssel bereits.';
+$string['audiencematchtype'] = 'Wer gehört dazu';
+$string['audiencematch_profile'] = 'Nutzer, deren Profilfeld einen bestimmten Wert hat';
+$string['audiencematch_staff'] = 'Gesamtes Handbuch-Personal (über Rolle)';
+$string['audienceprofilefield'] = 'Profilfeld (city, department, institution oder Kurzname eines eigenen Feldes)';
+$string['audienceprofilevalue'] = 'Erforderlicher Wert (ohne Groß-/Kleinschreibung; leer trifft nie zu)';
+$string['audiencecolor'] = 'Chipfarbe (Hex)';
+$string['audiencecolorinvalid'] = 'Verwenden Sie eine Hex-Farbe wie #0078c3.';
+$string['audienceactive'] = 'Aktiv';
+$string['audiencesaved'] = 'Zielgruppe gespeichert.';
+$string['audiencedeleted'] = 'Zielgruppe gelöscht.';
+$string['audienceinuse'] = 'Löschen nicht möglich: {$a} Seite(n) tragen dieses Etikett noch.';
+$string['audiencepagecount'] = '{$a} Seite(n)';
+$string['audiencenomatcher'] = 'noch kein Zugehörigkeitswert gesetzt';
+$string['confirmdeleteaudience'] = 'Zielgruppe „{$a}" löschen?';
+$string['noaudiences'] = 'Noch keine Zielgruppen definiert.';
+$string['audiencesfootnote'] = 'Der Zugang ist AKTIV: jeder Moodle-Nutzer, dessen Profil dem Wert einer Zielgruppe entspricht, kann das Handbuch betreten und sieht genau die Artikel dieser Zielgruppe (plus jeder weiteren passenden Zielgruppe) — Startseite, Kategorien, Suche, Links und Druck sind gefiltert. Ein LEERER Wert hält die Zielgruppe geschlossen. Das Personal sieht immer alles; die Zielgruppenauswahl auf der Startseite zeigt jedes Portal in der Vorschau.';
+$string['portalempty'] = 'Dein Portal hat noch keine veröffentlichten Artikel. Schau bald wieder vorbei.';
+$string['audiencesnote'] = 'Der Artikel erscheint im Portal jeder markierten Zielgruppe. Nichts markiert = interner Personalartikel. Etiketten gelten sofort (Seiteneinstellungen, nicht Teil des Entwurfs).';
+$string['audienceview'] = 'Zielgruppenansicht';
+$string['audienceviewall'] = 'Vollständiges Handbuch (Personal)';
+$string['audiencepreviewbanner'] = 'Portalvorschau „{$a}": Lesende dieser Zielgruppe werden genau diese Artikel sehen, sobald der Zugang geöffnet wird. Heute sieht nur das Personal diese Vorschau.';
 $string['emptycategory'] = 'Diese Kategorie enthält noch keine veröffentlichten Seiten.';
 
 // Reader view.
@@ -625,6 +656,8 @@ $string['relation_assessmentfor'] = 'Überprüfung für';
 $string['relationrev_assessmentfor'] = 'Verbundene Überprüfung';
 $string['relation_translationof'] = 'Übersetzung von';
 $string['relationrev_translationof'] = 'Übersetzt als';
+$string['relation_variantof'] = 'Zielgruppenvariante von';
+$string['relationrev_variantof'] = 'Hat Zielgruppenvariante';
 
 // Quality findings (spec 19).
 $string['reportproblem'] = 'Fehler melden';

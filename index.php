@@ -27,6 +27,7 @@ require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/locallib.php');
 
 use local_handbook\local\service\ack_service;
+use local_handbook\local\service\audience_service;
 use local_handbook\local\service\pageview_service;
 use local_handbook\local\service\path_service;
 use local_handbook\local\service\report_service;
@@ -115,7 +116,8 @@ if (has_capability('local/handbook:acknowledge', $context)) {
 
 // Continue where you left off: recently opened articles still unconfirmed
 // on their current version (fed by the gray-zone view records).
-$continue = pageview_service::continue_candidates((int)$USER->id, 4);
+$continue = pageview_service::continue_candidates((int)$USER->id, 4,
+    audience_service::reader_restriction());
 if ($continue) {
     $body = html_writer::tag('h3',
         html_writer::tag('i', '', ['class' => 'fa-solid fa-book-open me-2 text-info',
@@ -207,11 +209,54 @@ echo html_writer::start_div('col-lg-8');
 // Each category is a native <details> drawer; opening it reveals its pages as
 // banner cards (same renderer as the category view) plus subcategory chips.
 
+// Audience portal preview (phase 1, staff-only surface): ?aud=N filters
+// the accordion to that audience's articles — the manual each portal will
+// show once access opens. Everyone who can reach this page today is staff.
+$aud = optional_param('aud', 0, PARAM_INT);
+$allaudiences = audience_service::get_all(true);
+if ($aud && !isset($allaudiences[$aud])) {
+    $aud = 0;
+}
+
+// Restricted readers (phase 2: students, families): the filter is the
+// union of their audiences — no switcher, no previews; the portal IS
+// their handbook. Staff ($restriction === null) keep the full view and
+// the per-audience preview.
+$restriction = audience_service::reader_restriction();
+if ($restriction !== null) {
+    $aud = 0;
+}
+$audfilter = $restriction !== null ? $restriction : $aud;
+
 $categories = local_handbook_get_categories(0, has_capability('local/handbook:managecategories', $context));
-$counts = local_handbook_count_published_pages_by_category();
+$counts = local_handbook_count_published_pages_by_category($audfilter);
+
+$audswitcher = '';
+if ($restriction === null && $allaudiences) {
+    $options = html_writer::tag('option', s(get_string('audienceviewall', 'local_handbook')),
+        ['value' => 0]);
+    foreach ($allaudiences as $audience) {
+        $attrs = ['value' => $audience->id];
+        if ((int)$audience->id === $aud) {
+            $attrs['selected'] = 'selected';
+        }
+        $options .= html_writer::tag('option', s(format_string($audience->name)), $attrs);
+    }
+    $audswitcher = html_writer::tag('form',
+        html_writer::tag('label', s(get_string('audienceview', 'local_handbook')),
+            ['class' => 'small text-muted mb-0 mr-1', 'for' => 'handbook-aud'])
+        . html_writer::tag('select', $options, ['name' => 'aud', 'id' => 'handbook-aud',
+            'class' => 'custom-select custom-select-sm w-auto',
+            'onchange' => 'this.form.submit()'])
+        . html_writer::tag('noscript', html_writer::tag('button', s(get_string('go')),
+            ['class' => 'btn btn-secondary btn-sm ml-1'])),
+        ['method' => 'get', 'action' => (new moodle_url('/local/handbook/index.php'))->out(false),
+            'class' => 'd-flex align-items-center mr-2']);
+}
 
 echo html_writer::div(
-    html_writer::tag('h3', s(get_string('categories', 'local_handbook')), ['class' => 'h5 mb-0'])
+    html_writer::tag('h3', s(get_string('categories', 'local_handbook')), ['class' => 'h5 mb-0 mr-auto'])
+    . $audswitcher
     . html_writer::tag('button', s(get_string('openall', 'local_handbook')), [
         'type' => 'button',
         'class' => 'btn btn-outline-secondary btn-sm',
@@ -222,17 +267,31 @@ echo html_writer::div(
     'd-flex align-items-center justify-content-between mb-3');
 $PAGE->requires->js(new moodle_url('/local/handbook/js/accordion.js'));
 
+if ($aud) {
+    echo html_writer::div(
+        html_writer::tag('i', '', ['class' => 'fa-solid fa-eye me-2', 'aria-hidden' => 'true'])
+        . s(get_string('audiencepreviewbanner', 'local_handbook',
+            format_string($allaudiences[$aud]->name))),
+        'alert alert-info');
+}
+
 if (!$categories) {
     echo html_writer::div(s(get_string('nocategoriesyet', 'local_handbook')), 'alert alert-info');
 } else {
     $items = '';
     foreach ($categories as $category) {
-        $caturl = new moodle_url('/local/handbook/category.php', ['id' => $category->id]);
+        $caturl = new moodle_url('/local/handbook/category.php',
+            ['id' => $category->id] + ($aud ? ['aud' => $aud] : []));
         $children = local_handbook_get_categories((int)$category->id);
 
         $pagecount = $counts[(int)$category->id] ?? 0;
         foreach ($children as $child) {
             $pagecount += $counts[(int)$child->id] ?? 0;
+        }
+        if (($aud || $restriction !== null) && $pagecount === 0) {
+            // Portal view: a category with nothing for this audience
+            // simply does not exist in its portal.
+            continue;
         }
         $countlabel = $pagecount === 1
             ? get_string('pagecountone', 'local_handbook')
@@ -266,8 +325,12 @@ if (!$categories) {
             $chips = '';
             foreach ($children as $child) {
                 $childcount = $counts[(int)$child->id] ?? 0;
+                if (($aud || $restriction !== null) && $childcount === 0) {
+                    continue;
+                }
                 $chips .= html_writer::link(
-                    new moodle_url('/local/handbook/category.php', ['id' => $child->id]),
+                    new moodle_url('/local/handbook/category.php',
+                        ['id' => $child->id] + ($aud ? ['aud' => $aud] : [])),
                     s($child->name) . ($childcount
                         ? ' ' . html_writer::span($childcount, 'chip-count') : ''),
                     ['class' => 'cat-acc-chip']);
@@ -278,11 +341,13 @@ if (!$categories) {
             $drawer .= html_writer::div($chips, 'cat-acc-chips');
         }
 
-        $pages = local_handbook_get_published_pages((int)$category->id);
+        $pages = local_handbook_get_published_pages((int)$category->id, $audfilter);
         if ($pages) {
             $versions = local_handbook_published_versions($pages);
+            $audmap = audience_service::page_audience_map(array_keys($pages));
             $cards = '';
             foreach ($pages as $page) {
+                $page->audiences = $audmap[(int)$page->id] ?? [];
                 $cards .= local_handbook_render_page_card($page,
                     $versions[(int)$page->publishedrevisionid] ?? 0);
             }
@@ -301,7 +366,11 @@ if (!$categories) {
             $summary . html_writer::div($drawer, 'cat-acc-body'),
             ['class' => 'local-handbook-cat-acc']);
     }
-    echo html_writer::div($items, 'local-handbook-cat-grid mb-4');
+    if ($restriction !== null && $items === '') {
+        echo html_writer::div(s(get_string('portalempty', 'local_handbook')), 'alert alert-info');
+    } else {
+        echo html_writer::div($items, 'local-handbook-cat-grid mb-4');
+    }
 }
 
 echo html_writer::end_div(); // .col-lg-8.
@@ -319,9 +388,18 @@ echo html_writer::end_div(); // .row.
 
 $railcards = [];
 
+// Restricted readers see highlights drawn only from their portal.
+$hlwhere = '';
+$hlparams = [];
+if ($restriction !== null) {
+    [$vis, $hlparams] = audience_service::visibility_sql(
+        '{local_handbook_page}', $restriction, 'hl');
+    $hlwhere = ' AND ' . $vis;
+}
+
 $safetypages = $DB->get_records_select('local_handbook_page',
-    "criticality = 'safetycritical' AND publishedrevisionid > 0 AND archived = 0",
-    [], 'title ASC', '*', 0, 6);
+    "criticality = 'safetycritical' AND publishedrevisionid > 0 AND archived = 0" . $hlwhere,
+    $hlparams, 'title ASC', '*', 0, 6);
 if ($safetypages) {
     $railcards[] = html_writer::tag('h3',
         html_writer::tag('i', '', ['class' => 'fa-solid fa-triangle-exclamation me-2 text-warning',
@@ -331,7 +409,7 @@ if ($safetypages) {
         . local_handbook_render_pagelist($safetypages);
 }
 
-$recent = local_handbook_get_recently_published(5);
+$recent = local_handbook_get_recently_published(5, $restriction ?? 0);
 if ($recent) {
     $railcards[] = html_writer::tag('h3',
         html_writer::tag('i', '', ['class' => 'fa-solid fa-clock-rotate-left me-2 text-muted',
@@ -345,8 +423,8 @@ if ($recent) {
 }
 
 $quickguides = $DB->get_records_select('local_handbook_page',
-    "contenttype = 'quickguide' AND publishedrevisionid > 0 AND archived = 0",
-    [], 'title ASC', '*', 0, 5);
+    "contenttype = 'quickguide' AND publishedrevisionid > 0 AND archived = 0" . $hlwhere,
+    $hlparams, 'title ASC', '*', 0, 5);
 if ($quickguides) {
     $railcards[] = html_writer::tag('h3',
         html_writer::tag('i', '', ['class' => 'fa-solid fa-bolt me-2 text-muted', 'aria-hidden' => 'true'])
@@ -359,8 +437,8 @@ if ($quickguides) {
 }
 
 $templates = $DB->get_records_select('local_handbook_page',
-    "contenttype = 'template' AND publishedrevisionid > 0 AND archived = 0",
-    [], 'title ASC', '*', 0, 5);
+    "contenttype = 'template' AND publishedrevisionid > 0 AND archived = 0" . $hlwhere,
+    $hlparams, 'title ASC', '*', 0, 5);
 if ($templates) {
     $railcards[] = html_writer::tag('h3',
         html_writer::tag('i', '', ['class' => 'fa-solid fa-file-lines me-2 text-muted', 'aria-hidden' => 'true'])

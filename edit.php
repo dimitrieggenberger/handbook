@@ -34,6 +34,7 @@ require_once(__DIR__ . '/locallib.php');
 require_once($CFG->libdir . '/formslib.php');
 
 use local_handbook\form\page_form;
+use local_handbook\local\service\audience_service;
 use local_handbook\local\service\image_service;
 use local_handbook\local\service\page_service;
 
@@ -168,6 +169,17 @@ if ($data = $form->get_data()) {
         }
     }
 
+    // Audience tags (page-scoped, like the rest of the metadata above):
+    // the article appears in every checked audience's portal; none checked
+    // keeps it internal to staff.
+    $taggedids = [];
+    foreach (audience_service::get_all(true) as $audience) {
+        if (!empty($data->{'aud' . $audience->id})) {
+            $taggedids[] = (int)$audience->id;
+        }
+    }
+    audience_service::set_page_audiences((int)$page->id, $taggedids);
+
     // Store the banner image against the page (file area keyed by page id).
     $data = file_postupdate_standard_filemanager($data, 'bannerimage', $banneroptions, $context,
         'local_handbook', 'bannerimage', (int)$page->id);
@@ -224,6 +236,9 @@ if ($page) {
     $defaults->aiaccess = $page->aiaccess;
     $defaults->reviewdate = (int)$page->reviewdate;
     $defaults->summary = $page->summary;
+    foreach (audience_service::page_audience_ids((int)$page->id) as $audienceid) {
+        $defaults->{'aud' . $audienceid} = 1;
+    }
 }
 
 // Without a working draft, the editor starts from the published content

@@ -65,7 +65,7 @@ class get_context_index extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        helper::require_read($context);
+        $restriction = helper::require_consult_read($context);
 
         // Category names/parents for the path column.
         $categories = $DB->get_records('local_handbook_category', null, '', 'id, name, parentid');
@@ -86,6 +86,9 @@ class get_context_index extends external_api {
         if (!$params['includearchived']) {
             $where .= " AND p.archived = 0";
         }
+        [$consultwhere, $consultparams] = helper::consult_where($restriction, 'p', 'civ');
+        $where .= $consultwhere;
+        $sqlparams += $consultparams;
         $sql = "SELECT p.*, r.versionnumber AS pubversion, r.contenthash AS pubhash,
                        r.timepublished AS pubtime
                   FROM {local_handbook_page} p
