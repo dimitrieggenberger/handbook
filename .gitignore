@@ -13,3 +13,5 @@ node_modules/
 vendor/
 .env
 mcp/.env
+# Dark theme check screenshots and reports (dev/darkmode-check/out/).
+dev/**/out/
