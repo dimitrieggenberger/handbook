@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.39.1 (2026-10-11)
+
+Dark mode: the handbook follows Space's dark theme.
+
+- With Space's dark mode on, the handbook kept its light colours: white
+  category rows, search panel, cards, rails and article patterns on the dark
+  page, with grey text that could not be read on them, and the theme's
+  primary blue (#002db3) as link and accent colour. Space defines none of the
+  `--bs-*` properties `styles.css` fell back on and leaves `--primary`,
+  `--gray-100` and `--dark` at their light values in dark mode, so every
+  fallback resolved to white or a light-mode colour.
+- Every colour in `styles.css` is now written as
+  `var(--lh-<role>, <light colour>)`; a `.theme-dark` block at the top
+  defines the roles with Space's dark palette (raised surfaces `#202124` on
+  `#191a1e`, light text, softened status colours: the values of
+  `local_grades`' `--lg-*` and the child theme's `$es-dm-*`). The hb-*
+  article pattern tokens derive from them, so every content pattern follows.
+  Light mode keeps each literal; printing from dark mode resets the roles,
+  so paper stays white. The hb-chat thread stays a light phone on purpose.
+- Bootstrap's muted, secondary and warning text, links on the authority note
+  and on secondary alerts, and the hovered area tab are readable in dark mode.
+- Light mode contrast: amber and red pattern text (RACI "C", "Así no"
+  badges, do/don't headings, `hb-fill`, the Estatuto Docente badge, the
+  reading dashboard's states, the quiz's wrong-answer verdict) used Space's
+  `--warning` (#f8c971, 1.6:1 on white) and `--danger` (#f45959, 3.3:1);
+  they now use the handbook's own #9a6700 and #b4232c, which meet WCAG AA.
+  Slightly darker than before.
+- Dark theme checks (`dev/darkmode-check/check.js`, not shipped), adapted
+  from `local_grades`: open every handbook page, the style guide and an
+  article carrying every content pattern, in dark and light mode, on desktop
+  and phone, in the simulation Moodle; report text below WCAG AA and light
+  surfaces left on the dark page. `dev/sim/seed.php` fills the simulation
+  (the seed JSON, the pattern article, a draft in review, a finding).
+
 ## MCP adapter 0.2.0 (2026-09-15)
 
 Remote transport accepts OAuth 2.1 as well as the shared key.

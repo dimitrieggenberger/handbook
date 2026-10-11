@@ -86,6 +86,17 @@ local_grades-approved patterns (`/local/grades/dev/uireference.php`) → new
 `#page-local-handbook-area`. Keep strings in EN, ES and DE. Design new screens
 as `dev/<name>-mockup/index.html` mockups first (see `dev/README.md`).
 
+Dark mode (Space's `.theme-dark` on the body): write every colour as
+`var(--lh-<role>, <light colour>)`. The `--lh-*` tokens are defined only in
+the `.theme-dark` block at the top of `styles.css`, so light mode keeps the
+literal. Space defines no `--bs-*` properties and keeps `--primary`,
+`--gray-100` and `--dark` light in dark mode, so a bare theme variable is not
+dark-safe. Article patterns use the `--hb-*` tokens, which derive from the
+`--lh-*` roles. For `styles.css` changes, run the dark theme checks in the
+simulation Moodle (`dev/darkmode-check/check.js`, usage in its header; seed
+first with `dev/sim/seed.php`): every handbook page, the style guide and an
+article with every pattern, dark and light, desktop and phone.
+
 ## Core Source Reference
 
 A sparse checkout of Moodle MOODLE_502_STABLE lives at
