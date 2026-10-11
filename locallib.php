@@ -103,7 +103,6 @@ function local_handbook_apply_page_setup(
     $PAGE->set_subpage($subpage);
     $PAGE->set_title($title);
     $PAGE->set_heading(local_handbook_get_plugin_heading($context));
-    $PAGE->requires->css(new moodle_url('/local/handbook/styles.css'));
 
     local_handbook_apply_breadcrumbs($url, $breadcrumbtitle !== '' ? $breadcrumbtitle : $title);
 }

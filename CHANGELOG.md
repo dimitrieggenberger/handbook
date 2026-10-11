@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.42.2 (2026-10-11)
+
+Fix: the dark theme did not show on the live site after upgrading to 0.42.1.
+
+- Every handbook page (and print.php) also linked `/local/handbook/styles.css`
+  directly through `$PAGE->requires->css()`, after the theme's stylesheet
+  and at a URL that never changes. Moodle already serves the plugin's
+  `styles.css` inside the theme stylesheet, whose URL changes with every
+  cache purge. Browsers kept the old direct copy after the upgrade, and its
+  rules (white surfaces, theme colours) came after the new dark tokens and
+  won: category rows, search panel and cards stayed white in dark mode. The
+  simulation sends no cache headers, so it never showed there.
+- The direct link is gone. The plugin's CSS now comes only through the
+  theme stylesheet, so an upgrade reaches every browser at once. Checked in
+  the simulation with the old `styles.css` still served at the old URL: the
+  page no longer loads it, and the dark theme checks pass on every page;
+  print.php keeps its styles.
+
 ## 0.42.1 (2026-10-11)
 
 Dark mode: the handbook follows Space's dark theme. Built on 0.42.0, the

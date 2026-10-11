@@ -65,7 +65,6 @@ $PAGE->set_pagelayout('embedded');
 $PAGE->set_pagetype(LOCAL_HANDBOOK_PAGE_TYPE);
 $PAGE->set_title(format_string($page->title));
 $PAGE->set_heading(format_string($page->title));
-$PAGE->requires->css(new moodle_url('/local/handbook/styles.css'));
 
 echo $OUTPUT->header();
 

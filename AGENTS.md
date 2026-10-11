@@ -45,7 +45,7 @@ and structural reference: page shell, area actions, CSS scoping, build script.
 - `db/tasks.php` + `classes/task/`: review reminders (weekly), link checker (daily, files broken_link findings)
 - `db/access.php`: capabilities (spec §7.3); `db/install.xml`: schema (spec §20)
 - `lang/{en,es,de}/local_handbook.php`: UI strings (all three, always)
-- `styles.css`: plugin CSS, scoped to `#page-local-handbook-area`
+- `styles.css`: plugin CSS, scoped to `#page-local-handbook-area` — Moodle serves it inside the theme stylesheet; never also add it with `$PAGE->requires->css()` (an unversioned URL that browsers keep across upgrades, 0.42.2)
 
 ## Architecture Rules
 
