@@ -45,6 +45,12 @@
     color: var(--lh-muted) !important;
 }
 
+/* Space's dark code background (#47484b) is lighter than the page: a muted
+   audience key on it reads 4.3:1. */
+#page-local-handbook-area.theme-dark [role="main"] code.text-muted {
+    color: var(--lh-ink) !important;
+}
+
 /* Space's .text-warning is its light yellow in both modes (1.6:1 on white). */
 #page-local-handbook-area [role="main"] .text-warning {
     color: var(--lh-warn, #9a6700) !important;
@@ -2733,12 +2739,20 @@
     font-weight: 700;
     white-space: nowrap;
     margin-right: 0.55rem;
+    color: var(--aud);
+}
+/* An audience's colour is chosen in Audiencias for light pages; on the dark
+   page its name mixes toward the text colour (an admin's mid-tone blue or
+   green reads 3.4:1 otherwise). The dot keeps the true colour. */
+#page-local-handbook-area.theme-dark .local-handbook-aud-chip {
+    color: color-mix(in srgb, var(--aud) 45%, var(--lh-ink));
 }
 #page-local-handbook-area .local-handbook-aud-chip .aud-dot {
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
     flex: none;
+    background: var(--aud);
 }
 #page-local-handbook-area .local-handbook-card-audiences {
     margin-top: 0.4rem;

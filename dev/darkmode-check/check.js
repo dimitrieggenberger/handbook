@@ -130,6 +130,8 @@ const audit = dark => {
     echo json_encode(["page" => (int)$page->id, "category" => (int)$page->categoryid,
       "from" => (int)$revs[0], "to" => (int)end($revs),
       "path" => (int)$DB->get_field_sql("SELECT MIN(id) FROM {local_handbook_path}"),
+      "audience" => $DB->get_manager()->table_exists("local_handbook_audience")
+        ? (int)$DB->get_field_sql("SELECT MIN(id) FROM {local_handbook_audience}") : 0,
       "finding" => (int)$DB->get_field_sql("SELECT MIN(id) FROM {local_handbook_finding}")]);`));
   const setdark = on => php(`foreach ($DB->get_records_select("user", "deleted = 0 AND username <> 'guest'") as $user) {
       set_user_preference("darkmode-on", ${on ? 1 : 0}, $user); }`);
@@ -180,6 +182,10 @@ const audit = dark => {
     ['manage-images', admin, L + 'manage/images.php'],
     ['manage-holders', admin, L + 'manage/holders.php?id=' + ids.page],
     ['manage-import', admin, L + 'manage/import.php'],
+    // Audiences (0.40.0+): the management page and the home's portal preview.
+    ['manage-audiences', admin, L + 'manage/audiences.php'],
+    ['manage-audience', admin, L + 'manage/audiences.php?action=edit&id=' + ids.audience],
+    ['index-audience-preview', admin, L + 'index.php?aud=' + ids.audience],
   ].filter(c => !ONLY.length || ONLY.includes(c[0]));
   const phone = ['index', 'category', 'view-patterns', 'view-procedure', 'path', 'search'];
 

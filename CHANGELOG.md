@@ -20,6 +20,9 @@ release the site runs (feature/handbook-ai-editorial-expansion, merged in).
   article pattern tokens derive from them, so every content pattern follows.
   Light mode keeps each literal; printing from dark mode resets the roles,
   so paper stays white. The hb-chat thread stays a light phone on purpose.
+- Audience chips (0.40.0+) take their admin-chosen colour as a CSS variable
+  (`--aud`), so on the dark page the name mixes toward the text colour; the
+  dot keeps the true colour. Light mode looks the same.
 - Bootstrap's muted, secondary and warning text, links on the authority note
   and on secondary alerts, and the hovered area tab are readable in dark mode.
 - Light mode contrast: amber and red pattern text (RACI "C", "Así no"

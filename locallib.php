@@ -1856,10 +1856,11 @@ function local_handbook_render_page_card(stdClass $page, int $version = 0): stri
 function local_handbook_audience_chip(stdClass $audience): string {
     $color = preg_match('/^#[0-9a-fA-F]{6}$/', (string)$audience->colorhex)
         ? $audience->colorhex : '#6c757d';
+    // The colour goes in as --aud so styles.css can lighten the text in dark mode.
     return html_writer::span(
-        html_writer::span('', 'aud-dot', ['style' => 'background:' . $color . ';'])
+        html_writer::span('', 'aud-dot')
         . s(format_string($audience->name)),
-        'local-handbook-aud-chip', ['style' => 'color:' . $color . ';']);
+        'local-handbook-aud-chip', ['style' => '--aud:' . $color . ';']);
 }
 
 /**
