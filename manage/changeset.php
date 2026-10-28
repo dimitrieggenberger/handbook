@@ -330,7 +330,7 @@ foreach ($changeset->items as $item) {
                 && trim((string)$item->conflictnote) !== '') {
             $body .= html_writer::div(s($item->conflictnote), 'alert alert-warning py-2 px-3 small mb-2');
         }
-        $body .= local_handbook_render_new_page_preview($data);
+        $body .= local_handbook_render_new_page_preview($data, (int)$item->id);
         $body .= local_handbook_changeset_nonrevision_actions($url, $item,
             $canapprove, $canpublish, $canreview);
         echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');

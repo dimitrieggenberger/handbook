@@ -905,7 +905,11 @@
 /* ---- figure with caption ---- */
 #page-local-handbook-area .hb-figure { margin: 1rem 0; }
 #page-local-handbook-area .hb-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--hb-line); border-radius: 0.65rem; }
-#page-local-handbook-area .hb-figure figcaption { font-size: 0.8rem; color: var(--hb-muted); margin-top: 0.5rem; padding-left: 0.15rem; }
+/* Moodle's HTML cleaning removes <figure> and <figcaption>, so the pattern is
+   written <div class="hb-figure"> with <p class="hb-caption"> (0.43.0); the
+   figcaption rule stays for content written before. */
+#page-local-handbook-area .hb-figure figcaption,
+#page-local-handbook-area .hb-figure .hb-caption { font-size: 0.8rem; color: var(--hb-muted); margin-top: 0.5rem; padding-left: 0.15rem; }
 
 /* ---- fact sheet / ficha ---- */
 #page-local-handbook-area .hb-keyvalue { border: 1px solid var(--hb-line); border-radius: 0.65rem; overflow: hidden; margin: 1rem 0; max-width: 36rem; }

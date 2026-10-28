@@ -296,6 +296,20 @@ $functions = [
         'type' => 'write',
         'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
     ],
+
+    // Content repository round trip (0.43.0): screenshots into drafts, pages out.
+    'local_handbook_attach_changeset_file' => [
+        'classname' => 'local_handbook\external\attach_changeset_file',
+        'description' => 'Attach an image to a change item\'s draft (draft only; nothing is published).',
+        'type' => 'write',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view, local/handbook:edit',
+    ],
+    'local_handbook_export_page' => [
+        'classname' => 'local_handbook\external\export_page',
+        'description' => 'One page as a portable record: fiche, audiences, published content and its files.',
+        'type' => 'read',
+        'capabilities' => 'local/handbook:apiaccess, local/handbook:view',
+    ],
 ];
 
 $services = [

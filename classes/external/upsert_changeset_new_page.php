@@ -48,7 +48,11 @@ class upsert_changeset_new_page extends external_api {
             'tempkey' => new external_value(PARAM_TEXT, 'Stable id within the change set (e.g. newpage:slug)'),
             'page' => new external_single_structure([
                 'title' => new external_value(PARAM_TEXT, 'Title'),
-                'categoryid' => new external_value(PARAM_INT, 'Existing category id'),
+                'categoryid' => new external_value(PARAM_INT,
+                    'Existing category id (0 when categorytempkey names a category proposed in this set)',
+                    VALUE_DEFAULT, 0),
+                'categorytempkey' => new external_value(PARAM_TEXT,
+                    'Tempkey of a category proposed in this change set', VALUE_OPTIONAL),
                 'content' => new external_value(PARAM_RAW, 'Content HTML (headings start at h2)'),
                 'slug' => new external_value(PARAM_TEXT, 'Preferred slug', VALUE_OPTIONAL),
                 'summary' => new external_value(PARAM_RAW, 'Summary', VALUE_OPTIONAL),
@@ -59,6 +63,9 @@ class upsert_changeset_new_page extends external_api {
                 'reviewdate' => new external_value(PARAM_INT, 'Review date (unix time)', VALUE_OPTIONAL),
                 'requiredreading' => new external_value(PARAM_BOOL, 'Required-reading flag', VALUE_OPTIONAL),
                 'language' => new external_value(PARAM_ALPHANUMEXT, 'Language code', VALUE_OPTIONAL),
+                'audiences' => new external_value(PARAM_TEXT,
+                    'Proposed audience keys, comma-separated (empty = internal staff article); '
+                    . 'a human confirms them when publishing', VALUE_OPTIONAL),
             ], 'New page fiche and content'),
         ]);
     }

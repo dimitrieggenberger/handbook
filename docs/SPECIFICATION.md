@@ -1514,7 +1514,7 @@ This chapter extends the external API (17) and MCP adapter (18) so approved AI c
 
 Handbook AI **may**: list/search/read AI-eligible content and relations; read permitted working drafts; create new page drafts; create a revision draft based on the current published revision; update its own editable draft; create advisory findings; create and manage draft change sets; and submit drafts or a change set for human review **after an explicit user instruction**.
 
-Handbook AI **may never**: approve or publish a revision; use bootstrap direct publication; archive or delete published content; change permissions, categories, audiences or paths; silently overwrite a human draft or a draft belonging to another change set; or bypass the service layer with direct database writes. There is deliberately no external function and no MCP tool for approval or publication, and none may be added.
+Handbook AI **may never**: approve or publish a revision; use bootstrap direct publication; archive or delete published content; change permissions, categories, audiences or paths (it may *propose* audiences, categories and paths in a change set; a person applies them by publishing the item, 0.43.0); silently overwrite a human draft or a draft belonging to another change set; or bypass the service layer with direct database writes. There is deliberately no external function and no MCP tool for approval or publication, and none may be added.
 
 ### 36.2 Operating model
 

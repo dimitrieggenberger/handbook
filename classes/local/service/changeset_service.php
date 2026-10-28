@@ -87,15 +87,17 @@ class changeset_service {
 
     /**
      * Page fiche fields a metadata proposal may patch. Deliberately excludes
-     * structural and sensitive fields (slug, categoryid, audience, aiaccess,
-     * owner/approver, archived) — those arrive with the taxonomy, lifecycle
-     * and sensitive-field work in later increments.
+     * structural and sensitive fields (categoryid, aiaccess, owner/approver,
+     * archived) — those arrive with the taxonomy, lifecycle and
+     * sensitive-field work in later increments. Audiences (0.43.0) are
+     * proposed as audience keys and applied only when a human publishes the
+     * item: the reviewer confirms them like any other fiche field.
      *
      * @return string[]
      */
     public static function metadata_fields(): array {
         return ['title', 'slug', 'summary', 'contenttype', 'authoritylevel', 'criticality',
-            'responsiblearea', 'reviewdate', 'requiredreading'];
+            'responsiblearea', 'reviewdate', 'requiredreading', 'audiences'];
     }
 
     /**
@@ -171,7 +173,82 @@ class changeset_service {
     public static function new_page_fields(): array {
         return ['title', 'slug', 'summary', 'categoryid', 'content', 'contenttype',
             'authoritylevel', 'criticality', 'responsiblearea', 'reviewdate',
-            'requiredreading', 'language'];
+            'requiredreading', 'language', 'audiences', 'categorytempkey'];
+    }
+
+    /** @var string[] Image extensions a change set may attach to a draft (no SVG: it can carry script). */
+    public const ATTACH_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
+
+    /** @var int Largest image a change set may attach, in bytes. */
+    public const ATTACH_MAXBYTES = 5 * 1024 * 1024;
+
+    /**
+     * Normalise a proposed audience list to the sorted, unique keys of
+     * existing audiences. An empty list is a valid proposal: no tags, an
+     * internal staff article.
+     *
+     * @param mixed $value Array of keys or a comma-separated string.
+     * @return string[] Audience keys.
+     */
+    public static function normalise_audience_keys($value): array {
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+        if (!is_array($value)) {
+            throw new moodle_exception('errormetadatavalue', 'local_handbook', '', 'audiences');
+        }
+        $known = [];
+        foreach (audience_service::get_all() as $audience) {
+            $known[$audience->audiencekey] = true;
+        }
+        $keys = [];
+        foreach ($value as $key) {
+            $key = trim((string)$key);
+            if ($key === '') {
+                continue;
+            }
+            if (!isset($known[$key])) {
+                throw new moodle_exception('erroraudiencekey', 'local_handbook', '', $key);
+            }
+            $keys[$key] = $key;
+        }
+        $keys = array_values($keys);
+        sort($keys);
+        return $keys;
+    }
+
+    /**
+     * Audience keys a page is tagged with today, sorted.
+     *
+     * @param int $pageid Page id.
+     * @return string[]
+     */
+    public static function page_audience_keys(int $pageid): array {
+        $keys = [];
+        foreach (audience_service::page_audience_map([$pageid])[$pageid] ?? [] as $audience) {
+            $keys[] = (string)$audience->audiencekey;
+        }
+        sort($keys);
+        return $keys;
+    }
+
+    /**
+     * Tag a page with the audiences behind a list of keys.
+     *
+     * @param int $pageid Page id.
+     * @param string[] $keys Audience keys (already normalised).
+     * @return void
+     */
+    private static function apply_audience_keys(int $pageid, array $keys): void {
+        global $DB;
+
+        $ids = [];
+        if ($keys) {
+            [$insql, $params] = $DB->get_in_or_equal($keys, SQL_PARAMS_NAMED, 'ak');
+            $ids = $DB->get_fieldset_select('local_handbook_audience', 'id',
+                "audiencekey $insql", $params);
+        }
+        audience_service::set_page_audiences($pageid, $ids);
     }
 
     /**
@@ -475,6 +552,9 @@ class changeset_service {
                 case 'requiredreading':
                     $normalised['requiredreading'] = (int)((bool)$value);
                     break;
+                case 'audiences':
+                    $normalised['audiences'] = self::normalise_audience_keys($value);
+                    break;
             }
         }
 
@@ -530,6 +610,127 @@ class changeset_service {
     }
 
     /**
+     * Attach one image to a change item's draft, so a proposal can carry its
+     * screenshots. Content references it as @@PLUGINFILE@@/<filename>.
+     *
+     * - A page_revision item stores it in its working revision's file area,
+     *   where the draft preview, the diff and, once published, readers find it.
+     * - A page_create item has no revision yet: the file waits in the
+     *   'proposal' area (itemid = change item) and moves into the first
+     *   revision when a human publishes the page.
+     *
+     * A file of the same name is replaced; nothing else is removed. Only the
+     * set's own editable drafts accept files, never a human draft or one in
+     * review.
+     *
+     * @param int $changesetid Change-set id.
+     * @param int $itemid Change-item id (must belong to the set).
+     * @param string $filename File name (letters, digits, dot, dash, underscore).
+     * @param string $content Raw file bytes.
+     * @param int $userid Acting user (0 = current user).
+     * @return array filename, filesize, contenthash, mimetype, reference.
+     */
+    public static function attach_file(int $changesetid, int $itemid, string $filename,
+            string $content, int $userid = 0): array {
+        global $DB, $USER;
+
+        $userid = $userid ?: (int)$USER->id;
+
+        $changeset = $DB->get_record('local_handbook_changeset', ['id' => $changesetid], '*', MUST_EXIST);
+        if (in_array($changeset->status, self::LOCKED_STATUSES, true)) {
+            throw new moodle_exception('errorchangesetlocked', 'local_handbook');
+        }
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['id' => $itemid, 'changesetid' => $changesetid], '*', MUST_EXIST);
+        if ($item->itemstatus !== self::ITEM_DRAFT) {
+            throw new moodle_exception('errorattachitem', 'local_handbook');
+        }
+
+        if ($item->kind === self::KIND_PAGE_REVISION) {
+            $revision = $DB->get_record('local_handbook_revision', ['id' => $item->revisionid]);
+            if (!$revision || (int)$revision->pageid !== (int)$item->pageid
+                    || !in_array($revision->status, page_service::EDITABLE_STATUSES, true)) {
+                throw new moodle_exception('errorattachitem', 'local_handbook');
+            }
+            $filearea = 'revision';
+            $areaitemid = (int)$revision->id;
+        } else if ($item->kind === self::KIND_PAGE_CREATE) {
+            $filearea = 'proposal';
+            $areaitemid = (int)$item->id;
+        } else {
+            throw new moodle_exception('errorattachitem', 'local_handbook');
+        }
+
+        $filename = clean_param($filename, PARAM_FILE);
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if ($filename === '' || !preg_match('/^[A-Za-z0-9._-]+$/', $filename)
+                || !in_array($extension, self::ATTACH_EXTENSIONS, true)) {
+            throw new moodle_exception('errorattachfiletype', 'local_handbook');
+        }
+        if ($content === '' || strlen($content) > self::ATTACH_MAXBYTES) {
+            throw new moodle_exception('errorattachfilesize', 'local_handbook',
+                '', display_size(self::ATTACH_MAXBYTES));
+        }
+        // The bytes must really be an image of an allowed kind, whatever the name says.
+        $info = @getimagesizefromstring($content);
+        $allowedmimes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+        if (!$info || !in_array($info['mime'] ?? '', $allowedmimes, true)) {
+            throw new moodle_exception('errorattachfiletype', 'local_handbook');
+        }
+
+        $context = context_system::instance();
+        $fs = get_file_storage();
+        $existing = $fs->get_file($context->id, 'local_handbook', $filearea, $areaitemid, '/', $filename);
+        if ($existing) {
+            $existing->delete();
+        }
+        $file = $fs->create_file_from_string([
+            'contextid' => $context->id,
+            'component' => 'local_handbook',
+            'filearea' => $filearea,
+            'itemid' => $areaitemid,
+            'filepath' => '/',
+            'filename' => $filename,
+            'mimetype' => $info['mime'],
+            'userid' => $userid,
+        ], $content);
+
+        if (image_service::enabled()) {
+            image_service::optimize_file($file);
+            $file = $fs->get_file($context->id, 'local_handbook', $filearea, $areaitemid, '/', $filename);
+        }
+
+        $DB->update_record('local_handbook_changeset', (object)[
+            'id' => $changeset->id, 'timemodified' => time(), 'modifiedby' => $userid,
+        ]);
+
+        return [
+            'filename' => $file->get_filename(),
+            'filesize' => (int)$file->get_filesize(),
+            'contenthash' => $file->get_contenthash(),
+            'mimetype' => (string)$file->get_mimetype(),
+            'reference' => '@@PLUGINFILE@@/' . rawurlencode($file->get_filename()),
+        ];
+    }
+
+    /**
+     * Move a new-page proposal's attached images into its first revision.
+     *
+     * @param int $itemid Change-item id (kind page_create).
+     * @param int $revisionid The new page's draft revision.
+     * @return void
+     */
+    private static function move_proposal_files(int $itemid, int $revisionid): void {
+        $context = context_system::instance();
+        $fs = get_file_storage();
+        foreach ($fs->get_area_files($context->id, 'local_handbook', 'proposal', $itemid,
+                'filepath, filename', false) as $file) {
+            $fs->create_file_from_storedfile(['filearea' => 'revision', 'itemid' => $revisionid], $file);
+        }
+        $fs->delete_area_files($context->id, 'local_handbook', 'proposal', $itemid);
+    }
+
+    /**
      * Validate and normalise a new-page proposal (throws on any problem).
      *
      * @param array $data Raw new-page fields.
@@ -542,8 +743,13 @@ class changeset_service {
         if ($title === '' || \core_text::strlen($title) > 255) {
             throw new moodle_exception('errormetadatavalue', 'local_handbook', '', 'title');
         }
+        // An existing category, or one proposed in the same change set (its
+        // tempkey resolves when the set is published, categories first).
         $categoryid = (int)($data['categoryid'] ?? 0);
-        if (!$categoryid || !$DB->record_exists('local_handbook_category', ['id' => $categoryid])) {
+        $categorytempkey = trim((string)($data['categorytempkey'] ?? ''));
+        if ($categorytempkey !== '') {
+            $categoryid = 0;
+        } else if (!$categoryid || !$DB->record_exists('local_handbook_category', ['id' => $categoryid])) {
             throw new moodle_exception('errornewpagecategory', 'local_handbook');
         }
         $content = (string)($data['content'] ?? '');
@@ -557,6 +763,9 @@ class changeset_service {
             'content' => $content,
             'summary' => (string)($data['summary'] ?? ''),
         ];
+        if ($categorytempkey !== '') {
+            $out['categorytempkey'] = self::normalise_tempkey($categorytempkey);
+        }
         if (!empty($data['slug'])) {
             $out['slug'] = page_service::slugify((string)$data['slug']);
         }
@@ -571,6 +780,9 @@ class changeset_service {
         $out['language'] = \core_text::substr(trim((string)($data['language'] ?? 'es')), 0, 10) ?: 'es';
         if (isset($data['responsiblearea']) && trim((string)$data['responsiblearea']) !== '') {
             $out['responsiblearea'] = area_service::resolve_name((string)$data['responsiblearea']);
+        }
+        if (array_key_exists('audiences', $data) && $data['audiences'] !== null) {
+            $out['audiences'] = self::normalise_audience_keys($data['audiences']);
         }
         return $out;
     }
@@ -1439,6 +1651,8 @@ class changeset_service {
         }
 
         $DB->delete_records('local_handbook_changeitem', ['id' => $itemid]);
+        get_file_storage()->delete_area_files(context_system::instance()->id,
+            'local_handbook', 'proposal', $itemid);
         self::recompute_status((int)$item->changesetid, $userid);
     }
 
@@ -1839,6 +2053,12 @@ class changeset_service {
             unset($normalised['slug']);
         }
 
+        // Audiences are tags in their own table, not a page column.
+        if (array_key_exists('audiences', $normalised)) {
+            self::apply_audience_keys((int)$page->id, $normalised['audiences']);
+            unset($normalised['audiences']);
+        }
+
         $update = (object)['id' => (int)$page->id];
         foreach ($normalised as $field => $value) {
             $update->$field = $value;
@@ -1900,10 +2120,25 @@ class changeset_service {
         }
         // Re-validate defensively (category may have changed since proposal).
         $data = self::validate_new_page($data);
+        if (!empty($data['categorytempkey'])) {
+            $data['categoryid'] = self::resolve_tempkey_category((int)$item->changesetid,
+                $data['categorytempkey']);
+        }
+        unset($data['categorytempkey']);
+
+        $audiences = $data['audiences'] ?? null;
+        unset($data['audiences']);
 
         $record = (object)$data;
         $record->contentformat = FORMAT_HTML;
         $page = page_service::create_page($record, $userid);
+
+        if ($audiences !== null) {
+            self::apply_audience_keys((int)$page->id, $audiences);
+        }
+
+        // Images attached to the proposal become the first revision's files.
+        self::move_proposal_files((int)$item->id, (int)$page->draftrevision->id);
 
         // Publish the first revision through the governed transitions.
         $revision = $page->draftrevision;

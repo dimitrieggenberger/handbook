@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.43.0 (2026-10-28)
+
+The content repository round trip: platform guides with screenshots are
+proposed from a repository (`dimitrieggenberger/handbook-content`), people
+review and publish them here, and what is published flows back.
+
+- Audiences can be proposed. A metadata proposal and a new-page proposal
+  carry `audiences` (audience keys; none = internal staff article). They are
+  applied only when a person publishes the item: the change-set page shows
+  the proposed audiences by name next to the current ones, so the reviewer
+  confirms them like any other fiche field. The AI still cannot tag a page
+  itself.
+- Screenshots reach drafts. `local_handbook_attach_changeset_file` attaches
+  an image to a change item: to a page draft's working revision, or, for a
+  new-page proposal, to a `proposal` file area that moves into the first
+  revision when the page is published. Images only (PNG, JPEG, GIF, WebP;
+  the bytes are checked, not the name), up to 5 MB, optimised like any
+  handbook image.
+- A new-page proposal can name a category proposed in the same change set
+  (`categorytempkey`); categories are applied first.
+- The review page previews a proposed new page's article, with its images,
+  folded under "Ver el artículo propuesto". Before, only the fiche showed.
+- `local_handbook_export_page`: one page as a portable record (fiche,
+  category slug, audiences, published content as stored, its files). Read
+  only, AI-access rules apply. `get_context_index` lists audience keys, so a
+  mirror notices tag changes without exporting every page.
+- Figures: Moodle's HTML cleaning removes `<figure>` and `<figcaption>`, so
+  the style guide's figure pattern never rendered as a framed figure. The
+  pattern is now `<div class="hb-figure">` with `<p class="hb-caption">`;
+  the old markup keeps its styles where it survived.
+- MCP adapter: `audiences` on the metadata and new-page tools,
+  `categorytempkey` on the new-page tool.
+
 ## 0.42.1 (2026-10-11)
 
 Dark mode: the handbook follows Space's dark theme. Built on 0.42.0, the

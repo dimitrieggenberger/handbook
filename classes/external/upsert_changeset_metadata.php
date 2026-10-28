@@ -57,6 +57,9 @@ class upsert_changeset_metadata extends external_api {
                 'responsiblearea' => new external_value(PARAM_TEXT, 'Proposed responsible area', VALUE_OPTIONAL),
                 'reviewdate' => new external_value(PARAM_INT, 'Proposed review date (unix time)', VALUE_OPTIONAL),
                 'requiredreading' => new external_value(PARAM_BOOL, 'Proposed required-reading flag', VALUE_OPTIONAL),
+                'audiences' => new external_value(PARAM_TEXT,
+                    'Proposed audience keys, comma-separated (empty = internal staff article); '
+                    . 'a human confirms them when publishing', VALUE_OPTIONAL),
             ], 'Partial fiche patch; include only the fields to change'),
             'expectedtimemodified' => new external_value(PARAM_INT,
                 'Page timemodified the patch was based on (0 = skip the concurrency check)',

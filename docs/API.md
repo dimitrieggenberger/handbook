@@ -97,6 +97,26 @@ Change sets (§36.4) — grouped multi-page proposals, additionally require `edi
 | `local_handbook_upsert_changeset_draft` | Create or update the set's draft for **one** page. Reuses the same editable draft on repeat calls (`expectedtimemodified`); returns a structured conflict — never an overwrite — for a human draft, a foreign change set's draft, an in-review revision, a stale published base (`expectedpublishedrevisionid`), or a concurrency mismatch. Never publishes. |
 | `local_handbook_submit_changeset_for_review` | Submit the set's eligible drafts; returns a per-page result (conflicts are skipped, not forced). |
 
+Content repository round trip (0.43.0) — lets a repository mirror the
+handbook and propose pages with their screenshots
+(`dimitrieggenberger/handbook-content`):
+
+| Function | Purpose |
+|---|---|
+| `local_handbook_export_page` | One page as a portable record: fiche, category slug, audience keys, whether a working draft exists, the published revision exactly as stored (`@@PLUGINFILE@@` references) and every file of it, base64. `metadata_only` pages come without content or files; `excluded` pages are refused. Needs `view`. |
+| `local_handbook_attach_changeset_file` | Attach one image (PNG, JPEG, GIF or WebP, up to 5 MB, base64) to a change item's draft: a page draft keeps it in its working revision, a new-page proposal keeps it until a person publishes the page. Content refers to it as `@@PLUGINFILE@@/<name>` (returned as `reference`). Same name replaces; nothing else is removed. Needs `edit`. |
+
+Audiences in proposals (0.43.0): `upsert_changeset_metadata` and
+`upsert_changeset_new_page` take `audiences`, a comma-separated list of
+audience keys (empty = an internal staff article). They are applied only when
+a person publishes the item; the review page shows them by name next to the
+current tags. `upsert_changeset_new_page` also takes `categorytempkey`, a
+category proposed in the same change set (applied first). `get_context_index`
+lists each page's audience keys.
+
+The service account needs `local/handbook:apiproposetaxonomy` as well to
+propose categories, and `apiproposemetadata` to propose audiences.
+
 There is **no publish and no approve function** — for single drafts or change
 sets. Review, approval and publication are human UI actions, and this is
 asserted by an automated test.

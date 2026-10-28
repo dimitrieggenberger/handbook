@@ -49,7 +49,7 @@ function local_handbook_pluginfile($course, $cm, $context, string $filearea, arr
     global $DB;
 
     if ($context->contextlevel !== CONTEXT_SYSTEM
-            || !in_array($filearea, ['revision', 'bannerimage', 'attachments'], true)) {
+            || !in_array($filearea, ['revision', 'bannerimage', 'attachments', 'proposal'], true)) {
         return false;
     }
 
@@ -57,6 +57,28 @@ function local_handbook_pluginfile($course, $cm, $context, string $filearea, arr
 
     if (!has_capability('local/handbook:view', $context)) {
         return false;
+    }
+
+    // Images of a new-page proposal (itemid = change item), shown only to the
+    // editorial roles that review change sets until the page is published.
+    if ($filearea === 'proposal') {
+        if (!has_any_capability(
+                ['local/handbook:edit', 'local/handbook:review', 'local/handbook:publish'], $context)) {
+            return false;
+        }
+        $itemid = (int)array_shift($args);
+        if (!$DB->record_exists('local_handbook_changeitem', ['id' => $itemid])) {
+            return false;
+        }
+        $filename = array_pop($args);
+        $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+        $file = get_file_storage()->get_file($context->id, 'local_handbook', 'proposal', $itemid,
+            $filepath, $filename);
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+        send_stored_file($file, null, 0, $forcedownload, $options);
+        return true;
     }
 
     // Page-scoped files (itemid = page id): banner imagery and attached

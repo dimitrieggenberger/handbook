@@ -22,6 +22,7 @@ use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
+use local_handbook\local\service\audience_service;
 
 /**
  * External function: compact context index of AI-permitted pages (spec 36.6).
@@ -136,6 +137,13 @@ class get_context_index extends external_api {
             ];
         }
 
+        // Audience keys per page (one query): a mirror sees tag changes here.
+        $audiencekeys = [];
+        foreach (audience_service::page_audience_map(array_keys($pages)) as $pageid => $audiences) {
+            $audiencekeys[$pageid] = array_values(array_map(
+                static fn($audience) => (string)$audience->audiencekey, $audiences));
+        }
+
         $result = [];
         foreach ($pages as $page) {
             $result[] = [
@@ -162,6 +170,7 @@ class get_context_index extends external_api {
                 'timemodified' => (int)$page->timemodified,
                 'hasworkingdraft' => isset($draftpageids[(int)$page->id]),
                 'relations' => $relbypage[(int)$page->id] ?? [],
+                'audiences' => $audiencekeys[(int)$page->id] ?? [],
             ];
         }
         return $result;
@@ -202,6 +211,9 @@ class get_context_index extends external_api {
                 'otherpageid' => new external_value(PARAM_INT, 'The other page id'),
                 'otherslug' => new external_value(PARAM_ALPHANUMEXT, 'The other page slug'),
             ])),
+            'audiences' => new external_multiple_structure(
+                new external_value(PARAM_ALPHANUMEXT, 'Audience key'),
+                'Audience keys the page is tagged with (none = internal staff article)'),
         ]));
     }
 }

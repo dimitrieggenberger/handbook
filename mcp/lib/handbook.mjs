@@ -440,6 +440,8 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       responsiblearea: z.string().optional(),
       reviewdate: z.number().int().optional().describe("Unix time"),
       requiredreading: z.boolean().optional(),
+      audiences: z.array(z.string()).optional()
+        .describe("Proposed audience keys (e.g. personal, familias, estudiantescampus); [] = internal staff article. A human confirms them when publishing."),
       expectedtimemodified: z.number().int().optional(),
     },
     handler((args) => {
@@ -449,6 +451,9 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
         if (args[key] !== undefined) {
           metadata[key] = args[key];
         }
+      }
+      if (args.audiences !== undefined) {
+        metadata.audiences = args.audiences.join(",");
       }
       return ws("local_handbook_upsert_changeset_metadata", {
         changesetid: args.changesetid,
@@ -461,12 +466,14 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
 
   server.tool(
     "handbook_upsert_change_set_new_page",
-    "Propose a BRAND-NEW page inside THIS change set. Identify it by a stable tempkey (e.g. \"newpage:direccion-oficial\") so later relation proposals can point at it before it exists. Staged as a draft — a human reviews, approves and publishes it in Moodle. Never publishes. A category is required.",
+    "Propose a BRAND-NEW page inside THIS change set. Identify it by a stable tempkey (e.g. \"newpage:direccion-oficial\") so later relation proposals can point at it before it exists. Staged as a draft — a human reviews, approves and publishes it in Moodle. Never publishes. A category is required: an existing one, or one proposed in this change set (categorytempkey).",
     {
       changesetid: z.number().int(),
       tempkey: z.string().describe("Stable id within this change set, e.g. newpage:slug"),
       title: z.string(),
-      categoryid: z.number().int().describe("Existing category id"),
+      categoryid: z.number().int().optional().describe("Existing category id (or categorytempkey)"),
+      categorytempkey: z.string().optional()
+        .describe("Tempkey of a category proposed in this same change set (newcat:...)"),
       content: z.string().describe("Clean HTML, headings starting at h2. For procedures, structures and callouts use the handbook house patterns (call handbook_get_style_guide once for the catalogue): hb-steps, hb-note/hb-tip/hb-warning/hb-important, hb-org, hb-roles, hb-escalation, hb-dodont, hb-matrix, etc."),
       slug: z.string().optional(),
       summary: z.string().optional(),
@@ -478,14 +485,19 @@ export function registerHandbookTools(server, ws, { mode = "readwrite-drafts" } 
       reviewdate: z.number().int().optional(),
       requiredreading: z.boolean().optional(),
       language: z.string().optional(),
+      audiences: z.array(z.string()).optional()
+        .describe("Proposed audience keys (e.g. personal, familias, estudiantescampus); [] = internal staff article. A human confirms them when publishing."),
     },
     handler((args) => {
-      const page = { title: args.title, categoryid: args.categoryid, content: args.content };
+      const page = { title: args.title, categoryid: args.categoryid ?? 0, content: args.content };
       for (const key of ["slug", "summary", "contenttype", "authoritylevel", "criticality",
-        "responsiblearea", "reviewdate", "requiredreading", "language"]) {
+        "responsiblearea", "reviewdate", "requiredreading", "language", "categorytempkey"]) {
         if (args[key] !== undefined) {
           page[key] = args[key];
         }
+      }
+      if (args.audiences !== undefined) {
+        page.audiences = args.audiences.join(",");
       }
       return ws("local_handbook_upsert_changeset_new_page", {
         changesetid: args.changesetid,

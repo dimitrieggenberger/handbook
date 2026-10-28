@@ -1309,6 +1309,190 @@ final class changeset_service_test extends advanced_testcase {
     }
 
     /**
+     * Make sure the reader audiences used by the audience-proposal tests exist
+     * (the install creates the school's vocabulary; a site may have edited it).
+     *
+     * @return void
+     */
+    private function create_audiences(): void {
+        global $DB;
+        foreach (['familias' => 'Familias', 'estudiantescampus' => 'Estudiantes en campus'] as $key => $name) {
+            if (!$DB->record_exists('local_handbook_audience', ['audiencekey' => $key])) {
+                audience_service::save((object)['audiencekey' => $key, 'name' => $name,
+                    'matchtype' => 'profile', 'profilefield' => 'city', 'profilevalue' => $key,
+                    'active' => 1], 2);
+            }
+        }
+    }
+
+    /**
+     * A small valid PNG.
+     *
+     * @return string Raw bytes.
+     */
+    private function png(): string {
+        $image = imagecreatetruecolor(40, 20);
+        imagefill($image, 0, 0, imagecolorallocate($image, 20, 120, 200));
+        ob_start();
+        imagepng($image);
+        return (string)ob_get_clean();
+    }
+
+    public function test_audiences_are_proposed_and_applied_only_on_publish(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $this->create_audiences();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Ver las calificaciones');
+        $changeset = changeset_service::create((object)['title' => 'Audiencias', 'source' => 'ai']);
+
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id,
+            ['audiences' => 'familias, estudiantescampus']);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $changeset->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_METADATA], '*', MUST_EXIST);
+        $this->assertSame(['estudiantescampus', 'familias'],
+            json_decode($item->payloadjson, true)['audiences']);
+
+        // Proposed only: the page is still an internal staff article.
+        $this->assertSame([], changeset_service::page_audience_keys((int)$page->id));
+
+        changeset_service::submit($changeset->id);
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+        $this->assertSame(['estudiantescampus', 'familias'],
+            changeset_service::page_audience_keys((int)$page->id));
+
+        // An empty proposal takes the tags off again (internal staff article).
+        $second = changeset_service::create((object)['title' => 'Interno', 'source' => 'ai']);
+        changeset_service::upsert_metadata($second->id, (int)$page->id, ['audiences' => '']);
+        $item = $DB->get_record('local_handbook_changeitem',
+            ['changesetid' => $second->id, 'pageid' => $page->id,
+                'kind' => changeset_service::KIND_PAGE_METADATA], '*', MUST_EXIST);
+        changeset_service::submit($second->id);
+        changeset_service::approve_item((int)$item->id);
+        changeset_service::publish_item((int)$item->id);
+        $this->assertSame([], changeset_service::page_audience_keys((int)$page->id));
+    }
+
+    public function test_unknown_audience_key_is_refused(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $this->create_audiences();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Asistencia');
+        $changeset = changeset_service::create((object)['title' => 'Audiencias', 'source' => 'ai']);
+
+        $this->expectException(\moodle_exception::class);
+        changeset_service::upsert_metadata($changeset->id, (int)$page->id, ['audiences' => 'padres']);
+    }
+
+    public function test_attach_file_to_a_revision_draft(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Tomar asistencia');
+        $changeset = changeset_service::create((object)['title' => 'Capturas', 'source' => 'ai']);
+        $result = changeset_service::upsert_draft($changeset->id, (int)$page->id,
+            '<h2>Paso 1</h2><p><img src="@@PLUGINFILE@@/paso-1.png" alt="Paso 1"></p>', FORMAT_HTML,
+            'Capturas nuevas');
+
+        $file = changeset_service::attach_file($changeset->id, $result['itemid'], 'paso-1.png', $this->png());
+        $this->assertSame('paso-1.png', $file['filename']);
+        $this->assertSame('@@PLUGINFILE@@/paso-1.png', $file['reference']);
+
+        // Same name again replaces it: still one file.
+        changeset_service::attach_file($changeset->id, $result['itemid'], 'paso-1.png', $this->png());
+        $files = get_file_storage()->get_area_files(\context_system::instance()->id, 'local_handbook',
+            'revision', $result['revisionid'], 'filename', false);
+        $this->assertCount(1, $files);
+    }
+
+    public function test_attach_file_refuses_a_non_image_and_an_item_in_review(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $cat = $this->create_category();
+        $page = $this->publish_page($cat, 'Justificar una ausencia');
+        $changeset = changeset_service::create((object)['title' => 'Capturas', 'source' => 'ai']);
+        $result = changeset_service::upsert_draft($changeset->id, (int)$page->id,
+            '<h2>Texto</h2><p>Nuevo.</p>', FORMAT_HTML, 'Cambio');
+
+        try {
+            changeset_service::attach_file($changeset->id, $result['itemid'], 'paso.png', '<svg></svg>');
+            $this->fail('A non-image must be refused.');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('errorattachfiletype', $e->errorcode);
+        }
+
+        changeset_service::submit($changeset->id);
+        $this->expectException(\moodle_exception::class);
+        changeset_service::attach_file($changeset->id, $result['itemid'], 'paso.png', $this->png());
+    }
+
+    public function test_new_page_in_a_category_proposed_in_the_same_set(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $changeset = changeset_service::create((object)['title' => 'Guías', 'source' => 'ai']);
+        changeset_service::upsert_category($changeset->id,
+            ['op' => 'create', 'tempkey' => 'newcat:guias', 'name' => 'Guías de la plataforma']);
+        $result = changeset_service::upsert_new_page($changeset->id, 'newpage:asistencia', [
+            'title' => 'Registrar la asistencia',
+            'categorytempkey' => 'newcat:guias',
+            'content' => '<h2>Pasos</h2><p>Texto.</p>',
+        ]);
+        changeset_service::submit($changeset->id);
+        changeset_service::approve_all($changeset->id);
+        changeset_service::publish_all($changeset->id);
+
+        $pageid = (int)$DB->get_field('local_handbook_changeitem', 'pageid', ['id' => $result['itemid']]);
+        $categoryid = (int)$DB->get_field('local_handbook_tempref', 'entityid',
+            ['changesetid' => $changeset->id, 'tempkey' => 'newcat:guias']);
+        $this->assertGreaterThan(0, $categoryid);
+        $this->assertSame($categoryid,
+            (int)$DB->get_field('local_handbook_page', 'categoryid', ['id' => $pageid]));
+    }
+
+    public function test_new_page_carries_its_images_and_audiences_into_publication(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $this->create_audiences();
+
+        $cat = $this->create_category();
+        $changeset = changeset_service::create((object)['title' => 'Guía nueva', 'source' => 'ai']);
+        $result = changeset_service::upsert_new_page($changeset->id, 'newpage:boleta', [
+            'title' => 'Descargar la boleta',
+            'categoryid' => $cat,
+            'content' => '<h2>Pasos</h2><p><img src="@@PLUGINFILE@@/boleta.png" alt="Boleta"></p>',
+            'audiences' => 'familias',
+        ]);
+        changeset_service::attach_file($changeset->id, $result['itemid'], 'boleta.png', $this->png());
+
+        changeset_service::submit($changeset->id);
+        changeset_service::approve_item($result['itemid']);
+        changeset_service::publish_item($result['itemid']);
+
+        $item = $DB->get_record('local_handbook_changeitem', ['id' => $result['itemid']], '*', MUST_EXIST);
+        $page = $DB->get_record('local_handbook_page', ['id' => $item->pageid], '*', MUST_EXIST);
+        $fs = get_file_storage();
+        $context = \context_system::instance();
+        $this->assertTrue((bool)$fs->get_file($context->id, 'local_handbook', 'revision',
+            (int)$page->publishedrevisionid, '/', 'boleta.png'));
+        $this->assertTrue($fs->is_area_empty($context->id, 'local_handbook', 'proposal', $result['itemid']));
+        $this->assertSame(['familias'], changeset_service::page_audience_keys((int)$page->id));
+    }
+
+    /**
      * Read one item's status.
      *
      * @param int $changesetid Change-set id.

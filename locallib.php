@@ -221,6 +221,26 @@ function local_handbook_changeset_item_button(moodle_url $url, string $action, i
 }
 
 /**
+ * Audience names for a list of audience keys, in the vocabulary's order; an
+ * empty list reads as an internal staff article.
+ *
+ * @param string[] $keys Audience keys.
+ * @return string HTML-safe display string.
+ */
+function local_handbook_format_audience_keys(array $keys): string {
+    if (!$keys) {
+        return s(get_string('audiencesnone', 'local_handbook'));
+    }
+    $names = [];
+    foreach (\local_handbook\local\service\audience_service::get_all() as $audience) {
+        if (in_array($audience->audiencekey, $keys, true)) {
+            $names[] = format_string($audience->name);
+        }
+    }
+    return s(implode(', ', $names ?: $keys));
+}
+
+/**
  * Format a single page metadata value for display in a review diff.
  *
  * @param string $field Field name.
@@ -228,6 +248,9 @@ function local_handbook_changeset_item_button(moodle_url $url, string $action, i
  * @return string HTML-safe display string.
  */
 function local_handbook_format_metadata_value(string $field, $value): string {
+    if ($field === 'audiences' && is_array($value)) {
+        return local_handbook_format_audience_keys($value);
+    }
     if ($value === null || $value === '') {
         return html_writer::span('—', 'text-muted');
     }
@@ -242,6 +265,8 @@ function local_handbook_format_metadata_value(string $field, $value): string {
             return (int)$value
                 ? s(userdate((int)$value, get_string('strftimedate', 'langconfig')))
                 : html_writer::span('—', 'text-muted');
+        case 'audiences':
+            return local_handbook_format_audience_keys((array)$value);
         default:
             return s((string)$value);
     }
@@ -263,7 +288,9 @@ function local_handbook_render_metadata_diff(stdClass $page, array $patch): stri
     $rows = '';
     foreach ($patch as $field => $proposed) {
         $label = get_string('metafield_' . $field, 'local_handbook');
-        $current = $page->$field ?? null;
+        $current = $field === 'audiences'
+            ? \local_handbook\local\service\changeset_service::page_audience_keys((int)$page->id)
+            : ($page->$field ?? null);
         $rows .= html_writer::tag('tr',
             html_writer::tag('th', s($label), ['scope' => 'row', 'class' => 'text-nowrap'])
             . html_writer::tag('td', local_handbook_format_metadata_value($field, $current),
@@ -362,9 +389,10 @@ function local_handbook_changeset_nonrevision_actions(moodle_url $url, stdClass 
  * Render a preview of a proposed new page (fiche summary + content preview).
  *
  * @param array $data New-page payload.
+ * @param int $itemid Change-item id, whose 'proposal' area holds the page's images.
  * @return string HTML.
  */
-function local_handbook_render_new_page_preview(array $data): string {
+function local_handbook_render_new_page_preview(array $data, int $itemid = 0): string {
     global $DB;
 
     $rows = '';
@@ -372,6 +400,14 @@ function local_handbook_render_new_page_preview(array $data): string {
     $catname = $catid
         ? (string)$DB->get_field('local_handbook_category', 'name', ['id' => $catid])
         : '';
+    if (!$catid && !empty($data['categorytempkey']) && $itemid) {
+        // A category proposed in the same change set: show its proposed name.
+        $changesetid = (int)$DB->get_field('local_handbook_changeitem', 'changesetid', ['id' => $itemid]);
+        $payload = $DB->get_field('local_handbook_changeitem', 'payloadjson', ['changesetid' => $changesetid,
+            'kind' => 'category_change', 'tempkey' => $data['categorytempkey']]);
+        $op = $payload ? json_decode((string)$payload, true) : null;
+        $catname = get_string('newcategoryproposed', 'local_handbook', (string)($op['name'] ?? $data['categorytempkey']));
+    }
     $fields = [
         'metafield_title' => (string)($data['title'] ?? ''),
         'category' => $catname,
@@ -388,12 +424,33 @@ function local_handbook_render_new_page_preview(array $data): string {
                 ['scope' => 'row', 'class' => 'text-nowrap'])
             . html_writer::tag('td', s($value)));
     }
+    if (array_key_exists('audiences', $data)) {
+        $rows .= html_writer::tag('tr',
+            html_writer::tag('th', s(get_string('metafield_audiences', 'local_handbook')),
+                ['scope' => 'row', 'class' => 'text-nowrap'])
+            . html_writer::tag('td', local_handbook_format_audience_keys((array)$data['audiences'])));
+    }
     $out = html_writer::tag('table', html_writer::tag('tbody', $rows),
         ['class' => 'table table-sm table-bordered small mb-2']);
 
     $summary = trim((string)($data['summary'] ?? ''));
     if ($summary !== '') {
         $out .= html_writer::div(s($summary), 'small text-muted mb-2');
+    }
+
+    // The proposed article itself, with its images, folded so the set stays scannable.
+    $content = (string)($data['content'] ?? '');
+    if ($itemid && trim($content) !== '') {
+        $context = context_system::instance();
+        $content = file_rewrite_pluginfile_urls($content, 'pluginfile.php', $context->id,
+            'local_handbook', 'proposal', $itemid);
+        $content = local_handbook_demote_headings(format_text($content, FORMAT_HTML,
+            ['context' => $context, 'noclean' => false]));
+        $out .= html_writer::tag('details',
+            html_writer::tag('summary', s(get_string('newpagecontentpreview', 'local_handbook')),
+                ['class' => 'small'])
+            . html_writer::div($content, 'local-handbook-page-body border rounded p-3 mt-2'),
+            ['class' => 'mb-2']);
     }
     return $out;
 }
@@ -2076,10 +2133,10 @@ HTML);
 HTML);
 
     $add('figure', <<<'HTML'
-<figure class="hb-figure">
+<div class="hb-figure">
   <img src="URL_DE_LA_IMAGEN" alt="Descripción de la imagen para lectores de pantalla">
-  <figcaption><strong>Figura 1.</strong> Zonas de supervisión durante el recreo, por turno.</figcaption>
-</figure>
+  <p class="hb-caption"><strong>Figura 1.</strong> Zonas de supervisión durante el recreo, por turno.</p>
+</div>
 HTML);
 
     $add('keyvalue', <<<'HTML'
