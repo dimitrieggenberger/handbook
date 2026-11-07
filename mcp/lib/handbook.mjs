@@ -858,17 +858,22 @@ export function registerConsultTools(server, ws) {
  * Moodle account carries the audience profile value so the plugin
  * filters everything server-side).
  *
- * @param {{ baseUrl: string, token: string, mode?: string, name?: string, version?: string }} config
+ * @param {{ baseUrl: string, token: string, mode?: string, name?: string, version?: string, extensions?: Array<{ registerTools: Function }> }} config
  * @returns {McpServer}
  */
-export function buildHandbookServer({ baseUrl, token, mode = "readwrite-drafts", name = "handbook", version = "0.2.0" }) {
+export function buildHandbookServer({ baseUrl, token, mode = "readwrite-drafts", name = "handbook", version = "0.3.0", extensions = [] }) {
   const ws = makeWs({ baseUrl, token });
+  const server = mode === "consult"
+    ? new McpServer({ name, version }, { instructions: CONSULT_INSTRUCTIONS })
+    : new McpServer({ name, version });
   if (mode === "consult") {
-    const server = new McpServer({ name, version }, { instructions: CONSULT_INSTRUCTIONS });
     registerConsultTools(server, ws);
-    return server;
+  } else {
+    registerHandbookTools(server, ws, { mode });
   }
-  const server = new McpServer({ name, version });
-  registerHandbookTools(server, ws, { mode });
+  // Tool sets from lib/extensions.mjs (HANDBOOK_MCP_EXTENSIONS), if any.
+  for (const extension of extensions) {
+    extension.registerTools(server);
+  }
   return server;
 }

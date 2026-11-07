@@ -38,6 +38,24 @@ release the site runs (feature/handbook-ai-editorial-expansion, merged in).
   surfaces left on the dark page. `dev/sim/seed.php` fills the simulation
   (the seed JSON, the pattern article, a draft in review, a finding).
 
+## MCP adapter 0.3.0 (2026-11-07)
+
+One Node site can serve more than one connector.
+
+- New optional setting `HANDBOOK_MCP_EXTENSIONS`: absolute paths of extra
+  read-only tool sets (`mcp/lib/extensions.mjs`) that are added to every
+  session on the same `/mcp` endpoint, behind the same key and OAuth. The
+  school may run only one Node site at `mcp.europaschule.eu`; the first
+  extension is the course-documents connector of the `platform` repository
+  (decision 0008 there).
+- Each extension is checked at start and stops the app on a bad setting. It
+  reads its own secrets and uses its own Moodle account; the handbook token
+  is not passed to it. `/health` and the start log list loaded extensions.
+- Without the setting nothing changes. Checked in the simulation Moodle:
+  handbook and course tools on one session, no token in output or logs;
+  `npm run test:oauth` passes.
+- Not part of the plugin ZIP; `version.php` unchanged.
+
 ## MCP adapter 0.2.0 (2026-09-15)
 
 Remote transport accepts OAuth 2.1 as well as the shared key.
