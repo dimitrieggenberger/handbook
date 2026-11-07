@@ -861,7 +861,7 @@ export function registerConsultTools(server, ws) {
  * @param {{ baseUrl: string, token: string, mode?: string, name?: string, version?: string, extensions?: Array<{ registerTools: Function }> }} config
  * @returns {McpServer}
  */
-export function buildHandbookServer({ baseUrl, token, mode = "readwrite-drafts", name = "handbook", version = "0.3.0", extensions = [] }) {
+export function buildHandbookServer({ baseUrl, token, mode = "readwrite-drafts", name = "handbook", version = "0.3.1", extensions = [] }) {
   const ws = makeWs({ baseUrl, token });
   const server = mode === "consult"
     ? new McpServer({ name, version }, { instructions: CONSULT_INSTRUCTIONS })
