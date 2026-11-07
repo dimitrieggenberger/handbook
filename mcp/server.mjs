@@ -11,10 +11,12 @@
  *   HANDBOOK_BASE_URL   e.g. https://learn.europaschule.eu
  *   HANDBOOK_WSTOKEN    token of the authorised service account
  *   HANDBOOK_MCP_MODE   readwrite-drafts (default) or readonly
+ *   HANDBOOK_MCP_EXTENSIONS  optional extra tool sets (lib/extensions.mjs)
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { buildHandbookServer } from "./lib/handbook.mjs";
+import { loadExtensions } from "./lib/extensions.mjs";
 
 const baseUrl = (process.env.HANDBOOK_BASE_URL || "").replace(/\/+$/, "");
 const token = process.env.HANDBOOK_WSTOKEN || "";
@@ -26,7 +28,15 @@ if (!baseUrl || !token) {
   process.exit(1);
 }
 
-const server = buildHandbookServer({ baseUrl, token, mode });
+let extensions;
+try {
+  extensions = await loadExtensions(process.env.HANDBOOK_MCP_EXTENSIONS, (fields) => console.error(JSON.stringify(fields)));
+} catch (error) {
+  console.error(`handbook-mcp: ${error.message}`);
+  process.exit(1);
+}
+
+const server = buildHandbookServer({ baseUrl, token, mode, extensions });
 const transport = new StdioServerTransport();
 await server.connect(transport);
 console.error(`handbook-mcp connected to ${baseUrl} (mode: ${mode})`);

@@ -26,6 +26,10 @@ Configuration via environment variables:
 - `HANDBOOK_WSTOKEN` — the service-account token (never commit it)
 - `HANDBOOK_MCP_MODE` — `readwrite-drafts` (default) or `readonly`. In
   `readonly` mode no draft or change-set write tools are registered.
+- `HANDBOOK_MCP_EXTENSIONS` — optional. Comma-separated absolute paths of
+  extra read-only tool sets served on the same endpoint (`lib/extensions.mjs`),
+  for example the course-documents tools of the platform repository. See
+  DEPLOY.md, "Extra tool sets on the same site".
 
 All tool logic lives in `lib/handbook.mjs` (the REST client and tool
 registration); `server.mjs` is just the local stdio entry point that consumes

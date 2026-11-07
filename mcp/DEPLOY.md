@@ -230,6 +230,35 @@ The MCP client (ChatGPT custom connector) caches the tool list. After the
 server restarts with new tools, remove and re-add the connector (same
 `/mcp` URL + Bearer token) and start a new chat so it re-reads them.
 
+## Extra tool sets on the same site
+
+The school may run only one Node.js site at `mcp.europaschule.eu`, so other
+read-only connectors join this server instead of getting their own site. The
+first is **coursedocs-mcp** (course syllabus, weekly plans and exam topic
+lists), which lives in the private `platform` repository, folder
+`services/coursedocs-mcp`, with its own guide (`DEPLOY.md` there).
+
+How it works:
+
+- `HANDBOOK_MCP_EXTENSIONS` in `~/.handbook-mcp.env` lists the absolute paths
+  of the extra modules, comma-separated, for example
+  `/home/clients/<id>/platform/services/coursedocs-mcp/extension.mjs`.
+- Each module is checked once at start (`lib/extensions.mjs`). A missing
+  setting stops the app with a clear message, so a mistake never half-works.
+- Its tools are added next to the handbook tools on every session, at the
+  same `/mcp` URL, behind the same shared key and OAuth. claude.ai keeps
+  **one connector**.
+- Each module reads its **own** secrets file (coursedocs:
+  `~/.coursedocs-mcp.env`) and calls Moodle with its **own** restricted
+  account and token. The handbook account and token are not shared with it.
+- `/health` lists the loaded modules:
+  `{"status":"ok",...,"extensions":["coursedocs"]}`.
+
+Without the variable the server behaves exactly as before.
+
+After adding or updating a module, **Restart** the app and refresh the
+connector (above) so the client sees the new tools.
+
 ## Granting the editorial propose capabilities
 
 Beyond `apiaccess`, `view`, `viewhistory`, `edit`, the `handbook-ai` account's

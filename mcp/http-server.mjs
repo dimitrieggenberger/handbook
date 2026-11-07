@@ -38,6 +38,9 @@
  *                              value so the plugin filters server-side)
  *   HANDBOOK_MCP_PORT          listen port (default 3000)
  *   HANDBOOK_MCP_PATH          MCP route (default /mcp)
+ *   HANDBOOK_MCP_EXTENSIONS    optional comma-separated absolute paths of
+ *                              extra read-only tool sets (lib/extensions.mjs),
+ *                              e.g. the platform repo's coursedocs-mcp
  */
 
 import { createServer } from "node:http";
@@ -53,6 +56,7 @@ import { mcpAuthRouter, getOAuthProtectedResourceMetadataUrl } from "@modelconte
 import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
 import { buildHandbookServer } from "./lib/handbook.mjs";
+import { loadExtensions } from "./lib/extensions.mjs";
 import { HandbookOAuthProvider, SCOPE, deriveSigningKey } from "./lib/oauth.mjs";
 
 // Load KEY=VALUE lines from a file into process.env, without adding a
@@ -113,6 +117,15 @@ function log(fields) {
   console.error(JSON.stringify({ ts: new Date().toISOString(), ...fields }));
 }
 
+// Extra tool sets, checked once now; a bad configuration stops the start.
+let extensions = [];
+try {
+  extensions = await loadExtensions(process.env.HANDBOOK_MCP_EXTENSIONS, log);
+} catch (error) {
+  console.error(`handbook-mcp: ${error.message}`);
+  process.exit(1);
+}
+
 /** Constant-time comparison with the shared connector key. */
 function isSharedKey(token) {
   const provided = Buffer.from(token);
@@ -128,7 +141,7 @@ app.use(express.json({ limit: "4mb" }));
 
 // Health check: reveals nothing sensitive, needs no auth.
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", mode, oauth: Boolean(publicUrl) });
+  res.json({ status: "ok", mode, oauth: Boolean(publicUrl), extensions: extensions.map((item) => item.name) });
 });
 
 // ---- authorization -------------------------------------------------------
@@ -209,7 +222,7 @@ app.post(mcpPath, authenticate, async (req, res) => {
         log({ event: "session_close", session: transport.sessionId });
       }
     };
-    const server = buildHandbookServer({ baseUrl, token: wstoken, mode });
+    const server = buildHandbookServer({ baseUrl, token: wstoken, mode, extensions });
     await server.connect(transport);
   } else {
     res.status(400).json(rpcError("Bad Request: no valid session"));
@@ -238,7 +251,7 @@ function rpcError(message) {
 
 const httpServer = createServer(app);
 httpServer.listen(port, () => {
-  log({ event: "listening", port, path: mcpPath, mode, base: baseUrl, oauth: Boolean(publicUrl), issuer: publicUrl || null });
+  log({ event: "listening", port, path: mcpPath, mode, extensions: extensions.map((item) => item.name), base: baseUrl, oauth: Boolean(publicUrl), issuer: publicUrl || null });
 });
 
 // Graceful shutdown.
