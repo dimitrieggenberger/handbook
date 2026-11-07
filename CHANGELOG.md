@@ -38,6 +38,17 @@ release the site runs (feature/handbook-ai-editorial-expansion, merged in).
   surfaces left on the dark page. `dev/sim/seed.php` fills the simulation
   (the seed JSON, the pattern article, a draft in review, a finding).
 
+## MCP adapter 0.3.1 (2026-11-07)
+
+Security update. `@modelcontextprotocol/sdk` ^1.30.0 → ^1.32.2 and `zod`
+^3.24.0 → ^4.6.7, plus `npm audit fix` for transitive packages
+(body-parser, fast-uri, @hono/node-server). `npm audit` reported high
+advisories in the SDK (request size limits, bearer tokens issued for another
+service, cross-origin redirects), zod and body-parser; it now finds none.
+No tool change. `npm run test:oauth` passes; handbook and course tools on
+one session in the simulation Moodle give the same results as 0.3.0.
+Not part of the plugin ZIP; `version.php` unchanged.
+
 ## MCP adapter 0.3.0 (2026-11-07)
 
 One Node site can serve more than one connector.
